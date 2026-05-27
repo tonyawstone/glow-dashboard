@@ -7,187 +7,230 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Glow">
 <title>Glow · Tonya's Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
   --cream:#F7F3EE;--warm:#EDE6DA;--border:#D9CFC2;--text:#3D2E1E;--muted:#8C7B6B;
-  --accent:#A07850;--green:#6B9E78;--rose:#C4735A;--purple:#7F77DD;
+  --accent:#A07850;--green:#6B9E78;--rose:#C4735A;--purple:#7F77DD;--blue:#5B8DD9;
   --sans:'DM Sans',sans-serif;--serif:'Cormorant Garamond',serif;
+  --fs-xs:11px;--fs-sm:13px;--fs-md:15px;--fs-lg:17px;--fs-xl:20px;
 }
-html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(--sans);}
+html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(--sans);font-size:15px;}
 
 /* SHELL */
 .shell{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;}
 
-/* HERO WRAP — always visible, not scrollable */
-.hero-wrap{flex-shrink:0;padding:12px 16px 0;background:var(--cream);}
+/* HERO WRAP */
+.hero-wrap{flex-shrink:0;padding:14px 16px 0;background:var(--cream);}
+.hero{background:linear-gradient(135deg,var(--warm),#E8DDD0);border-radius:20px;padding:16px;border:0.5px solid var(--border);display:flex;gap:14px;align-items:center;}
+.hero-avatar{width:66px;height:76px;border-radius:33px 33px 8px 8px;overflow:hidden;flex-shrink:0;border:2px solid rgba(160,120,80,0.25);background:var(--warm);position:relative;cursor:pointer;}
+.hero-avatar img{width:100%;height:100%;object-fit:cover;object-position:center top;position:absolute;top:0;left:0;display:none;}
+.hero-icon-fallback{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.hero-name{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);white-space:nowrap;}
+.hero-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:3px;}
+.hero-quote{font-size:var(--fs-xs);color:var(--accent);margin-top:5px;font-style:italic;line-height:1.4;}
 
-/* 7-PILLAR TOP NAV — sits flush below hero */
-.top-nav{display:grid;grid-template-columns:repeat(7,1fr);background:var(--cream);border-bottom:0.5px solid var(--border);border-top:0.5px solid var(--border);flex-shrink:0;margin-top:10px;}
-.tnav{border:none;background:transparent;padding:9px 2px 7px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:8.5px;color:var(--muted);font-family:var(--sans);border-bottom:2px solid transparent;}
-.tnav i{font-size:17px;}
+/* 2-ROW PILLAR NAV */
+.top-nav{display:grid;grid-template-columns:repeat(4,1fr);background:var(--cream);border-bottom:0.5px solid var(--border);border-top:0.5px solid var(--border);flex-shrink:0;margin-top:12px;}
+.top-nav-row2{grid-template-columns:repeat(4,1fr);}
+.tnav{border:none;background:transparent;padding:10px 2px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--muted);font-family:var(--sans);border-bottom:2px solid transparent;}
+.tnav i{font-size:20px;}
 .tnav.on{color:var(--accent);border-bottom-color:var(--accent);}
 
+/* STAT STRIP */
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px;}
+.stat-tile{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;}
+.stat-val{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--text);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.3;}
+.stat-src{font-size:9px;color:var(--accent);margin-top:1px;}
+
+/* SCROLL */
 .scroll-area{flex:1;overflow-y:auto;padding:14px 16px 80px;-webkit-overflow-scrolling:touch;}
 
 /* BOTTOM VIEW TABS */
-.bottom-view-bar{flex-shrink:0;background:var(--cream);border-top:0.5px solid var(--border);padding:8px 16px max(10px,env(safe-area-inset-bottom));display:flex;gap:6px;}
-.vtab{flex:1;font-size:11px;padding:7px 0;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;border-radius:18px;font-family:var(--sans);}
+.bottom-view-bar{flex-shrink:0;background:var(--cream);border-top:0.5px solid var(--border);padding:10px 16px max(12px,env(safe-area-inset-bottom));display:flex;gap:6px;}
+.vtab{flex:1;font-size:12px;padding:8px 0;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;border-radius:18px;font-family:var(--sans);}
 .vtab.on{background:var(--warm);color:var(--accent);border-color:var(--accent);font-weight:500;}
 
 /* CARDS */
-.card{background:#fff;border:0.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;}
-.card-title{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;}
-.section-label{font-family:var(--serif);font-size:18px;font-weight:300;color:var(--text);margin:4px 0 12px;letter-spacing:0.02em;}
-
-/* HERO */
-.hero{background:linear-gradient(135deg,var(--warm),#E8DDD0);border-radius:20px;padding:16px;border:0.5px solid var(--border);display:flex;gap:14px;align-items:center;}
-.hero-avatar{width:58px;height:74px;border-radius:10px 10px 29px 29px;overflow:hidden;flex-shrink:0;border:2px solid rgba(160,120,80,0.25);background:var(--warm);position:relative;}
-.hero-avatar img{width:100%;height:100%;object-fit:cover;object-position:center top;position:absolute;top:0;left:0;}
-.hero-icon-fallback{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.hero-name{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hero-sub{font-size:11px;color:var(--muted);margin-top:3px;}
-.hero-quote{font-size:11px;color:var(--accent);margin-top:5px;font-style:italic;line-height:1.4;}
-
-/* STAT STRIP */
-.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;}
-.stat-tile{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:9px 6px;text-align:center;}
-.stat-val{font-family:var(--serif);font-size:17px;font-weight:400;color:var(--text);}
-.stat-lbl{font-size:9px;color:var(--muted);margin-top:2px;line-height:1.2;}
-.stat-src{font-size:8px;color:var(--accent);margin-top:1px;}
+.card{background:#fff;border:0.5px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px;}
+.card-title{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;}
+.section-label{font-family:var(--serif);font-size:20px;font-weight:300;color:var(--text);margin:4px 0 14px;letter-spacing:0.02em;}
 
 /* TAGS */
-.tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;}
-.tag{font-size:12px;padding:6px 11px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin:7px 0;}
+.tag{font-size:13px;padding:7px 13px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
 .tag.on{background:var(--warm);color:var(--accent);border-color:var(--accent);}
-.fl{font-size:12px;color:var(--muted);margin:10px 0 4px;}
+.fl{font-size:13px;color:var(--muted);margin:12px 0 5px;}
 
 /* INPUTS */
-textarea,input[type=text],input[type=number],input[type=time]{width:100%;font-size:13px;border:0.5px solid var(--border);border-radius:10px;padding:9px 12px;background:#fff;color:var(--text);resize:none;font-family:var(--sans);outline:none;}
+textarea,input[type=text],input[type=number],input[type=time]{width:100%;font-size:14px;border:0.5px solid var(--border);border-radius:10px;padding:10px 13px;background:#fff;color:var(--text);resize:none;font-family:var(--sans);outline:none;}
 textarea:focus,input:focus{border-color:var(--accent);}
 
 /* TOGGLE */
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:0.5px solid var(--border);}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-top:0.5px solid var(--border);}
 .toggle-row:first-child{border-top:none;}
-.tl{font-size:13px;color:var(--text);}
-.ts{font-size:10px;color:var(--muted);}
-.tog{position:relative;width:36px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;flex-shrink:0;transition:background .2s;}
+.tl{font-size:14px;color:var(--text);}
+.ts{font-size:11px;color:var(--muted);}
+.tog{position:relative;width:40px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;flex-shrink:0;transition:background .2s;}
 .tog.on{background:var(--accent);}
-.tok{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,0.15);}
-.tog.on .tok{transform:translateX(16px);}
+.tok{position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,0.15);}
+.tog.on .tok{transform:translateX(18px);}
 
 /* BUTTONS */
-.btn-primary{width:100%;margin-top:12px;padding:11px;border-radius:12px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);}
-.btn-ai{width:100%;margin-top:7px;padding:9px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);}
-.toast-msg{display:none;background:#EAF3DE;color:#27500A;font-size:12px;padding:8px 12px;border-radius:10px;margin-top:8px;text-align:center;}
+.btn-primary{width:100%;margin-top:14px;padding:13px;border-radius:12px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);}
+.btn-ai{width:100%;margin-top:8px;padding:11px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);}
+.btn-sm{font-size:12px;padding:6px 14px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
+.btn-sm.accent{border-color:var(--accent);color:var(--accent);}
+.toast-msg{display:none;background:#EAF3DE;color:#27500A;font-size:13px;padding:9px 14px;border-radius:10px;margin-top:9px;text-align:center;}
+.ext-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--accent);text-decoration:none;margin-top:6px;}
+.ext-link i{font-size:14px;}
 
 /* STARS */
-.stars{display:flex;gap:5px;margin:4px 0;}
-.star{font-size:20px;cursor:pointer;color:var(--border);line-height:1;}
+.stars{display:flex;gap:6px;margin:5px 0;}
+.star{font-size:22px;cursor:pointer;color:var(--border);line-height:1;}
 .star.on{color:var(--accent);}
 
 /* LOG ITEMS */
-.log-item{padding:9px 0;border-top:0.5px solid var(--border);font-size:13px;}
-.log-date{font-size:10px;color:var(--muted);margin-bottom:3px;}
-.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;}
-.chip{font-size:10px;padding:2px 8px;border-radius:8px;background:var(--warm);color:var(--muted);}
-.log-note{font-size:12px;color:var(--muted);margin-top:4px;}
-.log-empty{font-size:12px;color:var(--muted);text-align:center;padding:2rem 0;}
+.log-item{padding:10px 0;border-top:0.5px solid var(--border);}
+.log-date{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
+.chip{font-size:11px;padding:3px 9px;border-radius:8px;background:var(--warm);color:var(--muted);}
+.chip.green{background:#EAF3DE;color:#27500A;}
+.chip.red{background:#FAECE7;color:#712B13;}
+.log-note{font-size:13px;color:var(--muted);margin-top:5px;}
+.log-empty{font-size:13px;color:var(--muted);text-align:center;padding:2rem 0;}
 
-/* PHOTO SLOTS */
-.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0;}
+/* PHOTOS */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:9px 0;}
 .photo-slot{aspect-ratio:3/4;border-radius:12px;border:1.5px dashed var(--border);background:var(--warm);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;}
 .photo-slot img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:10px;}
-.photo-slot-label{font-size:10px;color:var(--muted);margin-top:5px;text-align:center;position:relative;z-index:1;}
-.photo-slot i{font-size:20px;color:var(--border);position:relative;z-index:1;}
-.photo-slot .rm{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.55);color:#fff;border:none;font-size:11px;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;}
+.photo-slot-label{font-size:11px;color:var(--muted);margin-top:6px;text-align:center;position:relative;z-index:1;}
+.photo-slot i{font-size:22px;color:var(--border);position:relative;z-index:1;}
+.photo-slot .rm{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.55);color:#fff;border:none;font-size:12px;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;}
 
-/* BODY CHART */
-.chart-wrap{height:170px;position:relative;margin:8px 0;}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;}
-.forecast-info{font-size:11px;color:var(--muted);margin-top:4px;font-style:italic;line-height:1.5;}
-
-/* BANNERS */
-.info-banner{background:#EEEDFE;border-radius:12px;padding:10px 14px;font-size:12px;color:#3C3489;border:0.5px solid #AFA9EC;margin-bottom:12px;line-height:1.5;}
-.success-banner{background:#EAF3DE;border-radius:12px;padding:10px 14px;font-size:12px;color:#27500A;border:0.5px solid #97C459;margin-bottom:12px;line-height:1.6;}
-
-/* SLEEP */
-.sleep-score-big{display:flex;flex-direction:column;align-items:center;background:var(--warm);border-radius:16px;padding:20px;border:0.5px solid var(--border);margin-bottom:12px;}
-.sleep-num{font-family:var(--serif);font-size:52px;font-weight:300;color:var(--accent);line-height:1;}
-.sleep-lbl{font-size:12px;color:var(--muted);margin-top:4px;}
-.quality-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:6px 0;}
-.qb{padding:8px 4px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;text-align:center;font-family:var(--sans);}
-.qb.on{background:var(--warm);color:var(--accent);border-color:var(--accent);font-weight:500;}
-
-/* OUTFITS */
-.outfit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0;}
-.outfit-card{border-radius:14px;border:0.5px solid var(--border);overflow:hidden;background:#fff;}
-.outfit-img{height:155px;background:var(--warm);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-.outfit-img img{width:100%;height:100%;object-fit:cover;}
-.outfit-img i{font-size:26px;color:var(--border);}
-.outfit-badge{position:absolute;top:6px;right:6px;font-size:9px;padding:3px 8px;border-radius:8px;font-weight:500;}
-.badge-keep{background:#EAF3DE;color:#27500A;}
-.badge-ret{background:#FAECE7;color:#712B13;}
-.badge-inspo{background:#EEEDFE;color:#3C3489;}
-.outfit-info{padding:9px 10px;}
-.outfit-name{font-size:12px;font-weight:500;color:var(--text);}
-.outfit-meta{font-size:10px;color:var(--muted);margin-top:2px;}
-
-/* HAIR PROGRESSION */
-.progression-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:8px 0;scrollbar-width:none;}
-.progression-strip::-webkit-scrollbar{display:none;}
-.prog-item{flex-shrink:0;width:88px;text-align:center;}
-.prog-img{width:88px;height:110px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);overflow:hidden;margin-bottom:4px;position:relative;display:flex;align-items:center;justify-content:center;}
-.prog-img img{width:100%;height:100%;object-fit:cover;}
-.prog-label{font-size:9px;color:var(--muted);line-height:1.3;}
-.prog-date{font-size:9px;color:var(--accent);font-weight:500;}
-.prog-actual{border:2px solid var(--green);}
-.prog-ai{border:1.5px dashed var(--muted);}
-.prog-future{opacity:0.35;}
-
-/* CHART TABS */
-.chart-tab{font-size:11px;padding:6px 12px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
+/* CHART */
+.chart-wrap{height:180px;position:relative;margin:10px 0;}
+.chart-tabs{display:flex;gap:6px;margin-bottom:12px;}
+.chart-tab{font-size:12px;padding:7px 13px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
 .chart-tab.on{background:var(--warm);color:var(--accent);border-color:var(--accent);}
 .chart-panel{display:none;}
 .chart-panel.on{display:block;}
 
-/* MILESTONE LIST */
-.milestone-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:0.5px solid var(--border);}
+/* MILESTONES */
+.milestone-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:0.5px solid var(--border);}
 .milestone-row:first-child{border-top:none;}
-.ms-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.ms-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
 .ms-label{flex:1;font-size:13px;color:var(--text);}
 .ms-date{font-size:11px;color:var(--muted);}
-.ms-badge{font-size:9px;padding:2px 8px;border-radius:8px;flex-shrink:0;}
+.ms-badge{font-size:10px;padding:3px 9px;border-radius:8px;flex-shrink:0;}
 .badge-done{background:#EAF3DE;color:#27500A;}
 .badge-now{background:#FAEEDA;color:#633806;}
 .badge-next{background:#EEEDFE;color:#3C3489;}
 
-/* ROUTINE */
-.routine-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:0.5px solid var(--border);}
-.routine-item:first-child{border-top:none;}
-.routine-tag{font-size:9px;padding:2px 7px;border-radius:6px;background:var(--warm);color:var(--muted);margin-left:6px;flex-shrink:0;}
+/* BANNERS */
+.info-banner{background:#EEEDFE;border-radius:12px;padding:12px 15px;font-size:13px;color:#3C3489;border:0.5px solid #AFA9EC;margin-bottom:14px;line-height:1.5;}
+.success-banner{background:#EAF3DE;border-radius:12px;padding:12px 15px;font-size:13px;color:#27500A;border:0.5px solid #97C459;margin-bottom:14px;line-height:1.6;}
+.warn-banner{background:#FFF7E6;border-radius:12px;padding:12px 15px;font-size:13px;color:#7A4F00;border:0.5px solid #F5CC7F;margin-bottom:14px;line-height:1.5;}
+.forecast-info{font-size:12px;color:var(--muted);margin-top:5px;font-style:italic;line-height:1.5;}
 
-/* WEEKLY/MONTHLY/YEARLY views */
-.view-content{display:none;}
-.view-content.on{display:block;}
+/* SLEEP */
+.sleep-score-big{display:flex;flex-direction:column;align-items:center;background:var(--warm);border-radius:16px;padding:22px;border:0.5px solid var(--border);margin-bottom:14px;}
+.sleep-num{font-family:var(--serif);font-size:56px;font-weight:300;color:var(--accent);line-height:1;}
+.sleep-lbl{font-size:13px;color:var(--muted);margin-top:5px;}
+.quality-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:7px 0;}
+.qb{padding:9px 4px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;text-align:center;font-family:var(--sans);}
+.qb.on{background:var(--warm);color:var(--accent);border-color:var(--accent);font-weight:500;}
+
+/* OUTFITS */
+.outfit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:9px 0;}
+.outfit-card{border-radius:14px;border:0.5px solid var(--border);overflow:hidden;background:#fff;}
+.outfit-img{height:170px;background:var(--warm);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;cursor:pointer;}
+.outfit-img img{width:100%;height:100%;object-fit:cover;}
+.outfit-img i{font-size:28px;color:var(--border);}
+.outfit-badge{position:absolute;top:7px;right:7px;font-size:10px;padding:3px 9px;border-radius:8px;font-weight:500;}
+.badge-keep{background:#EAF3DE;color:#27500A;}
+.badge-ret{background:#FAECE7;color:#712B13;}
+.badge-inspo{background:#EEEDFE;color:#3C3489;}
+.outfit-info{padding:10px 12px;}
+.outfit-name{font-size:13px;font-weight:500;color:var(--text);}
+.outfit-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* HAIR PROGRESSION */
+.progression-strip{display:flex;gap:9px;overflow-x:auto;padding-bottom:6px;margin:9px 0;scrollbar-width:none;}
+.progression-strip::-webkit-scrollbar{display:none;}
+.prog-item{flex-shrink:0;width:96px;text-align:center;}
+.prog-img{width:96px;height:120px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);overflow:hidden;margin-bottom:5px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.prog-img img{width:100%;height:100%;object-fit:cover;}
+.prog-label{font-size:10px;color:var(--muted);line-height:1.4;}
+.prog-date{font-size:10px;color:var(--accent);font-weight:500;}
+.prog-actual{border:2px solid var(--green);}
+.prog-ai{border:1.5px dashed var(--muted);}
+.prog-future{opacity:0.35;}
+
+/* LAB TABLE */
+.lab-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:0.5px solid var(--border);font-size:13px;}
+.lab-row:first-child{border-top:none;}
+.lab-name{color:var(--text);flex:1;}
+.lab-range{font-size:10px;color:var(--muted);margin-top:2px;}
+.lab-val{font-size:14px;font-weight:500;padding:2px 8px;border-radius:8px;margin-left:6px;}
+.lab-normal{background:#EAF3DE;color:#27500A;}
+.lab-high{background:#FAECE7;color:#712B13;}
+.lab-watch{background:#FFF7E6;color:#7A4F00;}
+
+/* BP LOG */
+.bp-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0;}
+.bp-input-wrap{display:flex;flex-direction:column;gap:3px;}
+.bp-lbl{font-size:11px;color:var(--muted);}
+
+/* EXERCISE */
+.exercise-types{display:flex;flex-wrap:wrap;gap:7px;margin:7px 0;}
+
+/* MUSELY TRACKER */
+.musely-track{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;}
+.musely-day{background:var(--warm);border-radius:12px;padding:12px;border:0.5px solid var(--border);text-align:center;}
+.musely-day.active{background:#EEEDFE;border-color:#AFA9EC;}
+.musely-day-label{font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.musely-day-sub{font-size:11px;color:var(--muted);}
+
+/* MIND STARS ROW */
+.stars-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:0.5px solid var(--border);}
+.stars-row:first-child{border-top:none;}
+.stars-row-label{font-size:14px;color:var(--text);}
+
+/* PRODUCT LIST */
+.product-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:0.5px solid var(--border);font-size:13px;}
+.product-item:first-child{border-top:none;}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
 
 /* SECTIONS */
 .sec{display:none;}
 .sec.on{display:block;}
+.view-content{display:none;}
+.view-content.on{display:block;}
+
+/* AFFIRMATION */
+.affirmation-card{background:linear-gradient(135deg,var(--warm),#E8DDD0);border-radius:16px;padding:20px;border:0.5px solid var(--border);margin-bottom:14px;text-align:center;}
+.affirmation-text{font-family:var(--serif);font-size:20px;font-weight:300;color:var(--text);line-height:1.5;font-style:italic;}
+.affirmation-sub{font-size:11px;color:var(--muted);margin-top:8px;}
 </style>
 </head>
 <body>
 <div class="shell">
 
-<!-- HERO — always visible at top -->
+<!-- HERO -->
 <div class="hero-wrap">
   <div class="hero">
-    <div class="hero-avatar" onclick="pickPhoto('hero')" title="Tap to set profile photo" style="cursor:pointer;">
-      <img id="hero-img" src="" alt="Tonya" style="display:none;">
+    <div class="hero-avatar" onclick="pickPhoto('hero')" id="hero-avatar-wrap">
+      <img id="hero-img" src="" alt="Tonya">
       <div class="hero-icon-fallback" id="hero-fallback">
-        <i class="ti ti-sparkles" aria-hidden="true" style="font-size:24px;"></i>
-        <div style="font-size:8px;color:var(--accent);margin-top:3px;text-align:center;line-height:1.3;">tap to<br>set photo</div>
+        <i class="ti ti-sparkles" style="font-size:26px;color:var(--accent);" aria-hidden="true"></i>
+        <div style="font-size:9px;color:var(--accent);margin-top:4px;text-align:center;line-height:1.3;">tap to<br>set photo</div>
       </div>
     </div>
     <div style="flex:1;min-width:0;">
@@ -198,46 +241,48 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<!-- 7-PILLAR NAV — below hero, above content -->
-<nav class="top-nav">
-  <button class="tnav on" onclick="tab('today')"><i class="ti ti-sun" aria-hidden="true"></i>Today</button>
-  <button class="tnav" onclick="tab('style')"><i class="ti ti-shirt" aria-hidden="true"></i>Style</button>
-  <button class="tnav" onclick="tab('sleep')"><i class="ti ti-moon" aria-hidden="true"></i>Sleep</button>
-  <button class="tnav" onclick="tab('body')"><i class="ti ti-trending-down" aria-hidden="true"></i>Body</button>
-  <button class="tnav" onclick="tab('skin')"><i class="ti ti-sparkles" aria-hidden="true"></i>Skin</button>
-  <button class="tnav" onclick="tab('hair')"><i class="ti ti-scissors" aria-hidden="true"></i>Hair</button>
-  <button class="tnav" onclick="tab('mind')"><i class="ti ti-brain" aria-hidden="true"></i>Mind</button>
+<!-- 2-ROW PILLAR NAV -->
+<nav>
+  <div class="top-nav">
+    <button class="tnav on" onclick="tab('today')"><i class="ti ti-sun" aria-hidden="true"></i>Today</button>
+    <button class="tnav" onclick="tab('style')"><i class="ti ti-shirt" aria-hidden="true"></i>Style</button>
+    <button class="tnav" onclick="tab('sleep')"><i class="ti ti-moon" aria-hidden="true"></i>Sleep</button>
+    <button class="tnav" onclick="tab('body')"><i class="ti ti-trending-down" aria-hidden="true"></i>Body</button>
+  </div>
+  <div class="top-nav top-nav-row2" style="border-top:none;">
+    <button class="tnav" onclick="tab('health')"><i class="ti ti-heart-rate-monitor" aria-hidden="true"></i>Health</button>
+    <button class="tnav" onclick="tab('skin')"><i class="ti ti-sparkles" aria-hidden="true"></i>Skin</button>
+    <button class="tnav" onclick="tab('hair')"><i class="ti ti-scissors" aria-hidden="true"></i>Hair</button>
+    <button class="tnav" onclick="tab('mind')"><i class="ti ti-brain" aria-hidden="true"></i>Mind</button>
+  </div>
 </nav>
 
 <div class="scroll-area" id="main-scroll">
 
 <!-- ═══════════════ TODAY ═══════════════ -->
 <div id="s-today" class="sec on">
-  <!-- DAILY VIEW -->
   <div class="view-content on" id="vc-today-daily">
     <div class="stat-strip">
-      <div class="stat-tile"><div class="stat-val">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src">Withings</div></div>
+      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src">Withings</div></div>
       <div class="stat-tile"><div class="stat-val">4,715</div><div class="stat-lbl">steps</div><div class="stat-src">Apple Health</div></div>
       <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src">log below</div></div>
-      <div class="stat-tile"><div class="stat-val" id="zep-day-count">—</div><div class="stat-lbl" id="zep-tile-lbl">Day · Month 7</div><div class="stat-src">since Oct 25, 2025</div></div>
+      <div class="stat-tile"><div class="stat-val" id="zep-day-count">—</div><div class="stat-lbl" id="zep-tile-lbl">loading...</div><div class="stat-src">since Oct 25, 2025</div></div>
+    </div>
+    <div class="affirmation-card">
+      <div class="affirmation-text" id="daily-affirmation"></div>
+      <div class="affirmation-sub">Your daily affirmation</div>
     </div>
     <div class="card">
       <div class="card-title">Daily check-in</div>
       <div class="fl">How are you feeling?</div>
       <div class="tags" id="mood-tags">
-        <button class="tag" onclick="tog(this)">Energized</button>
-        <button class="tag" onclick="tog(this)">Tired</button>
-        <button class="tag" onclick="tog(this)">Confident</button>
-        <button class="tag" onclick="tog(this)">Bloated</button>
-        <button class="tag" onclick="tog(this)">Glowing</button>
-        <button class="tag" onclick="tog(this)">Stressed</button>
-        <button class="tag" onclick="tog(this)">Strong</button>
+        <button class="tag" onclick="tog(this)">Energized</button><button class="tag" onclick="tog(this)">Tired</button><button class="tag" onclick="tog(this)">Confident</button><button class="tag" onclick="tog(this)">Bloated</button><button class="tag" onclick="tog(this)">Glowing</button><button class="tag" onclick="tog(this)">Stressed</button><button class="tag" onclick="tog(this)">Strong</button>
       </div>
       <div class="fl">Treatments</div>
       <div class="toggle-row" onclick="ts('t-zep')"><div><div class="tl">Zepbound dose</div><div class="ts">Weekly injection · Oct 25, 2025</div></div><div class="tog" id="t-zep"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-cpap')"><div><div class="tl">CPAP used last night</div><div class="ts">Sleep apnea</div></div><div class="tog" id="t-cpap"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-meds')"><div><div class="tl">Daily medications taken</div><div class="ts">Irbesartan · Metoprolol · Amlodipine · Osteo Biflex</div></div><div class="tog" id="t-meds"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('t-skin-am')"><div><div class="tl">AM skin routine done</div><div class="ts">Olay Cleanser · Serum · Vit C · SPF Cream</div></div><div class="tog" id="t-skin-am"><div class="tok"></div></div></div>
+      <div class="toggle-row" onclick="ts('t-skin-am')"><div><div class="tl">AM skin routine done</div><div class="ts">Olay Cleanser · Serum · Vit C · SPF</div></div><div class="tog" id="t-skin-am"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-skin-pm')"><div><div class="tl">PM skin routine done</div><div class="ts">Musely (alt nights) · Olay Regenerist</div></div><div class="tog" id="t-skin-pm"><div class="tok"></div></div></div>
       <div class="fl">Note for today</div>
       <textarea id="today-note" rows="2" placeholder="Outfit win, energy, anything on your mind..."></textarea>
@@ -247,21 +292,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="card"><div class="card-title">Recent check-ins</div><div id="checkin-log"><div class="log-empty">No check-ins yet.</div></div></div>
   </div>
-
-  <!-- WEEKLY VIEW -->
   <div class="view-content" id="vc-today-weekly">
-    <div class="section-label">This week at a glance</div>
+    <div class="section-label">This week</div>
     <div class="card">
-      <div class="card-title">Week summary</div>
-      <div id="weekly-summary"><div class="log-empty">Log daily check-ins to see your weekly summary here.</div></div>
+      <div class="card-title">Weekly AI insight</div>
+      <div id="weekly-summary"><div class="log-empty">Log daily check-ins to generate your weekly insight.</div></div>
+      <button class="btn-ai" onclick="weeklyInsight()">Generate weekly insight ↗</button>
     </div>
-    <div class="card">
-      <div class="card-title">Treatment streak this week</div>
-      <div id="weekly-treatments"><div class="log-empty">Track daily to see your streaks.</div></div>
-    </div>
+    <div class="card"><div class="card-title">Treatment streaks this week</div><div id="weekly-treatments"><div class="log-empty">Log daily to see your streaks.</div></div></div>
   </div>
-
-  <!-- MONTHLY VIEW -->
   <div class="view-content" id="vc-today-monthly">
     <div class="section-label">May 2026</div>
     <div class="card">
@@ -272,16 +311,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="card"><div class="card-title">Past reflections</div><div id="reflection-log"><div class="log-empty">No reflections yet.</div></div></div>
   </div>
-
-  <!-- YEARLY VIEW -->
   <div class="view-content" id="vc-today-yearly">
     <div class="section-label">2026 journey</div>
     <div class="card">
-      <div class="card-title">Year in review · key milestones</div>
-      <div class="log-item"><div class="log-date">Oct 25, 2025</div><div style="font-size:13px;">Started Zepbound · 201.4 lbs</div></div>
-      <div class="log-item"><div class="log-date">May 19, 2026</div><div style="font-size:13px;">All-time low · 168.7 lbs 🎉</div></div>
-      <div class="log-item"><div class="log-date">May 26, 2026</div><div style="font-size:13px;">Hair growth journey begins · chin-to-ear length</div></div>
-      <div id="yearly-milestones"></div>
+      <div class="card-title">Key milestones</div>
+      <div class="log-item"><div class="log-date">Oct 25, 2025</div><div style="font-size:14px;">Started Zepbound · 201.4 lbs</div></div>
+      <div class="log-item"><div class="log-date">May 19, 2026</div><div style="font-size:14px;">All-time low · 168.7 lbs 🎉</div></div>
+      <div class="log-item"><div class="log-date">May 26, 2026</div><div style="font-size:14px;">Glow Dashboard launched · Hair journey begins</div></div>
     </div>
   </div>
 </div>
@@ -293,23 +329,23 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
       <div class="card-title">Recent looks</div>
       <div class="outfit-grid" id="outfit-grid">
-        <div class="outfit-card" onclick="showOutfitForm()" style="cursor:pointer;">
-          <div class="outfit-img"><i class="ti ti-plus" aria-hidden="true"></i></div>
-          <div class="outfit-info"><div class="outfit-name" style="color:var(--muted);font-size:11px;">Add first look</div></div>
+        <div class="outfit-card">
+          <div class="outfit-img" onclick="triggerOutfitPhoto(0)" id="outfit-img-0"><i class="ti ti-plus" aria-hidden="true"></i></div>
+          <div class="outfit-info"><div class="outfit-name" style="color:var(--muted);font-size:12px;">Add first look</div></div>
         </div>
       </div>
+      <a href="https://www.dailylook.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open DailyLook</a>
     </div>
-    <div class="card" id="outfit-form">
+    <div class="card">
       <div class="card-title">Log an outfit</div>
-      <div class="fl">Photo</div>
-      <div style="display:flex;gap:10px;align-items:flex-start;margin:6px 0;">
-        <div class="photo-slot" style="width:80px;height:100px;flex-shrink:0;" onclick="pickPhoto('outfit-preview')" id="outfit-preview">
+      <div style="display:flex;gap:10px;align-items:flex-start;margin:7px 0;">
+        <div class="photo-slot" style="width:84px;height:105px;flex-shrink:0;" onclick="pickPhoto('outfit-new')" id="outfit-new">
           <i class="ti ti-camera" aria-hidden="true"></i>
         </div>
         <div style="flex:1;">
-          <input type="text" id="outfit-desc" placeholder="DailyLook #15, Dressly try-on, own photo...">
+          <input type="text" id="outfit-desc" placeholder="DailyLook #15, Dressly screenshot, own outfit...">
           <div class="fl" style="margin-top:8px;">Source</div>
-          <div class="tags" id="src-tags" style="margin:4px 0;">
+          <div class="tags" id="src-tags" style="margin:5px 0;">
             <button class="tag" onclick="solo('src-tags',this)">DailyLook</button>
             <button class="tag" onclick="solo('src-tags',this)">Dressly</button>
             <button class="tag" onclick="solo('src-tags',this)">Own photo</button>
@@ -318,17 +354,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div class="fl">Occasion</div>
       <div class="tags" id="occ-tags">
-        <button class="tag" onclick="tog(this)">Work</button>
-        <button class="tag" onclick="tog(this)">Weekend</button>
-        <button class="tag" onclick="tog(this)">Event</button>
-        <button class="tag" onclick="tog(this)">Date night</button>
-        <button class="tag" onclick="tog(this)">School run</button>
+        <button class="tag" onclick="tog(this)">Work</button><button class="tag" onclick="tog(this)">Weekend</button><button class="tag" onclick="tog(this)">Event</button><button class="tag" onclick="tog(this)">Date night</button><button class="tag" onclick="tog(this)">School run</button>
       </div>
       <div class="fl">Keep or return?</div>
       <div class="tags" id="keep-tags">
-        <button class="tag" onclick="solo('keep-tags',this)">Keeping</button>
-        <button class="tag" onclick="solo('keep-tags',this)">Returned</button>
-        <button class="tag" onclick="solo('keep-tags',this)">Inspo only</button>
+        <button class="tag" onclick="solo('keep-tags',this)">Keeping</button><button class="tag" onclick="solo('keep-tags',this)">Returned</button><button class="tag" onclick="solo('keep-tags',this)">Inspo only</button>
       </div>
       <div class="fl">Rating</div>
       <div class="stars" id="outfit-stars">
@@ -338,18 +368,49 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button class="btn-ai" onclick="styleCoach()">Style coaching ↗</button>
       <div class="toast-msg" id="st">Logged!</div>
     </div>
+    <div class="card">
+      <div class="card-title">Wardrobe planning</div>
+      <div class="fl">Upcoming occasion</div>
+      <input type="text" id="wardrobe-occasion" placeholder="e.g. Work conference, birthday dinner, vacation...">
+      <div class="fl">What I need / want to plan</div>
+      <textarea id="wardrobe-plan" rows="3" placeholder="e.g. Need a blazer that fits my new size. Want to try a wrap dress. Next DailyLook box should focus on..."></textarea>
+      <div class="fl">Next DailyLook box wish list</div>
+      <textarea id="dailylook-wishlist" rows="2" placeholder="e.g. Neutral blazer, wide leg trousers, something dressy for fall..."></textarea>
+      <button class="btn-primary" onclick="saveWardrobePlan()">Save plan</button>
+      <div class="toast-msg" id="wt">Saved!</div>
+    </div>
   </div>
   <div class="view-content" id="vc-style-weekly">
     <div class="section-label">This week's looks</div>
-    <div class="card"><div class="card-title">Outfits logged this week</div><div id="weekly-outfits"><div class="log-empty">Log outfits daily to see them here.</div></div></div>
+    <div class="card"><div class="card-title">Outfits this week</div><div id="weekly-outfits"><div class="log-empty">Log outfits daily to see them here.</div></div></div>
   </div>
   <div class="view-content" id="vc-style-monthly">
-    <div class="section-label">May 2026 · Style recap</div>
-    <div class="card"><div class="card-title">Monthly style summary</div><div id="monthly-outfits"><div class="log-empty">Your monthly style stats will appear here.</div></div></div>
+    <div class="section-label">May 2026 · DailyLook box</div>
+    <div class="card">
+      <div class="card-title">This month's box</div>
+      <div class="fl">What arrived</div>
+      <textarea id="box-arrived" rows="3" placeholder="List the pieces that arrived this month..."></textarea>
+      <div class="fl">Keep vs return summary</div>
+      <div class="two-col" style="margin:7px 0;">
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Kept</div><input type="number" id="box-kept" placeholder="0"></div>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Returned</div><input type="number" id="box-returned" placeholder="0"></div>
+      </div>
+      <div class="fl">Favourite piece this month</div>
+      <input type="text" id="box-fav" placeholder="e.g. The camel blazer — fits perfectly at new size">
+      <button class="btn-primary" onclick="saveBoxSummary()">Save box summary</button>
+      <div class="toast-msg" id="bxt">Saved!</div>
+    </div>
+    <div class="card"><div class="card-title">Monthly style log</div><div id="monthly-style-log"><div class="log-empty">No monthly summaries yet.</div></div></div>
   </div>
   <div class="view-content" id="vc-style-yearly">
-    <div class="section-label">2026 Style evolution</div>
-    <div class="card"><div class="card-title">Year in style</div><div class="log-empty">Your yearly style evolution tracked here.</div></div>
+    <div class="section-label">2026 style evolution</div>
+    <div class="card"><div class="card-title">Style journey · by the numbers</div>
+      <div class="stat-strip" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-tile"><div class="stat-val" id="total-outfits">0</div><div class="stat-lbl">Outfits logged</div></div>
+        <div class="stat-tile"><div class="stat-val" id="total-kept">0</div><div class="stat-lbl">Items kept</div></div>
+        <div class="stat-tile"><div class="stat-val" id="total-returned">0</div><div class="stat-lbl">Returned</div></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -357,7 +418,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="s-sleep" class="sec">
   <div class="view-content on" id="vc-sleep-daily">
     <div class="section-label">Sleep & Energy</div>
-    <div class="info-banner"><strong>Sleep apnea tracking.</strong> CPAP compliance, quality and energy correlation all live here. Apple Health sleep sync calibrating — log manually for now.</div>
+    <div class="info-banner"><strong>Sleep apnea tracking.</strong> Log CPAP compliance and quality here. Apple Health sleep sync calibrating — log manually for now.</div>
     <div class="sleep-score-big">
       <div class="sleep-num" id="sleep-display">—</div>
       <div class="sleep-lbl">hours last night</div>
@@ -366,15 +427,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="card-title">Log sleep</div>
       <div class="fl">Bedtime & wake</div>
       <div class="two-col">
-        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Bedtime</div><input type="time" id="sl-bed"></div>
-        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Wake time</div><input type="time" id="sl-wake"></div>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Bedtime</div><input type="time" id="sl-bed"></div>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Wake time</div><input type="time" id="sl-wake"></div>
       </div>
       <div class="fl">CPAP compliance</div>
       <div class="tags" id="cpap-tags">
-        <button class="tag" onclick="solo('cpap-tags',this)">Full night</button>
-        <button class="tag" onclick="solo('cpap-tags',this)">Partial</button>
-        <button class="tag" onclick="solo('cpap-tags',this)">Forgot</button>
-        <button class="tag" onclick="solo('cpap-tags',this)">Didn't use</button>
+        <button class="tag" onclick="solo('cpap-tags',this)">Full night</button><button class="tag" onclick="solo('cpap-tags',this)">Partial</button><button class="tag" onclick="solo('cpap-tags',this)">Forgot</button><button class="tag" onclick="solo('cpap-tags',this)">Didn't use</button>
       </div>
       <div class="fl">Sleep quality</div>
       <div class="quality-row" id="sq-tags">
@@ -384,18 +442,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="tags" id="energy-am-tags">
         <button class="tag" onclick="tog(this)">Rested</button><button class="tag" onclick="tog(this)">Groggy</button><button class="tag" onclick="tog(this)">Foggy</button><button class="tag" onclick="tog(this)">Energized</button><button class="tag" onclick="tog(this)">Exhausted</button>
       </div>
-      <div class="fl">Notes (AHI, mask, events)</div>
-      <textarea id="sleep-note" rows="2" placeholder="e.g. CPAP full night, AHI 2.1. Woke once at 3am."></textarea>
+      <div class="fl">Notes</div>
+      <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..."></textarea>
       <button class="btn-primary" onclick="saveSleep()">Log sleep</button>
       <button class="btn-ai" onclick="sleepCoach()">Sleep pattern analysis ↗</button>
       <div class="toast-msg" id="slp-t">Saved!</div>
     </div>
-    <div class="card"><div class="card-title">Sleep log</div><div id="sleep-log"><div class="log-empty">No sleep entries yet.</div></div></div>
+    <div class="card"><div class="card-title">Sleep log</div><div id="sleep-log"><div class="log-empty">No entries yet.</div></div></div>
   </div>
   <div class="view-content" id="vc-sleep-weekly">
     <div class="section-label">Sleep this week</div>
-    <div class="card"><div class="card-title">Weekly sleep averages</div><div class="chart-wrap"><canvas id="sleep-week-chart"></canvas></div></div>
-    <div class="card"><div class="card-title">CPAP compliance this week</div><div id="weekly-cpap"><div class="log-empty">Log daily to see weekly compliance.</div></div></div>
+    <div class="card"><div class="card-title">Hours & CPAP compliance</div><div class="chart-wrap"><canvas id="sleep-week-chart"></canvas></div></div>
   </div>
   <div class="view-content" id="vc-sleep-monthly">
     <div class="section-label">Sleep · May 2026</div>
@@ -403,7 +460,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
   <div class="view-content" id="vc-sleep-yearly">
     <div class="section-label">Sleep · 2026</div>
-    <div class="card"><div class="card-title">Yearly sleep overview</div><div class="log-empty">Log consistently to build your yearly sleep picture.</div></div>
+    <div class="card"><div class="card-title">Yearly overview</div><div class="log-empty" style="padding:2rem 0;">Log consistently to build your yearly picture.</div></div>
   </div>
 </div>
 
@@ -411,41 +468,56 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="s-body" class="sec">
   <div class="view-content on" id="vc-body-daily">
     <div class="section-label">Body · Zepbound Journey</div>
-    <div class="success-banner">
-      <strong>Zepbound started Oct 25, 2025</strong><br>
-      201.4 → 170.7 lbs · <strong>30.7 lbs lost</strong> · 7 months · All-time low 168.7 (May 19)
-    </div>
+    <div class="success-banner"><strong>Zepbound started Oct 25, 2025</strong><br>201.4 → 170.7 lbs · <strong>30.7 lbs lost</strong> · 7 months · All-time low 168.7 (May 19)</div>
     <div class="stat-strip" style="grid-template-columns:1fr 1fr;">
-      <div class="stat-tile"><div class="stat-val" style="font-size:22px;">170.7</div><div class="stat-lbl">Current · Withings</div></div>
-      <div class="stat-tile"><div class="stat-val" style="font-size:22px;">168.7</div><div class="stat-lbl">All-time low · May 19</div></div>
+      <div class="stat-tile"><div class="stat-val" style="font-size:24px;">170.7</div><div class="stat-lbl">Current · Withings</div></div>
+      <div class="stat-tile"><div class="stat-val" style="font-size:24px;">168.7</div><div class="stat-lbl">All-time low · May 19</div></div>
     </div>
     <div class="card">
       <div class="card-title">Weight charts</div>
-      <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <div class="chart-tabs">
         <button class="chart-tab on" onclick="switchChart('journey',this)">Weight journey</button>
         <button class="chart-tab" onclick="switchChart('recent',this)">2025–now</button>
         <button class="chart-tab" onclick="switchChart('milestones',this)">Milestones</button>
       </div>
       <div id="cpanel-journey" class="chart-panel on">
-        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Monthly average weight · 2015–2026</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;">Monthly average · 2015–2026</div>
         <div class="chart-wrap"><canvas id="body-chart-journey"></canvas></div>
       </div>
       <div id="cpanel-recent" class="chart-panel">
-        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Zepbound era · Oct 2025 – today + forecast</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;">Zepbound era · Oct 2025 – today + forecast</div>
         <div class="chart-wrap"><canvas id="body-chart-recent"></canvas></div>
       </div>
       <div id="cpanel-milestones" class="chart-panel">
-        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Key milestones</div>
         <div id="milestone-list"></div>
       </div>
       <div class="forecast-info" id="forecast-info">Set a goal weight below to see your projected timeline.</div>
     </div>
     <div class="card">
-      <div class="card-title">Set weight goal</div>
+      <div class="card-title">Weight goal</div>
       <div class="two-col">
-        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Goal weight (lbs)</div><input type="number" id="goal-weight" placeholder="e.g. 145" step="0.5" oninput="updateForecast()"></div>
-        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Target date (optional)</div><input type="text" id="goal-date" placeholder="e.g. Dec 2026"></div>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Goal weight (lbs)</div><input type="number" id="goal-weight" placeholder="e.g. 145" step="0.5" oninput="updateForecast()"></div>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Target date (optional)</div><input type="text" id="goal-date" placeholder="e.g. Dec 2026"></div>
       </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Exercise log</div>
+      <div class="fl">Type</div>
+      <div class="tags" id="exercise-tags">
+        <button class="tag" onclick="tog(this)">Walking</button><button class="tag" onclick="tog(this)">Strength</button><button class="tag" onclick="tog(this)">Swimming</button><button class="tag" onclick="tog(this)">Yoga</button><button class="tag" onclick="tog(this)">Cycling</button><button class="tag" onclick="tog(this)">Stretching</button><button class="tag" onclick="tog(this)">PT / Rehab</button><button class="tag" onclick="tog(this)">Other</button>
+      </div>
+      <div class="two-col" style="margin-top:8px;">
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Duration (mins)</div><input type="number" id="ex-duration" placeholder="30"></div>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Intensity</div>
+          <div class="tags" id="ex-intensity" style="margin:0;">
+            <button class="tag" style="padding:5px 9px;" onclick="solo('ex-intensity',this)">Low</button><button class="tag" style="padding:5px 9px;" onclick="solo('ex-intensity',this)">Medium</button><button class="tag" style="padding:5px 9px;" onclick="solo('ex-intensity',this)">High</button>
+          </div>
+        </div>
+      </div>
+      <div class="fl">Notes (hip, energy, how it felt)</div>
+      <textarea id="ex-note" rows="2" placeholder="e.g. 30 min walk, felt great. Right hip holding up well."></textarea>
+      <button class="btn-primary" onclick="saveExercise()">Log exercise</button>
+      <div class="toast-msg" id="ext">Saved!</div>
     </div>
     <div class="card">
       <div class="card-title">Monthly progress photos · May 2026</div>
@@ -461,9 +533,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="tags" id="nsv-tags">
         <button class="tag" onclick="tog(this)">Clothes fit better</button><button class="tag" onclick="tog(this)">More energy</button><button class="tag" onclick="tog(this)">Compliment</button><button class="tag" onclick="tog(this)">New low</button><button class="tag" onclick="tog(this)">Less bloated</button>
       </div>
-      <div class="two-col" style="margin-top:8px;">
-        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Waist (in)</div><input type="number" id="waist" placeholder="—" step="0.5"></div>
-        <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Hips (in)</div><input type="number" id="hips" placeholder="—" step="0.5"></div>
+      <div class="two-col" style="margin-top:9px;">
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Waist (in)</div><input type="number" id="waist" placeholder="—" step="0.5"></div>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hips (in)</div><input type="number" id="hips" placeholder="—" step="0.5"></div>
       </div>
       <div class="fl">Zepbound notes</div>
       <textarea id="zep-note" rows="2" placeholder="Appetite, side effects, energy..."></textarea>
@@ -475,14 +547,92 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content" id="vc-body-weekly">
     <div class="section-label">Body · this week</div>
     <div class="card"><div class="card-title">Daily weight this week</div><div class="chart-wrap"><canvas id="body-week-chart"></canvas></div></div>
+    <div class="card"><div class="card-title">Exercise this week</div><div id="weekly-exercise"><div class="log-empty">Log exercise daily to see weekly summary.</div></div></div>
   </div>
   <div class="view-content" id="vc-body-monthly">
     <div class="section-label">Body · May 2026</div>
     <div class="card"><div class="card-title">Monthly weight trend</div><div class="chart-wrap"><canvas id="body-month-chart"></canvas></div></div>
   </div>
   <div class="view-content" id="vc-body-yearly">
-    <div class="section-label">Body · 2026 full year</div>
+    <div class="section-label">Body · 2026</div>
     <div class="card"><div class="card-title">Zepbound full journey</div><div class="chart-wrap"><canvas id="body-year-chart"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════ HEALTH ═══════════════ -->
+<div id="s-health" class="sec">
+  <div class="view-content on" id="vc-health-daily">
+    <div class="section-label">Health Metrics</div>
+
+    <div class="card">
+      <div class="card-title">Blood pressure · log today</div>
+      <div class="bp-row">
+        <div class="bp-input-wrap"><div class="bp-lbl">Systolic</div><input type="number" id="bp-sys" placeholder="120"></div>
+        <div class="bp-input-wrap"><div class="bp-lbl">Diastolic</div><input type="number" id="bp-dia" placeholder="80"></div>
+        <div class="bp-input-wrap"><div class="bp-lbl">Pulse</div><input type="number" id="bp-pulse" placeholder="72"></div>
+      </div>
+      <div class="fl">Time of reading</div>
+      <div class="tags" id="bp-time-tags">
+        <button class="tag" onclick="solo('bp-time-tags',this)">Morning</button><button class="tag" onclick="solo('bp-time-tags',this)">Afternoon</button><button class="tag" onclick="solo('bp-time-tags',this)">Evening</button>
+      </div>
+      <div class="fl">Notes</div>
+      <textarea id="bp-note" rows="2" placeholder="e.g. After medication, before exercise, felt dizzy..."></textarea>
+      <button class="btn-primary" onclick="saveBP()">Log blood pressure</button>
+      <div class="toast-msg" id="bpt">Saved!</div>
+    </div>
+
+    <div class="card"><div class="card-title">Recent BP readings</div><div id="bp-log"><div class="log-empty">No readings yet.</div></div></div>
+
+    <div class="card">
+      <div class="card-title">Lab work · most recent results</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Last labs: Feb 11, 2026 · Next: ~Aug–Nov 2026</div>
+
+      <div style="font-size:11px;font-weight:500;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;">Lipid Panel</div>
+      <div class="lab-row"><div><div class="lab-name">Cholesterol</div><div class="lab-range">&lt;200 MG/DL</div></div><div><span class="lab-val lab-normal">116</span><span class="lab-val lab-normal" style="font-size:10px;margin-left:4px;">↓ from 132</span></div></div>
+      <div class="lab-row"><div><div class="lab-name">Triglycerides</div><div class="lab-range">&lt;150 MG/DL</div></div><span class="lab-val lab-normal">120</span></div>
+      <div class="lab-row"><div><div class="lab-name">HDL Cholesterol</div><div class="lab-range">40–60 MG/DL</div></div><span class="lab-val lab-normal">42</span></div>
+      <div class="lab-row"><div><div class="lab-name">LDL Calculated</div><div class="lab-range">&lt;100 MG/DL</div></div><span class="lab-val lab-normal">50 ✓</span></div>
+
+      <div style="font-size:11px;font-weight:500;color:var(--accent);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.06em;">Thyroid</div>
+      <div class="lab-row"><div><div class="lab-name">T4 Free (Direct)</div><div class="lab-range">0.71–1.85 NG/DL</div></div><span class="lab-val lab-normal">1.33</span></div>
+
+      <div style="font-size:11px;font-weight:500;color:var(--accent);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.06em;">Metabolic Panel</div>
+      <div class="lab-row"><div><div class="lab-name">Glucose</div><div class="lab-range">70–110 MG/DL</div></div><span class="lab-val lab-normal">88 ✓</span></div>
+      <div class="lab-row"><div><div class="lab-name">eGFR (kidney)</div><div class="lab-range">&gt;60</div></div><span class="lab-val lab-normal">107 ✓</span></div>
+      <div class="lab-row"><div><div class="lab-name">ALT (SGPT)</div><div class="lab-range">&lt;35 U/L</div></div><div><span class="lab-val lab-normal">25 ✓</span><span style="font-size:10px;color:var(--muted);margin-left:6px;">was 42</span></div></div>
+      <div class="lab-row"><div><div class="lab-name">Alk Phosphatase</div><div class="lab-range">38–126 IU/L</div></div><span class="lab-val lab-watch">135 ⚠</span></div>
+      <div class="lab-row"><div><div class="lab-name">Albumin</div><div class="lab-range">3.2–5.0 GM/DL</div></div><span class="lab-val lab-normal">3.8</span></div>
+      <div class="lab-row"><div><div class="lab-name">Creatinine</div><div class="lab-range">0.6–1.0 MG/DL</div></div><span class="lab-val lab-normal">0.6</span></div>
+      <div class="lab-row"><div><div class="lab-name">CO₂ Total</div><div class="lab-range">22–30 MEQ/L</div></div><span class="lab-val lab-watch">22.0 ↓</span></div>
+
+      <button class="btn-ai" onclick="labCoach()">Discuss lab results with coach ↗</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Log new lab results</div>
+      <div class="fl">Date of labs</div>
+      <input type="text" id="lab-date" placeholder="e.g. Aug 15, 2026">
+      <div class="fl">Notes / results to track</div>
+      <textarea id="lab-notes" rows="4" placeholder="Paste or type your key values — cholesterol, glucose, A1C, etc."></textarea>
+      <button class="btn-primary" onclick="saveLab()">Save lab results</button>
+      <div class="toast-msg" id="lt">Saved!</div>
+    </div>
+  </div>
+
+  <div class="view-content" id="vc-health-weekly">
+    <div class="section-label">BP this week</div>
+    <div class="card"><div class="card-title">Blood pressure trend</div><div class="chart-wrap"><canvas id="bp-week-chart"></canvas></div></div>
+  </div>
+  <div class="view-content" id="vc-health-monthly">
+    <div class="section-label">Health · May 2026</div>
+    <div class="card"><div class="card-title">Monthly BP trend</div><div class="chart-wrap"><canvas id="bp-month-chart"></canvas></div></div>
+  </div>
+  <div class="view-content" id="vc-health-yearly">
+    <div class="section-label">Health · 2026</div>
+    <div class="card"><div class="card-title">Lab work history</div>
+      <div class="log-item"><div class="log-date">Oct 13, 2025</div><div style="font-size:13px;">Cholesterol 132 · LDL 63 · Glucose 96 · ALT 42 ⚠</div></div>
+      <div class="log-item"><div class="log-date">Feb 11, 2026</div><div style="font-size:13px;">Cholesterol 116 ↓ · LDL 50 ✓ · Glucose 88 ✓ · ALT 25 ✓</div></div>
+    </div>
   </div>
 </div>
 
@@ -491,16 +641,33 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-skin-daily">
     <div class="section-label">Skin & Derm</div>
     <div class="card">
-      <div class="card-title">Today's routines</div>
-      <div style="font-size:11px;color:var(--accent);font-weight:500;margin-bottom:8px;">Morning</div>
+      <div class="card-title">Morning routine</div>
       <div class="toggle-row" onclick="ts('r-cleanser')"><div><div class="tl">Olay Super Facial Cleanser</div><div class="ts">Advanced Deep Clean</div></div><div class="tog" id="r-cleanser"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('r-serum')"><div><div class="tl">Olay Super Serum</div></div><div class="tog" id="r-serum"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('r-vitc')"><div><div class="tl">Olay Vitamin C Moisturizer</div></div><div class="tog" id="r-vitc"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('r-spf')"><div><div class="tl">Olay Super Cream with SPF</div><div class="ts">Daily sunscreen</div></div><div class="tog" id="r-spf"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('r-eye')"><div><div class="tl">Grace & Stella Under Eye Mask</div><div class="ts">Gold or blue</div></div><div class="tog" id="r-eye"><div class="tok"></div></div></div>
-      <div style="font-size:11px;color:var(--accent);font-weight:500;margin:12px 0 8px;">Evening (alternating)</div>
-      <div class="toggle-row" onclick="ts('r-musely')"><div><div class="tl">Musely treatment</div><div class="ts">Anti-aging OR spot treatment (alternate nights)</div></div><div class="tog" id="r-musely"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('r-regen')"><div><div class="tl">Olay Regenerist Ultra Rich Moisturizer</div><div class="ts">After Musely</div></div><div class="tog" id="r-regen"><div class="tok"></div></div></div>
+      <div class="toggle-row" onclick="ts('r-eye')"><div><div class="tl">Grace & Stella Under Eye Mask</div><div class="ts">Gold or blue — as needed</div></div><div class="tog" id="r-eye"><div class="tok"></div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Evening routine · Musely alternating tracker</div>
+      <div class="musely-track">
+        <div class="musely-day" id="musely-antiaging-card">
+          <div class="musely-day-label">Anti-Aging Cream</div>
+          <div class="musely-day-sub">Tonight?</div>
+          <div style="margin-top:10px;">
+            <div class="tog" id="r-musely-aa" onclick="ts('r-musely-aa');updateMuselyTracker()" style="margin:0 auto;"><div class="tok"></div></div>
+          </div>
+        </div>
+        <div class="musely-day" id="musely-spot-card">
+          <div class="musely-day-label">Spot Treatment</div>
+          <div class="musely-day-sub">Tonight?</div>
+          <div style="margin-top:10px;">
+            <div class="tog" id="r-musely-spot" onclick="ts('r-musely-spot');updateMuselyTracker()" style="margin:0 auto;"><div class="tok"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="toggle-row" onclick="ts('r-regen')"><div><div class="tl">Olay Regenerist Ultra Rich</div><div class="ts">After Musely — every night</div></div><div class="tog" id="r-regen"><div class="tok"></div></div></div>
+      <a href="https://www.musely.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open Musely</a>
     </div>
     <div class="card">
       <div class="card-title">Facial tracker · every 8 weeks</div>
@@ -517,38 +684,43 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="tags" id="skin-tags">
         <button class="tag" onclick="tog(this)">Clear</button><button class="tag" onclick="tog(this)">Glowing</button><button class="tag" onclick="tog(this)">Breaking out</button><button class="tag" onclick="tog(this)">Dry</button><button class="tag" onclick="tog(this)">Oily</button><button class="tag" onclick="tog(this)">Irritated</button><button class="tag" onclick="tog(this)">Uneven tone</button><button class="tag" onclick="tog(this)">Dull</button>
       </div>
-      <div class="fl">Concerns today</div>
+      <div class="fl">Concerns</div>
       <div class="tags" id="concern-tags">
         <button class="tag" onclick="tog(this)">Hyperpigmentation</button><button class="tag" onclick="tog(this)">Fine lines</button><button class="tag" onclick="tog(this)">Texture</button><button class="tag" onclick="tog(this)">Pores</button><button class="tag" onclick="tog(this)">Redness</button>
       </div>
-      <div class="fl">Derm notes (Rx changes, appt notes)</div>
-      <textarea id="derm-note" rows="2" placeholder="New prescriptions, doctor recommendations..."></textarea>
+      <div class="fl">Derm notes</div>
+      <textarea id="derm-note" rows="2" placeholder="Rx changes, appt notes..."></textarea>
       <button class="btn-primary" onclick="saveSkin()">Log skin</button>
       <button class="btn-ai" onclick="dermCoach()">Derm prep questions ↗</button>
       <div class="toast-msg" id="skt">Saved!</div>
     </div>
     <div class="card">
-      <div class="card-title">Monthly skin photos · May 2026</div>
+      <div class="card-title">Monthly photos · May 2026</div>
       <div class="photo-grid">
         <div onclick="pickPhoto('skin-may26-front')" id="skin-may26-front" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Front</div></div>
         <div onclick="pickPhoto('skin-may26-left')" id="skin-may26-left" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Left</div></div>
         <div onclick="pickPhoto('skin-may26-right')" id="skin-may26-right" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Right</div></div>
       </div>
     </div>
-    <div class="card"><div class="card-title">Skin log</div><div id="skin-log"><div class="log-empty">No skin entries yet.</div></div></div>
+    <div class="card"><div class="card-title">Skin log</div><div id="skin-log"><div class="log-empty">No entries yet.</div></div></div>
   </div>
   <div class="view-content" id="vc-skin-weekly">
     <div class="section-label">Skin · this week</div>
-    <div class="card"><div class="card-title">Routine compliance this week</div><div id="weekly-skin"><div class="log-empty">Log daily to see weekly routine compliance.</div></div></div>
+    <div class="card"><div class="card-title">Routine compliance & Musely alternation</div><div id="weekly-skin"><div class="log-empty">Log daily to see weekly routine compliance.</div></div></div>
   </div>
   <div class="view-content" id="vc-skin-monthly">
     <div class="section-label">Skin · May 2026</div>
-    <div class="card"><div class="card-title">Monthly skin trends</div><div id="monthly-skin"><div class="log-empty">Log daily to track monthly trends.</div></div></div>
-    <div class="card"><div class="card-title">Side-by-side comparison · coming monthly</div><div class="photo-grid" style="opacity:0.4;"><div class="photo-slot"><i class="ti ti-photo" aria-hidden="true"></i><div class="photo-slot-label">May 26</div></div><div class="photo-slot"><i class="ti ti-photo" aria-hidden="true"></i><div class="photo-slot-label">Jun 26</div></div><div class="photo-slot"><i class="ti ti-photo" aria-hidden="true"></i><div class="photo-slot-label">Jul 26</div></div></div></div>
+    <div class="card"><div class="card-title">Monthly comparison</div>
+      <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;">
+        <div style="flex-shrink:0;text-align:center;"><div class="photo-slot" style="width:95px;height:119px;" onclick="pickPhoto('skin-compare-may26')" id="skin-compare-may26"><i class="ti ti-plus" aria-hidden="true"></i></div><div style="font-size:11px;color:var(--accent);margin-top:5px;">May 2026</div></div>
+        <div style="flex-shrink:0;text-align:center;opacity:0.4;"><div class="photo-slot" style="width:95px;height:119px;"><i class="ti ti-clock" aria-hidden="true"></i></div><div style="font-size:11px;color:var(--muted);margin-top:5px;">Jun 2026</div></div>
+        <div style="flex-shrink:0;text-align:center;opacity:0.4;"><div class="photo-slot" style="width:95px;height:119px;"></div><div style="font-size:11px;color:var(--muted);margin-top:5px;">Jul 2026</div></div>
+      </div>
+    </div>
   </div>
   <div class="view-content" id="vc-skin-yearly">
     <div class="section-label">Skin · 2026</div>
-    <div class="card"><div class="card-title">Yearly skin progress</div><div class="log-empty">Your yearly skin evolution tracked here.</div></div>
+    <div class="card"><div class="card-title">Yearly skin progress</div><div class="log-empty" style="padding:2rem 0;">Your yearly skin evolution tracked here.</div></div>
   </div>
 </div>
 
@@ -557,56 +729,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-hair-daily">
     <div class="section-label">Hair Growth</div>
     <div class="card">
-      <div class="card-title">Growth progression · starting May 2026</div>
+      <div class="card-title">Progression strip · starting May 2026</div>
       <div class="progression-strip">
-        <div class="prog-item">
-          <div class="prog-img prog-actual" id="prog-may26" onclick="pickPhoto('prog-may26')" style="cursor:pointer;">
-            <i class="ti ti-camera" aria-hidden="true" style="font-size:16px;color:var(--muted);"></i>
-          </div>
-          <div class="prog-date">Now ✓</div>
-          <div class="prog-label">May 2026</div>
-          <div class="prog-label">Chin–ear</div>
-        </div>
-        <div class="prog-item">
-          <div class="prog-img prog-ai" id="prog-ai-may26" onclick="pickPhoto('prog-ai-may26')" style="cursor:pointer;">
-            <i class="ti ti-sparkles" aria-hidden="true" style="font-size:16px;color:var(--muted);"></i>
-          </div>
-          <div class="prog-date">AI ref</div>
-          <div class="prog-label">May 2026</div>
-          <div class="prog-label">Baseline</div>
-        </div>
-        <div class="prog-item">
-          <div class="prog-img prog-future"><i class="ti ti-clock" aria-hidden="true" style="font-size:16px;color:var(--muted);opacity:0.5;"></i></div>
-          <div class="prog-date">3 mo</div>
-          <div class="prog-label">Aug 2026</div>
-          <div class="prog-label">Slightly longer</div>
-        </div>
-        <div class="prog-item">
-          <div class="prog-img prog-future"></div>
-          <div class="prog-date">6 mo</div>
-          <div class="prog-label">Nov 2026</div>
-          <div class="prog-label">Bottom jawline</div>
-        </div>
-        <div class="prog-item">
-          <div class="prog-img prog-future"></div>
-          <div class="prog-date">12 mo</div>
-          <div class="prog-label">May 2027</div>
-          <div class="prog-label">Near shoulder</div>
-        </div>
-        <div class="prog-item">
-          <div class="prog-img prog-future"></div>
-          <div class="prog-date">18 mo</div>
-          <div class="prog-label">Nov 2027</div>
-          <div class="prog-label">Past shoulder</div>
-        </div>
-        <div class="prog-item">
-          <div class="prog-img prog-future"></div>
-          <div class="prog-date">36 mo</div>
-          <div class="prog-label">May 2029</div>
-          <div class="prog-label">Collarbone</div>
-        </div>
+        <div class="prog-item"><div class="prog-img prog-actual" id="prog-actual-may26" onclick="pickPhoto('prog-actual-may26')" style="cursor:pointer;"><i class="ti ti-camera" style="font-size:18px;color:var(--muted);" aria-hidden="true"></i></div><div class="prog-date">Now ✓</div><div class="prog-label">May 2026</div><div class="prog-label">Chin–ear</div></div>
+        <div class="prog-item"><div class="prog-img prog-ai" id="prog-ai-may26" onclick="pickPhoto('prog-ai-may26')" style="cursor:pointer;"><i class="ti ti-sparkles" style="font-size:18px;color:var(--muted);" aria-hidden="true"></i></div><div class="prog-date">AI ref</div><div class="prog-label">May 2026</div><div class="prog-label">Baseline</div></div>
+        <div class="prog-item"><div class="prog-img prog-future"><i class="ti ti-clock" style="font-size:16px;color:var(--muted);opacity:.5;" aria-hidden="true"></i></div><div class="prog-date">3 mo</div><div class="prog-label">Aug 2026</div><div class="prog-label">Slightly longer</div></div>
+        <div class="prog-item"><div class="prog-img prog-future"></div><div class="prog-date">6 mo</div><div class="prog-label">Nov 2026</div><div class="prog-label">Bottom jawline</div></div>
+        <div class="prog-item"><div class="prog-img prog-future"></div><div class="prog-date">12 mo</div><div class="prog-label">May 2027</div><div class="prog-label">Near shoulder</div></div>
+        <div class="prog-item"><div class="prog-img prog-future"></div><div class="prog-date">18 mo</div><div class="prog-label">Nov 2027</div><div class="prog-label">Past shoulder</div></div>
+        <div class="prog-item"><div class="prog-img prog-future"></div><div class="prog-date">36 mo</div><div class="prog-label">May 2029</div><div class="prog-label">Collarbone</div></div>
       </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:2px;">Green border = actual · Dashed = AI projection · Tap to add photo</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px;">Green border = actual · Dashed = AI ref · Tap to add</div>
     </div>
     <div class="card">
       <div class="card-title">Monthly photos · May 2026</div>
@@ -617,24 +750,30 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
     <div class="card">
-      <div class="card-title">Current products · May 2026</div>
-      <div style="font-size:12px;color:var(--text);line-height:2.1;">
-        Kinky-Curly Original Curling Custard<br>
-        Kinky-Curly Knot Today (leave-in / detangler)<br>
-        Camille Rose Curl Love Moisture Milk<br>
-        Camille Rose Curl Maker<br>
-        Camille Rose Honey Hydrate Leave-In
+      <div class="card-title">Current products</div>
+      <div id="product-list">
+        <div class="product-item" data-product="Kinky-Curly Original Curling Custard"><span>Kinky-Curly Original Curling Custard</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
+        <div class="product-item" data-product="Kinky-Curly Knot Today"><span>Kinky-Curly Knot Today (detangler)</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
+        <div class="product-item" data-product="Camille Rose Curl Love Moisture Milk"><span>Camille Rose Curl Love Moisture Milk</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
+        <div class="product-item" data-product="Camille Rose Curl Maker"><span>Camille Rose Curl Maker</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
+        <div class="product-item" data-product="Camille Rose Honey Hydrate Leave-In"><span>Camille Rose Honey Hydrate Leave-In</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <input type="text" id="new-product" placeholder="Add a product..." style="flex:1;">
+        <button class="btn-sm accent" onclick="addProduct()">Add</button>
       </div>
     </div>
     <div class="card">
       <div class="card-title">Hair check-in</div>
+      <div class="fl">Products used today</div>
+      <div class="tags" id="products-used-tags"></div>
       <div class="fl">Hair today</div>
       <div class="tags" id="hair-tags">
         <button class="tag" onclick="tog(this)">New growth visible</button><button class="tag" onclick="tog(this)">Shedding</button><button class="tag" onclick="tog(this)">Healthy shine</button><button class="tag" onclick="tog(this)">Frizzy</button><button class="tag" onclick="tog(this)">Loving it</button><button class="tag" onclick="tog(this)">Dry</button>
       </div>
       <div class="fl">Haircare done</div>
       <div class="tags" id="hcare-tags">
-        <button class="tag" onclick="tog(this)">Silk pillowcase</button><button class="tag" onclick="tog(this)">Deep conditioner</button><button class="tag" onclick="tog(this)">Protective style</button><button class="tag" onclick="tog(this)">Dusting trim</button><button class="tag" onclick="tog(this)">Salon visit</button>
+        <button class="tag" onclick="tog(this)">Wash day</button><button class="tag" onclick="tog(this)">Deep condition</button><button class="tag" onclick="tog(this)">Protein treatment</button><button class="tag" onclick="tog(this)">Silk pillowcase</button><button class="tag" onclick="tog(this)">Protective style</button><button class="tag" onclick="tog(this)">Dusting trim</button><button class="tag" onclick="tog(this)">Salon visit</button>
       </div>
       <div class="fl">Milestone or note</div>
       <textarea id="hair-note" rows="2" placeholder="e.g. Can pull into a bun now. Edges filling in. Curl pattern gorgeous."></textarea>
@@ -646,22 +785,29 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
   <div class="view-content" id="vc-hair-weekly">
     <div class="section-label">Hair · this week</div>
-    <div class="card"><div class="card-title">Weekly haircare</div><div id="weekly-hair"><div class="log-empty">Log daily to see your weekly routine.</div></div></div>
+    <div class="card">
+      <div class="card-title">Weekly hair care summary</div>
+      <div id="weekly-hair-summary"><div class="log-empty">Log daily to see weekly summary.</div></div>
+    </div>
   </div>
   <div class="view-content" id="vc-hair-monthly">
     <div class="section-label">Hair · month by month</div>
     <div class="card">
       <div class="card-title">Monthly comparison</div>
       <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;">
-        <div style="flex-shrink:0;text-align:center;"><div class="photo-slot" style="width:90px;height:113px;" onclick="pickPhoto('hair-compare-may26')" id="hair-compare-may26"><i class="ti ti-plus" aria-hidden="true"></i></div><div style="font-size:10px;color:var(--accent);margin-top:4px;">May 2026</div></div>
-        <div style="flex-shrink:0;text-align:center;opacity:0.4;"><div class="photo-slot" style="width:90px;height:113px;"><i class="ti ti-clock" aria-hidden="true"></i></div><div style="font-size:10px;color:var(--muted);margin-top:4px;">Jun 2026</div></div>
-        <div style="flex-shrink:0;text-align:center;opacity:0.4;"><div class="photo-slot" style="width:90px;height:113px;"></div><div style="font-size:10px;color:var(--muted);margin-top:4px;">Jul 2026</div></div>
+        <div style="flex-shrink:0;text-align:center;"><div class="photo-slot" style="width:95px;height:119px;" onclick="pickPhoto('hair-compare-may26')" id="hair-compare-may26"><i class="ti ti-plus" aria-hidden="true"></i></div><div style="font-size:11px;color:var(--accent);margin-top:5px;">May 2026</div></div>
+        <div style="flex-shrink:0;text-align:center;opacity:.4;"><div class="photo-slot" style="width:95px;height:119px;"><i class="ti ti-clock" aria-hidden="true"></i></div><div style="font-size:11px;color:var(--muted);margin-top:5px;">Jun 2026</div></div>
+        <div style="flex-shrink:0;text-align:center;opacity:.4;"><div class="photo-slot" style="width:95px;height:119px;"></div><div style="font-size:11px;color:var(--muted);margin-top:5px;">Jul 2026</div></div>
       </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Monthly hair care log</div>
+      <div id="monthly-hair-log"><div class="log-empty">Log daily to build your monthly summary.</div></div>
     </div>
   </div>
   <div class="view-content" id="vc-hair-yearly">
     <div class="section-label">Hair · 2026–2029 journey</div>
-    <div class="card"><div class="card-title">Yearly growth timeline</div><div class="log-empty">Your 3-year growth journey tracked here.</div></div>
+    <div class="card"><div class="card-title">Growth timeline</div><div class="log-empty" style="padding:2rem 0;">Your 3-year growth journey tracked here.</div></div>
   </div>
 </div>
 
@@ -670,42 +816,58 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-mind-daily">
     <div class="section-label">Mind & Mood</div>
     <div class="card">
-      <div class="card-title">Today</div>
-      <div class="fl">Energy level</div>
-      <div class="stars" id="energy-stars">
-        <span class="star" onclick="setStars('energy-stars',1)">★</span><span class="star" onclick="setStars('energy-stars',2)">★</span><span class="star" onclick="setStars('energy-stars',3)">★</span><span class="star" onclick="setStars('energy-stars',4)">★</span><span class="star" onclick="setStars('energy-stars',5)">★</span>
-      </div>
-      <div class="fl">Confidence today</div>
-      <div class="stars" id="conf-stars">
-        <span class="star" onclick="setStars('conf-stars',1)">★</span><span class="star" onclick="setStars('conf-stars',2)">★</span><span class="star" onclick="setStars('conf-stars',3)">★</span><span class="star" onclick="setStars('conf-stars',4)">★</span><span class="star" onclick="setStars('conf-stars',5)">★</span>
-      </div>
-      <div class="fl">Today's vibe</div>
+      <div class="card-title">Today's check-in</div>
+      <div class="stars-row"><div class="stars-row-label">Energy level</div><div class="stars" id="energy-stars"><span class="star" onclick="setStars('energy-stars',1)">★</span><span class="star" onclick="setStars('energy-stars',2)">★</span><span class="star" onclick="setStars('energy-stars',3)">★</span><span class="star" onclick="setStars('energy-stars',4)">★</span><span class="star" onclick="setStars('energy-stars',5)">★</span></div></div>
+      <div class="stars-row"><div class="stars-row-label">Confidence</div><div class="stars" id="conf-stars"><span class="star" onclick="setStars('conf-stars',1)">★</span><span class="star" onclick="setStars('conf-stars',2)">★</span><span class="star" onclick="setStars('conf-stars',3)">★</span><span class="star" onclick="setStars('conf-stars',4)">★</span><span class="star" onclick="setStars('conf-stars',5)">★</span></div></div>
+      <div class="stars-row"><div class="stars-row-label">Stress level</div><div class="stars" id="stress-stars"><span class="star" onclick="setStars('stress-stars',1)">★</span><span class="star" onclick="setStars('stress-stars',2)">★</span><span class="star" onclick="setStars('stress-stars',3)">★</span><span class="star" onclick="setStars('stress-stars',4)">★</span><span class="star" onclick="setStars('stress-stars',5)">★</span></div></div>
+      <div class="stars-row"><div class="stars-row-label">Body image</div><div class="stars" id="body-image-stars"><span class="star" onclick="setStars('body-image-stars',1)">★</span><span class="star" onclick="setStars('body-image-stars',2)">★</span><span class="star" onclick="setStars('body-image-stars',3)">★</span><span class="star" onclick="setStars('body-image-stars',4)">★</span><span class="star" onclick="setStars('body-image-stars',5)">★</span></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Gratitude · 3 things</div>
+      <textarea id="gratitude" rows="3" placeholder="1. &#10;2. &#10;3. "></textarea>
+    </div>
+    <div class="card">
+      <div class="card-title">Intention for today</div>
+      <input type="text" id="intention" placeholder="One word or phrase to carry through your day...">
+    </div>
+    <div class="card">
+      <div class="card-title">Today's vibe & wins</div>
+      <div class="fl">Vibe</div>
       <div class="tags" id="vibe-tags">
         <button class="tag" onclick="tog(this)">Motivated</button><button class="tag" onclick="tog(this)">Overwhelmed</button><button class="tag" onclick="tog(this)">Grateful</button><button class="tag" onclick="tog(this)">Anxious</button><button class="tag" onclick="tog(this)">Grounded</button><button class="tag" onclick="tog(this)">In my power</button><button class="tag" onclick="tog(this)">Scattered</button>
       </div>
-      <div class="fl">Today's win (big or small)</div>
-      <textarea id="win-note" rows="2" placeholder="New low, wore something I love, survived the school morning..."></textarea>
+      <div class="fl">Self-care done today (beyond routine)</div>
+      <div class="tags" id="selfcare-tags">
+        <button class="tag" onclick="tog(this)">Rest</button><button class="tag" onclick="tog(this)">Time alone</button><button class="tag" onclick="tog(this)">Time with friends</button><button class="tag" onclick="tog(this)">Good meal</button><button class="tag" onclick="tog(this)">Fresh air</button><button class="tag" onclick="tog(this)">Creative outlet</button>
+      </div>
+      <div class="fl">Today's win</div>
+      <textarea id="win-note" rows="2" placeholder="Big or small — new low, wore something I love, survived the school morning..."></textarea>
       <button class="btn-primary" onclick="saveMind()">Log mood</button>
-      <button class="btn-ai" onclick="mindCoach()">Weekly reflection ↗</button>
       <div class="toast-msg" id="mt">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Mood log</div><div id="mind-log"><div class="log-empty">No entries yet.</div></div></div>
   </div>
   <div class="view-content" id="vc-mind-weekly">
     <div class="section-label">Mind · this week</div>
+    <div class="card">
+      <div class="card-title">Weekly AI insight</div>
+      <div id="weekly-mind-insight"><div class="log-empty">Log daily this week to generate your insight.</div></div>
+      <button class="btn-ai" onclick="weeklyMindInsight()">Generate weekly mind & mood insight ↗</button>
+    </div>
     <div class="card"><div class="card-title">Energy & confidence this week</div><div class="chart-wrap"><canvas id="mood-week-chart"></canvas></div></div>
   </div>
   <div class="view-content" id="vc-mind-monthly">
     <div class="section-label">Mind · May 2026</div>
     <div class="card"><div class="card-title">Monthly mood trend</div><div class="chart-wrap"><canvas id="mood-month-chart"></canvas></div></div>
+    <div class="card"><div class="card-title">Monthly reflection</div><div id="monthly-mind-log"><div class="log-empty">No reflections yet.</div></div></div>
   </div>
   <div class="view-content" id="vc-mind-yearly">
     <div class="section-label">Mind · 2026</div>
-    <div class="card"><div class="card-title">Confidence journey 2026</div><div class="log-empty">Your yearly confidence arc tracked here.</div></div>
+    <div class="card"><div class="card-title">Confidence journey 2026</div><div class="log-empty" style="padding:2rem 0;">Your yearly confidence arc tracked here.</div></div>
   </div>
 </div>
 
-</div><!-- end scroll-area -->
+</div><!-- scroll-area -->
 
 <!-- BOTTOM VIEW TABS -->
 <div class="bottom-view-bar">
@@ -715,105 +877,71 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <button class="vtab" onclick="setView('yearly',this)">Yearly</button>
 </div>
 
-</div><!-- end shell -->
+</div><!-- shell -->
 
 <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handlePhoto(event)">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
 <script>
 // ── DB ────────────────────────────────────────────────────────────────
 let db;
-const req = indexedDB.open('GlowDashboard',2);
-req.onupgradeneeded = e => {
-  db = e.target.result;
-  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','settings'].forEach(s => {
+const req=indexedDB.open('GlowDashboard',3);
+req.onupgradeneeded=e=>{
+  db=e.target.result;
+  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries'].forEach(s=>{
     if(!db.objectStoreNames.contains(s)) db.createObjectStore(s,{keyPath:'id',autoIncrement:true});
   });
-  if(!db.objectStoreNames.contains('photos')){
-    const ps = db.createObjectStore('photos',{keyPath:'id'});
-  }
+  if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});
 };
-req.onsuccess = e => { db=e.target.result; boot(); };
+req.onsuccess=e=>{db=e.target.result;boot();};
 
-function dbAdd(store,data){ return new Promise(r=>{ const t=db.transaction(store,'readwrite'); t.objectStore(store).add({...data,ts:Date.now()}); t.oncomplete=r; }); }
-function dbAll(store){ return new Promise(r=>{ const t=db.transaction(store,'readonly'); const rq=t.objectStore(store).getAll(); rq.onsuccess=()=>r(rq.result); }); }
-function dbPutPhoto(key,dataUrl){ return new Promise(r=>{ const t=db.transaction('photos','readwrite'); t.objectStore('photos').put({id:key,data:dataUrl}); t.oncomplete=r; }); }
-function dbGetPhoto(key){ return new Promise(r=>{ const t=db.transaction('photos','readonly'); const rq=t.objectStore('photos').get(key); rq.onsuccess=()=>r(rq.result?.data||null); }); }
-function dbDelPhoto(key){ return new Promise(r=>{ const t=db.transaction('photos','readwrite'); t.objectStore('photos').delete(key); t.oncomplete=r; }); }
+function dbAdd(store,data){return new Promise(r=>{const t=db.transaction(store,'readwrite');t.objectStore(store).add({...data,ts:Date.now()});t.oncomplete=r;});}
+function dbAll(store){return new Promise(r=>{const t=db.transaction(store,'readonly');const rq=t.objectStore(store).getAll();rq.onsuccess=()=>r(rq.result);});}
+function dbPutPhoto(key,dataUrl){return new Promise(r=>{const t=db.transaction('photos','readwrite');t.objectStore('photos').put({id:key,data:dataUrl});t.oncomplete=r;});}
+function dbGetPhoto(key){return new Promise(r=>{const t=db.transaction('photos','readonly');const rq=t.objectStore('photos').get(key);rq.onsuccess=()=>r(rq.result?.data||null);});}
+function dbDelPhoto(key){return new Promise(r=>{const t=db.transaction('photos','readwrite');t.objectStore('photos').delete(key);t.oncomplete=r;});}
 
-// ── INIT ──────────────────────────────────────────────────────────────
+// ── BOOT ──────────────────────────────────────────────────────────────
 async function boot(){
   const now=new Date();
   document.getElementById('hero-sub').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-
-  // Inspirational quotes
-  const quotes=[
-    '"The secret of getting ahead is getting started."',
-    '"Progress, not perfection."',
-    '"Every day is a fresh start."',
-    '"You are stronger than you think."',
-    '"Small steps every day add up to big change."',
-    '"Be the energy you want to attract."',
-    '"Your only limit is you."',
-    '"Glow from the inside out."',
-    '"Consistency is the key to transformation."',
-    '"Today is a great day to feel good."',
-    '"Trust the process — it\'s working."',
-    '"You\'ve come so far. Keep going."',
-  ];
-  const q=quotes[now.getDay()%quotes.length];
-  document.getElementById('hero-quote').textContent=q;
-
-  // Zepbound day tracker
+  const quotes=['"You are stronger than you think."','"Progress, not perfection."','"Every day is a fresh start."','"Consistency is the key to transformation."','"Trust the process — it\'s working."','"You\'ve come so far. Keep going."','"Glow from the inside out."','"Small steps every day add up to big change."','"Be the energy you want to attract."','"Today is a great day to feel good."','"Your only limit is you."','"30 pounds and counting. You are unstoppable."'];
+  document.getElementById('hero-quote').textContent=quotes[now.getDay()%quotes.length];
+  const affirmations=['I am becoming the best version of myself every single day.','My body is strong, capable, and worthy of love — right now, exactly as I am.','I honor my health with every choice I make.','I am a powerful woman in full transformation — and the world can see it.','My consistency is creating the life I deserve.','I am enough. I have enough. I do enough.','Every healthy choice is an act of self-love.','I radiate confidence, warmth, and strength.','I am grateful for this body and everything it does for me.','My glow comes from within — and it is undeniable.','I am building habits that will sustain me for life.','I deserve to feel this good — and it\'s only getting better.','I trust my journey. The progress is real.'];
+  document.getElementById('daily-affirmation').textContent=affirmations[now.getDate()%affirmations.length];
   const zepStart=new Date('2025-10-25');
-  const days=Math.floor((now-zepStart)/(864e5));
-  const months=Math.floor(days/30.44);
+  const days=Math.floor((now-zepStart)/864e5);
   document.getElementById('zep-day-count').textContent='Day '+days;
-  document.getElementById('zep-tile-lbl').textContent='Month '+months+' · −30.7 lbs';
-
-  // Load hero photo
+  document.getElementById('zep-tile-lbl').textContent='Month '+Math.floor(days/30.44)+' · −30.7 lbs';
   const heroData=await dbGetPhoto('hero');
-  if(heroData){
-    const img=document.getElementById('hero-img');
-    const fallback=document.getElementById('hero-fallback');
-    img.src=heroData;
-    img.style.display='block';
-    if(fallback) fallback.style.display='none';
-  }
-
+  if(heroData){document.getElementById('hero-img').src=heroData;document.getElementById('hero-img').style.display='block';document.getElementById('hero-fallback').style.display='none';}
+  buildProductTags();
   await loadAllPhotos();
   await loadLogs();
   buildBodyChart();
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
-let curTab='today', curView='daily';
+let curTab='today',curView='daily';
 function tab(id){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.tnav').forEach(b=>b.classList.remove('on'));
   document.getElementById('s-'+id).classList.add('on');
-  const tabs=['today','style','sleep','body','skin','hair','mind'];
-  document.querySelectorAll('.tnav')[tabs.indexOf(id)].classList.add('on');
+  const tabs=['today','style','sleep','body','health','skin','hair','mind'];
+  const navBtns=document.querySelectorAll('.tnav');
+  const idx=tabs.indexOf(id);
+  if(idx>=0) navBtns[idx].classList.add('on');
   document.getElementById('main-scroll').scrollTop=0;
   curTab=id;
   applyView();
-  if(id==='body'){ buildBodyChart(); }
+  if(id==='body') buildBodyChart();
 }
-
-function setView(v,btn){
-  curView=v;
-  document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  applyView();
-}
-
+function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();}
 function applyView(){
-  const container=document.getElementById('s-'+curTab);
-  if(!container) return;
-  container.querySelectorAll('.view-content').forEach(el=>el.classList.remove('on'));
-  const target=document.getElementById('vc-'+curTab+'-'+curView);
-  if(target) target.classList.add('on');
-  else{ const daily=document.getElementById('vc-'+curTab+'-daily'); if(daily) daily.classList.add('on'); }
+  const c=document.getElementById('s-'+curTab);if(!c)return;
+  c.querySelectorAll('.view-content').forEach(el=>el.classList.remove('on'));
+  const t=document.getElementById('vc-'+curTab+'-'+curView);
+  if(t)t.classList.add('on');
+  else{const d=document.getElementById('vc-'+curTab+'-daily');if(d)d.classList.add('on');}
 }
 
 // ── UI HELPERS ────────────────────────────────────────────────────────
@@ -824,78 +952,121 @@ function ts(id){document.getElementById(id).classList.toggle('on');}
 function setStars(id,n){document.getElementById(id).querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n));}
 function getStars(id){return document.getElementById(id).querySelectorAll('.on').length;}
 function gT(id){return Array.from(document.getElementById(id).querySelectorAll('.on')).map(b=>b.textContent.trim());}
-function toast(id){const t=document.getElementById(id);t.style.display='block';setTimeout(()=>t.style.display='none',2200);}
+function toast(id){const t=document.getElementById(id);t.style.display='block';setTimeout(()=>t.style.display='none',2400);}
 function nowStr(){return new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
 function logItem(date,chips,note){return`<div class="log-item"><div class="log-date">${date}</div><div class="chips">${chips.filter(Boolean).map(c=>'<span class="chip">'+c+'</span>').join('')}</div>${note?'<div class="log-note">'+note+'</div>':''}</div>`;}
-function renderLog(id,items,fn){const el=document.getElementById(id);if(!items||!items.length){el.innerHTML='<div class="log-empty">Nothing logged yet.</div>';return;}el.innerHTML=items.slice(-8).reverse().map(fn).join('');}
+function renderLog(id,items,fn){const el=document.getElementById(id);if(!el)return;if(!items||!items.length){el.innerHTML='<div class="log-empty">Nothing logged yet.</div>';return;}el.innerHTML=items.slice(-8).reverse().map(fn).join('');}
 
 // ── SAVE HANDLERS ─────────────────────────────────────────────────────
 async function saveCheckin(){
-  const mood=gT('mood-tags'), note=document.getElementById('today-note').value.trim();
-  if(!mood.length&&!note) return;
+  const mood=gT('mood-tags'),note=document.getElementById('today-note').value.trim();
+  if(!mood.length&&!note)return;
   const zep=document.getElementById('t-zep').classList.contains('on');
   const cpap=document.getElementById('t-cpap').classList.contains('on');
   const meds=document.getElementById('t-meds').classList.contains('on');
   await dbAdd('checkins',{mood,note,zep,cpap,meds,date:nowStr()});
   document.getElementById('today-note').value='';
   document.getElementById('mood-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
-  toast('tt'); loadLogs();
+  toast('tt');loadLogs();
 }
 async function saveOutfit(){
-  const desc=document.getElementById('outfit-desc').value.trim(); if(!desc) return;
+  const desc=document.getElementById('outfit-desc').value.trim();if(!desc)return;
   await dbAdd('outfits',{desc,occ:gT('occ-tags'),src:gT('src-tags')[0]||'',keep:gT('keep-tags')[0]||'',stars:getStars('outfit-stars'),date:nowStr()});
   document.getElementById('outfit-desc').value='';
   toast('st');
 }
+async function saveWardrobePlan(){
+  const occasion=document.getElementById('wardrobe-occasion').value.trim();
+  const plan=document.getElementById('wardrobe-plan').value.trim();
+  const wishlist=document.getElementById('dailylook-wishlist').value.trim();
+  if(!occasion&&!plan&&!wishlist)return;
+  await dbAdd('wardrobeplans',{occasion,plan,wishlist,date:nowStr()});
+  document.getElementById('wardrobe-occasion').value='';
+  document.getElementById('wardrobe-plan').value='';
+  document.getElementById('dailylook-wishlist').value='';
+  toast('wt');
+}
+async function saveBoxSummary(){
+  const arrived=document.getElementById('box-arrived').value.trim();
+  await dbAdd('boxsummaries',{arrived,kept:document.getElementById('box-kept').value,returned:document.getElementById('box-returned').value,fav:document.getElementById('box-fav').value,date:nowStr()});
+  toast('bxt');
+}
 async function saveSleep(){
-  const bed=document.getElementById('sl-bed').value, wake=document.getElementById('sl-wake').value;
-  const cpap=gT('cpap-tags'), quality=document.getElementById('sq-tags').querySelector('.on')?.textContent||'';
-  const energy=gT('energy-am-tags'), note=document.getElementById('sleep-note').value.trim();
+  const bed=document.getElementById('sl-bed').value,wake=document.getElementById('sl-wake').value;
+  const cpap=gT('cpap-tags'),quality=document.getElementById('sq-tags').querySelector('.on')?.textContent||'';
+  const energy=gT('energy-am-tags'),note=document.getElementById('sleep-note').value.trim();
   let hrs='—';
   if(bed&&wake){const[bh,bm]=bed.split(':').map(Number);const[wh,wm]=wake.split(':').map(Number);let m=(wh*60+wm)-(bh*60+bm);if(m<0)m+=1440;hrs=(m/60).toFixed(1);document.getElementById('sleep-display').textContent=hrs+'h';document.getElementById('s-sleep-h').textContent=hrs+'h';}
   await dbAdd('sleeps',{hrs,cpap:cpap[0]||'',quality,energy,note,date:nowStr()});
   document.getElementById('sleep-note').value='';
   ['cpap-tags','energy-am-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
-  toast('slp-t'); loadLogs();
+  toast('slp-t');loadLogs();
 }
 async function saveBody(){
-  const nsv=gT('nsv-tags'), note=document.getElementById('zep-note').value.trim();
-  await dbAdd('skins',{type:'body',nsv,note,waist:document.getElementById('waist').value,hips:document.getElementById('hips').value,date:nowStr()});
+  await dbAdd('skins',{type:'body',nsv:gT('nsv-tags'),note:document.getElementById('zep-note').value.trim(),waist:document.getElementById('waist').value,hips:document.getElementById('hips').value,date:nowStr()});
   toast('bt');
 }
+async function saveExercise(){
+  const types=gT('exercise-tags'),note=document.getElementById('ex-note').value.trim();
+  await dbAdd('exercises',{types,duration:document.getElementById('ex-duration').value,intensity:gT('ex-intensity')[0]||'',note,date:nowStr()});
+  document.getElementById('ex-note').value='';document.getElementById('ex-duration').value='';
+  document.getElementById('exercise-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+  toast('ext');
+}
+async function saveBP(){
+  const sys=document.getElementById('bp-sys').value,dia=document.getElementById('bp-dia').value,pulse=document.getElementById('bp-pulse').value;
+  if(!sys||!dia)return;
+  const time=gT('bp-time-tags')[0]||'',note=document.getElementById('bp-note').value.trim();
+  await dbAdd('bps',{sys,dia,pulse,time,note,date:nowStr()});
+  document.getElementById('bp-sys').value='';document.getElementById('bp-dia').value='';document.getElementById('bp-pulse').value='';
+  document.getElementById('bp-note').value='';
+  toast('bpt');loadLogs();
+}
+async function saveLab(){
+  const date=document.getElementById('lab-date').value.trim(),notes=document.getElementById('lab-notes').value.trim();
+  if(!notes)return;
+  await dbAdd('labs',{date,notes,logged:nowStr()});
+  document.getElementById('lab-date').value='';document.getElementById('lab-notes').value='';
+  toast('lt');
+}
 async function saveFacial(){
-  const next=document.getElementById('next-facial').value.trim(), notes=document.getElementById('facial-notes').value.trim();
+  const next=document.getElementById('next-facial').value.trim(),notes=document.getElementById('facial-notes').value.trim();
   await dbAdd('skins',{type:'facial',next,notes,date:nowStr()});
   toast('ft');
 }
 async function saveSkin(){
-  const skinT=gT('skin-tags'), concerns=gT('concern-tags'), derm=document.getElementById('derm-note').value.trim();
-  await dbAdd('skins',{type:'checkin',skinT,concerns,derm,date:nowStr()});
+  const skinT=gT('skin-tags'),concerns=gT('concern-tags'),derm=document.getElementById('derm-note').value.trim();
+  const musely_aa=document.getElementById('r-musely-aa').classList.contains('on');
+  const musely_spot=document.getElementById('r-musely-spot').classList.contains('on');
+  await dbAdd('skins',{type:'checkin',skinT,concerns,derm,musely_aa,musely_spot,date:nowStr()});
   document.getElementById('derm-note').value='';
   ['skin-tags','concern-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
-  toast('skt'); loadLogs();
+  toast('skt');loadLogs();
 }
 async function saveHair(){
-  const hairT=gT('hair-tags'), care=gT('hcare-tags'), note=document.getElementById('hair-note').value.trim();
-  await dbAdd('hairs',{hairT,care,note,date:nowStr()});
+  const hairT=gT('hair-tags'),care=gT('hcare-tags'),prods=gT('products-used-tags'),note=document.getElementById('hair-note').value.trim();
+  await dbAdd('hairs',{hairT,care,prods,note,date:nowStr()});
   document.getElementById('hair-note').value='';
-  ['hair-tags','hcare-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
-  toast('ht'); loadLogs();
+  ['hair-tags','hcare-tags','products-used-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
+  toast('ht');loadLogs();
 }
 async function saveMind(){
-  const vibe=gT('vibe-tags'), win=document.getElementById('win-note').value.trim();
-  await dbAdd('minds',{vibe,win,energy:getStars('energy-stars'),conf:getStars('conf-stars'),date:nowStr()});
-  document.getElementById('win-note').value='';
+  const vibe=gT('vibe-tags'),selfcare=gT('selfcare-tags'),win=document.getElementById('win-note').value.trim();
+  const gratitude=document.getElementById('gratitude').value.trim();
+  const intention=document.getElementById('intention').value.trim();
+  await dbAdd('minds',{vibe,selfcare,win,gratitude,intention,energy:getStars('energy-stars'),conf:getStars('conf-stars'),stress:getStars('stress-stars'),bodyImage:getStars('body-image-stars'),date:nowStr()});
+  document.getElementById('win-note').value='';document.getElementById('gratitude').value='';document.getElementById('intention').value='';
   document.getElementById('vibe-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
-  setStars('energy-stars',0); setStars('conf-stars',0);
-  toast('mt'); loadLogs();
+  document.getElementById('selfcare-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+  setStars('energy-stars',0);setStars('conf-stars',0);setStars('stress-stars',0);setStars('body-image-stars',0);
+  toast('mt');loadLogs();
 }
 async function saveReflection(){
-  const text=document.getElementById('monthly-reflection').value.trim(); if(!text) return;
+  const text=document.getElementById('monthly-reflection').value.trim();if(!text)return;
   await dbAdd('reflections',{text,month:new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})});
   document.getElementById('monthly-reflection').value='';
-  toast('ref-t'); loadLogs();
+  toast('ref-t');loadLogs();
 }
 
 // ── LOAD LOGS ─────────────────────────────────────────────────────────
@@ -905,97 +1076,95 @@ async function loadLogs(){
   const sleeps=await dbAll('sleeps');
   renderLog('sleep-log',sleeps,e=>logItem(e.date,[e.hrs+'h',e.cpap,e.quality,...e.energy],e.note));
   const skins=await dbAll('skins');
-  renderLog('skin-log',skins.filter(s=>s.type==='checkin'),e=>logItem(e.date,[...e.skinT,...e.concerns],e.derm));
+  renderLog('skin-log',skins.filter(s=>s.type==='checkin'),e=>logItem(e.date,[...e.skinT,...e.concerns,...(e.musely_aa?['Musely Anti-Age']:[]),...(e.musely_spot?['Musely Spot']:[])],e.derm));
   const hairs=await dbAll('hairs');
-  renderLog('hair-log',hairs,e=>logItem(e.date,[...e.hairT,...e.care],e.note));
+  renderLog('hair-log',hairs,e=>logItem(e.date,[...e.hairT,...e.care,...(e.prods||[])],e.note));
   const minds=await dbAll('minds');
   renderLog('mind-log',minds,e=>logItem(e.date,[...e.vibe,...(e.energy?['Energy '+'★'.repeat(e.energy)]:[]),...(e.conf?['Confidence '+'★'.repeat(e.conf)]:[])],e.win));
+  const bps=await dbAll('bps');
+  renderLog('bp-log',bps,e=>logItem(e.date,[e.sys+'/'+e.dia,e.pulse?'Pulse '+e.pulse:'',e.time],''));
   const refs=await dbAll('reflections');
   renderLog('reflection-log',refs,e=>logItem(e.month,[],e.text));
+}
+
+// ── PRODUCTS ─────────────────────────────────────────────────────────
+function buildProductTags(){
+  const list=document.getElementById('product-list');
+  const products=Array.from(list.querySelectorAll('.product-item')).map(el=>el.dataset.product);
+  const tagsEl=document.getElementById('products-used-tags');
+  tagsEl.innerHTML=products.map(p=>`<button class="tag" onclick="tog(this)">${p.split(' ').slice(0,3).join(' ')}</button>`).join('');
+}
+function addProduct(){
+  const input=document.getElementById('new-product');
+  const name=input.value.trim();if(!name)return;
+  const list=document.getElementById('product-list');
+  const div=document.createElement('div');
+  div.className='product-item';div.dataset.product=name;
+  div.innerHTML=`<span>${name}</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button>`;
+  list.appendChild(div);
+  input.value='';
+  buildProductTags();
+}
+function removeProduct(btn){
+  btn.closest('.product-item').remove();
+  buildProductTags();
+}
+
+// ── MUSELY TRACKER ────────────────────────────────────────────────────
+function updateMuselyTracker(){
+  const aa=document.getElementById('r-musely-aa').classList.contains('on');
+  const spot=document.getElementById('r-musely-spot').classList.contains('on');
+  document.getElementById('musely-antiaging-card').classList.toggle('active',aa);
+  document.getElementById('musely-spot-card').classList.toggle('active',spot);
 }
 
 // ── CHARTS ────────────────────────────────────────────────────────────
 const chartInstances={};
 function makeChart(id,type,labels,datasets,opts={}){
-  const canvas=document.getElementById(id); if(!canvas) return;
-  if(chartInstances[id]){ chartInstances[id].destroy(); delete chartInstances[id]; }
-  const ctx=canvas.getContext('2d');
-  chartInstances[id]=new Chart(ctx,{type,data:{labels,datasets},options:{
+  const canvas=document.getElementById(id);if(!canvas)return;
+  if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];}
+  chartInstances[id]=new Chart(canvas.getContext('2d'),{type,data:{labels,datasets},options:{
     responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y?.toFixed(1)+(opts.unit||' lbs')}}},
-    scales:{
-      x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:8}},
-      y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',callback:v=>v+(opts.unit||' lb')},min:opts.min||undefined,max:opts.max||undefined}
-    },...(opts.extra||{})
+    scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',maxTicksLimit:8}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',callback:v=>v+(opts.unit||' lb')},min:opts.min,max:opts.max}}
   }});
 }
 
-// ── CHART TABS ────────────────────────────────────────────────────────
-let activeChartTab = 'journey';
-function switchChart(id, btn){
-  activeChartTab = id;
+let activeChart='journey';
+function switchChart(id,btn){
+  activeChart=id;
   document.querySelectorAll('.chart-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   document.querySelectorAll('.chart-panel').forEach(p=>p.classList.remove('on'));
   document.getElementById('cpanel-'+id).classList.add('on');
-  if(id==='journey') buildJourneyChart();
-  if(id==='recent') buildRecentChart();
-  if(id==='milestones') buildMilestones();
+  if(id==='journey')buildJourneyChart();
+  if(id==='recent')buildRecentChart();
+  if(id==='milestones')buildMilestones();
 }
 
-function buildBodyChart(){
-  buildJourneyChart();
-  buildMilestones();
-}
+function buildBodyChart(){buildJourneyChart();buildMilestones();}
 
 function buildJourneyChart(){
-  const labels=['2015-03','2015-08','2016-01','2016-06','2016-11','2017-03','2017-09','2017-10',
-    '2018-01','2018-05','2018-09','2019-01','2019-05','2019-11','2020-03','2020-07','2020-10',
-    '2021-01','2021-05','2021-10','2022-03','2022-06','2022-09','2022-10','2023-03','2023-08',
-    '2023-10','2024-01','2024-04','2024-08','2024-09','2024-10','2025-01','2025-05','2025-10',
-    '2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
-  const vals=[169.8,175,176.9,178.4,177.2,178.1,171.7,172.5,178.8,181.5,180.1,181.2,181.3,
-    185.9,185.1,193.6,196.2,196.5,192.8,191.5,192,187.2,181.8,181.6,184.5,185.2,194.3,196.5,
-    194.6,200.8,200.6,202.6,198,198.2,199.8,194.9,189.2,183.8,180.5,177.1,173.7,171.7];
-  const colors=vals.map((v,i)=>{
-    if(i===vals.length-1) return '#6B9E78';
-    if(i>=35) return '#6B9E78';
-    if(v===Math.max(...vals)) return '#C4735A';
-    return '#A07850';
-  });
-  makeChart('body-chart-journey','line',labels,[{
-    data:vals, borderColor:'#A07850', borderWidth:1.5,
-    pointRadius:vals.map((v,i)=>i===vals.length-1||v===Math.max(...vals)?5:2),
-    pointBackgroundColor:colors,
-    tension:0.3, fill:{target:'origin',above:'rgba(160,120,80,0.05)'}
-  }],{min:160,max:215,unit:' lb'});
+  const labels=['2015-03','2015-08','2016-01','2016-06','2016-11','2017-03','2017-09','2017-10','2018-01','2018-05','2018-09','2019-01','2019-05','2019-11','2020-03','2020-07','2020-10','2021-01','2021-05','2021-10','2022-03','2022-06','2022-09','2022-10','2023-03','2023-08','2023-10','2024-01','2024-04','2024-08','2024-09','2024-10','2025-01','2025-05','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
+  const vals=[169.8,175,176.9,178.4,177.2,178.1,171.7,172.5,178.8,181.5,180.1,181.2,181.3,185.9,185.1,193.6,196.2,196.5,192.8,191.5,192,187.2,181.8,181.6,184.5,185.2,194.3,196.5,194.6,200.8,200.6,202.6,198,198.2,199.8,194.9,189.2,183.8,180.5,177.1,173.7,171.7];
+  makeChart('body-chart-journey','line',labels,[{data:vals,borderColor:'#A07850',borderWidth:1.5,pointRadius:vals.map((v,i)=>i===vals.length-1||v===Math.max(...vals)?5:2),pointBackgroundColor:vals.map((v,i)=>i===vals.length-1?'#6B9E78':v===Math.max(...vals)?'#C4735A':'#A07850'),tension:0.3,fill:{target:'origin',above:'rgba(160,120,80,0.05)'}}],{min:160,max:215,unit:' lb'});
 }
 
 function buildRecentChart(){
   const goalWeight=parseFloat(document.getElementById('goal-weight')?.value)||null;
-  const actualLabels=['Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26'];
-  const actualVals=[201.4,194.9,189.2,183.8,180.5,177.1,173.7,170.7];
-  const labels=[...actualLabels];
-  const datasets=[{
-    label:'Actual',data:actualVals,
-    borderColor:'#6B9E78',borderWidth:2,
-    pointRadius:actualVals.map((_,i)=>i===0||i===actualVals.length-1?5:2),
-    pointBackgroundColor:actualVals.map((_,i)=>i===0?'#C4735A':i===actualVals.length-1?'#A07850':'#6B9E78'),
-    tension:0.35,fill:{target:'origin',above:'rgba(107,158,120,0.07)'}
-  }];
-
-  const goalWeight2=goalWeight||null;
-  const dynamicMin=goalWeight2?Math.min(goalWeight2-15,155):155;
-
-  if(goalWeight2 && goalWeight2 < 170.7){
-    const monthlyLoss=4.4, months=Math.ceil((170.7-goalWeight2)/monthlyLoss);
+  const aLabels=['Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26'];
+  const aVals=[201.4,194.9,189.2,183.8,180.5,177.1,173.7,170.7];
+  const labels=[...aLabels];
+  const datasets=[{label:'Actual',data:aVals,borderColor:'#6B9E78',borderWidth:2,pointRadius:aVals.map((_,i)=>i===0||i===aVals.length-1?5:3),pointBackgroundColor:aVals.map((_,i)=>i===0?'#C4735A':i===aVals.length-1?'#A07850':'#6B9E78'),tension:0.35,fill:{target:'origin',above:'rgba(107,158,120,0.07)'}}];
+  const dynamicMin=goalWeight?Math.min(goalWeight-15,155):155;
+  if(goalWeight&&goalWeight<170.7){
+    const monthlyLoss=4.4,months=Math.ceil((170.7-goalWeight)/monthlyLoss);
     const fNames=['Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26','Dec 26','Jan 27','Feb 27','Mar 27','Apr 27','May 27','Jun 27','Jul 27','Aug 27'];
     const fVals=[170.7];
-    for(let i=0;i<Math.min(months,14);i++) fVals.push(+(Math.max(goalWeight2,170.7-(i+1)*monthlyLoss)).toFixed(1));
+    for(let i=0;i<Math.min(months,14);i++) fVals.push(+(Math.max(goalWeight,170.7-(i+1)*monthlyLoss)).toFixed(1));
     labels.push(...fNames.slice(0,fVals.length-1));
-    const pad=Array(actualVals.length-1).fill(null);
-    datasets.push({label:'Projected',data:[...pad,...fVals],borderColor:'#A07850',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.35,fill:false});
-    document.getElementById('forecast-info').textContent=`At ~4.4 lbs/month you'll reach ${goalWeight2} lbs in ~${months} months (around ${fNames[months-1]||'later'}).`;
+    datasets.push({label:'Projected',data:[...Array(aVals.length-1).fill(null),...fVals],borderColor:'#A07850',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.35,fill:false});
+    document.getElementById('forecast-info').textContent=`At ~4.4 lbs/month you'll reach ${goalWeight} lbs in ~${months} months (around ${fNames[months-1]||'later'}).`;
   } else {
     document.getElementById('forecast-info').textContent='Set a goal weight below to see your projected timeline.';
   }
@@ -1003,77 +1172,54 @@ function buildRecentChart(){
 }
 
 function buildMilestones(){
+  const gw=parseFloat(document.getElementById('goal-weight')?.value)||null;
   const milestones=[
     {label:'All-time high',val:'210.5 lbs · Sep 2024',status:'done',color:'#C4735A'},
     {label:'Under 200 lbs',val:'Crossed Nov 2025',status:'done',color:'#A07850'},
     {label:'Under 190 lbs',val:'Crossed Dec 2025',status:'done',color:'#A07850'},
     {label:'Under 180 lbs',val:'Crossed Feb 2026',status:'done',color:'#A07850'},
     {label:'Under 175 lbs',val:'Crossed Mar 2026',status:'done',color:'#6B9E78'},
-    {label:'New all-time low · 168.7 lbs',val:'May 19, 2026 🎉',status:'now',color:'#6B9E78'},
+    {label:'All-time low · 168.7 lbs',val:'May 19, 2026 🎉',status:'now',color:'#6B9E78'},
     {label:'Under 165 lbs',val:'~6–8 weeks at current pace',status:'next',color:'#7F77DD'},
     {label:'Under 160 lbs',val:'~12–16 weeks',status:'next',color:'#7F77DD'},
   ];
-  const gw=parseFloat(document.getElementById('goal-weight')?.value)||null;
-  if(gw && gw < 160){
-    milestones.push({label:`Goal weight · ${gw} lbs`,val:'Your target',status:'next',color:'#7F77DD'});
-  }
-  document.getElementById('milestone-list').innerHTML=milestones.map(m=>`
-    <div class="milestone-row">
-      <div class="ms-dot" style="background:${m.color};"></div>
-      <div class="ms-label">${m.label}</div>
-      <div class="ms-date">${m.val}</div>
-      <span class="ms-badge ${m.status==='done'?'badge-done':m.status==='now'?'badge-now':'badge-next'}">${m.status==='done'?'Done ✓':m.status==='now'?'This month!':'Coming up'}</span>
-    </div>`).join('');
+  if(gw&&gw<160) milestones.push({label:`Goal weight · ${gw} lbs`,val:'Your target',status:'next',color:'#7F77DD'});
+  document.getElementById('milestone-list').innerHTML=milestones.map(m=>`<div class="milestone-row"><div class="ms-dot" style="background:${m.color};"></div><div class="ms-label">${m.label}</div><div class="ms-date">${m.val}</div><span class="ms-badge ${m.status==='done'?'badge-done':m.status==='now'?'badge-now':'badge-next'}">${m.status==='done'?'Done ✓':m.status==='now'?'This month!':'Coming up'}</span></div>`).join('');
 }
-
-function updateForecast(){ buildRecentChart(); if(activeChartTab==='milestones') buildMilestones(); }
+function updateForecast(){buildRecentChart();if(activeChart==='milestones')buildMilestones();}
 
 // ── PHOTO HANDLING ────────────────────────────────────────────────────
 let curPhotoTarget=null;
-function pickPhoto(slotId){ curPhotoTarget=slotId; document.getElementById('photo-input').click(); }
+function pickPhoto(slotId){curPhotoTarget=slotId;document.getElementById('photo-input').click();}
+function triggerOutfitPhoto(idx){curPhotoTarget='outfit-grid-'+idx;document.getElementById('photo-input').click();}
 
 async function handlePhoto(event){
-  const file=event.target.files[0]; if(!file) return;
+  const file=event.target.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=async e=>{
     try{
-      // Compress image before storing
-      const compressed=await compressImage(e.target.result, curPhotoTarget==='hero'?200:400);
-      // Test that db is available
-      if(!db){ alert('Storage not ready yet — please try again in a moment.'); return; }
+      const compressed=await compressImage(e.target.result,curPhotoTarget==='hero'?220:420);
       await dbPutPhoto(curPhotoTarget,compressed);
-      // Verify it saved by reading it back
       const verify=await dbGetPhoto(curPhotoTarget);
-      if(verify){
-        displayPhoto(curPhotoTarget,verify);
-        if(curPhotoTarget==='hero') alert('✓ Photo saved! It will appear every time you open the app.');
-      } else {
-        alert('Photo could not be saved. Please try again.');
-      }
-    } catch(err){
-      alert('Error saving photo: '+err.message);
-    }
+      if(verify) displayPhoto(curPhotoTarget,verify);
+    }catch(err){alert('Could not save photo: '+err.message);}
     event.target.value='';
   };
-  reader.onerror=()=>alert('Could not read the photo file. Please try again.');
   reader.readAsDataURL(file);
 }
 
-function compressImage(dataUrl, maxWidth){
+function compressImage(dataUrl,maxWidth){
   return new Promise(resolve=>{
     const img=new Image();
     img.onload=()=>{
       const canvas=document.createElement('canvas');
-      let w=img.width, h=img.height;
-      // Scale down if wider than maxWidth
-      if(w>maxWidth){ h=Math.round(h*maxWidth/w); w=maxWidth; }
-      canvas.width=w; canvas.height=h;
-      const ctx=canvas.getContext('2d');
-      ctx.drawImage(img,0,0,w,h);
-      // 0.7 quality JPEG — good balance of quality vs size
-      resolve(canvas.toDataURL('image/jpeg',0.7));
+      let w=img.width,h=img.height;
+      if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(canvas.toDataURL('image/jpeg',0.75));
     };
-    img.onerror=()=>resolve(dataUrl); // fallback to original if error
+    img.onerror=()=>resolve(dataUrl);
     img.src=dataUrl;
   });
 }
@@ -1081,26 +1227,34 @@ function compressImage(dataUrl, maxWidth){
 function displayPhoto(slotId,data){
   if(slotId==='hero'){
     const img=document.getElementById('hero-img');
-    const fallback=document.getElementById('hero-fallback');
+    const fb=document.getElementById('hero-fallback');
     if(img){img.src=data;img.style.display='block';}
-    if(fallback) fallback.style.display='none';
+    if(fb)fb.style.display='none';
     return;
   }
-  const slot=document.getElementById(slotId); if(!slot) return;
-  const labelEl=slot.querySelector('.photo-slot-label');
-  const label=labelEl?.textContent||'';
-  slot.innerHTML=`<img src="${data}" alt="photo"><button class="rm" onclick="removePhoto('${slotId}',event)">✕</button>`;
-  if(label&&slotId!=='outfit-preview'){
-    const lbl=document.createElement('div');
-    lbl.className='photo-slot-label';lbl.textContent=label;
-    slot.appendChild(lbl);
+  if(slotId.startsWith('outfit-grid-')){
+    const idx=parseInt(slotId.split('-')[2]);
+    const imgEl=document.getElementById('outfit-img-'+idx);
+    if(imgEl){imgEl.innerHTML=`<img src="${data}" alt="outfit">`;imgEl.onclick=null;}
+    return;
   }
+  if(slotId.startsWith('prog-')){
+    const el=document.getElementById(slotId);if(!el)return;
+    el.innerHTML=`<img src="${data}" alt="hair progress">`;
+    el.classList.remove('prog-future');
+    if(slotId.includes('actual')) el.classList.add('prog-actual');
+    return;
+  }
+  const slot=document.getElementById(slotId);if(!slot)return;
+  const label=slot.querySelector('.photo-slot-label')?.textContent||'';
+  slot.innerHTML=`<img src="${data}" alt="photo"><button class="rm" onclick="removePhoto('${slotId}',event)">✕</button>`;
+  if(label){const lbl=document.createElement('div');lbl.className='photo-slot-label';lbl.textContent=label;slot.appendChild(lbl);}
 }
 
 async function removePhoto(slotId,event){
   event.stopPropagation();
   await dbDelPhoto(slotId);
-  const slot=document.getElementById(slotId); if(!slot) return;
+  const slot=document.getElementById(slotId);if(!slot)return;
   const label=slot.querySelector('.photo-slot-label')?.textContent||'';
   slot.innerHTML=`<i class="ti ti-plus" aria-hidden="true"></i>${label?'<div class="photo-slot-label">'+label+'</div>':''}`;
 }
@@ -1109,18 +1263,33 @@ async function loadAllPhotos(){
   return new Promise(r=>{
     const t=db.transaction('photos','readonly');
     const rq=t.objectStore('photos').getAll();
-    rq.onsuccess=()=>{ rq.result.forEach(p=>displayPhoto(p.id,p.data)); r(); };
+    rq.onsuccess=()=>{rq.result.forEach(p=>displayPhoto(p.id,p.data));r();};
   });
 }
 
 // ── AI COACH ─────────────────────────────────────────────────────────
-function aiCoach(){ const mood=gT('mood-tags'); if(window.sendPrompt) sendPrompt('Act as my holistic glow coach. I am a busy professional mom of 5, 7 months into Zepbound (Oct 25 2025), down 30.7 lbs from 201.4 to 170.7 — personal all-time low. Today: '+(mood.join(', ')||'checking in')+'. Give me one warm specific insight.'); }
-function styleCoach(){ if(window.sendPrompt) sendPrompt('I am down 30.7 lbs on Zepbound in 7 months, body changing fast. What style advice for dressing my changing body? What should my next DailyLook box focus on?'); }
-function sleepCoach(){ if(window.sendPrompt) sendPrompt('I have sleep apnea and use a CPAP. Based on my sleep log, what patterns do you see and what should I discuss with my sleep doctor?'); }
-function zepCoach(){ if(window.sendPrompt) sendPrompt('Started Zepbound Oct 25 2025 at 201.4 lbs. Now May 26 2026 at 170.7 lbs — 30.7 lbs in 7 months. How is my journey going and what should I discuss with my doctor?'); }
-function dermCoach(){ if(window.sendPrompt) sendPrompt('I use Musely anti-aging cream and spot treatment (alternating nights) followed by Olay Regenerist. Morning: Olay cleanser, super serum, Vitamin C moisturizer, SPF cream. Facials every 8 weeks. What questions should I bring to my derm?'); }
-function hairCoach(){ if(window.sendPrompt) sendPrompt('Hair journey started May 2026 at chin-to-ear length. I use Kinky-Curly and Camille Rose products. What should I focus on for healthy growth to collarbone?'); }
-function mindCoach(){ if(window.sendPrompt) sendPrompt('I am a professional mom of 5 with twin 15-year-olds, 7 months into Zepbound having lost 30.7 lbs, growing my hair, seeing a derm. Give me an honest encouraging weekly reflection.'); }
+function aiCoach(){if(window.sendPrompt)sendPrompt('Act as my holistic glow coach. I am a busy professional mom of 5, 7 months into Zepbound (Oct 25 2025), down 30.7 lbs from 201.4 to 170.7. Give me one warm specific daily insight.');}
+function styleCoach(){if(window.sendPrompt)sendPrompt('I am down 30.7 lbs on Zepbound in 7 months, body changing fast. What style advice for dressing my changing body? What should my next DailyLook box focus on?');}
+function sleepCoach(){if(window.sendPrompt)sendPrompt('I have sleep apnea and use a CPAP. Based on my sleep log, what patterns do you see and what should I discuss with my sleep doctor?');}
+function zepCoach(){if(window.sendPrompt)sendPrompt('Started Zepbound Oct 25 2025 at 201.4 lbs. Today May 26 2026 at 170.7 lbs — 30.7 lbs in 7 months. How is my journey going and what should I discuss with my doctor?');}
+function labCoach(){if(window.sendPrompt)sendPrompt('Review my recent lab results: Cholesterol 116 (down from 132), LDL 50, Glucose 88 (down from 96), ALT 25 (down from 42 — normalized!), Alkaline Phosphatase 135 (still slightly elevated, down from 168), eGFR 107 excellent, Albumin 3.8. I take Irbesartan HCTZ, Metoprolol, and Amlodipine for blood pressure and am 7 months into Zepbound. What do my trends show and what should I discuss with my doctor?');}
+function dermCoach(){if(window.sendPrompt)sendPrompt('I use Musely anti-aging cream and spot treatment on alternating nights followed by Olay Regenerist. Morning: Olay cleanser, super serum, Vitamin C moisturizer, SPF cream. Facials every 8 weeks. What questions should I bring to my derm?');}
+function hairCoach(){if(window.sendPrompt)sendPrompt('Hair journey started May 2026 at chin-to-ear length. I use Kinky-Curly and Camille Rose products. I track wash days, deep conditioning, and protein treatments. What should I focus on for healthy growth to collarbone?');}
+function mindCoach(){if(window.sendPrompt)sendPrompt('I am a professional mom of 5 with twin 15-year-olds, 7 months into Zepbound having lost 30.7 lbs, growing my hair, seeing a derm. Give me an honest encouraging weekly reflection.');}
+async function weeklyInsight(){
+  const checkins=await dbAll('checkins');
+  const recent=checkins.slice(-7);
+  if(!recent.length){document.getElementById('weekly-summary').innerHTML='<div class="log-empty">No data yet — log daily check-ins first.</div>';return;}
+  const summary=recent.map(c=>`${c.date}: mood=[${c.mood.join(',')}] zep=${c.zep} cpap=${c.cpap} meds=${c.meds}`).join('\n');
+  if(window.sendPrompt)sendPrompt(`I am a busy professional mom of 5, 7 months into Zepbound. Here is my week of check-ins:\n${summary}\n\nPlease give me a warm, insightful weekly summary — what patterns do you see across my mood, treatments, and energy? What should I focus on next week?`);
+}
+async function weeklyMindInsight(){
+  const minds=await dbAll('minds');
+  const recent=minds.slice(-7);
+  if(!recent.length){document.getElementById('weekly-mind-insight').innerHTML='<div class="log-empty">No mood data yet — log daily first.</div>';return;}
+  const summary=recent.map(m=>`${m.date}: energy=${m.energy} confidence=${m.conf} stress=${m.stress} bodyImage=${m.bodyImage} vibe=[${m.vibe.join(',')}] win="${m.win}"`).join('\n');
+  if(window.sendPrompt)sendPrompt(`Here is my week of mind & mood data:\n${summary}\n\nPlease give me a thoughtful weekly insight — what patterns do you see in my energy, confidence, stress, and body image? Where am I thriving? What needs attention? Be warm, honest, and specific.`);
+}
 </script>
 </body>
 </html>
