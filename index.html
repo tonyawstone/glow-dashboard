@@ -1036,12 +1036,46 @@ async function handlePhoto(event){
   const file=event.target.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=async e=>{
-    const data=e.target.result;
-    await dbPutPhoto(curPhotoTarget,data);
-    displayPhoto(curPhotoTarget,data);
+    try{
+      // Compress image before storing
+      const compressed=await compressImage(e.target.result, curPhotoTarget==='hero'?200:400);
+      // Test that db is available
+      if(!db){ alert('Storage not ready yet — please try again in a moment.'); return; }
+      await dbPutPhoto(curPhotoTarget,compressed);
+      // Verify it saved by reading it back
+      const verify=await dbGetPhoto(curPhotoTarget);
+      if(verify){
+        displayPhoto(curPhotoTarget,verify);
+        if(curPhotoTarget==='hero') alert('✓ Photo saved! It will appear every time you open the app.');
+      } else {
+        alert('Photo could not be saved. Please try again.');
+      }
+    } catch(err){
+      alert('Error saving photo: '+err.message);
+    }
     event.target.value='';
   };
+  reader.onerror=()=>alert('Could not read the photo file. Please try again.');
   reader.readAsDataURL(file);
+}
+
+function compressImage(dataUrl, maxWidth){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      let w=img.width, h=img.height;
+      // Scale down if wider than maxWidth
+      if(w>maxWidth){ h=Math.round(h*maxWidth/w); w=maxWidth; }
+      canvas.width=w; canvas.height=h;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      // 0.7 quality JPEG — good balance of quality vs size
+      resolve(canvas.toDataURL('image/jpeg',0.7));
+    };
+    img.onerror=()=>resolve(dataUrl); // fallback to original if error
+    img.src=dataUrl;
+  });
 }
 
 function displayPhoto(slotId,data){
