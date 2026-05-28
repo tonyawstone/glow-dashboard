@@ -32,6 +32,10 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .hero-name{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);white-space:nowrap;}
 .hero-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:3px;}
 .hero-quote{font-size:var(--fs-xs);color:var(--accent);margin-top:5px;font-style:italic;line-height:1.4;}
+.date-nav{display:flex;align-items:center;gap:6px;margin-top:5px;}
+.date-nav-btn{background:transparent;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0;line-height:1;flex-shrink:0;}
+.date-nav-btn:active{color:var(--accent);}
+.past-banner{background:#FFF7E6;border-radius:10px;padding:8px 12px;font-size:12px;color:#7A4F00;border:0.5px solid #F5CC7F;margin-bottom:10px;display:none;text-align:center;}
 
 /* 2-ROW PILLAR NAV */
 .top-nav{display:grid;grid-template-columns:repeat(4,1fr);background:var(--cream);border-bottom:0.5px solid var(--border);border-top:0.5px solid var(--border);flex-shrink:0;margin-top:12px;}
@@ -48,10 +52,10 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .stat-src{font-size:9px;color:var(--accent);margin-top:1px;}
 
 /* SCROLL */
-.scroll-area{flex:1;overflow-y:auto;padding:14px 16px 80px;-webkit-overflow-scrolling:touch;}
+.scroll-area{flex:1;overflow-y:auto;padding:14px 16px 100px;-webkit-overflow-scrolling:touch;}
 
-/* BOTTOM VIEW TABS */
-.bottom-view-bar{flex-shrink:0;background:var(--cream);border-top:0.5px solid var(--border);padding:10px 16px max(12px,env(safe-area-inset-bottom));display:flex;gap:6px;}
+/* BOTTOM VIEW TABS — fixed to bottom of shell always */
+.bottom-view-bar{flex-shrink:0;background:var(--cream);border-top:0.5px solid var(--border);padding:10px 16px max(12px,env(safe-area-inset-bottom));display:flex;gap:6px;position:sticky;bottom:0;z-index:100;}
 .vtab{flex:1;font-size:12px;padding:8px 0;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;border-radius:18px;font-family:var(--sans);}
 .vtab.on{background:var(--warm);color:var(--accent);border-color:var(--accent);font-weight:500;}
 
@@ -234,8 +238,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
     <div style="flex:1;min-width:0;">
-      <div class="hero-name">Good morning, Tonya.</div>
-      <div class="hero-sub" id="hero-sub"></div>
+      <div class="hero-name" id="hero-greeting">Good morning, Tonya.</div>
+      <div class="date-nav">
+        <button class="date-nav-btn" onclick="changeDate(-1)" title="Previous day">‹</button>
+        <div class="hero-sub" id="hero-sub" style="flex:1;"></div>
+        <button class="date-nav-btn" onclick="changeDate(1)" id="date-fwd-btn" title="Next day" style="visibility:hidden;">›</button>
+      </div>
       <div class="hero-quote" id="hero-quote"></div>
     </div>
   </div>
@@ -258,6 +266,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 </nav>
 
 <div class="scroll-area" id="main-scroll">
+<div class="past-banner" id="past-banner"></div>
 
 <!-- ═══════════════ TODAY ═══════════════ -->
 <div id="s-today" class="sec on">
@@ -279,7 +288,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="tag" onclick="tog(this)">Energized</button><button class="tag" onclick="tog(this)">Tired</button><button class="tag" onclick="tog(this)">Confident</button><button class="tag" onclick="tog(this)">Bloated</button><button class="tag" onclick="tog(this)">Glowing</button><button class="tag" onclick="tog(this)">Stressed</button><button class="tag" onclick="tog(this)">Strong</button>
       </div>
       <div class="fl">Treatments</div>
-      <div class="toggle-row" onclick="ts('t-zep')"><div><div class="tl">Zepbound dose</div><div class="ts">Weekly injection · Oct 25, 2025</div></div><div class="tog" id="t-zep"><div class="tok"></div></div></div>
+      <div class="toggle-row" onclick="ts('t-zep')"><div><div class="tl">Zepbound dose</div><div class="ts">Weekly injection</div></div><div class="tog" id="t-zep"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-cpap')"><div><div class="tl">CPAP used last night</div><div class="ts">Sleep apnea</div></div><div class="tog" id="t-cpap"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-meds')"><div><div class="tl">Daily medications taken</div><div class="ts">Irbesartan · Metoprolol · Amlodipine · Osteo Biflex</div></div><div class="tog" id="t-meds"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-skin-am')"><div><div class="tl">AM skin routine done</div><div class="ts">Olay Cleanser · Serum · Vit C · SPF</div></div><div class="tog" id="t-skin-am"><div class="tok"></div></div></div>
@@ -918,7 +927,7 @@ function dbDelPhoto(key){return new Promise(r=>{const t=db.transaction('photos',
 // ── BOOT ──────────────────────────────────────────────────────────────
 async function boot(){
   const now=new Date();
-  document.getElementById('hero-sub').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  updateDateUI();
   const quotes=['"You are stronger than you think."','"Progress, not perfection."','"Every day is a fresh start."','"Consistency is the key to transformation."','"Trust the process — it\'s working."','"You\'ve come so far. Keep going."','"Glow from the inside out."','"Small steps every day add up to big change."','"Be the energy you want to attract."','"Today is a great day to feel good."','"Your only limit is you."','"30 pounds and counting. You are unstoppable."'];
   document.getElementById('hero-quote').textContent=quotes[now.getDay()%quotes.length];
   const affirmations=['I am becoming the best version of myself every single day.','My body is strong, capable, and worthy of love — right now, exactly as I am.','I honor my health with every choice I make.','I am a powerful woman in full transformation — and the world can see it.','My consistency is creating the life I deserve.','I am enough. I have enough. I do enough.','Every healthy choice is an act of self-love.','I radiate confidence, warmth, and strength.','I am grateful for this body and everything it does for me.','My glow comes from within — and it is undeniable.','I am building habits that will sustain me for life.','I deserve to feel this good — and it\'s only getting better.','I trust my journey. The progress is real.'];
@@ -969,9 +978,68 @@ function setStars(id,n){document.getElementById(id).querySelectorAll('.star').fo
 function getStars(id){return document.getElementById(id).querySelectorAll('.on').length;}
 function gT(id){return Array.from(document.getElementById(id).querySelectorAll('.on')).map(b=>b.textContent.trim());}
 function toast(id){const t=document.getElementById(id);t.style.display='block';setTimeout(()=>t.style.display='none',2400);}
-function nowStr(){return new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+// ── DATE NAVIGATION ───────────────────────────────────────────────────
+let viewingDate = new Date();
+viewingDate.setHours(0,0,0,0);
+
+function isToday(d){
+  const t=new Date(); t.setHours(0,0,0,0);
+  return d.getTime()===t.getTime();
+}
+
+function changeDate(dir){
+  viewingDate.setDate(viewingDate.getDate()+dir);
+  updateDateUI();
+  loadLogs();
+}
+
+function updateDateUI(){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const isT=isToday(viewingDate);
+  // Update date label
+  document.getElementById('hero-sub').textContent=viewingDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  // Update greeting
+  const hr=new Date().getHours();
+  const greet=isT?(hr<12?'Good morning,':hr<17?'Good afternoon,':'Good evening,'):'Logging for';
+  document.getElementById('hero-greeting').textContent=greet+' Tonya.';
+  // Forward arrow — hide if today
+  document.getElementById('date-fwd-btn').style.visibility=isT?'hidden':'visible';
+  // Past banner
+  const banner=document.getElementById('past-banner');
+  if(isT){banner.style.display='none';}
+  else{
+    const diff=Math.round((today-viewingDate)/864e5);
+    banner.textContent=`Logging for ${diff===1?'yesterday':viewingDate.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})} — entries will be saved to this date`;
+    banner.style.display='block';
+  }
+  // Quote only shows for today
+  document.getElementById('hero-quote').style.display=isT?'block':'none';
+}
+
+function nowStr(){
+  return viewingDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
 function logItem(date,chips,note){return`<div class="log-item"><div class="log-date">${date}</div><div class="chips">${chips.filter(Boolean).map(c=>'<span class="chip">'+c+'</span>').join('')}</div>${note?'<div class="log-note">'+note+'</div>':''}</div>`;}
-function renderLog(id,items,fn){const el=document.getElementById(id);if(!el)return;if(!items||!items.length){el.innerHTML='<div class="log-empty">Nothing logged yet.</div>';return;}el.innerHTML=items.slice(-8).reverse().map(fn).join('');}
+function renderLog(id,items,fn){
+  const el=document.getElementById(id);if(!el)return;
+  if(!items||!items.length){el.innerHTML='<div class="log-empty">Nothing logged yet.</div>';return;}
+  const sorted=items.slice().reverse();
+  const visible=sorted.slice(0,2);
+  let html=visible.map(fn).join('');
+  if(sorted.length>2){
+    html+=`<div id="${id}-more" style="display:none;">${sorted.slice(2).map(fn).join('')}</div>`;
+    html+=`<button onclick="toggleMore('${id}')" id="${id}-btn" style="width:100%;margin-top:8px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Show ${sorted.length-2} more</button>`;
+  }
+  el.innerHTML=html;
+}
+function toggleMore(id){
+  const more=document.getElementById(id+'-more');
+  const btn=document.getElementById(id+'-btn');
+  if(!more||!btn)return;
+  const hidden=more.style.display==='none';
+  more.style.display=hidden?'block':'none';
+  btn.textContent=hidden?'Show less':'Show more';
+}
 
 // ── SAVE HANDLERS ─────────────────────────────────────────────────────
 async function saveCheckin(){
