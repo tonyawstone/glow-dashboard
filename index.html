@@ -502,23 +502,30 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="card">
       <div class="card-title">Exercise log</div>
-      <div class="fl">Type</div>
-      <div class="tags" id="exercise-tags">
-        <button class="tag" onclick="tog(this)">Walking</button><button class="tag" onclick="tog(this)">Strength</button><button class="tag" onclick="tog(this)">Swimming</button><button class="tag" onclick="tog(this)">Yoga</button><button class="tag" onclick="tog(this)">Cycling</button><button class="tag" onclick="tog(this)">Stretching</button><button class="tag" onclick="tog(this)">PT / Rehab</button><button class="tag" onclick="tog(this)">Other</button>
+      <div class="fl">Workout time</div>
+      <div class="tags" id="ex-time-tags">
+        <button class="tag" onclick="solo('ex-time-tags',this)">AM</button>
+        <button class="tag" onclick="solo('ex-time-tags',this)">PM</button>
       </div>
-      <div class="two-col" style="margin-top:8px;">
-        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Duration (mins)</div><input type="number" id="ex-duration" placeholder="30"></div>
-        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Intensity</div>
-          <div class="tags" id="ex-intensity" style="margin:0;">
-            <button class="tag" style="padding:5px 9px;" onclick="solo('ex-intensity',this)">Low</button><button class="tag" style="padding:5px 9px;" onclick="solo('ex-intensity',this)">Medium</button><button class="tag" style="padding:5px 9px;" onclick="solo('ex-intensity',this)">High</button>
-          </div>
-        </div>
+      <div class="fl">Type & duration</div>
+      <div class="toggle-row"><div><div class="tl">Treadmill walking</div></div><input type="number" id="ex-walk" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
+      <div class="toggle-row"><div><div class="tl">Pilates reformer</div></div><input type="number" id="ex-pilates" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
+      <div class="toggle-row"><div><div class="tl">Dumbbells / strength</div></div><input type="number" id="ex-strength" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
+      <div class="toggle-row"><div><div class="tl">Abdominal exercises</div></div><input type="number" id="ex-abs" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
+      <div class="toggle-row"><div><div class="tl">Yoga / stretching</div></div><input type="number" id="ex-yoga" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
+      <div class="toggle-row"><div><div class="tl">Swimming / other</div></div><input type="number" id="ex-other" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
+      <div class="fl">Intensity overall</div>
+      <div class="tags" id="ex-intensity">
+        <button class="tag" onclick="solo('ex-intensity',this)">Low</button>
+        <button class="tag" onclick="solo('ex-intensity',this)">Medium</button>
+        <button class="tag" onclick="solo('ex-intensity',this)">High</button>
       </div>
       <div class="fl">Notes (hip, energy, how it felt)</div>
-      <textarea id="ex-note" rows="2" placeholder="e.g. 30 min walk, felt great. Right hip holding up well."></textarea>
+      <textarea id="ex-note" rows="2" placeholder="e.g. 30 min treadmill + 20 min Pilates. Right hip felt great."></textarea>
       <button class="btn-primary" onclick="saveExercise()">Log exercise</button>
       <div class="toast-msg" id="ext">Saved!</div>
     </div>
+    <div class="card"><div class="card-title">Exercise log</div><div id="exercise-log"><div class="log-empty">No exercise entries yet.</div></div></div>
     <div class="card">
       <div class="card-title">Monthly progress photos · May 2026</div>
       <div class="photo-grid">
@@ -543,6 +550,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button class="btn-ai" onclick="zepCoach()">Zepbound review ↗</button>
       <div class="toast-msg" id="bt">Saved!</div>
     </div>
+    <div class="card"><div class="card-title">Body log</div><div id="body-log"><div class="log-empty">No entries yet.</div></div></div>
   </div>
   <div class="view-content" id="vc-body-weekly">
     <div class="section-label">Body · this week</div>
@@ -670,7 +678,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <a href="https://www.musely.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open Musely</a>
     </div>
     <div class="card">
-      <div class="card-title">Facial tracker · every 8 weeks</div>
+      <div class="card-title">Treatment start dates</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Track when each treatment began — used to measure improvement over time.</div>
+      <div class="toggle-row"><div><div class="tl">Musely Anti-Aging Cream</div><div class="ts" id="start-musely-aa-display">Tap to set start date</div></div><input type="text" id="start-musely-aa" placeholder="e.g. Jan 2025" style="width:110px;padding:6px 8px;font-size:12px;" onchange="saveStartDate('musely-aa',this.value)"></div>
+      <div class="toggle-row"><div><div class="tl">Musely Spot Treatment</div><div class="ts" id="start-musely-spot-display">Tap to set start date</div></div><input type="text" id="start-musely-spot" placeholder="e.g. Jan 2025" style="width:110px;padding:6px 8px;font-size:12px;" onchange="saveStartDate('musely-spot',this.value)"></div>
+      <div class="toggle-row"><div><div class="tl">Olay Morning Routine</div><div class="ts" id="start-olay-display">Tap to set start date</div></div><input type="text" id="start-olay" placeholder="e.g. Mar 2024" style="width:110px;padding:6px 8px;font-size:12px;" onchange="saveStartDate('olay',this.value)"></div>
+      <div class="toggle-row"><div><div class="tl">Facials (every 8 weeks)</div><div class="ts" id="start-facials-display">Tap to set start date</div></div><input type="text" id="start-facials" placeholder="e.g. Jun 2024" style="width:110px;padding:6px 8px;font-size:12px;" onchange="saveStartDate('facials',this.value)"></div>
+    </div>
       <div class="fl">Next facial date</div>
       <input type="text" id="next-facial" placeholder="e.g. July 5, 2026">
       <div class="fl">Notes from last facial</div>
@@ -678,6 +692,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button class="btn-primary" onclick="saveFacial()">Save facial log</button>
       <div class="toast-msg" id="ft">Saved!</div>
     </div>
+    <div class="card"><div class="card-title">Facial log</div><div id="facial-log"><div class="log-empty">No facial entries yet.</div></div></div>
     <div class="card">
       <div class="card-title">Skin check-in</div>
       <div class="fl">Skin today</div>
@@ -915,6 +930,7 @@ async function boot(){
   const heroData=await dbGetPhoto('hero');
   if(heroData){document.getElementById('hero-img').src=heroData;document.getElementById('hero-img').style.display='block';document.getElementById('hero-fallback').style.display='none';}
   buildProductTags();
+  loadStartDates();
   await loadAllPhotos();
   await loadLogs();
   buildBodyChart();
@@ -1008,11 +1024,28 @@ async function saveBody(){
   toast('bt');
 }
 async function saveExercise(){
-  const types=gT('exercise-tags'),note=document.getElementById('ex-note').value.trim();
-  await dbAdd('exercises',{types,duration:document.getElementById('ex-duration').value,intensity:gT('ex-intensity')[0]||'',note,date:nowStr()});
-  document.getElementById('ex-note').value='';document.getElementById('ex-duration').value='';
-  document.getElementById('exercise-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+  const walk=document.getElementById('ex-walk').value;
+  const pilates=document.getElementById('ex-pilates').value;
+  const strength=document.getElementById('ex-strength').value;
+  const abs=document.getElementById('ex-abs').value;
+  const yoga=document.getElementById('ex-yoga').value;
+  const other=document.getElementById('ex-other').value;
+  const note=document.getElementById('ex-note').value.trim();
+  const time=gT('ex-time-tags')[0]||'';
+  const intensity=gT('ex-intensity')[0]||'';
+  if(!walk&&!pilates&&!strength&&!abs&&!yoga&&!other&&!note) return;
+  const summary=[];
+  if(walk) summary.push('Walk '+walk+'m');
+  if(pilates) summary.push('Pilates '+pilates+'m');
+  if(strength) summary.push('Strength '+strength+'m');
+  if(abs) summary.push('Abs '+abs+'m');
+  if(yoga) summary.push('Yoga '+yoga+'m');
+  if(other) summary.push('Other '+other+'m');
+  await dbAdd('exercises',{walk,pilates,strength,abs,yoga,other,summary,time,intensity,note,date:nowStr()});
+  ['ex-walk','ex-pilates','ex-strength','ex-abs','ex-yoga','ex-other','ex-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['ex-time-tags','ex-intensity'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   toast('ext');
+  renderLog('exercise-log',await dbAll('exercises'),e=>logItem(e.date,[...(e.summary||[]),e.time,e.intensity],e.note));
 }
 async function saveBP(){
   const sys=document.getElementById('bp-sys').value,dia=document.getElementById('bp-dia').value,pulse=document.getElementById('bp-pulse').value;
@@ -1052,11 +1085,19 @@ async function saveHair(){
   toast('ht');loadLogs();
 }
 async function saveMind(){
-  const vibe=gT('vibe-tags'),selfcare=gT('selfcare-tags'),win=document.getElementById('win-note').value.trim();
+  const vibe=gT('vibe-tags');
+  const selfcare=gT('selfcare-tags');
+  const win=document.getElementById('win-note').value.trim();
   const gratitude=document.getElementById('gratitude').value.trim();
   const intention=document.getElementById('intention').value.trim();
-  await dbAdd('minds',{vibe,selfcare,win,gratitude,intention,energy:getStars('energy-stars'),conf:getStars('conf-stars'),stress:getStars('stress-stars'),bodyImage:getStars('body-image-stars'),date:nowStr()});
-  document.getElementById('win-note').value='';document.getElementById('gratitude').value='';document.getElementById('intention').value='';
+  const energy=getStars('energy-stars');
+  const conf=getStars('conf-stars');
+  const stress=getStars('stress-stars');
+  const bodyImage=getStars('body-image-stars');
+  await dbAdd('minds',{vibe,selfcare,win,gratitude,intention,energy,conf,stress,bodyImage,date:nowStr()});
+  document.getElementById('win-note').value='';
+  document.getElementById('gratitude').value='';
+  document.getElementById('intention').value='';
   document.getElementById('vibe-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
   document.getElementById('selfcare-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
   setStars('energy-stars',0);setStars('conf-stars',0);setStars('stress-stars',0);setStars('body-image-stars',0);
@@ -1077,12 +1118,17 @@ async function loadLogs(){
   renderLog('sleep-log',sleeps,e=>logItem(e.date,[e.hrs+'h',e.cpap,e.quality,...e.energy],e.note));
   const skins=await dbAll('skins');
   renderLog('skin-log',skins.filter(s=>s.type==='checkin'),e=>logItem(e.date,[...e.skinT,...e.concerns,...(e.musely_aa?['Musely Anti-Age']:[]),...(e.musely_spot?['Musely Spot']:[])],e.derm));
+  renderLog('facial-log',skins.filter(s=>s.type==='facial'),e=>logItem(e.date,[e.next?'Next: '+e.next:''],e.notes));
+  const bodies=await dbAll('skins');
+  renderLog('body-log',bodies.filter(s=>s.type==='body'),e=>logItem(e.date,[...(e.nsv||[]),...(e.waist?['Waist '+e.waist+'"']:[]),...(e.hips?['Hips '+e.hips+'"']:[])],e.note));
   const hairs=await dbAll('hairs');
   renderLog('hair-log',hairs,e=>logItem(e.date,[...e.hairT,...e.care,...(e.prods||[])],e.note));
   const minds=await dbAll('minds');
-  renderLog('mind-log',minds,e=>logItem(e.date,[...e.vibe,...(e.energy?['Energy '+'★'.repeat(e.energy)]:[]),...(e.conf?['Confidence '+'★'.repeat(e.conf)]:[])],e.win));
+  renderLog('mind-log',minds,e=>logItem(e.date,[...e.vibe,...(e.energy?['Energy '+'★'.repeat(e.energy)]:[]),...(e.conf?['Conf '+'★'.repeat(e.conf)]:[]),...(e.stress?['Stress '+'★'.repeat(e.stress)]:[])],e.win+(e.gratitude?'\nGrateful: '+e.gratitude:'')+(e.intention?'\nIntention: '+e.intention:'')));
   const bps=await dbAll('bps');
   renderLog('bp-log',bps,e=>logItem(e.date,[e.sys+'/'+e.dia,e.pulse?'Pulse '+e.pulse:'',e.time],''));
+  const exercises=await dbAll('exercises');
+  renderLog('exercise-log',exercises,e=>logItem(e.date,[...(e.summary||[]),e.time,e.intensity],e.note));
   const refs=await dbAll('reflections');
   renderLog('reflection-log',refs,e=>logItem(e.month,[],e.text));
 }
@@ -1092,7 +1138,8 @@ function buildProductTags(){
   const list=document.getElementById('product-list');
   const products=Array.from(list.querySelectorAll('.product-item')).map(el=>el.dataset.product);
   const tagsEl=document.getElementById('products-used-tags');
-  tagsEl.innerHTML=products.map(p=>`<button class="tag" onclick="tog(this)">${p.split(' ').slice(0,3).join(' ')}</button>`).join('');
+  // Use full product name as tag text — no truncation to avoid duplicates
+  tagsEl.innerHTML=products.map(p=>`<button class="tag" onclick="tog(this)" data-product="${p}">${p}</button>`).join('');
 }
 function addProduct(){
   const input=document.getElementById('new-product');
@@ -1110,7 +1157,23 @@ function removeProduct(btn){
   buildProductTags();
 }
 
-// ── MUSELY TRACKER ────────────────────────────────────────────────────
+// ── TREATMENT START DATES ─────────────────────────────────────────────
+function saveStartDate(key,val){
+  localStorage.setItem('startdate_'+key,val);
+  const display=document.getElementById('start-'+key+'-display');
+  if(display) display.textContent='Started: '+val;
+}
+function loadStartDates(){
+  ['musely-aa','musely-spot','olay','facials'].forEach(key=>{
+    const val=localStorage.getItem('startdate_'+key);
+    if(val){
+      const input=document.getElementById('start-'+key);
+      const display=document.getElementById('start-'+key+'-display');
+      if(input) input.value=val;
+      if(display) display.textContent='Started: '+val;
+    }
+  });
+}
 function updateMuselyTracker(){
   const aa=document.getElementById('r-musely-aa').classList.contains('on');
   const spot=document.getElementById('r-musely-spot').classList.contains('on');
