@@ -591,6 +591,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="section-label">Health Metrics</div>
 
     <div class="card">
+      <div class="card-title">Apple Health data · weekly upload</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Run your Python script weekly, then upload the CSV here to update your charts and AI coach with fresh data.</div>
+      <input type="file" id="health-csv-input" accept=".csv" style="display:none" onchange="uploadHealthCSV(this)">
+      <button class="btn-primary" onclick="document.getElementById('health-csv-input').click()">📂 Upload glow_health_data.csv</button>
+      <div id="csv-upload-status" style="display:none;margin-top:10px;font-size:13px;padding:10px;border-radius:10px;"></div>
+    </div>
+
+    <div class="card">
       <div class="card-title">Blood pressure · log today</div>
       <div class="bp-row">
         <div class="bp-input-wrap"><div class="bp-lbl">Systolic</div><input type="number" id="bp-sys" placeholder="120"></div>
@@ -651,8 +659,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card"><div class="card-title">Blood pressure trend</div><div class="chart-wrap" id="wrap-bp-week-chart"></div></div>
   </div>
   <div class="view-content" id="vc-health-monthly">
-    <div class="section-label">Health · May 2026</div>
+    <div class="section-label">Health · Monthly</div>
     <div class="card"><div class="card-title">Monthly BP trend</div><div class="chart-wrap" id="wrap-bp-month-chart"></div></div>
+    <div class="card">
+      <div class="card-title">Lab trends · Oct 2025 → Feb 2026</div>
+      <div class="chart-tabs" id="lab-chart-tabs-monthly">
+        <button class="chart-tab on" onclick="switchLabChart('metabolic',this)">Metabolic</button>
+        <button class="chart-tab" onclick="switchLabChart('lipid',this)">Lipid</button>
+      </div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="lab-chart"></canvas></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Next labs: ~Aug–Nov 2026</div>
+    </div>
   </div>
   <div class="view-content" id="vc-health-yearly">
     <div class="section-label">Health · 2026</div>
@@ -662,7 +679,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="chart-tab on" onclick="switchLabChart('metabolic',this)">Metabolic</button>
         <button class="chart-tab" onclick="switchLabChart('lipid',this)">Lipid</button>
       </div>
-      <div class="chart-wrap" style="height:220px;"><canvas id="lab-chart"></canvas></div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="lab-chart-yearly"></canvas></div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">Shaded band = normal range · Next labs: ~Aug–Nov 2026</div>
     </div>
   </div>
@@ -1483,40 +1500,136 @@ async function loadAllPhotos(){
   });
 }
 
-// ── HEALTH CHARTS ────────────────────────────────────────────────────
+// ── HEALTH CSV UPLOAD ─────────────────────────────────────────────────
+async function uploadHealthCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status = document.getElementById('csv-upload-status');
+  status.style.display = 'block';
+  status.style.background = 'var(--warm)';
+  status.style.color = 'var(--muted)';
+  status.textContent = '⏳ Uploading health data...';
+
+  try {
+    const csv = await file.text();
+    const rows = csv.trim().split('\n');
+    const rowCount = rows.length - 1; // exclude header
+
+    const res = await fetch(`${BACKEND}/api/health-data`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ csv })
+    });
+
+    if (!res.ok) throw new Error('Upload failed');
+
+    status.style.background = '#EAF3DE';
+    status.style.color = '#27500A';
+    status.textContent = `✅ ${rowCount} days of health data uploaded successfully! Charts and AI coach are now updated.`;
+
+    // Rebuild charts with new data
+    if (curTab === 'health') buildBPChart();
+
+  } catch (err) {
+    status.style.background = '#FAECE7';
+    status.style.color = '#712B13';
+    status.textContent = '❌ Upload failed — please try again.';
+  }
+  input.value = '';
+}
+
+
+function parseCSVToRows(csv) {
+  const lines = csv.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',');
+    const row = {};
+    headers.forEach((h, i) => row[h] = vals[i]?.trim() || '');
+    return row;
+  });
+}
+
+async function getCSVBPData() {
+  try {
+    const res = await fetch(`${BACKEND}/api/health-data`);
+    if (!res.ok) return [];
+    const { csv } = await res.json();
+    if (!csv) return [];
+    return parseCSVToRows(csv)
+      .filter(r => r.bp_systolic && r.bp_diastolic)
+      .map(r => ({ date: r.date, sys: parseFloat(r.bp_systolic), dia: parseFloat(r.bp_diastolic) }));
+  } catch (e) { return []; }
+}
+
+function parseBPDate(dateStr){
+  // Handle both "Mon, Jun 1" and "2026-06-01" formats
+  if(!dateStr) return null;
+  if(dateStr.match(/^\d{4}-\d{2}-\d{2}/)) return new Date(dateStr);
+  try { return new Date(dateStr + ' 2026'); } catch(e){ return null; }
+}
+
 async function buildBPChart(){
-  const bps = await dbAll('bps');
-  const now = new Date();
+  const manualBPs = await dbAll('bps');
+  const csvBPs = await getCSVBPData();
+
+  // Merge: manual entries take priority over CSV for same day
+  const allBPs = [...csvBPs, ...manualBPs.map(b => ({
+    date: b.date, sys: Number(b.sys), dia: Number(b.dia)
+  }))].filter(b => b.sys && b.dia);
 
   if(curView==='weekly'){
-    // Last 7 days
+    const now=new Date();
     const days=[];
-    for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
-    const labels=days.map(d=>d.slice(5));
-    const sys=days.map(d=>{const r=bps.filter(b=>b.date&&b.date.startsWith(d)&&b.sys);return r.length?Math.round(r.reduce((a,b)=>a+Number(b.sys),0)/r.length):null;});
-    const dia=days.map(d=>{const r=bps.filter(b=>b.date&&b.date.startsWith(d)&&b.dia);return r.length?Math.round(r.reduce((a,b)=>a+Number(b.dia),0)/r.length):null;});
+    for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d);}
+    const labels=days.map(d=>`${d.getMonth()+1}/${d.getDate()}`);
+    const sys=days.map(d=>{
+      const r=allBPs.filter(b=>{const bd=parseBPDate(b.date);return bd&&bd.toDateString()===d.toDateString();});
+      return r.length?Math.round(r.reduce((a,b)=>a+b.sys,0)/r.length):null;
+    });
+    const dia=days.map(d=>{
+      const r=allBPs.filter(b=>{const bd=parseBPDate(b.date);return bd&&bd.toDateString()===d.toDateString();});
+      return r.length?Math.round(r.reduce((a,b)=>a+b.dia,0)/r.length):null;
+    });
     const wrap=document.getElementById('wrap-bp-week-chart');
     if(!wrap)return;
     if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id='bp-week-chart';wrap.appendChild(c);}
-    buildBPChartOnCanvas('bp-week-chart',labels,sys,dia);
+    if(sys.some(v=>v!==null)||dia.some(v=>v!==null)){
+      buildBPChartOnCanvas('bp-week-chart',labels,sys,dia);
+    } else {
+      wrap.innerHTML='<div class="log-empty">No BP readings yet this week — log some readings first.</div>';
+    }
   }
 
   if(curView==='monthly'){
-    // Last 30 days grouped by week
-    const weeks=[];
-    for(let i=3;i>=0;i--){
-      const start=new Date(now);start.setDate(start.getDate()-(i+1)*7);
-      const end=new Date(now);end.setDate(end.getDate()-i*7);
-      const label=`${(start.getMonth()+1)}/${start.getDate()}`;
-      const relevant=bps.filter(b=>{if(!b.date||!b.sys)return false;const d=new Date(b.date);return d>=start&&d<end;});
-      const avgSys=relevant.length?Math.round(relevant.reduce((a,b)=>a+Number(b.sys),0)/relevant.length):null;
-      const avgDia=relevant.length?Math.round(relevant.reduce((a,b)=>a+Number(b.dia),0)/relevant.length):null;
-      weeks.push({label,sys:avgSys,dia:avgDia});
-    }
+    // Group by month for BP trend
+    const monthGroups={};
+    allBPs.forEach(b=>{
+      
+      const d=parseBPDate(b.date);if(!d)return;
+      const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      if(!monthGroups[key]){monthGroups[key]={sys:[],dia:[],label:d.toLocaleString('en-US',{month:'short',year:'numeric'})};}
+      monthGroups[key].sys.push(b.sys);
+      monthGroups[key].dia.push(b.dia);
+    });
+    const months=Object.keys(monthGroups).sort();
+    const labels=months.map(k=>monthGroups[k].label);
+    const sys=months.map(k=>Math.round(monthGroups[k].sys.reduce((a,b)=>a+b,0)/monthGroups[k].sys.length));
+    const dia=months.map(k=>Math.round(monthGroups[k].dia.reduce((a,b)=>a+b,0)/monthGroups[k].dia.length));
     const wrap=document.getElementById('wrap-bp-month-chart');
     if(!wrap)return;
     if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id='bp-month-chart';wrap.appendChild(c);}
-    buildBPChartOnCanvas('bp-month-chart',weeks.map(w=>w.label),weeks.map(w=>w.sys),weeks.map(w=>w.dia));
+    if(sys.length>0){
+      buildBPChartOnCanvas('bp-month-chart',labels,sys,dia);
+    } else {
+      wrap.innerHTML='<div class="log-empty">No BP readings yet — log some readings first.</div>';
+    }
+    // Also build lab chart in monthly view
+    setTimeout(buildLabChart,50);
+  }
+
+  if(curView==='yearly'){
+    setTimeout(buildLabChart,50);
   }
 }
 
@@ -1571,17 +1684,19 @@ const LAB_DATA = {
 let activeLabChart='metabolic';
 function switchLabChart(type,btn){
   activeLabChart=type;
-  document.querySelectorAll('#lab-chart-tabs .chart-tab').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
+  document.querySelectorAll('#lab-chart-tabs .chart-tab, #lab-chart-tabs-monthly .chart-tab').forEach(b=>b.classList.remove('on'));
+  // Re-select the matching tab in both sets
+  document.querySelectorAll(`#lab-chart-tabs .chart-tab, #lab-chart-tabs-monthly .chart-tab`).forEach(b=>{if(b.textContent.toLowerCase().includes(type))b.classList.add('on');});
   buildLabChart();
 }
 
 function buildLabChart(){
-  const canvas=document.getElementById('lab-chart');if(!canvas)return;
-  if(chartInstances['lab-chart']){chartInstances['lab-chart'].destroy();delete chartInstances['lab-chart'];}
+  const canvasId = curView==='yearly' ? 'lab-chart-yearly' : 'lab-chart';
+  const canvas=document.getElementById(canvasId);if(!canvas)return;
+  if(chartInstances[canvasId]){chartInstances[canvasId].destroy();delete chartInstances[canvasId];}
   const d=LAB_DATA[activeLabChart];
   const colors=['#A07850','#C4735A','#6B9E78','#9B8EC4'];
-  chartInstances['lab-chart']=new Chart(canvas.getContext('2d'),{
+  chartInstances[canvasId]=new Chart(canvas.getContext('2d'),{
     type:'line',
     data:{labels:d.labels,datasets:d.datasets.map((ds,i)=>({
       label:ds.label,data:ds.data,
