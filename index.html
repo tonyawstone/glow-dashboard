@@ -656,9 +656,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
   <div class="view-content" id="vc-health-yearly">
     <div class="section-label">Health · 2026</div>
-    <div class="card"><div class="card-title">Lab work history</div>
-      <div class="log-item"><div class="log-date">Oct 13, 2025</div><div style="font-size:13px;">Cholesterol 132 · LDL 63 · Glucose 96 · ALT 42 ⚠</div></div>
-      <div class="log-item"><div class="log-date">Feb 11, 2026</div><div style="font-size:13px;">Cholesterol 116 ↓ · LDL 50 ✓ · Glucose 88 ✓ · ALT 25 ✓</div></div>
+    <div class="card">
+      <div class="card-title">Lab trends · Oct 2025 → Feb 2026</div>
+      <div class="chart-tabs" id="lab-chart-tabs">
+        <button class="chart-tab on" onclick="switchLabChart('metabolic',this)">Metabolic</button>
+        <button class="chart-tab" onclick="switchLabChart('lipid',this)">Lipid</button>
+      </div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="lab-chart"></canvas></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Shaded band = normal range · Next labs: ~Aug–Nov 2026</div>
     </div>
   </div>
 </div>
@@ -985,8 +990,11 @@ function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') buildBodyChart();
+  if(id==='health') buildBPChart();
 }
-function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();}
+function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
+  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);}
+}
 function applyView(){
   const c=document.getElementById('s-'+curTab);if(!c)return;
   c.querySelectorAll('.view-content').forEach(el=>el.classList.remove('on'));
@@ -1475,7 +1483,128 @@ async function loadAllPhotos(){
   });
 }
 
-// ── AI COACH ─────────────────────────────────────────────────────────
+// ── HEALTH CHARTS ────────────────────────────────────────────────────
+async function buildBPChart(){
+  const bps = await dbAll('bps');
+  const now = new Date();
+
+  if(curView==='weekly'){
+    // Last 7 days
+    const days=[];
+    for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+    const labels=days.map(d=>d.slice(5));
+    const sys=days.map(d=>{const r=bps.filter(b=>b.date&&b.date.startsWith(d)&&b.sys);return r.length?Math.round(r.reduce((a,b)=>a+Number(b.sys),0)/r.length):null;});
+    const dia=days.map(d=>{const r=bps.filter(b=>b.date&&b.date.startsWith(d)&&b.dia);return r.length?Math.round(r.reduce((a,b)=>a+Number(b.dia),0)/r.length):null;});
+    const wrap=document.getElementById('wrap-bp-week-chart');
+    if(!wrap)return;
+    if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id='bp-week-chart';wrap.appendChild(c);}
+    buildBPChartOnCanvas('bp-week-chart',labels,sys,dia);
+  }
+
+  if(curView==='monthly'){
+    // Last 30 days grouped by week
+    const weeks=[];
+    for(let i=3;i>=0;i--){
+      const start=new Date(now);start.setDate(start.getDate()-(i+1)*7);
+      const end=new Date(now);end.setDate(end.getDate()-i*7);
+      const label=`${(start.getMonth()+1)}/${start.getDate()}`;
+      const relevant=bps.filter(b=>{if(!b.date||!b.sys)return false;const d=new Date(b.date);return d>=start&&d<end;});
+      const avgSys=relevant.length?Math.round(relevant.reduce((a,b)=>a+Number(b.sys),0)/relevant.length):null;
+      const avgDia=relevant.length?Math.round(relevant.reduce((a,b)=>a+Number(b.dia),0)/relevant.length):null;
+      weeks.push({label,sys:avgSys,dia:avgDia});
+    }
+    const wrap=document.getElementById('wrap-bp-month-chart');
+    if(!wrap)return;
+    if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id='bp-month-chart';wrap.appendChild(c);}
+    buildBPChartOnCanvas('bp-month-chart',weeks.map(w=>w.label),weeks.map(w=>w.sys),weeks.map(w=>w.dia));
+  }
+}
+
+function buildBPChartOnCanvas(id,labels,sys,dia){
+  const canvas=document.getElementById(id);if(!canvas)return;
+  if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];}
+  chartInstances[id]=new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Systolic',data:sys,borderColor:'#C4735A',backgroundColor:'rgba(196,115,90,0.08)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#C4735A',tension:0.3,spanGaps:true},
+      {label:'Diastolic',data:dia,borderColor:'#6B9E78',backgroundColor:'rgba(107,158,120,0.08)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#6B9E78',tension:0.3,spanGaps:true},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,labels:{font:{size:11},color:'#8C7B6B',boxWidth:12}},
+        tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y} mmHg`}},
+        annotation:{annotations:{
+          sysNormal:{type:'box',yMin:90,yMax:120,backgroundColor:'rgba(107,158,120,0.06)',borderWidth:0},
+          diaNormal:{type:'box',yMin:60,yMax:80,backgroundColor:'rgba(107,158,120,0.06)',borderWidth:0},
+        }}
+      },
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',callback:v=>v+' mmHg'},min:50,max:160}
+      }
+    }
+  });
+}
+
+// Lab chart data — hardcoded from your Oct 2025 and Feb 2026 results
+const LAB_DATA = {
+  metabolic:{
+    labels:['Oct 2025','Feb 2026'],
+    datasets:[
+      {label:'Glucose',data:[96,88],borderColor:'#A07850',borderWidth:2,pointRadius:5,tension:0,normalMin:70,normalMax:110},
+      {label:'ALT',data:[42,25],borderColor:'#C4735A',borderWidth:2,pointRadius:5,tension:0,normalMin:0,normalMax:35},
+      {label:'Alk Phos',data:[168,135],borderColor:'#E8A87C',borderWidth:2,pointRadius:5,tension:0,normalMin:38,normalMax:126},
+    ]
+  },
+  lipid:{
+    labels:['Oct 2025','Feb 2026'],
+    datasets:[
+      {label:'Cholesterol',data:[132,116],borderColor:'#A07850',borderWidth:2,pointRadius:5,tension:0,normalMin:0,normalMax:200},
+      {label:'LDL',data:[63,50],borderColor:'#C4735A',borderWidth:2,pointRadius:5,tension:0,normalMin:0,normalMax:100},
+      {label:'HDL',data:[47,42],borderColor:'#6B9E78',borderWidth:2,pointRadius:5,tension:0,normalMin:40,normalMax:60},
+      {label:'Triglycerides',data:[110,120],borderColor:'#9B8EC4',borderWidth:2,pointRadius:5,tension:0,normalMin:0,normalMax:150},
+    ]
+  }
+};
+
+let activeLabChart='metabolic';
+function switchLabChart(type,btn){
+  activeLabChart=type;
+  document.querySelectorAll('#lab-chart-tabs .chart-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  buildLabChart();
+}
+
+function buildLabChart(){
+  const canvas=document.getElementById('lab-chart');if(!canvas)return;
+  if(chartInstances['lab-chart']){chartInstances['lab-chart'].destroy();delete chartInstances['lab-chart'];}
+  const d=LAB_DATA[activeLabChart];
+  const colors=['#A07850','#C4735A','#6B9E78','#9B8EC4'];
+  chartInstances['lab-chart']=new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels:d.labels,datasets:d.datasets.map((ds,i)=>({
+      label:ds.label,data:ds.data,
+      borderColor:colors[i]||'#A07850',
+      backgroundColor:'transparent',
+      borderWidth:2,pointRadius:6,
+      pointBackgroundColor:colors[i]||'#A07850',
+      tension:0,
+    }))},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,labels:{font:{size:11},color:'#8C7B6B',boxWidth:12}},
+        tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y}`}},
+      },
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#8C7B6B'}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'},beginAtZero:false}
+      }
+    }
+  });
+}
+
 async function callCoach(pillar, userMessage, outputId, logData) {
   const el = document.getElementById(outputId);
   if (el) { el.style.display = 'block'; el.textContent = '✨ Getting your insight...'; }
