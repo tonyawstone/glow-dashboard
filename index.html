@@ -90,6 +90,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 /* BUTTONS */
 .btn-primary{width:100%;margin-top:16px;padding:14px;border-radius:12px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:15px;font-weight:500;cursor:pointer;font-family:var(--sans);}
 .btn-ai{width:100%;margin-top:9px;padding:12px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:14px;cursor:pointer;font-family:var(--sans);}
+.coach-response{margin-top:10px;padding:14px;background:var(--warm);border-radius:12px;font-size:14px;color:var(--text);line-height:1.6;border:0.5px solid var(--border);white-space:pre-wrap;}
 .btn-sm{font-size:12px;padding:6px 14px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
 .btn-sm.accent{border-color:var(--accent);color:var(--accent);}
 .toast-msg{display:none;background:#EAF3DE;color:#27500A;font-size:14px;padding:10px 15px;border-radius:10px;margin-top:10px;text-align:center;}
@@ -301,6 +302,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <textarea id="today-note" rows="2" placeholder="Outfit win, energy, anything on your mind..."></textarea>
       <button class="btn-primary" onclick="saveCheckin()">Save check-in</button>
       <button class="btn-ai" onclick="aiCoach()">Ask your coach ↗</button>
+      <div id="coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="tt">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Recent check-ins</div><div id="checkin-log"><div class="log-empty">No check-ins yet.</div></div></div>
@@ -379,6 +381,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <button class="btn-primary" onclick="saveOutfit()">Log outfit</button>
       <button class="btn-ai" onclick="styleCoach()">Style coaching ↗</button>
+      <div id="style-coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="st">Logged!</div>
     </div>
     <div class="card">
@@ -459,6 +462,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..."></textarea>
       <button class="btn-primary" onclick="saveSleep()">Log sleep</button>
       <button class="btn-ai" onclick="sleepCoach()">Sleep pattern analysis ↗</button>
+      <div id="sleep-coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="slp-t">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Sleep log</div><div id="sleep-log"><div class="log-empty">No entries yet.</div></div></div>
@@ -561,6 +565,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <textarea id="zep-note" rows="2" placeholder="Appetite, side effects, energy..."></textarea>
       <button class="btn-primary" onclick="saveBody()">Log body update</button>
       <button class="btn-ai" onclick="zepCoach()">Zepbound review ↗</button>
+      <div id="zep-coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="bt">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Body log</div><div id="body-log"><div class="log-empty">No entries yet.</div></div></div>
@@ -627,6 +632,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="lab-row"><div><div class="lab-name">CO₂ Total</div><div class="lab-range">22–30 MEQ/L</div></div><span class="lab-val lab-watch">22.0 ↓</span></div>
 
       <button class="btn-ai" onclick="labCoach()">Discuss lab results with coach ↗</button>
+      <div id="lab-coach-output" class="coach-response" style="display:none"></div>
     </div>
 
     <div class="card">
@@ -720,6 +726,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <textarea id="derm-note" rows="2" placeholder="Rx changes, appt notes..."></textarea>
       <button class="btn-primary" onclick="saveSkin()">Log skin</button>
       <button class="btn-ai" onclick="dermCoach()">Derm prep questions ↗</button>
+      <div id="derm-coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="skt">Saved!</div>
     </div>
     <div class="card">
@@ -807,6 +814,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <textarea id="hair-note" rows="2" placeholder="e.g. Can pull into a bun now. Edges filling in. Curl pattern gorgeous."></textarea>
       <button class="btn-primary" onclick="saveHair()">Log hair</button>
       <button class="btn-ai" onclick="hairCoach()">Hair growth coaching ↗</button>
+      <div id="hair-coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="ht">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Hair log</div><div id="hair-log"><div class="log-empty">No entries yet.</div></div></div>
@@ -1096,7 +1104,9 @@ async function saveCheckin(){
 }
 async function saveOutfit(){
   const desc=document.getElementById('outfit-desc').value.trim();if(!desc)return;
-  await dbAdd('outfits',{desc,occ:gT('occ-tags'),src:gT('src-tags')[0]||'',keep:gT('keep-tags')[0]||'',stars:getStars('outfit-stars'),date:nowStr()});
+  const outfitEntry={desc,occ:gT('occ-tags'),src:gT('src-tags')[0]||'',keep:gT('keep-tags')[0]||'',stars:getStars('outfit-stars'),date:nowStr()};
+  await dbAdd('outfits',outfitEntry);
+  syncToNotion('outfits',outfitEntry);
   document.getElementById('outfit-desc').value='';
   toast('st');
 }
@@ -1122,14 +1132,18 @@ async function saveSleep(){
   const energy=gT('energy-am-tags'),note=document.getElementById('sleep-note').value.trim();
   let hrs='—';
   if(bed&&wake){const[bh,bm]=bed.split(':').map(Number);const[wh,wm]=wake.split(':').map(Number);let m=(wh*60+wm)-(bh*60+bm);if(m<0)m+=1440;hrs=(m/60).toFixed(1);document.getElementById('sleep-display').textContent=hrs+'h';document.getElementById('s-sleep-h').textContent=hrs+'h';}
-  await dbAdd('sleeps',{hrs,cpap:cpap[0]||'',quality,energy,note,date:nowStr()});
+  const sleepEntry={hrs,cpap:cpap[0]||'',quality,energy,note,date:nowStr()};
+  await dbAdd('sleeps',sleepEntry);
+  syncToNotion('sleeps',sleepEntry);
   document.getElementById('sleep-note').value='';
   ['cpap-tags','energy-am-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
   toast('slp-t');loadLogs();
 }
 async function saveBody(){
-  await dbAdd('skins',{type:'body',nsv:gT('nsv-tags'),note:document.getElementById('zep-note').value.trim(),waist:document.getElementById('waist').value,hips:document.getElementById('hips').value,date:nowStr()});
+  const entry={type:'body',nsv:gT('nsv-tags'),note:document.getElementById('zep-note').value.trim(),waist:document.getElementById('waist').value,hips:document.getElementById('hips').value,date:nowStr()};
+  await dbAdd('skins',entry);
+  syncToNotion('skins',entry);
   toast('bt');
 }
 async function saveExercise(){
@@ -1150,7 +1164,9 @@ async function saveExercise(){
   if(abs) summary.push('Abs '+abs+'m');
   if(yoga) summary.push('Yoga '+yoga+'m');
   if(other) summary.push('Other '+other+'m');
-  await dbAdd('exercises',{walk,pilates,strength,abs,yoga,other,summary,time,intensity,note,date:nowStr()});
+  const exEntry={walk,pilates,strength,abs,yoga,other,summary,time,intensity,note,date:nowStr()};
+  await dbAdd('exercises',exEntry);
+  syncToNotion('exercises',exEntry);
   ['ex-walk','ex-pilates','ex-strength','ex-abs','ex-yoga','ex-other','ex-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['ex-time-tags','ex-intensity'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   toast('ext');
@@ -1160,7 +1176,9 @@ async function saveBP(){
   const sys=document.getElementById('bp-sys').value,dia=document.getElementById('bp-dia').value,pulse=document.getElementById('bp-pulse').value;
   if(!sys||!dia)return;
   const time=gT('bp-time-tags')[0]||'',note=document.getElementById('bp-note').value.trim();
-  await dbAdd('bps',{sys,dia,pulse,time,note,date:nowStr()});
+  const bpEntry={sys,dia,pulse,time,note,date:nowStr()};
+  await dbAdd('bps',bpEntry);
+  syncToNotion('bps',bpEntry);
   document.getElementById('bp-sys').value='';document.getElementById('bp-dia').value='';document.getElementById('bp-pulse').value='';
   document.getElementById('bp-note').value='';
   toast('bpt');loadLogs();
@@ -1181,14 +1199,18 @@ async function saveSkin(){
   const skinT=gT('skin-tags'),concerns=gT('concern-tags'),derm=document.getElementById('derm-note').value.trim();
   const musely_aa=document.getElementById('r-musely-aa').classList.contains('on');
   const musely_spot=document.getElementById('r-musely-spot').classList.contains('on');
-  await dbAdd('skins',{type:'checkin',skinT,concerns,derm,musely_aa,musely_spot,date:nowStr()});
+  const skinEntry={type:'checkin',skinT,concerns,derm,musely_aa,musely_spot,date:nowStr()};
+  await dbAdd('skins',skinEntry);
+  syncToNotion('skins',skinEntry);
   document.getElementById('derm-note').value='';
   ['skin-tags','concern-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   toast('skt');loadLogs();
 }
 async function saveHair(){
   const hairT=gT('hair-tags'),care=gT('hcare-tags'),prods=gT('products-used-tags'),note=document.getElementById('hair-note').value.trim();
-  await dbAdd('hairs',{hairT,care,prods,note,date:nowStr()});
+  const hairEntry={hairT,care,prods,note,date:nowStr()};
+  await dbAdd('hairs',hairEntry);
+  syncToNotion('hairs',hairEntry);
   document.getElementById('hair-note').value='';
   ['hair-tags','hcare-tags','products-used-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   toast('ht');loadLogs();
@@ -1203,7 +1225,9 @@ async function saveMind(){
   const conf=getStars('conf-stars');
   const stress=getStars('stress-stars');
   const bodyImage=getStars('body-image-stars');
-  await dbAdd('minds',{vibe,selfcare,win,gratitude,intention,energy,conf,stress,bodyImage,date:nowStr()});
+  const mindEntry={vibe,selfcare,win,gratitude,intention,energy,conf,stress,bodyImage,date:nowStr()};
+  await dbAdd('minds',mindEntry);
+  syncToNotion('minds',mindEntry);
   document.getElementById('win-note').value='';
   document.getElementById('gratitude').value='';
   document.getElementById('intention').value='';
@@ -1452,27 +1476,45 @@ async function loadAllPhotos(){
 }
 
 // ── AI COACH ─────────────────────────────────────────────────────────
-function aiCoach(){if(window.sendPrompt)sendPrompt('Act as my holistic glow coach. I am a busy professional mom of 5, 7 months into Zepbound (Oct 25 2025), down 30.7 lbs from 201.4 to 170.7. Give me one warm specific daily insight.');}
-function styleCoach(){if(window.sendPrompt)sendPrompt('I am down 30.7 lbs on Zepbound in 7 months, body changing fast. What style advice for dressing my changing body? What should my next DailyLook box focus on?');}
-function sleepCoach(){if(window.sendPrompt)sendPrompt('I have sleep apnea and use a CPAP. Based on my sleep log, what patterns do you see and what should I discuss with my sleep doctor?');}
-function zepCoach(){if(window.sendPrompt)sendPrompt('Started Zepbound Oct 25 2025 at 201.4 lbs. Today May 26 2026 at 170.7 lbs — 30.7 lbs in 7 months. How is my journey going and what should I discuss with my doctor?');}
-function labCoach(){if(window.sendPrompt)sendPrompt('Review my recent lab results: Cholesterol 116 (down from 132), LDL 50, Glucose 88 (down from 96), ALT 25 (down from 42 — normalized!), Alkaline Phosphatase 135 (still slightly elevated, down from 168), eGFR 107 excellent, Albumin 3.8. I take Irbesartan HCTZ, Metoprolol, and Amlodipine for blood pressure and am 7 months into Zepbound. What do my trends show and what should I discuss with my doctor?');}
-function dermCoach(){if(window.sendPrompt)sendPrompt('I use Musely anti-aging cream and spot treatment on alternating nights followed by Olay Regenerist. Morning: Olay cleanser, super serum, Vitamin C moisturizer, SPF cream. Facials every 8 weeks. What questions should I bring to my derm?');}
-function hairCoach(){if(window.sendPrompt)sendPrompt('Hair journey started May 2026 at chin-to-ear length. I use Kinky-Curly and Camille Rose products. I track wash days, deep conditioning, and protein treatments. What should I focus on for healthy growth to collarbone?');}
-function mindCoach(){if(window.sendPrompt)sendPrompt('I am a professional mom of 5 with twin 15-year-olds, 7 months into Zepbound having lost 30.7 lbs, growing my hair, seeing a derm. Give me an honest encouraging weekly reflection.');}
+async function callCoach(pillar, userMessage, outputId, logData) {
+  const el = document.getElementById(outputId);
+  if (el) { el.style.display = 'block'; el.textContent = '✨ Getting your insight...'; }
+  try {
+    const res = await fetch(`${BACKEND}/api/coach`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pillar, userMessage, logData })
+    });
+    const data = await res.json();
+    if (el) el.textContent = data.response || 'No response generated.';
+  } catch (err) {
+    if (el) el.textContent = 'Coach unavailable right now — try again shortly.';
+  }
+}
+
+function aiCoach(){ callCoach('Today','Give me one warm specific daily insight based on my wellness journey.','coach-output'); }
+function styleCoach(){ callCoach('Style','I am down 30.7 lbs on Zepbound in 7 months, body changing fast. What style advice for dressing my changing body? What should my next DailyLook box focus on?','style-coach-output'); }
+function sleepCoach(){ callCoach('Sleep','I have sleep apnea and use a CPAP. What patterns should I watch for and what should I discuss with my sleep doctor?','sleep-coach-output'); }
+function zepCoach(){ callCoach('Body','How is my Zepbound journey going and what should I discuss with my doctor at my next visit?','zep-coach-output'); }
+function labCoach(){ callCoach('Health','Review my recent lab trends and tell me what they show and what I should discuss with my doctor.','lab-coach-output'); }
+function dermCoach(){ callCoach('Skin','Based on my skincare routine, what questions should I bring to my next derm appointment?','derm-coach-output'); }
+function hairCoach(){ callCoach('Hair','I am growing my hair from chin to collarbone length. What should I focus on for healthy growth?','hair-coach-output'); }
+function mindCoach(){ callCoach('Mind','Give me an honest encouraging weekly reflection on my overall wellness journey.','mind-coach-output'); }
+
 async function weeklyInsight(){
   const checkins=await dbAll('checkins');
   const recent=checkins.slice(-7);
   if(!recent.length){document.getElementById('weekly-summary').innerHTML='<div class="log-empty">No data yet — log daily check-ins first.</div>';return;}
   const summary=recent.map(c=>`${c.date}: mood=[${c.mood.join(',')}] zep=${c.zep} cpap=${c.cpap} meds=${c.meds}`).join('\n');
-  if(window.sendPrompt)sendPrompt(`I am a busy professional mom of 5, 7 months into Zepbound. Here is my week of check-ins:\n${summary}\n\nPlease give me a warm, insightful weekly summary — what patterns do you see across my mood, treatments, and energy? What should I focus on next week?`);
+  callCoach('Today',`Here is my week of check-ins:\n${summary}\n\nGive me a warm weekly summary — what patterns do you see? What should I focus on next week?`,'weekly-summary');
 }
+
 async function weeklyMindInsight(){
   const minds=await dbAll('minds');
   const recent=minds.slice(-7);
   if(!recent.length){document.getElementById('weekly-mind-insight').innerHTML='<div class="log-empty">No mood data yet — log daily first.</div>';return;}
   const summary=recent.map(m=>`${m.date}: energy=${m.energy} confidence=${m.conf} stress=${m.stress} bodyImage=${m.bodyImage} vibe=[${m.vibe.join(',')}] win="${m.win}"`).join('\n');
-  if(window.sendPrompt)sendPrompt(`Here is my week of mind & mood data:\n${summary}\n\nPlease give me a thoughtful weekly insight — what patterns do you see in my energy, confidence, stress, and body image? Where am I thriving? What needs attention? Be warm, honest, and specific.`);
+  callCoach('Mind',`Here is my week of mind & mood data:\n${summary}\n\nWhat patterns do you see in my energy, confidence, stress, and body image? Be warm, honest, and specific.`,'weekly-mind-insight');
 }
 </script>
 </body>
