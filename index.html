@@ -1059,6 +1059,27 @@ function toggleMore(id){
   btn.textContent=hidden?'Show less':'Show more';
 }
 
+// ── NOTION SYNC ───────────────────────────────────────────────────────
+const BACKEND = 'https://glow-dashboard-backend.vercel.app';
+
+async function syncToNotion(store, data) {
+  try {
+    const res = await fetch(`${BACKEND}/api/notion-sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ store, data })
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      console.warn(`Notion sync failed for ${store}:`, err);
+    } else {
+      console.log(`✅ Notion sync OK: ${store}`);
+    }
+  } catch (err) {
+    console.warn(`Notion sync error (${store}) — saved locally only:`, err.message);
+  }
+}
+
 // ── SAVE HANDLERS ─────────────────────────────────────────────────────
 async function saveCheckin(){
   const mood=gT('mood-tags'),note=document.getElementById('today-note').value.trim();
@@ -1066,7 +1087,9 @@ async function saveCheckin(){
   const zep=document.getElementById('t-zep').classList.contains('on');
   const cpap=document.getElementById('t-cpap').classList.contains('on');
   const meds=document.getElementById('t-meds').classList.contains('on');
-  await dbAdd('checkins',{mood,note,zep,cpap,meds,date:nowStr()});
+  const entry={mood,note,zep,cpap,meds,date:nowStr()};
+  await dbAdd('checkins',entry);
+  syncToNotion('checkins',entry); // fire-and-forget — won't break local save
   document.getElementById('today-note').value='';
   document.getElementById('mood-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
   toast('tt');loadLogs();
