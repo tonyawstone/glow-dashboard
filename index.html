@@ -118,6 +118,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .snapshot-status-ok{color:#27500A;}
 .snapshot-status-watch{color:#92400E;}
 .snapshot-status-high{color:#7F1D1D;}
+.btn-ai{width:100%;margin-top:9px;padding:12px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:14px;cursor:pointer;font-family:var(--sans);}
 .coach-response{margin-top:10px;padding:14px;background:var(--warm);border-radius:12px;font-size:14px;color:var(--text);line-height:1.6;border:0.5px solid var(--border);white-space:pre-wrap;}
 .btn-sm{font-size:12px;padding:6px 14px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
 .btn-sm.accent{border-color:var(--accent);color:var(--accent);}
@@ -628,6 +629,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
+    <!-- Apple Health metrics from CSV -->
+    <div class="card">
+      <div class="card-title">Apple Health · latest data</div>
+      <div id="apple-health-metrics"><div class="log-empty">Upload your weekly CSV to see steps, sleep, weight and more.</div></div>
+    </div>
+
     <!-- BP Log -->
     <div class="card">
       <div class="card-title">Blood pressure · log today</div>
@@ -745,13 +752,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <span class="bp-legend-dot" style="background:#6B9E78"></span> Diastolic
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">Lab trends · Oct 2025 → Feb 2026</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tracking improvement since starting Zepbound. Next labs expected Aug–Nov 2026.</div>
       <div class="chart-tabs" id="lab-chart-tabs-monthly">
         <button class="chart-tab on" onclick="switchLabChart('metabolic',this)">Metabolic</button>
         <button class="chart-tab" onclick="switchLabChart('lipid',this)">Lipid</button>
+        <button class="chart-tab" onclick="switchLabChart('thyroid',this)">Thyroid</button>
       </div>
       <div class="chart-wrap" style="height:260px;"><canvas id="lab-chart"></canvas></div>
       <div id="lab-context-monthly" class="health-explainer" style="margin-top:12px;"></div>
@@ -798,6 +805,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="chart-tabs" id="lab-chart-tabs">
         <button class="chart-tab on" onclick="switchLabChart('metabolic',this)">Metabolic</button>
         <button class="chart-tab" onclick="switchLabChart('lipid',this)">Lipid</button>
+        <button class="chart-tab" onclick="switchLabChart('thyroid',this)">Thyroid</button>
       </div>
       <div class="chart-wrap" style="height:260px;"><canvas id="lab-chart-yearly"></canvas></div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">Next labs: ~Aug–Nov 2026 · Values from MyChart &amp; Athena Health</div>
@@ -1133,7 +1141,7 @@ function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') buildBodyChart();
-  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); }
+  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);}
@@ -1626,7 +1634,108 @@ async function loadAllPhotos(){
   });
 }
 
-async function buildHealthSnapshot(){
+async function buildAppleHealthMetrics(){
+  const el = document.getElementById('apple-health-metrics');
+  if(!el) return;
+  try {
+    const res = await fetch(`${BACKEND}/api/health-data`);
+    if(!res.ok){ el.innerHTML='<div class="log-empty">Upload your weekly CSV to see steps, sleep, weight and more.</div>'; return; }
+    const { csv } = await res.json();
+    if(!csv){ el.innerHTML='<div class="log-empty">Upload your weekly CSV to see steps, sleep, weight and more.</div>'; return; }
+
+    const rows = parseCSVToRows(csv);
+    if(!rows.length){ el.innerHTML='<div class="log-empty">No data found in CSV.</div>'; return; }
+
+    // Get most recent row with data
+    const latest = rows.filter(r=>r.date).sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const prev = rows.filter(r=>r.date&&r.date<latest.date).sort((a,b)=>b.date.localeCompare(a.date))[0];
+
+    // 7-day averages
+    const recent7 = rows.filter(r=>r.date).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7);
+    const avg = (field) => {
+      const vals = recent7.map(r=>parseFloat(r[field])).filter(v=>!isNaN(v)&&v>0);
+      return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length) : null;
+    };
+
+    const avgSteps = avg('steps');
+    const avgSleep = avg('sleep_hrs');
+    const avgHR = avg('resting_hr');
+    const avgRespRate = avg('respiratory_rate');
+    const avgWalkAsym = avg('walking_asymmetry');
+    const avgDoubleSupport = avg('double_support');
+    const latestWeight = parseFloat(latest.weight_lbs)||null;
+    const latestBMI = parseFloat(latest.bmi)||null;
+    const latestBodyFat = parseFloat(latest.body_fat_pct)||null;
+    const prevWeight = prev ? parseFloat(prev.weight_lbs)||null : null;
+    const weightTrend = latestWeight&&prevWeight ? (latestWeight-prevWeight).toFixed(1) : null;
+
+    el.innerHTML = `
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Latest: ${latest.date} · 7-day averages where shown</div>
+
+      <div class="lab-section-title">Body</div>
+      <div class="snapshot-grid">
+        <div class="snapshot-item">
+          <div class="snapshot-label">Weight</div>
+          <div class="snapshot-val">${latestWeight||'—'}</div>
+          <div class="snapshot-sub ${weightTrend&&weightTrend<0?'snapshot-status-ok':weightTrend>0?'snapshot-status-watch':''}">${weightTrend?(weightTrend>0?'+':'')+weightTrend+' lbs':'—'}</div>
+        </div>
+        <div class="snapshot-item">
+          <div class="snapshot-label">BMI</div>
+          <div class="snapshot-val">${latestBMI||'—'}</div>
+          <div class="snapshot-sub ${latestBMI&&latestBMI<25?'snapshot-status-ok':latestBMI<30?'snapshot-status-watch':'snapshot-status-high'}">${latestBMI?(latestBMI<25?'Normal':latestBMI<30?'Overweight':'Obese'):'—'}</div>
+        </div>
+        ${latestBodyFat?`<div class="snapshot-item"><div class="snapshot-label">Body Fat</div><div class="snapshot-val">${latestBodyFat}%</div><div class="snapshot-sub">—</div></div>`:''}
+      </div>
+
+      <div class="lab-section-title" style="margin-top:14px;">Activity</div>
+      <div class="snapshot-grid">
+        <div class="snapshot-item">
+          <div class="snapshot-label">Avg Steps</div>
+          <div class="snapshot-val" style="font-size:18px;">${avgSteps?Math.round(avgSteps).toLocaleString():'—'}</div>
+          <div class="snapshot-sub">per day</div>
+        </div>
+        <div class="snapshot-item">
+          <div class="snapshot-label">Avg Sleep</div>
+          <div class="snapshot-val">${avgSleep?avgSleep.toFixed(1):'—'}</div>
+          <div class="snapshot-sub">hrs/night</div>
+        </div>
+      </div>
+
+      <div class="lab-section-title" style="margin-top:14px;">Heart & Breathing</div>
+      <div class="snapshot-grid">
+        <div class="snapshot-item">
+          <div class="snapshot-label">Resting HR</div>
+          <div class="snapshot-val">${avgHR?Math.round(avgHR):'—'}</div>
+          <div class="snapshot-sub">bpm avg</div>
+        </div>
+        <div class="snapshot-item">
+          <div class="snapshot-label">Resp. Rate</div>
+          <div class="snapshot-val">${avgRespRate?avgRespRate.toFixed(1):'—'}</div>
+          <div class="snapshot-sub">breaths/min</div>
+        </div>
+      </div>
+
+      <div class="lab-section-title" style="margin-top:14px;">Gait & Mobility</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Walking metrics from Apple Health · relevant after hip replacement</div>
+      <div class="snapshot-grid">
+        <div class="snapshot-item">
+          <div class="snapshot-label">Walking Asymmetry</div>
+          <div class="snapshot-val" style="font-size:18px;">${avgWalkAsym?avgWalkAsym.toFixed(1)+'%':'—'}</div>
+          <div class="snapshot-sub ${avgWalkAsym&&avgWalkAsym<5?'snapshot-status-ok':avgWalkAsym<10?'snapshot-status-watch':'snapshot-status-high'}">${avgWalkAsym?(avgWalkAsym<5?'Excellent':avgWalkAsym<10?'Mild asymmetry':'Notable asymmetry'):'—'}</div>
+        </div>
+        <div class="snapshot-item">
+          <div class="snapshot-label">Double Support</div>
+          <div class="snapshot-val" style="font-size:18px;">${avgDoubleSupport?avgDoubleSupport.toFixed(1)+'%':'—'}</div>
+          <div class="snapshot-sub">${avgDoubleSupport?(avgDoubleSupport<25?'Normal':'Elevated — watch'):'—'}</div>
+        </div>
+      </div>
+    `;
+  } catch(e){
+    el.innerHTML='<div class="log-empty">Upload your weekly CSV to see steps, sleep, weight and more.</div>';
+  }
+}
+
+
   const bps = await dbAll('bps');
   const csvBPs = await getCSVBPData();
   const allBPs = [...csvBPs, ...bps.map(b=>({date:b.date,sys:Number(b.sys),dia:Number(b.dia)}))].filter(b=>b.sys&&b.dia);
@@ -1634,32 +1743,42 @@ async function buildHealthSnapshot(){
   const el = document.getElementById('health-snapshot-content');
   if(!el) return;
 
-  // Get most recent BP
-  let lastBP = null;
-  if(allBPs.length){
-    const sorted = allBPs.filter(b=>parseBPDate(b.date)).sort((a,b)=>parseBPDate(b.date)-parseBPDate(a.date));
-    lastBP = sorted[0];
-  }
+  // Get most recent manual BP (has pulse)
+  const manualSorted = bps.filter(b=>b.sys&&b.dia).sort((a,b)=>{
+    const da=parseBPDate(a.date)||new Date(0);
+    const db=parseBPDate(b.date)||new Date(0);
+    return db-da;
+  });
+  const lastManual = manualSorted[0];
 
-  // BP status
+  // Get most recent from any source
+  const sorted = allBPs.filter(b=>parseBPDate(b.date)).sort((a,b)=>parseBPDate(b.date)-parseBPDate(a.date));
+  lastBP = sorted[0] || null;
+
+  // Use manual for pulse, either for sys/dia
+  const displayBP = lastManual || lastBP;
+  const displayDate = displayBP ? (parseBPDate(displayBP.date)?.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) || displayBP.date) : null;
+
   let bpStatus = '', bpColor = '';
-  if(lastBP){
-    if(lastBP.sys < 120 && lastBP.dia < 80){ bpStatus='Normal ✓'; bpColor='snapshot-status-ok'; }
-    else if(lastBP.sys < 130 && lastBP.dia < 80){ bpStatus='Elevated ⚠'; bpColor='snapshot-status-watch'; }
+  if(displayBP){
+    if(displayBP.sys < 120 && displayBP.dia < 80){ bpStatus='Normal ✓'; bpColor='snapshot-status-ok'; }
+    else if(displayBP.sys < 130 && displayBP.dia < 80){ bpStatus='Elevated ⚠'; bpColor='snapshot-status-watch'; }
     else { bpStatus='High — note this'; bpColor='snapshot-status-high'; }
   }
 
   el.innerHTML = `
     <div class="snapshot-grid">
       <div class="snapshot-item">
-        <div class="snapshot-label">Last BP</div>
-        <div class="snapshot-val">${lastBP ? lastBP.sys+'/'+lastBP.dia : '—'}</div>
-        <div class="snapshot-sub ${bpColor}">${lastBP ? bpStatus : 'No reading yet'}</div>
+        <div class="snapshot-label">Blood Pressure</div>
+        <div class="snapshot-val">${displayBP ? displayBP.sys+'/'+displayBP.dia : '—'}</div>
+        <div class="snapshot-sub ${bpColor}">${displayBP ? bpStatus : 'No reading yet'}</div>
+        ${displayDate ? `<div class="snapshot-sub" style="margin-top:4px;">${displayDate}</div>` : ''}
       </div>
       <div class="snapshot-item">
         <div class="snapshot-label">Pulse</div>
-        <div class="snapshot-val">${lastBP ? (bps[0]?.pulse || '—') : '—'}</div>
+        <div class="snapshot-val">${lastManual?.pulse || '—'}</div>
         <div class="snapshot-sub">bpm</div>
+        ${displayDate ? `<div class="snapshot-sub" style="margin-top:4px;">${displayDate}</div>` : ''}
       </div>
       <div class="snapshot-item">
         <div class="snapshot-label">Weight</div>
@@ -1704,7 +1823,7 @@ async function uploadHealthCSV(input) {
     status.textContent = `✅ ${rowCount} days of health data uploaded successfully! Charts and AI coach are now updated.`;
 
     // Rebuild charts with new data
-    if (curTab === 'health') buildBPChart();
+    if (curTab === 'health') { buildBPChart(); buildAppleHealthMetrics(); }
 
   } catch (err) {
     status.style.background = '#FAECE7';
@@ -1859,18 +1978,26 @@ const LAB_DATA = {
   metabolic:{
     labels:['Oct 2025','Feb 2026'],
     datasets:[
-      {label:'Glucose',data:[96,88],borderColor:'#A07850',borderWidth:2,pointRadius:5,tension:0,normalMin:70,normalMax:110},
-      {label:'ALT',data:[42,25],borderColor:'#C4735A',borderWidth:2,pointRadius:5,tension:0,normalMin:0,normalMax:35},
-      {label:'Alk Phos',data:[168,135],borderColor:'#E8A87C',borderWidth:2,pointRadius:5,tension:0,normalMin:38,normalMax:126},
+      {label:'Glucose',      data:[96,88],   borderColor:'#A07850', normalMin:70,  normalMax:110},
+      {label:'ALT',          data:[42,25],   borderColor:'#C4735A', normalMin:0,   normalMax:35},
+      {label:'Alk Phos',     data:[168,135], borderColor:'#E8A87C', normalMin:38,  normalMax:126},
+      {label:'Albumin',      data:[4.5,3.8], borderColor:'#6B9E78', normalMin:3.2, normalMax:5.0},
+      {label:'eGFR',         data:[107,107], borderColor:'#9B8EC4', normalMin:60,  normalMax:120},
     ]
   },
   lipid:{
     labels:['Oct 2025','Feb 2026'],
     datasets:[
-      {label:'Cholesterol',data:[132,116],borderColor:'#A07850',borderWidth:2,pointRadius:5,tension:0,normalMin:0,normalMax:200},
-      {label:'LDL',data:[63,50],borderColor:'#C4735A',borderWidth:2,pointRadius:5,tension:0,normalMin:0,normalMax:100},
-      {label:'HDL',data:[47,42],borderColor:'#6B9E78',borderWidth:2,pointRadius:5,tension:0,normalMin:40,normalMax:60},
-      {label:'Triglycerides',data:[110,120],borderColor:'#9B8EC4',borderWidth:2,pointRadius:5,tension:0,normalMin:0,normalMax:150},
+      {label:'Cholesterol',    data:[132,116], borderColor:'#A07850', normalMin:0,  normalMax:200},
+      {label:'LDL',            data:[63,50],   borderColor:'#C4735A', normalMin:0,  normalMax:100},
+      {label:'HDL',            data:[47,42],   borderColor:'#6B9E78', normalMin:40, normalMax:60},
+      {label:'Triglycerides',  data:[110,120], borderColor:'#9B8EC4', normalMin:0,  normalMax:150},
+    ]
+  },
+  thyroid:{
+    labels:['Oct 2025','Feb 2026'],
+    datasets:[
+      {label:'T4 Free',  data:[1.11,1.33], borderColor:'#A07850', normalMin:0.71, normalMax:1.85},
     ]
   }
 };
@@ -1889,17 +2016,86 @@ function buildLabChart(){
   const canvas=document.getElementById(canvasId);if(!canvas)return;
   if(chartInstances[canvasId]){chartInstances[canvasId].destroy();delete chartInstances[canvasId];}
   const d=LAB_DATA[activeLabChart];
-  const colors=['#A07850','#C4735A','#6B9E78','#9B8EC4'];
+  const colors=['#A07850','#C4735A','#6B9E78','#9B8EC4','#E8A87C'];
+
+  // Build datasets with range band backgrounds
+  const datasets = d.datasets.map((ds,i)=>({
+    label:ds.label,
+    data:ds.data,
+    borderColor:colors[i]||'#A07850',
+    backgroundColor:'transparent',
+    borderWidth:2.5,
+    pointRadius:7,
+    pointBackgroundColor:colors[i]||'#A07850',
+    pointBorderColor:'#fff',
+    pointBorderWidth:2,
+    tension:0,
+  }));
+
+  // Add normal range band as a shaded dataset for first metric only
+  const firstDS = d.datasets[0];
+  if(firstDS && firstDS.normalMin !== undefined){
+    datasets.push({
+      label:'Normal range',
+      data: d.labels.map(()=>firstDS.normalMax),
+      borderColor:'rgba(107,158,120,0.3)',
+      backgroundColor:'rgba(107,158,120,0.08)',
+      borderWidth:1,
+      borderDash:[4,4],
+      pointRadius:0,
+      fill:'+1',
+      tension:0,
+    });
+    datasets.push({
+      label:'_normalMin',
+      data: d.labels.map(()=>firstDS.normalMin),
+      borderColor:'rgba(107,158,120,0.3)',
+      backgroundColor:'rgba(107,158,120,0.08)',
+      borderWidth:1,
+      borderDash:[4,4],
+      pointRadius:0,
+      fill:false,
+      tension:0,
+    });
+  }
+
   chartInstances[canvasId]=new Chart(canvas.getContext('2d'),{
     type:'line',
-    data:{labels:d.labels,datasets:d.datasets.map((ds,i)=>({
-      label:ds.label,data:ds.data,
-      borderColor:colors[i]||'#A07850',
-      backgroundColor:'transparent',
-      borderWidth:2,pointRadius:6,
-      pointBackgroundColor:colors[i]||'#A07850',
-      tension:0,
-    }))},
+    data:{labels:d.labels, datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          display:true,
+          labels:{
+            font:{size:11},
+            color:'#8C7B6B',
+            boxWidth:12,
+            filter: item => !item.text.startsWith('_')
+          }
+        },
+        tooltip:{
+          callbacks:{
+            label:c=>{
+              if(c.dataset.label==='Normal range'||c.dataset.label==='_normalMin') return null;
+              const ds=d.datasets[c.datasetIndex];
+              let suffix='';
+              if(ds && ds.normalMin!==undefined){
+                const v=c.parsed.y;
+                suffix = v>=ds.normalMin&&v<=ds.normalMax?' ✓':' ⚠';
+              }
+              return `${c.dataset.label}: ${c.parsed.y}${suffix}`;
+            }
+          }
+        },
+      },
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#8C7B6B'}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'},beginAtZero:false}
+      }
+    }
+  });
+}
     options:{
       responsive:true,maintainAspectRatio:false,
       plugins:{
