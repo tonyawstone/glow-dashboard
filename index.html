@@ -1650,17 +1650,26 @@ async function loadAllPhotos(){
   return new Promise(r=>{
     const t=db.transaction('photos','readonly');
     const rq=t.objectStore('photos').getAll();
-    rq.onsuccess=()=>{
+    rq.onsuccess=async ()=>{
       const results=rq.result;
       // Build a map of slotId -> blobUrl if available
       const blobUrls={};
       results.forEach(p=>{if(p.id.endsWith('-bloburl'))blobUrls[p.id.replace('-bloburl','')]=p.data;});
       // Display each photo — prefer Blob URL over base64
       results.forEach(p=>{
-        if(p.id.endsWith('-bloburl')) return; // skip url entries
+        if(p.id.endsWith('-bloburl')) return;
         const url=blobUrls[p.id]||p.data;
         displayPhoto(p.id,url);
       });
+      // If hero photo not found locally, try fetching from Blob
+      const heroFound = results.some(p=>p.id==='hero'||p.id==='hero-bloburl');
+      if(!heroFound){
+        try {
+          const proxyUrl = `${BACKEND}/api/upload-photo?slotId=hero`;
+          const test = await fetch(proxyUrl, {method:'HEAD'});
+          if(test.ok) displayPhoto('hero', proxyUrl);
+        } catch(e){}
+      }
       r();
     };
   });
