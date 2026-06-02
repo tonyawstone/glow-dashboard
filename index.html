@@ -89,7 +89,35 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
 /* BUTTONS */
 .btn-primary{width:100%;margin-top:16px;padding:14px;border-radius:12px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:15px;font-weight:500;cursor:pointer;font-family:var(--sans);}
-.btn-ai{width:100%;margin-top:9px;padding:12px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:14px;cursor:pointer;font-family:var(--sans);}
+.lab-section-title{font-size:11px;font-weight:500;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;}
+.lab-trend{font-size:10px;color:var(--muted);margin-left:6px;}
+.health-insight-banner{display:flex;align-items:flex-start;gap:12px;background:var(--warm);border-radius:14px;padding:14px;margin-bottom:16px;border:0.5px solid var(--border);}
+.hib-icon{font-size:22px;flex-shrink:0;}
+.hib-text{font-size:13px;color:var(--muted);line-height:1.5;}
+.bp-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:10px;flex-wrap:wrap;}
+.bp-legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;}
+.health-explainer{font-size:13px;color:var(--text);}
+.he-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.he-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap;}
+.wins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.win-item{text-align:center;background:var(--warm);border-radius:12px;padding:12px 8px;border:0.5px solid var(--border);}
+.win-val{font-size:22px;font-weight:700;line-height:1.1;}
+.win-label{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.3;}
+.timeline{padding:4px 0;}
+.tl-item{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start;}
+.tl-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.tl-content{}
+.tl-date{font-size:11px;color:var(--muted);font-weight:500;}
+.tl-text{font-size:13px;color:var(--text);margin-top:2px;line-height:1.4;}
+.health-snapshot-card{}
+.snapshot-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.snapshot-item{background:var(--warm);border-radius:12px;padding:12px;border:0.5px solid var(--border);}
+.snapshot-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
+.snapshot-val{font-size:20px;font-weight:700;color:var(--text);}
+.snapshot-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.snapshot-status-ok{color:#27500A;}
+.snapshot-status-watch{color:#92400E;}
+.snapshot-status-high{color:#7F1D1D;}
 .coach-response{margin-top:10px;padding:14px;background:var(--warm);border-radius:12px;font-size:14px;color:var(--text);line-height:1.6;border:0.5px solid var(--border);white-space:pre-wrap;}
 .btn-sm{font-size:12px;padding:6px 14px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
 .btn-sm.accent{border-color:var(--accent);color:var(--accent);}
@@ -587,17 +615,20 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
 <!-- ═══════════════ HEALTH ═══════════════ -->
 <div id="s-health" class="sec">
-  <div class="view-content on" id="vc-health-daily">
-    <div class="section-label">Health Metrics</div>
 
-    <div class="card">
-      <div class="card-title">Apple Health data · weekly upload</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Run your Python script weekly, then upload the CSV here to update your charts and AI coach with fresh data.</div>
-      <input type="file" id="health-csv-input" accept=".csv" style="display:none" onchange="uploadHealthCSV(this)">
-      <button class="btn-primary" onclick="document.getElementById('health-csv-input').click()">📂 Upload glow_health_data.csv</button>
-      <div id="csv-upload-status" style="display:none;margin-top:10px;font-size:13px;padding:10px;border-radius:10px;"></div>
+  <!-- ── DAILY ── -->
+  <div class="view-content on" id="vc-health-daily">
+    <div class="section-label">Health · Today</div>
+
+    <!-- Today's snapshot -->
+    <div class="card health-snapshot-card">
+      <div class="card-title">Today's snapshot</div>
+      <div id="health-snapshot-content">
+        <div class="log-empty">Loading your health data...</div>
+      </div>
     </div>
 
+    <!-- BP Log -->
     <div class="card">
       <div class="card-title">Blood pressure · log today</div>
       <div class="bp-row">
@@ -607,7 +638,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div class="fl">Time of reading</div>
       <div class="tags" id="bp-time-tags">
-        <button class="tag" onclick="solo('bp-time-tags',this)">Morning</button><button class="tag" onclick="solo('bp-time-tags',this)">Afternoon</button><button class="tag" onclick="solo('bp-time-tags',this)">Evening</button>
+        <button class="tag" onclick="solo('bp-time-tags',this)">Morning</button>
+        <button class="tag" onclick="solo('bp-time-tags',this)">Afternoon</button>
+        <button class="tag" onclick="solo('bp-time-tags',this)">Evening</button>
       </div>
       <div class="fl">Notes</div>
       <textarea id="bp-note" rows="2" placeholder="e.g. After medication, before exercise, felt dizzy..."></textarea>
@@ -615,34 +648,34 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="bpt">Saved!</div>
     </div>
 
-    <div class="card"><div class="card-title">Recent BP readings</div><div id="bp-log"><div class="log-empty">No readings yet.</div></div></div>
-
+    <!-- Lab results -->
     <div class="card">
       <div class="card-title">Lab work · most recent results</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Last labs: Feb 11, 2026 · Next: ~Aug–Nov 2026</div>
 
-      <div style="font-size:11px;font-weight:500;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;">Lipid Panel</div>
-      <div class="lab-row"><div><div class="lab-name">Cholesterol</div><div class="lab-range">&lt;200 MG/DL</div></div><div><span class="lab-val lab-normal">116</span><span class="lab-val lab-normal" style="font-size:10px;margin-left:4px;">↓ from 132</span></div></div>
-      <div class="lab-row"><div><div class="lab-name">Triglycerides</div><div class="lab-range">&lt;150 MG/DL</div></div><span class="lab-val lab-normal">120</span></div>
-      <div class="lab-row"><div><div class="lab-name">HDL Cholesterol</div><div class="lab-range">40–60 MG/DL</div></div><span class="lab-val lab-normal">42</span></div>
-      <div class="lab-row"><div><div class="lab-name">LDL Calculated</div><div class="lab-range">&lt;100 MG/DL</div></div><span class="lab-val lab-normal">50 ✓</span></div>
+      <div class="lab-section-title">Lipid Panel</div>
+      <div class="lab-row"><div><div class="lab-name">Cholesterol</div><div class="lab-range">&lt;200 mg/dL</div></div><div><span class="lab-val lab-normal">116</span><span class="lab-trend">↓ from 132</span></div></div>
+      <div class="lab-row"><div><div class="lab-name">Triglycerides</div><div class="lab-range">&lt;150 mg/dL</div></div><span class="lab-val lab-normal">120</span></div>
+      <div class="lab-row"><div><div class="lab-name">HDL Cholesterol</div><div class="lab-range">40–60 mg/dL</div></div><span class="lab-val lab-normal">42</span></div>
+      <div class="lab-row"><div><div class="lab-name">LDL Calculated</div><div class="lab-range">&lt;100 mg/dL</div></div><span class="lab-val lab-normal">50 ✓</span></div>
 
-      <div style="font-size:11px;font-weight:500;color:var(--accent);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.06em;">Thyroid</div>
-      <div class="lab-row"><div><div class="lab-name">T4 Free (Direct)</div><div class="lab-range">0.71–1.85 NG/DL</div></div><span class="lab-val lab-normal">1.33</span></div>
+      <div class="lab-section-title" style="margin-top:14px;">Thyroid</div>
+      <div class="lab-row"><div><div class="lab-name">T4 Free (Direct)</div><div class="lab-range">0.71–1.85 ng/dL</div></div><span class="lab-val lab-normal">1.33</span></div>
 
-      <div style="font-size:11px;font-weight:500;color:var(--accent);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.06em;">Metabolic Panel</div>
-      <div class="lab-row"><div><div class="lab-name">Glucose</div><div class="lab-range">70–110 MG/DL</div></div><span class="lab-val lab-normal">88 ✓</span></div>
+      <div class="lab-section-title" style="margin-top:14px;">Metabolic Panel</div>
+      <div class="lab-row"><div><div class="lab-name">Glucose</div><div class="lab-range">70–110 mg/dL</div></div><span class="lab-val lab-normal">88 ✓</span></div>
       <div class="lab-row"><div><div class="lab-name">eGFR (kidney)</div><div class="lab-range">&gt;60</div></div><span class="lab-val lab-normal">107 ✓</span></div>
-      <div class="lab-row"><div><div class="lab-name">ALT (SGPT)</div><div class="lab-range">&lt;35 U/L</div></div><div><span class="lab-val lab-normal">25 ✓</span><span style="font-size:10px;color:var(--muted);margin-left:6px;">was 42</span></div></div>
+      <div class="lab-row"><div><div class="lab-name">ALT (SGPT)</div><div class="lab-range">&lt;35 U/L</div></div><div><span class="lab-val lab-normal">25 ✓</span><span class="lab-trend">was 42</span></div></div>
       <div class="lab-row"><div><div class="lab-name">Alk Phosphatase</div><div class="lab-range">38–126 IU/L</div></div><span class="lab-val lab-watch">135 ⚠</span></div>
-      <div class="lab-row"><div><div class="lab-name">Albumin</div><div class="lab-range">3.2–5.0 GM/DL</div></div><span class="lab-val lab-normal">3.8</span></div>
-      <div class="lab-row"><div><div class="lab-name">Creatinine</div><div class="lab-range">0.6–1.0 MG/DL</div></div><span class="lab-val lab-normal">0.6</span></div>
-      <div class="lab-row"><div><div class="lab-name">CO₂ Total</div><div class="lab-range">22–30 MEQ/L</div></div><span class="lab-val lab-watch">22.0 ↓</span></div>
+      <div class="lab-row"><div><div class="lab-name">Albumin</div><div class="lab-range">3.2–5.0 gm/dL</div></div><span class="lab-val lab-normal">3.8</span></div>
+      <div class="lab-row"><div><div class="lab-name">Creatinine</div><div class="lab-range">0.6–1.0 mg/dL</div></div><span class="lab-val lab-normal">0.6</span></div>
+      <div class="lab-row"><div><div class="lab-name">CO₂ Total</div><div class="lab-range">22–30 mEq/L</div></div><span class="lab-val lab-watch">22.0 ↓</span></div>
 
       <button class="btn-ai" onclick="labCoach()">Discuss lab results with coach ↗</button>
       <div id="lab-coach-output" class="coach-response" style="display:none"></div>
     </div>
 
+    <!-- Log new labs -->
     <div class="card">
       <div class="card-title">Log new lab results</div>
       <div class="fl">Date of labs</div>
@@ -652,37 +685,130 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button class="btn-primary" onclick="saveLab()">Save lab results</button>
       <div class="toast-msg" id="lt">Saved!</div>
     </div>
+
+    <!-- Apple Health Upload -->
+    <div class="card">
+      <div class="card-title">Apple Health data · weekly upload</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Run your Python script weekly, then upload the CSV here to update your charts and AI coach with fresh data.</div>
+      <input type="file" id="health-csv-input" accept=".csv" style="display:none" onchange="uploadHealthCSV(this)">
+      <button class="btn-primary" onclick="document.getElementById('health-csv-input').click()">📂 Upload glow_health_data.csv</button>
+      <div id="csv-upload-status" style="display:none;margin-top:10px;font-size:13px;padding:10px;border-radius:10px;"></div>
+    </div>
   </div>
 
+  <!-- ── WEEKLY ── -->
   <div class="view-content" id="vc-health-weekly">
     <div class="section-label">BP this week</div>
-    <div class="card"><div class="card-title">Blood pressure trend</div><div class="chart-wrap" id="wrap-bp-week-chart"></div></div>
+
+    <div class="health-insight-banner" id="bp-week-insight">
+      <div class="hib-icon">💓</div>
+      <div class="hib-text">Your BP trend for the last 7 days. Green zone is your target range.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Blood pressure · last 7 days</div>
+      <div class="chart-wrap" style="height:240px;" id="wrap-bp-week-chart"></div>
+      <div class="bp-legend">
+        <span class="bp-legend-dot" style="background:#C4735A"></span> Systolic &nbsp;
+        <span class="bp-legend-dot" style="background:#6B9E78"></span> Diastolic &nbsp;
+        <span class="bp-legend-dot" style="background:rgba(107,158,120,0.2);border:1px solid #6B9E78"></span> Normal range
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">What does this mean?</div>
+      <div class="health-explainer">
+        <div class="he-row"><span class="he-badge" style="background:#EAF3DE;color:#27500A;">Normal</span> Systolic &lt;120 · Diastolic &lt;80</div>
+        <div class="he-row"><span class="he-badge" style="background:#FEF3C7;color:#92400E;">Elevated</span> Systolic 120–129 · Diastolic &lt;80</div>
+        <div class="he-row"><span class="he-badge" style="background:#FEE2E2;color:#7F1D1D;">High</span> Systolic ≥130 · Diastolic ≥80</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:10px;">You take Irbesartan HCTZ, Metoprolol, and Amlodipine — your target may differ. Always discuss readings with your doctor.</div>
+      </div>
+      <button class="btn-ai" onclick="zepCoach()">Ask coach about my BP trend ↗</button>
+      <div id="zep-coach-output" class="coach-response" style="display:none"></div>
+    </div>
   </div>
+
+  <!-- ── MONTHLY ── -->
   <div class="view-content" id="vc-health-monthly">
-    <div class="section-label">Health · Monthly</div>
-    <div class="card"><div class="card-title">Monthly BP trend</div><div class="chart-wrap" id="wrap-bp-month-chart"></div></div>
+    <div class="section-label">Health · Monthly trends</div>
+
+    <div class="health-insight-banner">
+      <div class="hib-icon">📈</div>
+      <div class="hib-text">Month-by-month trends show the big picture. Your Zepbound journey started Oct 2025 — watch the improvements unfold.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Blood pressure · monthly averages</div>
+      <div class="chart-wrap" style="height:260px;" id="wrap-bp-month-chart"></div>
+      <div class="bp-legend">
+        <span class="bp-legend-dot" style="background:#C4735A"></span> Systolic &nbsp;
+        <span class="bp-legend-dot" style="background:#6B9E78"></span> Diastolic
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">Lab trends · Oct 2025 → Feb 2026</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tracking improvement since starting Zepbound. Next labs expected Aug–Nov 2026.</div>
       <div class="chart-tabs" id="lab-chart-tabs-monthly">
         <button class="chart-tab on" onclick="switchLabChart('metabolic',this)">Metabolic</button>
         <button class="chart-tab" onclick="switchLabChart('lipid',this)">Lipid</button>
       </div>
-      <div class="chart-wrap" style="height:220px;"><canvas id="lab-chart"></canvas></div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Next labs: ~Aug–Nov 2026</div>
+      <div class="chart-wrap" style="height:260px;"><canvas id="lab-chart"></canvas></div>
+      <div id="lab-context-monthly" class="health-explainer" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Your wins since Zepbound ✨</div>
+      <div class="wins-grid">
+        <div class="win-item"><div class="win-val" style="color:#6B9E78">↓16</div><div class="win-label">Cholesterol points</div></div>
+        <div class="win-item"><div class="win-val" style="color:#6B9E78">↓8</div><div class="win-label">Glucose points</div></div>
+        <div class="win-item"><div class="win-val" style="color:#6B9E78">↓17</div><div class="win-label">ALT points</div></div>
+        <div class="win-item"><div class="win-val" style="color:#6B9E78">↓13</div><div class="win-label">LDL points</div></div>
+        <div class="win-item"><div class="win-val" style="color:#C4735A">↓30.7</div><div class="win-label">lbs lost</div></div>
+        <div class="win-item"><div class="win-val" style="color:#6B9E78">7</div><div class="win-label">months strong</div></div>
+      </div>
+      <button class="btn-ai" onclick="labCoach()">Discuss my lab trends with coach ↗</button>
+      <div id="lab-coach-output-monthly" class="coach-response" style="display:none"></div>
     </div>
   </div>
+
+  <!-- ── YEARLY ── -->
   <div class="view-content" id="vc-health-yearly">
-    <div class="section-label">Health · 2026</div>
+    <div class="section-label">Health · Your journey</div>
+
+    <div class="health-insight-banner">
+      <div class="hib-icon">🌿</div>
+      <div class="hib-text">Your health story goes back to 2019. Hip issues, recovery, and now a full transformation. This is your data telling that story.</div>
+    </div>
+
     <div class="card">
-      <div class="card-title">Lab trends · Oct 2025 → Feb 2026</div>
+      <div class="card-title">Key milestones</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot" style="background:#E8A87C"></div><div class="tl-content"><div class="tl-date">2019–2022</div><div class="tl-text">Hip pain begins, activity decreases, weight climbs</div></div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:#C4735A"></div><div class="tl-content"><div class="tl-date">Oct 2023</div><div class="tl-text">Total right hip replacement — beginning of recovery</div></div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:#A07850"></div><div class="tl-content"><div class="tl-date">Oct 13, 2025</div><div class="tl-text">Labs: Cholesterol 132, ALT 42 ⚠, Glucose 96</div></div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:#6B9E78"></div><div class="tl-content"><div class="tl-date">Oct 25, 2025</div><div class="tl-text">Started Zepbound at 201.4 lbs — the turning point</div></div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:#6B9E78"></div><div class="tl-content"><div class="tl-date">Feb 11, 2026</div><div class="tl-text">Labs: Cholesterol 116 ✓, ALT 25 ✓, Glucose 88 ✓</div></div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:#6B9E78"></div><div class="tl-content"><div class="tl-date">May 19, 2026</div><div class="tl-text">All-time low: 168.7 lbs — 32.7 lbs lost</div></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Lab trends over time</div>
       <div class="chart-tabs" id="lab-chart-tabs">
         <button class="chart-tab on" onclick="switchLabChart('metabolic',this)">Metabolic</button>
         <button class="chart-tab" onclick="switchLabChart('lipid',this)">Lipid</button>
       </div>
-      <div class="chart-wrap" style="height:220px;"><canvas id="lab-chart-yearly"></canvas></div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Shaded band = normal range · Next labs: ~Aug–Nov 2026</div>
+      <div class="chart-wrap" style="height:260px;"><canvas id="lab-chart-yearly"></canvas></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Next labs: ~Aug–Nov 2026 · Values from MyChart &amp; Athena Health</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Blood pressure · all time</div>
+      <div class="chart-wrap" style="height:260px;" id="wrap-bp-yearly-chart"></div>
     </div>
   </div>
+
 </div>
 
 <!-- ═══════════════ SKIN ═══════════════ -->
@@ -1007,7 +1133,7 @@ function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') buildBodyChart();
-  if(id==='health') buildBPChart();
+  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);}
@@ -1500,7 +1626,57 @@ async function loadAllPhotos(){
   });
 }
 
-// ── HEALTH CSV UPLOAD ─────────────────────────────────────────────────
+async function buildHealthSnapshot(){
+  const bps = await dbAll('bps');
+  const csvBPs = await getCSVBPData();
+  const allBPs = [...csvBPs, ...bps.map(b=>({date:b.date,sys:Number(b.sys),dia:Number(b.dia)}))].filter(b=>b.sys&&b.dia);
+
+  const el = document.getElementById('health-snapshot-content');
+  if(!el) return;
+
+  // Get most recent BP
+  let lastBP = null;
+  if(allBPs.length){
+    const sorted = allBPs.filter(b=>parseBPDate(b.date)).sort((a,b)=>parseBPDate(b.date)-parseBPDate(a.date));
+    lastBP = sorted[0];
+  }
+
+  // BP status
+  let bpStatus = '', bpColor = '';
+  if(lastBP){
+    if(lastBP.sys < 120 && lastBP.dia < 80){ bpStatus='Normal ✓'; bpColor='snapshot-status-ok'; }
+    else if(lastBP.sys < 130 && lastBP.dia < 80){ bpStatus='Elevated ⚠'; bpColor='snapshot-status-watch'; }
+    else { bpStatus='High — note this'; bpColor='snapshot-status-high'; }
+  }
+
+  el.innerHTML = `
+    <div class="snapshot-grid">
+      <div class="snapshot-item">
+        <div class="snapshot-label">Last BP</div>
+        <div class="snapshot-val">${lastBP ? lastBP.sys+'/'+lastBP.dia : '—'}</div>
+        <div class="snapshot-sub ${bpColor}">${lastBP ? bpStatus : 'No reading yet'}</div>
+      </div>
+      <div class="snapshot-item">
+        <div class="snapshot-label">Pulse</div>
+        <div class="snapshot-val">${lastBP ? (bps[0]?.pulse || '—') : '—'}</div>
+        <div class="snapshot-sub">bpm</div>
+      </div>
+      <div class="snapshot-item">
+        <div class="snapshot-label">Weight</div>
+        <div class="snapshot-val">170.7</div>
+        <div class="snapshot-sub snapshot-status-ok">↓ 30.7 lbs</div>
+      </div>
+      <div class="snapshot-item">
+        <div class="snapshot-label">Next labs</div>
+        <div class="snapshot-val" style="font-size:14px;">Aug–Nov</div>
+        <div class="snapshot-sub">2026</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);">Medications: Irbesartan HCTZ · Metoprolol · Amlodipine</div>
+  `;
+}
+
+
 async function uploadHealthCSV(input) {
   const file = input.files[0];
   if (!file) return;
@@ -1629,6 +1805,24 @@ async function buildBPChart(){
   }
 
   if(curView==='yearly'){
+    // All-time BP by year
+    const yearGroups={};
+    allBPs.forEach(b=>{
+      const d=parseBPDate(b.date);if(!d)return;
+      const key=d.getFullYear();
+      if(!yearGroups[key]){yearGroups[key]={sys:[],dia:[]};}
+      yearGroups[key].sys.push(b.sys);
+      yearGroups[key].dia.push(b.dia);
+    });
+    const years=Object.keys(yearGroups).sort();
+    const labels=years;
+    const sys=years.map(y=>Math.round(yearGroups[y].sys.reduce((a,b)=>a+b,0)/yearGroups[y].sys.length));
+    const dia=years.map(y=>Math.round(yearGroups[y].dia.reduce((a,b)=>a+b,0)/yearGroups[y].dia.length));
+    const wrap=document.getElementById('wrap-bp-yearly-chart');
+    if(wrap){
+      if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id='bp-yearly-chart';wrap.appendChild(c);}
+      if(sys.length>0) buildBPChartOnCanvas('bp-yearly-chart',labels,sys,dia);
+    }
     setTimeout(buildLabChart,50);
   }
 }
