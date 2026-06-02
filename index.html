@@ -1114,6 +1114,7 @@ async function boot(){
   buildBodyChart();
   // Sync from Blob in background — loads any data from other devices
   syncAllFromBlob();
+  loadCoachingInsights();
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
@@ -1725,9 +1726,13 @@ async function buildAppleHealthMetrics(){
     const rows = parseCSVToRows(csv);
     if(!rows.length){ el.innerHTML='<div class="log-empty">No data found in CSV.</div>'; return; }
 
-    // Get most recent row with data
-    const latest = rows.filter(r=>r.date).sort((a,b)=>b.date.localeCompare(a.date))[0];
-    const prev = rows.filter(r=>r.date&&r.date<latest.date).sort((a,b)=>b.date.localeCompare(a.date))[0];
+    // Get most recent row with data — search back for each metric independently
+    const allRows = rows.filter(r=>r.date).sort((a,b)=>b.date.localeCompare(a.date));
+    const latest = allRows[0];
+    const prev = allRows[1];
+    const latestWithWeight = allRows.find(r=>parseFloat(r.weight_lbs)>0);
+    const latestWithBMI = allRows.find(r=>parseFloat(r.bmi)>0);
+    const latestWithBodyFat = allRows.find(r=>parseFloat(r.body_fat_pct)>0);
 
     // 7-day averages
     const recent7 = rows.filter(r=>r.date).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7);
@@ -1742,11 +1747,13 @@ async function buildAppleHealthMetrics(){
     const avgRespRate = avg('respiratory_rate');
     const avgWalkAsym = avg('walking_asymmetry');
     const avgDoubleSupport = avg('double_support');
-    const latestWeight = parseFloat(latest.weight_lbs)||null;
-    const latestBMI = parseFloat(latest.bmi)||null;
-    const latestBodyFat = parseFloat(latest.body_fat_pct)||null;
+    const latestWeight = latestWithWeight ? parseFloat(latestWithWeight.weight_lbs) : null;
+    const latestBMI = latestWithBMI ? parseFloat(latestWithBMI.bmi) : null;
+    const latestBodyFat = latestWithBodyFat ? parseFloat(latestWithBodyFat.body_fat_pct) : null;
     const prevWeight = prev ? parseFloat(prev.weight_lbs)||null : null;
     const weightTrend = latestWeight&&prevWeight ? (latestWeight-prevWeight).toFixed(1) : null;
+    const weightDate = latestWithWeight ? new Date(latestWithWeight.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+    const bmiDate = latestWithBMI ? new Date(latestWithBMI.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
 
     el.innerHTML = `
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Latest: ${latest.date} · 7-day averages where shown</div>
@@ -1755,13 +1762,15 @@ async function buildAppleHealthMetrics(){
       <div class="snapshot-grid">
         <div class="snapshot-item">
           <div class="snapshot-label">Weight</div>
-          <div class="snapshot-val">${latestWeight||'—'}</div>
+          <div class="snapshot-val">${latestWeight?latestWeight.toFixed(1):'—'}</div>
           <div class="snapshot-sub ${weightTrend&&weightTrend<0?'snapshot-status-ok':weightTrend>0?'snapshot-status-watch':''}">${weightTrend?(weightTrend>0?'+':'')+weightTrend+' lbs':'—'}</div>
+          ${weightDate?`<div class="snapshot-sub" style="margin-top:2px;">${weightDate}</div>`:''}
         </div>
         <div class="snapshot-item">
           <div class="snapshot-label">BMI</div>
-          <div class="snapshot-val">${latestBMI||'—'}</div>
+          <div class="snapshot-val">${latestBMI?latestBMI.toFixed(1):'—'}</div>
           <div class="snapshot-sub ${latestBMI&&latestBMI<25?'snapshot-status-ok':latestBMI<30?'snapshot-status-watch':'snapshot-status-high'}">${latestBMI?(latestBMI<25?'Normal':latestBMI<30?'Overweight':'Obese'):'—'}</div>
+          ${bmiDate?`<div class="snapshot-sub" style="margin-top:2px;">${bmiDate}</div>`:''}
         </div>
         ${latestBodyFat?`<div class="snapshot-item"><div class="snapshot-label">Body Fat</div><div class="snapshot-val">${latestBodyFat}%</div><div class="snapshot-sub">—</div></div>`:''}
       </div>
@@ -1846,6 +1855,27 @@ async function buildHealthSnapshot(){
     else { bpStatus='High — note this'; bpColor='snapshot-status-high'; }
   }
 
+  // Get weight and pulse from CSV if available
+  let csvWeight = null, csvWeightDate = null, csvPulse = null;
+  try {
+    const csvRes = await fetch(`${BACKEND}/api/health-data`);
+    if(csvRes.ok){
+      const { csv } = await csvRes.json();
+      if(csv){
+        const rows = parseCSVToRows(csv).filter(r=>r.date).sort((a,b)=>b.date.localeCompare(a.date));
+        const weightRow = rows.find(r=>parseFloat(r.weight_lbs)>0);
+        if(weightRow){ csvWeight=parseFloat(weightRow.weight_lbs).toFixed(1); csvWeightDate=weightRow.date; }
+        const hrRow = rows.find(r=>parseFloat(r.heart_rate)>0);
+        if(hrRow) csvPulse = Math.round(parseFloat(hrRow.heart_rate));
+      }
+    }
+  } catch(e){}
+
+  const pulseDisplay = lastManual?.pulse || csvPulse || '—';
+  const pulseDate = lastManual?.pulse ? displayDate : (csvPulse ? csvWeightDate : null);
+  const weightDisplay = csvWeight || '170.7';
+  const weightDateDisplay = csvWeightDate ? new Date(csvWeightDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+
   el.innerHTML = `
     <div class="snapshot-grid">
       <div class="snapshot-item">
@@ -1856,14 +1886,14 @@ async function buildHealthSnapshot(){
       </div>
       <div class="snapshot-item">
         <div class="snapshot-label">Pulse</div>
-        <div class="snapshot-val">${lastManual?.pulse || '—'}</div>
+        <div class="snapshot-val">${pulseDisplay}</div>
         <div class="snapshot-sub">bpm</div>
-        ${displayDate ? `<div class="snapshot-sub" style="margin-top:4px;">${displayDate}</div>` : ''}
+        ${pulseDate ? `<div class="snapshot-sub" style="margin-top:4px;">${pulseDate}</div>` : ''}
       </div>
       <div class="snapshot-item">
         <div class="snapshot-label">Weight</div>
-        <div class="snapshot-val">170.7</div>
-        <div class="snapshot-sub snapshot-status-ok">↓ 30.7 lbs</div>
+        <div class="snapshot-val">${weightDisplay}</div>
+        <div class="snapshot-sub snapshot-status-ok">${weightDateDisplay||'↓ 30.7 lbs'}</div>
       </div>
       <div class="snapshot-item">
         <div class="snapshot-label">Next labs</div>
@@ -1992,15 +2022,22 @@ async function buildBPChart(){
     if(sys.some(v=>v!==null)||dia.some(v=>v!==null)){
       buildBPChartOnCanvas('bp-week-chart',labels,sys,dia);
     } else {
-      wrap.innerHTML='<div class="log-empty">No BP readings yet this week — log some readings first.</div>';
+      // Fallback — show last 3 available readings
+      const recent=allBPs.filter(b=>parseBPDate(b.date)).sort((a,b)=>parseBPDate(b.date)-parseBPDate(a.date)).slice(-3);
+      if(recent.length){
+        const fl=recent.map(b=>{const d=parseBPDate(b.date);return d?`${d.getMonth()+1}/${d.getDate()}`:'—';});
+        wrap.innerHTML=`<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">No readings this week · Showing last ${recent.length} available (${fl[0]}–${fl[fl.length-1]})</div>`;
+        const c=document.createElement('canvas');c.id='bp-week-chart';wrap.appendChild(c);
+        buildBPChartOnCanvas('bp-week-chart',fl,recent.map(b=>b.sys),recent.map(b=>b.dia));
+      } else {
+        wrap.innerHTML='<div class="log-empty">No BP readings yet — upload your health CSV or log a reading.</div>';
+      }
     }
   }
 
   if(curView==='monthly'){
-    // Group by month for BP trend
     const monthGroups={};
     allBPs.forEach(b=>{
-      
       const d=parseBPDate(b.date);if(!d)return;
       const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
       if(!monthGroups[key]){monthGroups[key]={sys:[],dia:[],label:d.toLocaleString('en-US',{month:'short',year:'numeric'})};}
@@ -2015,11 +2052,10 @@ async function buildBPChart(){
     if(!wrap)return;
     if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id='bp-month-chart';wrap.appendChild(c);}
     if(sys.length>0){
-      buildBPChartOnCanvas('bp-month-chart',labels,sys,dia);
+      buildBPChartOnCanvasWithBands('bp-month-chart',labels,sys,dia);
     } else {
-      wrap.innerHTML='<div class="log-empty">No BP readings yet — log some readings first.</div>';
+      wrap.innerHTML='<div class="log-empty">No BP readings yet — upload your health CSV to see trends.</div>';
     }
-    // Also build lab chart in monthly view
     setTimeout(buildLabChart,50);
   }
 
@@ -2068,6 +2104,35 @@ function buildBPChartOnCanvas(id,labels,sys,dia){
       scales:{
         x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}},
         y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',callback:v=>v+' mmHg'},min:50,max:160}
+      }
+    }
+  });
+}
+
+function buildBPChartOnCanvasWithBands(id,labels,sys,dia){
+  const canvas=document.getElementById(id);if(!canvas)return;
+  if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];}
+  chartInstances[id]=new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[
+      // Normal range bands as filled datasets
+      {label:'Systolic normal (90–120)',data:labels.map(()=>120),borderColor:'rgba(107,158,120,0.3)',backgroundColor:'rgba(107,158,120,0.08)',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:'+1',tension:0,spanGaps:true},
+      {label:'_sys_low',data:labels.map(()=>90),borderColor:'rgba(107,158,120,0.3)',backgroundColor:'rgba(107,158,120,0.08)',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false,tension:0,spanGaps:true},
+      {label:'Diastolic normal (60–80)',data:labels.map(()=>80),borderColor:'rgba(107,158,120,0.2)',backgroundColor:'rgba(107,158,120,0.06)',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:'+1',tension:0,spanGaps:true},
+      {label:'_dia_low',data:labels.map(()=>60),borderColor:'rgba(107,158,120,0.2)',backgroundColor:'rgba(107,158,120,0.06)',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false,tension:0,spanGaps:true},
+      // Actual data lines
+      {label:'Systolic',data:sys,borderColor:'#C4735A',backgroundColor:'rgba(196,115,90,0.08)',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#C4735A',tension:0.3,spanGaps:true},
+      {label:'Diastolic',data:dia,borderColor:'#6B9E78',backgroundColor:'rgba(107,158,120,0.08)',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#6B9E78',tension:0.3,spanGaps:true},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,labels:{font:{size:11},color:'#8C7B6B',boxWidth:12,filter:i=>!i.text.startsWith('_')}},
+        tooltip:{callbacks:{label:c=>{if(c.dataset.label.startsWith('_'))return null;return `${c.dataset.label}: ${c.parsed.y} mmHg`;}}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:12}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',callback:v=>v+' mmHg'},min:50,max:170}
       }
     }
   });
@@ -2207,10 +2272,46 @@ async function callCoach(pillar, userMessage, outputId, logData) {
       body: JSON.stringify({ pillar, userMessage, logData })
     });
     const data = await res.json();
-    if (el) el.textContent = data.response || 'No response generated.';
+    const response = data.response || 'No response generated.';
+    if (el) el.textContent = response;
+    // Save to Blob for persistence across devices
+    fetch(`${BACKEND}/api/sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        pillar: 'coaching', 
+        data: { ...await getCoachingData(), [outputId]: { text: response, date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), pillar } }
+      })
+    }).catch(()=>{});
   } catch (err) {
     if (el) el.textContent = 'Coach unavailable right now — try again shortly.';
   }
+}
+
+async function getCoachingData() {
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=coaching`);
+    if (!res.ok) return {};
+    const { data } = await res.json();
+    return data || {};
+  } catch(e) { return {}; }
+}
+
+async function loadCoachingInsights() {
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=coaching`);
+    if (!res.ok) return;
+    const { data } = await res.json();
+    if (!data) return;
+    // Restore last response for each coach output
+    Object.entries(data).forEach(([outputId, insight]) => {
+      const el = document.getElementById(outputId);
+      if (el && insight.text) {
+        el.style.display = 'block';
+        el.textContent = `${insight.text}\n\n— ${insight.date}`;
+      }
+    });
+  } catch(e) {}
 }
 
 function aiCoach(){ callCoach('Today','Give me one warm specific daily insight based on my wellness journey.','coach-output'); }
