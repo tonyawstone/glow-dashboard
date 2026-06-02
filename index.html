@@ -697,6 +697,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
       <div class="card-title">Apple Health data · weekly upload</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Run your Python script weekly, then upload the CSV here to update your charts and AI coach with fresh data.</div>
+      <div id="csv-last-upload" style="font-size:12px;color:var(--muted);margin-bottom:10px;">Last upload: checking...</div>
       <input type="file" id="health-csv-input" accept=".csv" style="display:none" onchange="uploadHealthCSV(this)">
       <button class="btn-primary" onclick="document.getElementById('health-csv-input').click()">📂 Upload glow_health_data.csv</button>
       <div id="csv-upload-status" style="display:none;margin-top:10px;font-size:13px;padding:10px;border-radius:10px;"></div>
@@ -1141,7 +1142,7 @@ function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') buildBodyChart();
-  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); }
+  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); checkLastUpload(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);}
@@ -1797,6 +1798,26 @@ async function buildHealthSnapshot(){
 }
 
 
+async function checkLastUpload(){
+  const el = document.getElementById('csv-last-upload');
+  if(!el) return;
+  try {
+    const res = await fetch(`${BACKEND}/api/health-data`);
+    if(!res.ok){ el.textContent='Last upload: none yet'; return; }
+    const { csv } = await res.json();
+    if(!csv){ el.textContent='Last upload: none yet'; return; }
+    const rows = parseCSVToRows(csv);
+    const dates = rows.map(r=>r.date).filter(Boolean).sort();
+    const latest = dates[dates.length-1];
+    const earliest = dates[0];
+    el.textContent = `Last upload: ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} · Data: ${earliest} → ${latest} (${rows.length} days)`;
+    el.style.color = '#27500A';
+  } catch(e){
+    el.textContent = 'Last upload: none yet';
+  }
+}
+
+
 async function uploadHealthCSV(input) {
   const file = input.files[0];
   if (!file) return;
@@ -1822,7 +1843,7 @@ async function uploadHealthCSV(input) {
     status.style.background = '#EAF3DE';
     status.style.color = '#27500A';
     status.textContent = `✅ ${rowCount} days of health data uploaded successfully! Charts and AI coach are now updated.`;
-
+    checkLastUpload();
     // Rebuild charts with new data
     if (curTab === 'health') { buildBPChart(); buildAppleHealthMetrics(); }
 
