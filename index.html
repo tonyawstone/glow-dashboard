@@ -1664,11 +1664,15 @@ async function loadAllPhotos(){
       // If hero photo not found locally, try fetching from Blob
       const heroFound = results.some(p=>p.id==='hero'||p.id==='hero-bloburl');
       if(!heroFound){
-        try {
-          const proxyUrl = `${BACKEND}/api/upload-photo?slotId=hero`;
-          const test = await fetch(proxyUrl, {method:'HEAD'});
-          if(test.ok) displayPhoto('hero', proxyUrl);
-        } catch(e){}
+        const proxyUrl = `${BACKEND}/api/upload-photo?slotId=hero`;
+        // Just try setting the image src directly — if it loads, great; if not, stays empty
+        const img = document.getElementById('hero-img');
+        const fb = document.getElementById('hero-fallback');
+        if(img){
+          img.onload = () => { img.style.display='block'; if(fb) fb.style.display='none'; };
+          img.onerror = () => { img.style.display='none'; if(fb) fb.style.display='block'; };
+          img.src = proxyUrl;
+        }
       }
       r();
     };
