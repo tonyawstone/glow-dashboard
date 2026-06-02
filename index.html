@@ -1112,6 +1112,8 @@ async function boot(){
   await loadAllPhotos();
   await loadLogs();
   buildBodyChart();
+  // Sync from Blob in background — loads any data from other devices
+  syncAllFromBlob();
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
@@ -1227,25 +1229,52 @@ function toggleMore(id){
   btn.textContent=hidden?'Show less':'Show more';
 }
 
-// ── NOTION SYNC ───────────────────────────────────────────────────────
+// ── VERCEL BLOB SYNC ──────────────────────────────────────────────────
 const BACKEND = 'https://glow-dashboard-backend.vercel.app';
 
-async function syncToNotion(store, data) {
+async function syncToBlob(store) {
   try {
-    const res = await fetch(`${BACKEND}/api/notion-sync`, {
+    // Get all current records from IndexedDB for this store
+    const data = await dbAll(store);
+    await fetch(`${BACKEND}/api/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ store, data })
+      body: JSON.stringify({ pillar: store, data })
     });
-    if (!res.ok) {
-      const err = await res.text();
-      console.warn(`Notion sync failed for ${store}:`, err);
-    } else {
-      console.log(`✅ Notion sync OK: ${store}`);
-    }
+    console.log(`✅ Blob sync OK: ${store}`);
   } catch (err) {
-    console.warn(`Notion sync error (${store}) — saved locally only:`, err.message);
+    console.warn(`Blob sync error (${store}):`, err.message);
   }
+}
+
+async function loadFromBlob(store) {
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=${store}`);
+    if (!res.ok) return;
+    const { data } = await res.json();
+    if (!data || !data.length) return;
+    // Merge with local — add any entries not already in IndexedDB
+    const local = await dbAll(store);
+    const localDates = new Set(local.map(e => e.date + (e.sys||'') + (e.mood||'')));
+    let added = 0;
+    for (const entry of data) {
+      const key = entry.date + (entry.sys||'') + (entry.mood||'');
+      if (!localDates.has(key)) {
+        await dbAdd(store, entry);
+        added++;
+      }
+    }
+    if (added > 0) console.log(`✅ Loaded ${added} new entries from Blob: ${store}`);
+  } catch (err) {
+    console.warn(`Blob load error (${store}):`, err.message);
+  }
+}
+
+async function syncAllFromBlob() {
+  const stores = ['checkins','bps','sleeps','skins','hairs','minds','outfits','exercises','labs','wardrobeplans','boxsummaries','reflections'];
+  await Promise.all(stores.map(s => loadFromBlob(s)));
+  await loadLogs();
+  console.log('✅ All data synced from Blob');
 }
 
 // ── SAVE HANDLERS ─────────────────────────────────────────────────────
@@ -1257,7 +1286,7 @@ async function saveCheckin(){
   const meds=document.getElementById('t-meds').classList.contains('on');
   const entry={mood,note,zep,cpap,meds,date:nowStr()};
   await dbAdd('checkins',entry);
-  syncToNotion('checkins',entry); // fire-and-forget — won't break local save
+  syncToBlob('checkins'); // fire-and-forget — won't break local save
   document.getElementById('today-note').value='';
   document.getElementById('mood-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
   toast('tt');loadLogs();
@@ -1266,7 +1295,7 @@ async function saveOutfit(){
   const desc=document.getElementById('outfit-desc').value.trim();if(!desc)return;
   const outfitEntry={desc,occ:gT('occ-tags'),src:gT('src-tags')[0]||'',keep:gT('keep-tags')[0]||'',stars:getStars('outfit-stars'),date:nowStr()};
   await dbAdd('outfits',outfitEntry);
-  syncToNotion('outfits',outfitEntry);
+  syncToBlob('outfits');
   document.getElementById('outfit-desc').value='';
   toast('st');
 }
@@ -1276,6 +1305,7 @@ async function saveWardrobePlan(){
   const wishlist=document.getElementById('dailylook-wishlist').value.trim();
   if(!occasion&&!plan&&!wishlist)return;
   await dbAdd('wardrobeplans',{occasion,plan,wishlist,date:nowStr()});
+  syncToBlob('wardrobeplans');
   document.getElementById('wardrobe-occasion').value='';
   document.getElementById('wardrobe-plan').value='';
   document.getElementById('dailylook-wishlist').value='';
@@ -1284,6 +1314,7 @@ async function saveWardrobePlan(){
 async function saveBoxSummary(){
   const arrived=document.getElementById('box-arrived').value.trim();
   await dbAdd('boxsummaries',{arrived,kept:document.getElementById('box-kept').value,returned:document.getElementById('box-returned').value,fav:document.getElementById('box-fav').value,date:nowStr()});
+  syncToBlob('boxsummaries');
   toast('bxt');
 }
 async function saveSleep(){
@@ -1294,7 +1325,7 @@ async function saveSleep(){
   if(bed&&wake){const[bh,bm]=bed.split(':').map(Number);const[wh,wm]=wake.split(':').map(Number);let m=(wh*60+wm)-(bh*60+bm);if(m<0)m+=1440;hrs=(m/60).toFixed(1);document.getElementById('sleep-display').textContent=hrs+'h';document.getElementById('s-sleep-h').textContent=hrs+'h';}
   const sleepEntry={hrs,cpap:cpap[0]||'',quality,energy,note,date:nowStr()};
   await dbAdd('sleeps',sleepEntry);
-  syncToNotion('sleeps',sleepEntry);
+  syncToBlob('sleeps');
   document.getElementById('sleep-note').value='';
   ['cpap-tags','energy-am-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
@@ -1303,7 +1334,7 @@ async function saveSleep(){
 async function saveBody(){
   const entry={type:'body',nsv:gT('nsv-tags'),note:document.getElementById('zep-note').value.trim(),waist:document.getElementById('waist').value,hips:document.getElementById('hips').value,date:nowStr()};
   await dbAdd('skins',entry);
-  syncToNotion('skins',entry);
+  syncToBlob('skins');
   toast('bt');
 }
 async function saveExercise(){
@@ -1326,7 +1357,7 @@ async function saveExercise(){
   if(other) summary.push('Other '+other+'m');
   const exEntry={walk,pilates,strength,abs,yoga,other,summary,time,intensity,note,date:nowStr()};
   await dbAdd('exercises',exEntry);
-  syncToNotion('exercises',exEntry);
+  syncToBlob('exercises');
   ['ex-walk','ex-pilates','ex-strength','ex-abs','ex-yoga','ex-other','ex-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['ex-time-tags','ex-intensity'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   toast('ext');
@@ -1338,7 +1369,7 @@ async function saveBP(){
   const time=gT('bp-time-tags')[0]||'',note=document.getElementById('bp-note').value.trim();
   const bpEntry={sys,dia,pulse,time,note,date:nowStr()};
   await dbAdd('bps',bpEntry);
-  syncToNotion('bps',bpEntry);
+  syncToBlob('bps');
   document.getElementById('bp-sys').value='';document.getElementById('bp-dia').value='';document.getElementById('bp-pulse').value='';
   document.getElementById('bp-note').value='';
   toast('bpt');loadLogs();
@@ -1347,12 +1378,14 @@ async function saveLab(){
   const date=document.getElementById('lab-date').value.trim(),notes=document.getElementById('lab-notes').value.trim();
   if(!notes)return;
   await dbAdd('labs',{date,notes,logged:nowStr()});
+  syncToBlob('labs');
   document.getElementById('lab-date').value='';document.getElementById('lab-notes').value='';
   toast('lt');
 }
 async function saveFacial(){
   const next=document.getElementById('next-facial').value.trim(),notes=document.getElementById('facial-notes').value.trim();
   await dbAdd('skins',{type:'facial',next,notes,date:nowStr()});
+  syncToBlob('skins');
   toast('ft');
 }
 async function saveSkin(){
@@ -1361,7 +1394,7 @@ async function saveSkin(){
   const musely_spot=document.getElementById('r-musely-spot').classList.contains('on');
   const skinEntry={type:'checkin',skinT,concerns,derm,musely_aa,musely_spot,date:nowStr()};
   await dbAdd('skins',skinEntry);
-  syncToNotion('skins',skinEntry);
+  syncToBlob('skins');
   document.getElementById('derm-note').value='';
   ['skin-tags','concern-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   toast('skt');loadLogs();
@@ -1370,7 +1403,7 @@ async function saveHair(){
   const hairT=gT('hair-tags'),care=gT('hcare-tags'),prods=gT('products-used-tags'),note=document.getElementById('hair-note').value.trim();
   const hairEntry={hairT,care,prods,note,date:nowStr()};
   await dbAdd('hairs',hairEntry);
-  syncToNotion('hairs',hairEntry);
+  syncToBlob('hairs');
   document.getElementById('hair-note').value='';
   ['hair-tags','hcare-tags','products-used-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   toast('ht');loadLogs();
@@ -1387,7 +1420,7 @@ async function saveMind(){
   const bodyImage=getStars('body-image-stars');
   const mindEntry={vibe,selfcare,win,gratitude,intention,energy,conf,stress,bodyImage,date:nowStr()};
   await dbAdd('minds',mindEntry);
-  syncToNotion('minds',mindEntry);
+  syncToBlob('minds');
   document.getElementById('win-note').value='';
   document.getElementById('gratitude').value='';
   document.getElementById('intention').value='';
@@ -1399,6 +1432,7 @@ async function saveMind(){
 async function saveReflection(){
   const text=document.getElementById('monthly-reflection').value.trim();if(!text)return;
   await dbAdd('reflections',{text,month:new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})});
+  syncToBlob('reflections');
   document.getElementById('monthly-reflection').value='';
   toast('ref-t');loadLogs();
 }
