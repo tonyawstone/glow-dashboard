@@ -1735,7 +1735,7 @@ async function buildAppleHealthMetrics(){
   }
 }
 
-
+async function buildHealthSnapshot(){
   const bps = await dbAll('bps');
   const csvBPs = await getCSVBPData();
   const allBPs = [...csvBPs, ...bps.map(b=>({date:b.date,sys:Number(b.sys),dia:Number(b.dia)}))].filter(b=>b.sys&&b.dia);
@@ -1752,6 +1752,7 @@ async function buildAppleHealthMetrics(){
   const lastManual = manualSorted[0];
 
   // Get most recent from any source
+  let lastBP = null;
   const sorted = allBPs.filter(b=>parseBPDate(b.date)).sort((a,b)=>parseBPDate(b.date)-parseBPDate(a.date));
   lastBP = sorted[0] || null;
 
