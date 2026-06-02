@@ -1567,13 +1567,32 @@ async function handlePhoto(event){
   reader.onload=async e=>{
     try{
       const compressed=await compressImage(e.target.result,curPhotoTarget==='hero'?220:420);
+      // Save to IndexedDB immediately for instant display
       await dbPutPhoto(curPhotoTarget,compressed);
-      const verify=await dbGetPhoto(curPhotoTarget);
-      if(verify) displayPhoto(curPhotoTarget,verify);
+      displayPhoto(curPhotoTarget,compressed);
+      // Upload to Vercel Blob in background
+      uploadPhotoToBlob(curPhotoTarget,compressed);
     }catch(err){alert('Could not save photo: '+err.message);}
     event.target.value='';
   };
   reader.readAsDataURL(file);
+}
+
+async function uploadPhotoToBlob(slotId,dataUrl){
+  try{
+    const res=await fetch(`${BACKEND}/api/upload-photo`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({slotId,dataUrl})
+    });
+    if(!res.ok) throw new Error(await res.text());
+    const {url}=await res.json();
+    // Store the Blob URL in IndexedDB so future loads use it
+    await dbPutPhoto(slotId+'-bloburl',url);
+    console.log(`✅ Photo uploaded to Blob: ${slotId}`);
+  }catch(err){
+    console.warn('Blob upload failed (photo still saved locally):',err.message);
+  }
 }
 
 function compressImage(dataUrl,maxWidth){
@@ -1631,7 +1650,19 @@ async function loadAllPhotos(){
   return new Promise(r=>{
     const t=db.transaction('photos','readonly');
     const rq=t.objectStore('photos').getAll();
-    rq.onsuccess=()=>{rq.result.forEach(p=>displayPhoto(p.id,p.data));r();};
+    rq.onsuccess=()=>{
+      const results=rq.result;
+      // Build a map of slotId -> blobUrl if available
+      const blobUrls={};
+      results.forEach(p=>{if(p.id.endsWith('-bloburl'))blobUrls[p.id.replace('-bloburl','')]=p.data;});
+      // Display each photo — prefer Blob URL over base64
+      results.forEach(p=>{
+        if(p.id.endsWith('-bloburl')) return; // skip url entries
+        const url=blobUrls[p.id]||p.data;
+        displayPhoto(p.id,url);
+      });
+      r();
+    };
   });
 }
 
