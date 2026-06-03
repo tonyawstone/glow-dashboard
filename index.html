@@ -89,6 +89,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
 /* BUTTONS */
 .btn-primary{width:100%;margin-top:16px;padding:14px;border-radius:12px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:15px;font-weight:500;cursor:pointer;font-family:var(--sans);}
+.btn-secondary{width:100%;margin-top:8px;padding:11px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:14px;font-weight:400;cursor:pointer;font-family:var(--sans);}
 .lab-section-title{font-size:11px;font-weight:500;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;}
 .lab-trend{font-size:10px;color:var(--muted);margin-left:6px;}
 .health-insight-banner{display:flex;align-items:flex-start;gap:12px;background:var(--warm);border-radius:14px;padding:14px;margin-bottom:16px;border:0.5px solid var(--border);}
@@ -988,9 +989,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="log-empty">No scan yet — take your first weekly skin scan below.</div>
       </div>
       <div style="margin-top:14px;">
-        <input type="file" id="skin-scan-input" accept="image/*" capture="user" style="display:none" onchange="runSkinAnalysis(this)">
+        <input type="file" id="skin-scan-input" accept="image/*" capture="user" style="display:none" onchange="runSkinAnalysis(this, false)">
+        <input type="file" id="skin-scan-historical-input" accept="image/*" style="display:none" onchange="runSkinAnalysis(this, true)">
         <button class="btn-primary" onclick="document.getElementById('skin-scan-input').click()">📷 Scan my skin</button>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Take a well-lit selfie · Weekly scanning recommended</div>
+        <button class="btn-secondary" style="margin-top:8px;width:100%;" onclick="document.getElementById('skin-scan-historical-input').click()">📂 Upload historical photo</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Weekly scanning recommended · Upload past photos to build your history</div>
         <div id="skin-scan-status" style="display:none;margin-top:10px;padding:12px;border-radius:12px;font-size:13px;"></div>
       </div>
     </div>
@@ -2413,16 +2416,33 @@ async function uploadHealthCSV(input) {
 
 
 // ── SKIN ANALYSIS ─────────────────────────────────────────────────────
-async function runSkinAnalysis(input){
+async function runSkinAnalysis(input, isHistorical=false){
   const file = input.files[0]; if(!file) return;
+
+  // For historical uploads, ask for the date
+  let scanDate = nowStr();
+  let isoDate = new Date().toISOString();
+  if(isHistorical){
+    const dateInput = prompt('What date was this photo taken?\n\nEnter as: Mon Jan 15, 2026\nor: March 3, 2025');
+    if(!dateInput) return;
+    try {
+      const parsed = new Date(dateInput);
+      if(isNaN(parsed)) throw new Error('Invalid date');
+      scanDate = parsed.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+      isoDate = parsed.toISOString();
+    } catch(e) {
+      alert('Could not parse that date — please try again in format: March 3, 2025');
+      return;
+    }
+  }
+
   const status = document.getElementById('skin-scan-status');
   status.style.display='block';
   status.style.background='#FEF3C7';
   status.style.color='#92400E';
-  status.textContent='✨ Analyzing your skin... this takes about 15 seconds';
+  status.textContent=`✨ Analyzing ${isHistorical?'historical photo':'your skin'}... this takes about 15 seconds`;
 
   try {
-    // Convert to base64
     const base64 = await new Promise((res,rej)=>{
       const r=new FileReader();
       r.onload=()=>res(r.result.split(',')[1]);
@@ -2440,15 +2460,15 @@ async function runSkinAnalysis(input){
     const {result} = await response.json();
     if(!result) throw new Error('No result returned');
 
-    // Save scan result
-    const scan = {
-      date: nowStr(),
-      isoDate: new Date().toISOString(),
-      ...result
-    };
+    const scan = { date:scanDate, isoDate, ...result };
+
+    // Save — insert in chronological order
     const existing = await fetch(`${BACKEND}/api/sync?pillar=skinscan`)
       .then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
     existing.push(scan);
+    // Sort by date
+    existing.sort((a,b)=>new Date(a.isoDate)-new Date(b.isoDate));
+
     await fetch(`${BACKEND}/api/sync`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -2457,7 +2477,7 @@ async function runSkinAnalysis(input){
 
     status.style.background='#EAF3DE';
     status.style.color='#27500A';
-    status.textContent='✅ Scan complete! Results saved.';
+    status.textContent=`✅ ${isHistorical?`Historical scan saved for ${scanDate}`:'Scan complete!'} · Results saved.`;
     renderSkinScanResults(scan, 'skin-scan-latest');
     input.value='';
 
