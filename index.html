@@ -1218,6 +1218,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handlePhoto(event)">
 
 <script>
+// ── SAFE NAV HELPERS (defined first so score card can use them) ────────
+function goToHealth(){ if(typeof tab==='function') tab('health'); }
+function goToHealthInsights(){ goToHealth(); setTimeout(buildHealthInsights,300); }
+
 // ── DB ────────────────────────────────────────────────────────────────
 let db;
 const req=indexedDB.open('GlowDashboard',4);
@@ -1258,8 +1262,8 @@ async function boot(){
   // Sync from Blob in background — loads any data from other devices
   syncAllFromBlob();
   loadCoachingInsights();
-  calculateGlowScore(false);
-  loadTodayWater(); // calculate on load, don't auto-save
+  loadSavedScore();
+  loadTodayWater();
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
@@ -2467,6 +2471,7 @@ async function buildHealthInsights(){
 }
 
 
+async function buildHydrationStatus(){
   const el = document.getElementById('hydration-status');
   if(!el) return;
 
@@ -2643,11 +2648,13 @@ async function calculateGlowScore(save=false) {
   if(recentEx.length>=4) activityScore=Math.min(20,activityScore+2);
   else if(recentEx.length>=2) activityScore=Math.min(20,activityScore+1);
 
-  // ── SLEEP (0–20) ──
+  // ── SLEEP (0–20) — prefer manual logs over CSV ──
   let sleepScore=10;
-  const csvSleep=avgField(csvRows.slice(0,7),'sleep_hrs');
   const recentSleeps=recent7(sleeps);
-  const avgSleepHrs=recentSleeps.length?avgField(recentSleeps,'hrs'):csvSleep;
+  const manualSleepHrs = recentSleeps.map(s=>parseFloat(s.hrs)||0).filter(v=>v>0);
+  const csvSleepHrs = csvRows.slice(0,7).map(r=>parseFloat(r.sleep_hrs)||0).filter(v=>v>0);
+  const sleepSource = manualSleepHrs.length ? manualSleepHrs : csvSleepHrs;
+  const avgSleepHrs = sleepSource.length ? sleepSource.reduce((a,b)=>a+b,0)/sleepSource.length : null;
   if(avgSleepHrs){
     if(avgSleepHrs>=7&&avgSleepHrs<=9) sleepScore=20; else if(avgSleepHrs>=6) sleepScore=15;
     else if(avgSleepHrs>=5) sleepScore=10; else sleepScore=6;
@@ -2725,20 +2732,74 @@ async function calculateGlowScore(save=false) {
     <button class="glow-recalc-btn" onclick="calculateGlowScore(true)">🔄 Recalculate &amp; save</button>
     <div class="glow-score-trend" id="glow-score-trend">Save your first score to start tracking your trend.</div>
     <div style="text-align:center;margin-top:10px;">
-      <button onclick="tab('health');setTimeout(buildHealthInsights,300)" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);text-decoration:underline;">See what's driving your score →</button>
+      <button onclick="goToHealthInsights()" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);text-decoration:underline;">See what's driving your score →</button>
     </div>
   `;
   loadScoreTrend();
+}
+
+async function loadSavedScore(){
+  const el = document.getElementById('health-score-content');
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=scores`);
+    if(res.ok){
+      const { data } = await res.json();
+      if(data && data.length){
+        // Render last saved score
+        const last = data[data.length-1];
+        renderSavedScore(last);
+        return;
+      }
+    }
+  } catch(e){}
+  // No saved score yet — calculate fresh
+  calculateGlowScore(false);
+}
+
+function renderSavedScore(saved){
+  const el = document.getElementById('health-score-content');
+  if(!el) return;
+  const totalScore = saved.totalScore;
+  const realAge = saved.realAge;
+  const scoreColor = totalScore>=85?'#27500A':totalScore>=70?'#6B9E78':totalScore>=55?'#92400E':'#7F1D1D';
+  const scoreBg = totalScore>=85?'#EAF3DE':totalScore>=70?'rgba(107,158,120,0.15)':totalScore>=55?'#FEF3C7':'#FEE2E2';
+  const scoreLabel = totalScore>=85?'Thriving':totalScore>=70?'Strong':totalScore>=55?'Building':'Needs attention';
+  const savedDate = new Date(saved.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  // Reconstruct pillar array from saved data
+  const pillarColors = {'❤️ Cardio':'#C4735A','🧪 Metabolic':'#A07850','💪 Body':'#6B9E78','🏃 Activity':'#9B8EC4','😴 Sleep':'#6B9E78','🧠 Mind':'#E8A87C'};
+  const pillarsHTML = saved.pillars ? Object.entries(saved.pillars).map(([name,score])=>`
+    <div class="glow-pillar-item">
+      <div class="glow-pillar-name">${name}</div>
+      <div class="glow-pillar-bar-wrap"><div class="glow-pillar-bar" style="width:${(score/20)*100}%;background:${pillarColors[name]||'#A07850'};"></div></div>
+      <div class="glow-pillar-score">${score}/20</div>
+    </div>`).join('') : '';
+
+  el.innerHTML = `
+    <div class="glow-score-hero">
+      <div class="glow-score-circle" style="background:${scoreBg};border-color:${scoreColor};">
+        <div class="glow-score-num" style="color:${scoreColor};">${totalScore}</div>
+        <div class="glow-score-label" style="color:${scoreColor};">${scoreLabel}</div>
+      </div>
+      <div class="glow-score-right">
+        <div class="glow-real-age">${realAge} <span style="font-size:14px;font-weight:400;color:var(--muted);">body age</span></div>
+        <div class="glow-real-age-label">vs. chronological age 54</div>
+        <div class="glow-score-date">Saved ${savedDate}</div>
+      </div>
+    </div>
+    <div class="glow-pillar-scores">${pillarsHTML}</div>
+    <button class="glow-recalc-btn" onclick="calculateGlowScore(true)">🔄 Recalculate &amp; save</button>
+    <div class="glow-score-trend" id="glow-score-trend">Loading trend...</div>
+    <div style="text-align:center;margin-top:10px;">
+      <button onclick="goToHealthInsights()" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);text-decoration:underline;">See what's driving your score →</button>
+    </div>
+  `;
   loadScoreTrend();
 }
 
+
 async function loadScoreTrend(){
   try{
-    const res=await fetch(`${BACKEND}/api/sync?pillar=scores`);
-    if(!res.ok)return;
-    const {data}=await res.json();
-    if(!data||!data.length)return;
-    const el=document.getElementById('glow-score-trend');
     if(!el)return;
     if(data.length>=2){
       const prev=data[data.length-2],curr=data[data.length-1];
