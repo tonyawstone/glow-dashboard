@@ -1220,7 +1220,25 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <script>
 // ── SAFE NAV HELPERS (defined first so score card can use them) ────────
 function goToHealth(){ if(typeof tab==='function') tab('health'); }
-function goToHealthInsights(){ goToHealth(); setTimeout(buildHealthInsights,300); }
+function goToHealthInsights(){ 
+  goToHealth(); 
+  setTimeout(()=>{
+    buildHealthInsights();
+    setTimeout(()=>{
+      const card = document.getElementById('health-insights-card');
+      if(card) card.scrollIntoView({behavior:'smooth', block:'start'});
+    }, 400);
+  }, 300);
+}
+async function getRealAge(){
+  try{
+    const res = await fetch(`${BACKEND}/api/sync?pillar=scores`);
+    if(!res.ok) return '—';
+    const {data} = await res.json();
+    if(data&&data.length) return data[data.length-1].realAge;
+  }catch(e){}
+  return '—';
+}
 
 // ── DB ────────────────────────────────────────────────────────────────
 let db;
@@ -2390,6 +2408,14 @@ async function buildHealthInsights(){
   if(!el) return;
   el.innerHTML = '<div class="log-empty">Calculating insights...</div>';
 
+  // Get saved score and biological age for display
+  let totalScore = 0, scoreColor = 'var(--accent)', bioAge = '—';
+  try {
+    const sr = await fetch(`${BACKEND}/api/sync?pillar=scores`);
+    if(sr.ok){ const {data}=await sr.json(); if(data&&data.length){ totalScore=data[data.length-1].totalScore; bioAge=data[data.length-1].realAge; }}
+  } catch(e){}
+  scoreColor = totalScore>=85?'#27500A':totalScore>=70?'#6B9E78':totalScore>=55?'#92400E':'#7F1D1D';
+
   const [bps, checkins, sleeps, minds, exercises] = await Promise.all([
     dbAll('bps'), dbAll('checkins'), dbAll('sleeps'), dbAll('minds'), dbAll('exercises')
   ]);
@@ -2411,31 +2437,31 @@ async function buildHealthInsights(){
   const focus = [];
 
   // BP
-  if(avgSys&&avgSys<130) wins.push({icon:'❤️', title:'BP well controlled', impact:'−3 body age years', detail:`Avg systolic ${Math.round(avgSys)} mmHg — excellent on your medications`});
+  if(avgSys&&avgSys<130) wins.push({icon:'❤️', title:'BP well controlled', impact:'−3 biological age years', detail:`Avg systolic ${Math.round(avgSys)} mmHg — excellent on your medications`});
   else if(avgSys&&avgSys>=130) focus.push({icon:'❤️', title:'BP needs attention', impact:'Could save 3 years', detail:`Avg systolic ${Math.round(avgSys)} mmHg — discuss with your doctor`, action:'Log readings more consistently and discuss with your doctor'});
 
   // Labs
-  wins.push({icon:'🧪', title:'Lab values excellent', impact:'−2 body age years', detail:'Cholesterol 116, LDL 50, Glucose 88, ALT normalized — all optimal'});
+  wins.push({icon:'🧪', title:'Lab values excellent', impact:'−2 biological age years', detail:'Cholesterol 116, LDL 50, Glucose 88, ALT normalized — all optimal'});
   focus.push({icon:'🧪', title:'Alk Phosphatase still elevated', impact:'Room to improve', detail:'135 IU/L (normal <126) — improving but watch at next labs (Aug–Nov 2026)', action:'Continue Zepbound — weight loss is known to normalize Alk Phos'});
 
   // BMI
-  if(bmi&&bmi<25) wins.push({icon:'💪', title:'BMI in normal range', impact:'−2 body age years', detail:`BMI ${bmi.toFixed(1)} — normal range achieved`});
+  if(bmi&&bmi<25) wins.push({icon:'💪', title:'BMI in normal range', impact:'−2 biological age years', detail:`BMI ${bmi.toFixed(1)} — normal range achieved`});
   else if(bmi) focus.push({icon:'💪', title:'BMI improving', impact:'Could save 2 more years', detail:`BMI ${bmi.toFixed(1)} — goal is under 25`, action:'At current Zepbound pace, normal BMI is within reach'});
 
   // Zepbound
-  wins.push({icon:'✨', title:'Active weight loss', impact:'−2 body age years', detail:'30.7 lbs lost on Zepbound — intentional weight loss has documented anti-aging effects'});
+  wins.push({icon:'✨', title:'Active weight loss', impact:'−2 biological age years', detail:'30.7 lbs lost on Zepbound — intentional weight loss has documented anti-aging effects'});
 
   // Steps
-  if(avgStepsVal>=7500) wins.push({icon:'🏃', title:'Good activity level', impact:'−2 body age years', detail:`${avgStepsVal.toLocaleString()} avg steps/day`});
+  if(avgStepsVal>=7500) wins.push({icon:'🏃', title:'Good activity level', impact:'−2 biological age years', detail:`${avgStepsVal.toLocaleString()} avg steps/day`});
   else if(avgStepsVal>=5000) focus.push({icon:'🏃', title:'Increase daily steps', impact:'Could save 2 years', detail:`Currently ${avgStepsVal.toLocaleString()} steps/day · goal is 7,500+`, action:'Add a 15-min walk after dinner — low-impact, hip-friendly'});
   else focus.push({icon:'🏃', title:'Activity level low', impact:'Could save up to 3 years', detail:`Steps data shows ${avgStepsVal?avgStepsVal.toLocaleString():'no data yet'} — aim for 7,500+`, action:'Start with 10-min treadmill walks and build gradually'});
 
   // Sleep
-  if(avgSleepVal>=7) wins.push({icon:'😴', title:'Good sleep duration', impact:'−2 body age years', detail:`${avgSleepVal.toFixed(1)} hrs avg · CPAP helping`});
+  if(avgSleepVal>=7) wins.push({icon:'😴', title:'Good sleep duration', impact:'−2 biological age years', detail:`${avgSleepVal.toFixed(1)} hrs avg · CPAP helping`});
   else if(avgSleepVal>0) focus.push({icon:'😴', title:'Improve sleep duration', impact:'Could save 2 years', detail:`${avgSleepVal.toFixed(1)} hrs avg — aim for 7+ hrs`, action:'Consistent CPAP use and a regular bedtime make the biggest difference'});
 
   // Exercise
-  if(recentEx.length>=3) wins.push({icon:'💪', title:'Regular exercise', impact:'−1 body age year', detail:`${recentEx.length} workouts logged this week`});
+  if(recentEx.length>=3) wins.push({icon:'💪', title:'Regular exercise', impact:'−1 biological age year', detail:`${recentEx.length} workouts logged this week`});
   else focus.push({icon:'💪', title:'Log exercise more consistently', impact:'Could save 1 year', detail:'Pilates, treadmill, and yoga all count — even 20 mins', action:'Low-impact workouts protect your hip and build the habit'});
 
   const winsHTML = wins.map(w=>`
@@ -2460,12 +2486,23 @@ async function buildHealthInsights(){
     </div>`).join('');
 
   el.innerHTML = `
-    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Based on your latest data · Body age adjustments vs chronological age 54</div>
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--warm);border-radius:12px;margin-bottom:16px;border:0.5px solid var(--border);">
+      <div style="text-align:center;min-width:60px;">
+        <div style="font-size:28px;font-weight:700;color:${scoreColor};">${totalScore}</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Glow Score</div>
+      </div>
+      <div style="width:1px;height:40px;background:var(--border);"></div>
+      <div>
+        <div style="font-size:22px;font-weight:700;color:var(--text);">${bioAge} <span style="font-size:13px;font-weight:400;color:var(--muted);">biological age</span></div>
+        <div style="font-size:11px;color:var(--muted);">vs. your chronological age 54</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Based on your latest data · Biological age adjustments vs chronological age 54</div>
     <div class="insight-section-label">✅ What's working for you</div>
     ${winsHTML}
     <div class="insight-section-label" style="margin-top:16px;">🎯 Where to focus</div>
     ${focusHTML}
-    <button class="btn-ai" style="margin-top:14px;" onclick="callCoach('Health','Based on my Glow Score pillar breakdown and health data, give me a specific personalized action plan to improve my body age score. Focus on the highest-impact changes I can realistically make.','insights-coach-output')">Ask coach for my action plan ↗</button>
+    <button class="btn-ai" style="margin-top:14px;" onclick="callCoach('Health','Based on my Glow Score pillar breakdown and health data, give me a specific personalized action plan to improve my biological age. Focus on the highest-impact changes I can realistically make.','insights-coach-output')">Ask coach for my action plan ↗</button>
     <div id="insights-coach-output" class="coach-response" style="display:none"></div>
   `;
 }
@@ -2716,8 +2753,8 @@ async function calculateGlowScore(save=false) {
         <div class="glow-score-label" style="color:${scoreColor};">${scoreLabel}</div>
       </div>
       <div class="glow-score-right">
-        <div class="glow-real-age">${realAge} <span style="font-size:14px;font-weight:400;color:var(--muted);">body age</span></div>
-        <div class="glow-real-age-label">vs. chronological age 54</div>
+        <div class="glow-real-age">${realAge} <span style="font-size:14px;font-weight:400;color:var(--muted);">biological age</span></div>
+        <div class="glow-real-age-label">vs. your chronological age 54</div>
         <div class="glow-score-date">${dateStr} · ${timeStr}</div>
       </div>
     </div>
@@ -2782,8 +2819,8 @@ function renderSavedScore(saved){
         <div class="glow-score-label" style="color:${scoreColor};">${scoreLabel}</div>
       </div>
       <div class="glow-score-right">
-        <div class="glow-real-age">${realAge} <span style="font-size:14px;font-weight:400;color:var(--muted);">body age</span></div>
-        <div class="glow-real-age-label">vs. chronological age 54</div>
+        <div class="glow-real-age">${realAge} <span style="font-size:14px;font-weight:400;color:var(--muted);">biological age</span></div>
+        <div class="glow-real-age-label">vs. your chronological age 54</div>
         <div class="glow-score-date">Saved ${savedDate}</div>
       </div>
     </div>
