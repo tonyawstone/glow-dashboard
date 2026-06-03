@@ -100,7 +100,16 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .he-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .he-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap;}
 .wins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
-.hydration-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.insight-section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;}
+.insight-item{display:flex;gap:12px;padding:12px;border-radius:12px;margin-bottom:8px;border:0.5px solid var(--border);}
+.insight-win{background:#F8FBF4;}
+.insight-focus{background:#FEFCF7;}
+.insight-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+.insight-body{flex:1;}
+.insight-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.insight-impact{font-size:12px;font-weight:500;margin-bottom:4px;}
+.insight-detail{font-size:12px;color:var(--muted);line-height:1.4;}
+.insight-action{font-size:12px;color:var(--accent);margin-top:6px;font-style:italic;line-height:1.4;}border-radius:50%;border:1.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .hydration-status-bar{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;margin-bottom:4px;}
 .hydration-status-icon{font-size:24px;flex-shrink:0;}
 .hydration-status-text{flex:1;}
@@ -347,7 +356,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
 
     <div class="card">
-      <div class="card-title">Daily check-in</div>
       <div class="card-title">Daily check-in</div>
       <div class="fl">How are you feeling?</div>
       <div class="tags" id="mood-tags">
@@ -810,6 +818,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="lt">Saved!</div>
     </div>
 
+    <!-- Health Insights -->
+    <div class="card" id="health-insights-card">
+      <div class="card-title">What's driving your Glow Score</div>
+      <div id="health-insights-content"><div class="log-empty">Tap "See what's driving your score" from Today to load insights.</div></div>
+    </div>
+
     <!-- Apple Health Upload -->
     <div class="card">
       <div class="card-title">Apple Health data · weekly upload</div>
@@ -1206,7 +1220,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <script>
 // ── DB ────────────────────────────────────────────────────────────────
 let db;
-const req=indexedDB.open('GlowDashboard',3);
+const req=indexedDB.open('GlowDashboard',4);
 req.onupgradeneeded=e=>{
   db=e.target.result;
   ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries','water'].forEach(s=>{
@@ -1277,7 +1291,7 @@ function tab(id){
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
   if(id==='sleep') buildSleepAppleMetrics();
-  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); }
+  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();}}
@@ -2268,8 +2282,10 @@ async function checkLastUpload(){
     const dates = rows.map(r=>r.date).filter(Boolean).sort();
     const latest = dates[dates.length-1];
     const earliest = dates[0];
-    el.textContent = `Last upload: ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} · Data: ${earliest} → ${latest} (${rows.length} days)`;
-    el.style.color = '#27500A';
+    const uploadDate = localStorage.getItem('glowCSVUploadDate');
+    const uploadStr = uploadDate ? `Uploaded ${uploadDate} · ` : '';
+    el.textContent = `${uploadStr}Data: ${earliest} → ${latest} (${rows.length} days)`;
+    el.style.color = 'var(--muted)';
   } catch(e){
     el.textContent = 'Last upload: none yet';
   }
@@ -2298,9 +2314,12 @@ async function uploadHealthCSV(input) {
 
     if (!res.ok) throw new Error('Upload failed');
 
+    const uploadDate = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     status.style.background = '#EAF3DE';
     status.style.color = '#27500A';
-    status.textContent = `✅ ${rowCount} days of health data uploaded successfully! Charts and AI coach are now updated.`;
+    status.textContent = `✅ ${rowCount} days of health data uploaded · ${uploadDate}`;
+    // Store upload date in localStorage for display
+    localStorage.setItem('glowCSVUploadDate', uploadDate);
     checkLastUpload();
     // Rebuild charts with new data
     if (curTab === 'health') { buildBPChart(); buildAppleHealthMetrics(); }
@@ -2362,7 +2381,92 @@ async function saveWaterIntake(){
   buildHydrationStatus();
 }
 
-async function buildHydrationStatus(){
+async function buildHealthInsights(){
+  const el = document.getElementById('health-insights-content');
+  if(!el) return;
+  el.innerHTML = '<div class="log-empty">Calculating insights...</div>';
+
+  const [bps, checkins, sleeps, minds, exercises] = await Promise.all([
+    dbAll('bps'), dbAll('checkins'), dbAll('sleeps'), dbAll('minds'), dbAll('exercises')
+  ]);
+  const csvRows = await getCSVRows();
+
+  const avgSteps = csvRows.slice(0,7).map(r=>parseInt(r.steps)||0).filter(v=>v>0);
+  const avgStepsVal = avgSteps.length ? Math.round(avgSteps.reduce((a,b)=>a+b,0)/avgSteps.length) : 0;
+  const recentEx = exercises.slice(-7);
+  const csvSleep = csvRows.slice(0,7).map(r=>parseFloat(r.sleep_hrs)||0).filter(v=>v>0);
+  const avgSleepVal = csvSleep.length ? csvSleep.reduce((a,b)=>a+b,0)/csvSleep.length : 0;
+  const allBPs = [...(await getCSVBPData()), ...bps.map(b=>({sys:Number(b.sys),dia:Number(b.dia),date:b.date}))].filter(b=>b.sys&&b.dia);
+  const recentBPs = allBPs.sort((a,b)=>parseBPDate(b.date)-parseBPDate(a.date)).slice(0,7);
+  const avgSys = recentBPs.length ? recentBPs.reduce((a,b)=>a+b.sys,0)/recentBPs.length : null;
+  const latestBMIRow = csvRows.find(r=>parseFloat(r.bmi)>0);
+  const bmi = latestBMIRow ? parseFloat(latestBMIRow.bmi) : null;
+
+  // Build winning factors
+  const wins = [];
+  const focus = [];
+
+  // BP
+  if(avgSys&&avgSys<130) wins.push({icon:'❤️', title:'BP well controlled', impact:'−3 body age years', detail:`Avg systolic ${Math.round(avgSys)} mmHg — excellent on your medications`});
+  else if(avgSys&&avgSys>=130) focus.push({icon:'❤️', title:'BP needs attention', impact:'Could save 3 years', detail:`Avg systolic ${Math.round(avgSys)} mmHg — discuss with your doctor`, action:'Log readings more consistently and discuss with your doctor'});
+
+  // Labs
+  wins.push({icon:'🧪', title:'Lab values excellent', impact:'−2 body age years', detail:'Cholesterol 116, LDL 50, Glucose 88, ALT normalized — all optimal'});
+  focus.push({icon:'🧪', title:'Alk Phosphatase still elevated', impact:'Room to improve', detail:'135 IU/L (normal <126) — improving but watch at next labs (Aug–Nov 2026)', action:'Continue Zepbound — weight loss is known to normalize Alk Phos'});
+
+  // BMI
+  if(bmi&&bmi<25) wins.push({icon:'💪', title:'BMI in normal range', impact:'−2 body age years', detail:`BMI ${bmi.toFixed(1)} — normal range achieved`});
+  else if(bmi) focus.push({icon:'💪', title:'BMI improving', impact:'Could save 2 more years', detail:`BMI ${bmi.toFixed(1)} — goal is under 25`, action:'At current Zepbound pace, normal BMI is within reach'});
+
+  // Zepbound
+  wins.push({icon:'✨', title:'Active weight loss', impact:'−2 body age years', detail:'30.7 lbs lost on Zepbound — intentional weight loss has documented anti-aging effects'});
+
+  // Steps
+  if(avgStepsVal>=7500) wins.push({icon:'🏃', title:'Good activity level', impact:'−2 body age years', detail:`${avgStepsVal.toLocaleString()} avg steps/day`});
+  else if(avgStepsVal>=5000) focus.push({icon:'🏃', title:'Increase daily steps', impact:'Could save 2 years', detail:`Currently ${avgStepsVal.toLocaleString()} steps/day · goal is 7,500+`, action:'Add a 15-min walk after dinner — low-impact, hip-friendly'});
+  else focus.push({icon:'🏃', title:'Activity level low', impact:'Could save up to 3 years', detail:`Steps data shows ${avgStepsVal?avgStepsVal.toLocaleString():'no data yet'} — aim for 7,500+`, action:'Start with 10-min treadmill walks and build gradually'});
+
+  // Sleep
+  if(avgSleepVal>=7) wins.push({icon:'😴', title:'Good sleep duration', impact:'−2 body age years', detail:`${avgSleepVal.toFixed(1)} hrs avg · CPAP helping`});
+  else if(avgSleepVal>0) focus.push({icon:'😴', title:'Improve sleep duration', impact:'Could save 2 years', detail:`${avgSleepVal.toFixed(1)} hrs avg — aim for 7+ hrs`, action:'Consistent CPAP use and a regular bedtime make the biggest difference'});
+
+  // Exercise
+  if(recentEx.length>=3) wins.push({icon:'💪', title:'Regular exercise', impact:'−1 body age year', detail:`${recentEx.length} workouts logged this week`});
+  else focus.push({icon:'💪', title:'Log exercise more consistently', impact:'Could save 1 year', detail:'Pilates, treadmill, and yoga all count — even 20 mins', action:'Low-impact workouts protect your hip and build the habit'});
+
+  const winsHTML = wins.map(w=>`
+    <div class="insight-item insight-win">
+      <div class="insight-icon">${w.icon}</div>
+      <div class="insight-body">
+        <div class="insight-title">${w.title}</div>
+        <div class="insight-impact" style="color:#27500A;">${w.impact}</div>
+        <div class="insight-detail">${w.detail}</div>
+      </div>
+    </div>`).join('');
+
+  const focusHTML = focus.map(f=>`
+    <div class="insight-item insight-focus">
+      <div class="insight-icon">${f.icon}</div>
+      <div class="insight-body">
+        <div class="insight-title">${f.title}</div>
+        <div class="insight-impact" style="color:#92400E;">${f.impact}</div>
+        <div class="insight-detail">${f.detail}</div>
+        ${f.action?`<div class="insight-action">→ ${f.action}</div>`:''}
+      </div>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Based on your latest data · Body age adjustments vs chronological age 54</div>
+    <div class="insight-section-label">✅ What's working for you</div>
+    ${winsHTML}
+    <div class="insight-section-label" style="margin-top:16px;">🎯 Where to focus</div>
+    ${focusHTML}
+    <button class="btn-ai" style="margin-top:14px;" onclick="callCoach('Health','Based on my Glow Score pillar breakdown and health data, give me a specific personalized action plan to improve my body age score. Focus on the highest-impact changes I can realistically make.','insights-coach-output')">Ask coach for my action plan ↗</button>
+    <div id="insights-coach-output" class="coach-response" style="display:none"></div>
+  `;
+}
+
+
   const el = document.getElementById('hydration-status');
   if(!el) return;
 
@@ -2619,8 +2723,12 @@ async function calculateGlowScore(save=false) {
         </div>`).join('')}
     </div>
     <button class="glow-recalc-btn" onclick="calculateGlowScore(true)">🔄 Recalculate &amp; save</button>
-    <div class="glow-score-trend" id="glow-score-trend">Loading history...</div>
+    <div class="glow-score-trend" id="glow-score-trend">Save your first score to start tracking your trend.</div>
+    <div style="text-align:center;margin-top:10px;">
+      <button onclick="tab('health');setTimeout(buildHealthInsights,300)" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);text-decoration:underline;">See what's driving your score →</button>
+    </div>
   `;
+  loadScoreTrend();
   loadScoreTrend();
 }
 
@@ -2636,10 +2744,11 @@ async function loadScoreTrend(){
       const prev=data[data.length-2],curr=data[data.length-1];
       const diff=curr.totalScore-prev.totalScore;
       const prevDate=new Date(prev.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      el.textContent=diff>0?`↑ +${diff} points since ${prevDate}`:diff<0?`↓ ${diff} points since ${prevDate}`:`No change since ${prevDate}`;
+      el.textContent=diff>0?`↑ +${diff} points since ${prevDate} · Keep going!`:diff<0?`↓ ${Math.abs(diff)} points since ${prevDate} · Recalculate after logging more data`:`No change since ${prevDate}`;
       el.style.color=diff>0?'#27500A':diff<0?'#7F1D1D':'var(--muted)';
     } else {
-      el.textContent='First score saved! Recalculate weekly to track your trend.';
+      const el2=document.getElementById('glow-score-trend');
+      if(el2) el2.textContent='First score saved! Recalculate weekly to track your trend.';
     }
   }catch(e){}
 }
