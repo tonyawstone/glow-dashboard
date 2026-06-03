@@ -100,7 +100,20 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .he-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .he-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap;}
 .wins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
-.insight-section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;}
+.skin-scan-card{}
+.skin-score-gauge{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+.skin-score-circle{width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;border:3px solid;}
+.skin-score-num{font-size:28px;font-weight:700;line-height:1;}
+.skin-score-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+.skin-metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;}
+.skin-metric-item{background:var(--warm);border-radius:10px;padding:10px 12px;border:0.5px solid var(--border);}
+.skin-metric-name{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+.skin-metric-bar-wrap{background:rgba(0,0,0,0.06);border-radius:20px;height:5px;margin-bottom:4px;}
+.skin-metric-bar{height:5px;border-radius:20px;}
+.skin-metric-score{font-size:13px;font-weight:600;color:var(--text);}
+.skin-scan-date{font-size:11px;color:var(--muted);margin-bottom:12px;}
+.skin-insight{font-size:13px;color:var(--text);line-height:1.5;padding:10px 12px;background:var(--warm);border-radius:10px;margin-bottom:8px;border:0.5px solid var(--border);}
+.skin-insight-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;}
 .insight-item{display:flex;gap:12px;padding:12px;border-radius:12px;margin-bottom:8px;border:0.5px solid var(--border);}
 .insight-win{background:#F8FBF4;}
 .insight-focus{background:#FEFCF7;}
@@ -967,6 +980,22 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="s-skin" class="sec">
   <div class="view-content on" id="vc-skin-daily">
     <div class="section-label">Skin & Derm</div>
+
+    <!-- AI Skin Scan -->
+    <div class="card skin-scan-card">
+      <div class="card-title">✨ Weekly skin scan</div>
+      <div id="skin-scan-latest">
+        <div class="log-empty">No scan yet — take your first weekly skin scan below.</div>
+      </div>
+      <div style="margin-top:14px;">
+        <input type="file" id="skin-scan-input" accept="image/*" capture="user" style="display:none" onchange="runSkinAnalysis(this)">
+        <button class="btn-primary" onclick="document.getElementById('skin-scan-input').click()">📷 Scan my skin</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Take a well-lit selfie · Weekly scanning recommended</div>
+        <div id="skin-scan-status" style="display:none;margin-top:10px;padding:12px;border-radius:12px;font-size:13px;"></div>
+      </div>
+    </div>
+
+    <!-- Routine tracking -->
     <div class="card">
       <div class="card-title">Morning routine</div>
       <div class="toggle-row" onclick="ts('r-cleanser')"><div><div class="tl">Olay Super Facial Cleanser</div><div class="ts">Advanced Deep Clean</div></div><div class="tog" id="r-cleanser"><div class="tok"></div></div></div>
@@ -1004,6 +1033,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toggle-row"><div><div class="tl">Olay Morning Routine</div><div class="ts" id="start-olay-display">Tap to set start date</div></div><input type="text" id="start-olay" placeholder="e.g. Mar 2024" style="width:110px;padding:6px 8px;font-size:12px;" onchange="saveStartDate('olay',this.value)"></div>
       <div class="toggle-row"><div><div class="tl">Facials (every 8 weeks)</div><div class="ts" id="start-facials-display">Tap to set start date</div></div><input type="text" id="start-facials" placeholder="e.g. Jun 2024" style="width:110px;padding:6px 8px;font-size:12px;" onchange="saveStartDate('facials',this.value)"></div>
     </div>
+    <div class="card">
       <div class="fl">Next facial date</div>
       <input type="text" id="next-facial" placeholder="e.g. July 5, 2026">
       <div class="fl">Notes from last facial</div>
@@ -1039,23 +1069,48 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="card"><div class="card-title">Skin log</div><div id="skin-log"><div class="log-empty">No entries yet.</div></div></div>
   </div>
+
   <div class="view-content" id="vc-skin-weekly">
     <div class="section-label">Skin · this week</div>
+    <div class="card">
+      <div class="card-title">Latest scan results</div>
+      <div id="skin-scan-weekly"><div class="log-empty">No scan this week — tap "Scan my skin" on Daily view.</div></div>
+    </div>
     <div class="card"><div class="card-title">Routine compliance & Musely alternation</div><div id="weekly-skin"><div class="log-empty">Log daily to see weekly routine compliance.</div></div></div>
   </div>
+
   <div class="view-content" id="vc-skin-monthly">
-    <div class="section-label">Skin · May 2026</div>
-    <div class="card"><div class="card-title">Monthly comparison</div>
+    <div class="section-label">Skin · Monthly trends</div>
+    <div class="card">
+      <div class="card-title">Skin score trend</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="skin-score-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Metric trends</div>
+      <div class="chart-tabs" id="skin-metric-tabs">
+        <button class="chart-tab on" onclick="switchSkinMetricChart('hydration',this)">Hydration</button>
+        <button class="chart-tab" onclick="switchSkinMetricChart('darkSpots',this)">Dark Spots</button>
+        <button class="chart-tab" onclick="switchSkinMetricChart('wrinkles',this)">Wrinkles</button>
+        <button class="chart-tab" onclick="switchSkinMetricChart('texture',this)">Texture</button>
+      </div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="skin-metric-chart"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title">Monthly comparison photos</div>
       <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;">
         <div style="flex-shrink:0;text-align:center;"><div class="photo-slot" style="width:95px;height:119px;" onclick="pickPhoto('skin-compare-may26')" id="skin-compare-may26"><i class="ti ti-plus" aria-hidden="true"></i></div><div style="font-size:11px;color:var(--accent);margin-top:5px;">May 2026</div></div>
         <div style="flex-shrink:0;text-align:center;opacity:0.4;"><div class="photo-slot" style="width:95px;height:119px;"><i class="ti ti-clock" aria-hidden="true"></i></div><div style="font-size:11px;color:var(--muted);margin-top:5px;">Jun 2026</div></div>
-        <div style="flex-shrink:0;text-align:center;opacity:0.4;"><div class="photo-slot" style="width:95px;height:119px;"></div><div style="font-size:11px;color:var(--muted);margin-top:5px;">Jul 2026</div></div>
       </div>
     </div>
   </div>
+
   <div class="view-content" id="vc-skin-yearly">
-    <div class="section-label">Skin · 2026</div>
-    <div class="card"><div class="card-title">Yearly skin progress</div><div class="log-empty" style="padding:2rem 0;">Your yearly skin evolution tracked here.</div></div>
+    <div class="section-label">Skin · 2026 journey</div>
+    <div class="card">
+      <div class="card-title">Skin age trend · 2026</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="skin-age-chart"></canvas></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Lower is better · Based on weekly AI scan</div>
+    </div>
+    <div class="card"><div class="card-title">Yearly skin progress</div><div id="skin-yearly-scans"><div class="log-empty">Complete weekly scans to build your yearly picture.</div></div></div>
   </div>
 </div>
 
@@ -1312,12 +1367,12 @@ function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
-  if(id==='sleep') buildSleepAppleMetrics();
+  if(id==='skin') loadLatestSkinScan();
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();}}
-  if(curTab==='body'&&v!=='daily') buildBodyCompChartsForView(v);
+  if(curTab==='skin'&&v!=='daily') buildSkinCharts();
 }
 function applyView(){
   const c=document.getElementById('s-'+curTab);if(!c)return;
@@ -2357,7 +2412,227 @@ async function uploadHealthCSV(input) {
 }
 
 
-// ── HYDRATION ─────────────────────────────────────────────────────────
+// ── SKIN ANALYSIS ─────────────────────────────────────────────────────
+async function runSkinAnalysis(input){
+  const file = input.files[0]; if(!file) return;
+  const status = document.getElementById('skin-scan-status');
+  status.style.display='block';
+  status.style.background='#FEF3C7';
+  status.style.color='#92400E';
+  status.textContent='✨ Analyzing your skin... this takes about 15 seconds';
+
+  try {
+    // Convert to base64
+    const base64 = await new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=()=>res(r.result.split(',')[1]);
+      r.onerror=rej;
+      r.readAsDataURL(file);
+    });
+    const mimeType = file.type || 'image/jpeg';
+
+    const response = await fetch(`${BACKEND}/api/skin-analysis`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({imageBase64:base64, mimeType})
+    });
+    if(!response.ok) throw new Error('Analysis failed');
+    const {result} = await response.json();
+    if(!result) throw new Error('No result returned');
+
+    // Save scan result
+    const scan = {
+      date: nowStr(),
+      isoDate: new Date().toISOString(),
+      ...result
+    };
+    const existing = await fetch(`${BACKEND}/api/sync?pillar=skinscan`)
+      .then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
+    existing.push(scan);
+    await fetch(`${BACKEND}/api/sync`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pillar:'skinscan',data:existing})
+    });
+
+    status.style.background='#EAF3DE';
+    status.style.color='#27500A';
+    status.textContent='✅ Scan complete! Results saved.';
+    renderSkinScanResults(scan, 'skin-scan-latest');
+    input.value='';
+
+  } catch(err){
+    status.style.background='#FAECE7';
+    status.style.color='#712B13';
+    status.textContent='❌ Analysis failed — please try again with a clear, well-lit photo.';
+    console.error('Skin analysis error:', err);
+  }
+}
+
+function renderSkinScanResults(scan, containerId){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const score = scan.overallScore || 0;
+  const scoreColor = score>=80?'#27500A':score>=65?'#6B9E78':score>=50?'#92400E':'#7F1D1D';
+  const scoreBg = score>=80?'#EAF3DE':score>=65?'rgba(107,158,120,0.15)':score>=50?'#FEF3C7':'#FEE2E2';
+  const metrics = scan.metrics || {};
+  const metricList = [
+    {key:'hydration',label:'Hydration',color:'#5B9EC9'},
+    {key:'elasticity',label:'Elasticity',color:'#6B9E78'},
+    {key:'texture',label:'Texture',color:'#A07850'},
+    {key:'acne',label:'Acne',color:'#E8A87C'},
+    {key:'wrinkles',label:'Wrinkles',color:'#9B8EC4'},
+    {key:'darkSpots',label:'Dark Spots',color:'#C4735A'},
+    {key:'pores',label:'Pores',color:'#6B9E78'},
+    {key:'redness',label:'Redness',color:'#C4735A'},
+  ];
+
+  el.innerHTML = `
+    <div class="skin-scan-date">${scan.date} · Skin age: <strong>${scan.skinAge}</strong></div>
+    <div class="skin-score-gauge">
+      <div class="skin-score-circle" style="background:${scoreBg};border-color:${scoreColor};">
+        <div class="skin-score-num" style="color:${scoreColor};">${score}</div>
+        <div class="skin-score-lbl" style="color:${scoreColor};">Skin Score</div>
+      </div>
+      <div style="flex:1;">
+        ${scan.highlights?`<div class="skin-insight"><div class="skin-insight-label" style="color:#27500A;">✅ Looking good</div>${scan.highlights}</div>`:''}
+      </div>
+    </div>
+    <div class="skin-metrics-grid">
+      ${metricList.map(m=>`
+        <div class="skin-metric-item">
+          <div class="skin-metric-name">${m.label}</div>
+          <div class="skin-metric-bar-wrap"><div class="skin-metric-bar" style="width:${metrics[m.key]||0}%;background:${m.color};"></div></div>
+          <div class="skin-metric-score">${metrics[m.key]||'—'}/100</div>
+        </div>`).join('')}
+    </div>
+    ${scan.focus?`<div class="skin-insight"><div class="skin-insight-label" style="color:#92400E;">🎯 Focus area</div>${scan.focus}</div>`:''}
+    ${scan.tip?`<div class="skin-insight"><div class="skin-insight-label" style="color:var(--accent);">💡 Tip</div>${scan.tip}</div>`:''}
+  `;
+}
+
+async function loadLatestSkinScan(){
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=skinscan`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!data||!data.length) return;
+    const latest = data[data.length-1];
+    renderSkinScanResults(latest, 'skin-scan-latest');
+    // Also update weekly view
+    renderSkinScanResults(latest, 'skin-scan-weekly');
+  } catch(e){}
+}
+
+async function buildSkinCharts(){
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=skinscan`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!data||!data.length) return;
+
+    // Skin score trend chart
+    const scoreCanvas = document.getElementById('skin-score-chart');
+    if(scoreCanvas){
+      if(chartInstances['skin-score-chart']){chartInstances['skin-score-chart'].destroy();}
+      const labels = data.map(s=>s.date);
+      const scores = data.map(s=>s.overallScore);
+      chartInstances['skin-score-chart'] = new Chart(scoreCanvas.getContext('2d'),{
+        type:'line',
+        data:{labels,datasets:[{
+          label:'Skin Score',data:scores,
+          borderColor:'#E8A87C',backgroundColor:'rgba(232,168,124,0.1)',
+          borderWidth:2.5,pointRadius:5,fill:true,tension:0.3
+        }]},
+        options:{
+          responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{
+            x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}},
+            y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}
+          }
+        }
+      });
+    }
+
+    // Skin age chart
+    const ageCanvas = document.getElementById('skin-age-chart');
+    if(ageCanvas){
+      if(chartInstances['skin-age-chart']){chartInstances['skin-age-chart'].destroy();}
+      chartInstances['skin-age-chart'] = new Chart(ageCanvas.getContext('2d'),{
+        type:'line',
+        data:{labels:data.map(s=>s.date),datasets:[{
+          label:'Skin Age',data:data.map(s=>s.skinAge),
+          borderColor:'#9B8EC4',backgroundColor:'rgba(155,142,196,0.1)',
+          borderWidth:2.5,pointRadius:5,fill:true,tension:0.3
+        }]},
+        options:{
+          responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{
+            x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}},
+            y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}
+          }
+        }
+      });
+    }
+
+    // Metric chart
+    buildSkinMetricChart('hydration', data);
+
+    // Yearly scan list
+    const yearlyEl = document.getElementById('skin-yearly-scans');
+    if(yearlyEl && data.length){
+      yearlyEl.innerHTML = data.slice().reverse().map(s=>`
+        <div class="log-item">
+          <div class="log-date">${s.date}</div>
+          <div style="font-size:13px;">Score: <strong>${s.overallScore}</strong> · Skin age: <strong>${s.skinAge}</strong></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">${s.highlights||''}</div>
+        </div>`).join('');
+    }
+  } catch(e){ console.error('buildSkinCharts error:', e); }
+}
+
+let activeSkinMetric = 'hydration';
+function switchSkinMetricChart(metric, btn){
+  activeSkinMetric = metric;
+  document.querySelectorAll('#skin-metric-tabs .chart-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  fetch(`${BACKEND}/api/sync?pillar=skinscan`).then(r=>r.json()).then(({data})=>{
+    if(data) buildSkinMetricChart(metric, data);
+  });
+}
+
+function buildSkinMetricChart(metric, data){
+  const canvas = document.getElementById('skin-metric-chart');
+  if(!canvas) return;
+  if(chartInstances['skin-metric-chart']){chartInstances['skin-metric-chart'].destroy();}
+  const colors = {hydration:'#5B9EC9',darkSpots:'#C4735A',wrinkles:'#9B8EC4',texture:'#A07850'};
+  const labels = {hydration:'Hydration',darkSpots:'Dark Spots',wrinkles:'Wrinkles',texture:'Texture'};
+  chartInstances['skin-metric-chart'] = new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{
+      labels:data.map(s=>s.date),
+      datasets:[{
+        label:labels[metric]||metric,
+        data:data.map(s=>s.metrics?.[metric]||null),
+        borderColor:colors[metric]||'#A07850',
+        backgroundColor:`${colors[metric]||'#A07850'}22`,
+        borderWidth:2.5,pointRadius:5,fill:true,tension:0.3,spanGaps:true
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}},
+        y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}
+      }
+    }
+  });
+}
+
+
 let todayWaterCount = 0;
 const WATER_GOAL = 10; // glasses — higher target for Zepbound + HCTZ
 
@@ -2709,8 +2984,24 @@ async function calculateGlowScore(save=false) {
   }
   if(recent7(checkins).length>=5) mindScore=Math.min(20,mindScore+2);
 
-  // ── TOTAL ──
-  const totalScore=Math.round(cardioScore+metabolicScore+bodyScore+activityScore+sleepScore+mindScore);
+  // ── SKIN (0–20) — from latest AI scan ──
+  let skinScore = 10; // default until first scan
+  try {
+    const skinRes = await fetch(`${BACKEND}/api/sync?pillar=skinscan`);
+    if(skinRes.ok){
+      const {data} = await skinRes.json();
+      if(data&&data.length){
+        const latestScan = data[data.length-1];
+        const s = latestScan.overallScore || 50;
+        if(s>=85) skinScore=20; else if(s>=75) skinScore=17;
+        else if(s>=65) skinScore=14; else if(s>=50) skinScore=10; else skinScore=7;
+      }
+    }
+  } catch(e){}
+
+  // ── TOTAL — now 7 pillars, normalize to 0-100 ──
+  const rawTotal = cardioScore+metabolicScore+bodyScore+activityScore+sleepScore+mindScore+skinScore;
+  const totalScore = Math.round((rawTotal/140)*100); // 140 = max (7×20)
   const pillars=[
     {name:'❤️ Cardio',score:cardioScore,max:20,color:'#C4735A'},
     {name:'🧪 Metabolic',score:metabolicScore,max:20,color:'#A07850'},
@@ -2718,6 +3009,7 @@ async function calculateGlowScore(save=false) {
     {name:'🏃 Activity',score:activityScore,max:20,color:'#9B8EC4'},
     {name:'😴 Sleep',score:sleepScore,max:20,color:'#6B9E78'},
     {name:'🧠 Mind',score:mindScore,max:20,color:'#E8A87C'},
+    {name:'✨ Skin',score:skinScore,max:20,color:'#E8A87C'},
   ];
 
   // ── REAL AGE (based on RealAge methodology, chronological age 54) ──
