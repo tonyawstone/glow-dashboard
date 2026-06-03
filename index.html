@@ -100,6 +100,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .he-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .he-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap;}
 .wins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.hydration-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hydration-status-bar{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;margin-bottom:4px;}
+.hydration-status-icon{font-size:24px;flex-shrink:0;}
+.hydration-status-text{flex:1;}
+.hydration-status-title{font-size:14px;font-weight:600;}
+.hydration-status-sub{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
 .win-item{text-align:center;background:var(--warm);border-radius:12px;padding:12px 8px;border:0.5px solid var(--border);}
 .win-val{font-size:22px;font-weight:700;line-height:1.1;}
 .win-label{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.3;}
@@ -109,7 +115,23 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .tl-content{}
 .tl-date{font-size:11px;color:var(--muted);font-weight:500;}
 .tl-text{font-size:13px;color:var(--text);margin-top:2px;line-height:1.4;}
-.health-snapshot-card{}
+.health-score-card{}
+.glow-score-hero{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+.glow-score-circle{width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;border:3px solid var(--border);}
+.glow-score-num{font-size:28px;font-weight:700;line-height:1;}
+.glow-score-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+.glow-score-right{flex:1;}
+.glow-real-age{font-size:22px;font-weight:700;color:var(--text);}
+.glow-real-age-label{font-size:12px;color:var(--muted);margin-top:2px;}
+.glow-score-date{font-size:11px;color:var(--muted);margin-top:4px;}
+.glow-pillar-scores{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.glow-pillar-item{background:var(--warm);border-radius:10px;padding:10px 12px;border:0.5px solid var(--border);}
+.glow-pillar-name{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+.glow-pillar-bar-wrap{background:rgba(0,0,0,0.06);border-radius:20px;height:6px;margin-bottom:4px;}
+.glow-pillar-bar{height:6px;border-radius:20px;transition:width 0.8s ease;}
+.glow-pillar-score{font-size:12px;font-weight:600;color:var(--text);}
+.glow-recalc-btn{width:100%;padding:11px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--accent);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);}
+.glow-score-trend{font-size:12px;color:var(--muted);text-align:center;margin-top:8px;}
 .snapshot-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
 .snapshot-item{background:var(--warm);border-radius:12px;padding:12px;border:0.5px solid var(--border);}
 .snapshot-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
@@ -315,7 +337,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="affirmation-text" id="daily-affirmation"></div>
       <div class="affirmation-sub">Your daily affirmation</div>
     </div>
+
+    <!-- Health Score Card -->
+    <div class="card health-score-card" id="health-score-card">
+      <div class="card-title">Your Glow Score</div>
+      <div id="health-score-content">
+        <div class="log-empty">Calculating your score...</div>
+      </div>
+    </div>
+
     <div class="card">
+      <div class="card-title">Daily check-in</div>
       <div class="card-title">Daily check-in</div>
       <div class="fl">How are you feeling?</div>
       <div class="tags" id="mood-tags">
@@ -469,6 +501,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="sleep-lbl">hours last night</div>
     </div>
     <div class="card">
+      <div class="card-title">Apple Health · sleep data</div>
+      <div id="sleep-apple-metrics"><div class="log-empty">Upload your weekly CSV to see sleep hours from Apple Health.</div></div>
+    </div>
+    <div class="card">
       <div class="card-title">Log sleep</div>
       <div class="fl">Bedtime & wake</div>
       <div class="two-col">
@@ -518,6 +554,27 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="stat-strip" style="grid-template-columns:1fr 1fr;">
       <div class="stat-tile"><div class="stat-val" style="font-size:24px;">170.7</div><div class="stat-lbl">Current · Withings</div></div>
       <div class="stat-tile"><div class="stat-val" style="font-size:24px;">168.7</div><div class="stat-lbl">All-time low · May 19</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Apple Health · body composition</div>
+      <div id="body-composition-metrics"><div class="log-empty">Upload your weekly CSV to see body composition data.</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Apple Health · activity</div>
+      <div id="body-activity-metrics"><div class="log-empty">Upload your weekly CSV to see steps data.</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Body composition · trends</div>
+      <div class="chart-tabs" id="body-comp-tabs">
+        <button class="chart-tab on" onclick="switchBodyCompChart('weight_lbs',this)">Weight</button>
+        <button class="chart-tab" onclick="switchBodyCompChart('bmi',this)">BMI</button>
+        <button class="chart-tab" onclick="switchBodyCompChart('body_fat_pct',this)">Body Fat %</button>
+        <button class="chart-tab" onclick="switchBodyCompChart('lean_mass_lbs',this)">Lean Mass</button>
+        <button class="chart-tab" onclick="switchBodyCompChart('bone_mass_lbs',this)">Bone Mass</button>
+        <button class="chart-tab" onclick="switchBodyCompChart('body_water_pct',this)">Water %</button>
+      </div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="body-comp-chart"></canvas></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Data from Apple Health via Withings scale · upload CSV weekly</div>
     </div>
     <div class="card">
       <div class="card-title">Weight charts</div>
@@ -602,15 +659,48 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content" id="vc-body-weekly">
     <div class="section-label">Body · this week</div>
     <div class="card"><div class="card-title">Daily weight this week</div><div class="chart-wrap" id="wrap-body-week-chart"></div></div>
+    <div class="card">
+      <div class="card-title">Body composition · this week</div>
+      <div class="chart-tabs" id="body-comp-tabs-weekly">
+        <button class="chart-tab on" onclick="switchBodyCompChartView('body_fat_pct','weekly',this)">Body Fat %</button>
+        <button class="chart-tab" onclick="switchBodyCompChartView('lean_mass_lbs','weekly',this)">Lean Mass</button>
+        <button class="chart-tab" onclick="switchBodyCompChartView('bone_mass_lbs','weekly',this)">Bone Mass</button>
+      </div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="body-comp-chart-weekly"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title">Steps · this week</div><div class="chart-wrap" id="wrap-steps-week-chart"></div></div>
     <div class="card"><div class="card-title">Exercise this week</div><div id="weekly-exercise"><div class="log-empty">Log exercise daily to see weekly summary.</div></div></div>
   </div>
+
   <div class="view-content" id="vc-body-monthly">
-    <div class="section-label">Body · May 2026</div>
+    <div class="section-label">Body · Monthly trends</div>
     <div class="card"><div class="card-title">Monthly weight trend</div><div class="chart-wrap" id="wrap-body-month-chart"></div></div>
+    <div class="card">
+      <div class="card-title">Body composition · monthly</div>
+      <div class="chart-tabs" id="body-comp-tabs-monthly">
+        <button class="chart-tab on" onclick="switchBodyCompChartView('body_fat_pct','monthly',this)">Body Fat %</button>
+        <button class="chart-tab" onclick="switchBodyCompChartView('lean_mass_lbs','monthly',this)">Lean Mass</button>
+        <button class="chart-tab" onclick="switchBodyCompChartView('bone_mass_lbs','monthly',this)">Bone Mass</button>
+        <button class="chart-tab" onclick="switchBodyCompChartView('bmi','monthly',this)">BMI</button>
+      </div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="body-comp-chart-monthly"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title">Monthly steps</div><div class="chart-wrap" id="wrap-steps-month-chart"></div></div>
   </div>
+
   <div class="view-content" id="vc-body-yearly">
-    <div class="section-label">Body · 2026</div>
+    <div class="section-label">Body · Full journey</div>
     <div class="card"><div class="card-title">Zepbound full journey</div><div class="chart-wrap" id="wrap-body-year-chart"></div></div>
+    <div class="card">
+      <div class="card-title">Body composition · all time</div>
+      <div class="chart-tabs" id="body-comp-tabs-yearly">
+        <button class="chart-tab on" onclick="switchBodyCompChartView('body_fat_pct','yearly',this)">Body Fat %</button>
+        <button class="chart-tab" onclick="switchBodyCompChartView('lean_mass_lbs','yearly',this)">Lean Mass</button>
+        <button class="chart-tab" onclick="switchBodyCompChartView('bone_mass_lbs','yearly',this)">Bone Mass</button>
+        <button class="chart-tab" onclick="switchBodyCompChartView('bmi','yearly',this)">BMI</button>
+      </div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="body-comp-chart-yearly"></canvas></div>
+    </div>
   </div>
 </div>
 
@@ -629,10 +719,37 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <!-- Apple Health metrics from CSV -->
+    <!-- Hydration -->
     <div class="card">
-      <div class="card-title">Apple Health · latest data</div>
-      <div id="apple-health-metrics"><div class="log-empty">Upload your weekly CSV to see steps, sleep, weight and more.</div></div>
+      <div class="card-title">💧 Hydration</div>
+      <div id="hydration-status"><div class="log-empty">Loading hydration data...</div></div>
+      <div style="margin-top:14px;">
+        <div class="fl">Log water intake today</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+          <button class="hydration-btn" onclick="adjustWater(-1)">−</button>
+          <div style="text-align:center;flex:1;">
+            <div style="font-size:28px;font-weight:700;color:var(--accent);" id="water-count">0</div>
+            <div style="font-size:11px;color:var(--muted);">glasses (8 oz each)</div>
+          </div>
+          <button class="hydration-btn" onclick="adjustWater(1)">+</button>
+        </div>
+        <div style="margin-top:8px;" id="water-goal-bar-wrap">
+          <div style="background:rgba(0,0,0,0.06);border-radius:20px;height:8px;">
+            <div id="water-goal-bar" style="height:8px;border-radius:20px;background:#5B9EC9;transition:width 0.4s ease;width:0%;"></div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;" id="water-goal-label">Goal: 10 glasses (80 oz) · recommended on Zepbound + diuretics</div>
+        </div>
+        <button class="btn-primary" style="margin-top:12px;" onclick="saveWaterIntake()">Log water intake</button>
+        <div class="toast-msg" id="wt">Saved!</div>
+      </div>
+      <button class="btn-ai" style="margin-top:8px;" onclick="hydrationCoach()">Hydration coaching ↗</button>
+      <div id="hydration-coach-output" class="coach-response" style="display:none"></div>
+    </div>
+
+    <!-- Apple Health clinical metrics -->
+    <div class="card">
+      <div class="card-title">Apple Health · clinical metrics</div>
+      <div id="health-clinical-metrics"><div class="log-empty">Upload your weekly CSV to see resting HR, gait and respiratory data.</div></div>
     </div>
 
     <!-- BP Log -->
@@ -733,6 +850,18 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <button class="btn-ai" onclick="zepCoach()">Ask coach about my BP trend ↗</button>
       <div id="zep-coach-output" class="coach-response" style="display:none"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💧 Water intake · this week</div>
+      <div class="chart-wrap" style="height:200px;" id="wrap-water-week-chart"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Goal: 10 glasses/day · Zepbound + HCTZ diuretic increases fluid needs</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💧 Body water % · this week</div>
+      <div class="chart-wrap" style="height:200px;" id="wrap-bodywater-week-chart"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Healthy range for women: 45–60% · Estimated from Withings scale data</div>
     </div>
   </div>
 
@@ -1080,7 +1209,7 @@ let db;
 const req=indexedDB.open('GlowDashboard',3);
 req.onupgradeneeded=e=>{
   db=e.target.result;
-  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries'].forEach(s=>{
+  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries','water'].forEach(s=>{
     if(!db.objectStoreNames.contains(s)) db.createObjectStore(s,{keyPath:'id',autoIncrement:true});
   });
   if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});
@@ -1115,6 +1244,8 @@ async function boot(){
   // Sync from Blob in background — loads any data from other devices
   syncAllFromBlob();
   loadCoachingInsights();
+  calculateGlowScore(false);
+  loadTodayWater(); // calculate on load, don't auto-save
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
@@ -1144,11 +1275,13 @@ function tab(id){
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
-  if(id==='body') buildBodyChart();
-  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); checkLastUpload(); }
+  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
+  if(id==='sleep') buildSleepAppleMetrics();
+  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
-  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);}
+  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();}}
+  if(curTab==='body'&&v!=='daily') buildBodyCompChartsForView(v);
 }
 function applyView(){
   const c=document.getElementById('s-'+curTab);if(!c)return;
@@ -1272,7 +1405,7 @@ async function loadFromBlob(store) {
 }
 
 async function syncAllFromBlob() {
-  const stores = ['checkins','bps','sleeps','skins','hairs','minds','outfits','exercises','labs','wardrobeplans','boxsummaries','reflections'];
+  const stores = ['checkins','bps','sleeps','skins','hairs','minds','outfits','exercises','labs','wardrobeplans','boxsummaries','reflections','water'];
   await Promise.all(stores.map(s => loadFromBlob(s)));
   await loadLogs();
   console.log('✅ All data synced from Blob');
@@ -1714,113 +1847,321 @@ async function loadAllPhotos(){
   });
 }
 
-async function buildAppleHealthMetrics(){
-  const el = document.getElementById('apple-health-metrics');
-  if(!el) return;
+async function getCSVRows() {
   try {
     const res = await fetch(`${BACKEND}/api/health-data`);
-    if(!res.ok){ el.innerHTML='<div class="log-empty">Upload your weekly CSV to see steps, sleep, weight and more.</div>'; return; }
+    if(!res.ok) return [];
     const { csv } = await res.json();
-    if(!csv){ el.innerHTML='<div class="log-empty">Upload your weekly CSV to see steps, sleep, weight and more.</div>'; return; }
+    if(!csv) return [];
+    return parseCSVToRows(csv).filter(r=>r.date).sort((a,b)=>b.date.localeCompare(a.date));
+  } catch(e){ return []; }
+}
 
-    const rows = parseCSVToRows(csv);
-    if(!rows.length){ el.innerHTML='<div class="log-empty">No data found in CSV.</div>'; return; }
+async function buildHealthClinicalMetrics(){
+  const el = document.getElementById('health-clinical-metrics');
+  if(!el) return;
+  const rows = await getCSVRows();
+  if(!rows.length){ el.innerHTML='<div class="log-empty">Upload your weekly CSV to see clinical metrics.</div>'; return; }
 
-    // Get most recent row with data — search back for each metric independently
-    const allRows = rows.filter(r=>r.date).sort((a,b)=>b.date.localeCompare(a.date));
-    const latest = allRows[0];
-    const prev = allRows[1];
-    const latestWithWeight = allRows.find(r=>parseFloat(r.weight_lbs)>0);
-    const latestWithBMI = allRows.find(r=>parseFloat(r.bmi)>0);
-    const latestWithBodyFat = allRows.find(r=>parseFloat(r.body_fat_pct)>0);
+  const avg = (field, n=7) => {
+    const vals = rows.slice(0,n).map(r=>parseFloat(r[field])).filter(v=>!isNaN(v)&&v>0);
+    return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+  };
+  const latest = (field) => {
+    const row = rows.find(r=>parseFloat(r[field])>0);
+    return row ? {val:parseFloat(row[field]), date:row.date} : null;
+  };
 
-    // 7-day averages
-    const recent7 = rows.filter(r=>r.date).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7);
-    const avg = (field) => {
-      const vals = recent7.map(r=>parseFloat(r[field])).filter(v=>!isNaN(v)&&v>0);
-      return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length) : null;
-    };
+  const avgHR = avg('resting_hr');
+  const avgResp = avg('respiratory_rate');
+  const avgAsym = avg('walking_asymmetry');
+  const avgDS = avg('double_support');
+  const fmt = (d) => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
 
-    const avgSteps = avg('steps');
-    const avgSleep = avg('sleep_hrs');
-    const avgHR = avg('resting_hr');
-    const avgRespRate = avg('respiratory_rate');
-    const avgWalkAsym = avg('walking_asymmetry');
-    const avgDoubleSupport = avg('double_support');
-    const latestWeight = latestWithWeight ? parseFloat(latestWithWeight.weight_lbs) : null;
-    const latestBMI = latestWithBMI ? parseFloat(latestWithBMI.bmi) : null;
-    const latestBodyFat = latestWithBodyFat ? parseFloat(latestWithBodyFat.body_fat_pct) : null;
-    const prevWeight = prev ? parseFloat(prev.weight_lbs)||null : null;
-    const weightTrend = latestWeight&&prevWeight ? (latestWeight-prevWeight).toFixed(1) : null;
-    const weightDate = latestWithWeight ? new Date(latestWithWeight.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
-    const bmiDate = latestWithBMI ? new Date(latestWithBMI.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
-
-    el.innerHTML = `
-      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Latest: ${latest.date} · 7-day averages where shown</div>
-
-      <div class="lab-section-title">Body</div>
-      <div class="snapshot-grid">
-        <div class="snapshot-item">
-          <div class="snapshot-label">Weight</div>
-          <div class="snapshot-val">${latestWeight?latestWeight.toFixed(1):'—'}</div>
-          <div class="snapshot-sub ${weightTrend&&weightTrend<0?'snapshot-status-ok':weightTrend>0?'snapshot-status-watch':''}">${weightTrend?(weightTrend>0?'+':'')+weightTrend+' lbs':'—'}</div>
-          ${weightDate?`<div class="snapshot-sub" style="margin-top:2px;">${weightDate}</div>`:''}
-        </div>
-        <div class="snapshot-item">
-          <div class="snapshot-label">BMI</div>
-          <div class="snapshot-val">${latestBMI?latestBMI.toFixed(1):'—'}</div>
-          <div class="snapshot-sub ${latestBMI&&latestBMI<25?'snapshot-status-ok':latestBMI<30?'snapshot-status-watch':'snapshot-status-high'}">${latestBMI?(latestBMI<25?'Normal':latestBMI<30?'Overweight':'Obese'):'—'}</div>
-          ${bmiDate?`<div class="snapshot-sub" style="margin-top:2px;">${bmiDate}</div>`:''}
-        </div>
-        ${latestBodyFat?`<div class="snapshot-item"><div class="snapshot-label">Body Fat</div><div class="snapshot-val">${latestBodyFat}%</div><div class="snapshot-sub">—</div></div>`:''}
+  el.innerHTML = `
+    <div class="lab-section-title">Heart & Breathing · 7-day avg</div>
+    <div class="snapshot-grid">
+      <div class="snapshot-item">
+        <div class="snapshot-label">Resting HR</div>
+        <div class="snapshot-val">${avgHR?Math.round(avgHR):'—'}</div>
+        <div class="snapshot-sub">bpm</div>
       </div>
-
-      <div class="lab-section-title" style="margin-top:14px;">Activity</div>
-      <div class="snapshot-grid">
-        <div class="snapshot-item">
-          <div class="snapshot-label">Avg Steps</div>
-          <div class="snapshot-val" style="font-size:18px;">${avgSteps?Math.round(avgSteps).toLocaleString():'—'}</div>
-          <div class="snapshot-sub">per day</div>
-        </div>
-        <div class="snapshot-item">
-          <div class="snapshot-label">Avg Sleep</div>
-          <div class="snapshot-val">${avgSleep?avgSleep.toFixed(1):'—'}</div>
-          <div class="snapshot-sub">hrs/night</div>
-        </div>
+      <div class="snapshot-item">
+        <div class="snapshot-label">Resp. Rate</div>
+        <div class="snapshot-val">${avgResp?avgResp.toFixed(1):'—'}</div>
+        <div class="snapshot-sub">breaths/min</div>
       </div>
-
-      <div class="lab-section-title" style="margin-top:14px;">Heart & Breathing</div>
-      <div class="snapshot-grid">
-        <div class="snapshot-item">
-          <div class="snapshot-label">Resting HR</div>
-          <div class="snapshot-val">${avgHR?Math.round(avgHR):'—'}</div>
-          <div class="snapshot-sub">bpm avg</div>
-        </div>
-        <div class="snapshot-item">
-          <div class="snapshot-label">Resp. Rate</div>
-          <div class="snapshot-val">${avgRespRate?avgRespRate.toFixed(1):'—'}</div>
-          <div class="snapshot-sub">breaths/min</div>
-        </div>
+    </div>
+    <div class="lab-section-title" style="margin-top:14px;">Gait & Mobility · 7-day avg</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Post hip replacement recovery metrics</div>
+    <div class="snapshot-grid">
+      <div class="snapshot-item">
+        <div class="snapshot-label">Walk Asymmetry</div>
+        <div class="snapshot-val" style="font-size:18px;">${avgAsym?avgAsym.toFixed(1)+'%':'—'}</div>
+        <div class="snapshot-sub ${avgAsym&&avgAsym<5?'snapshot-status-ok':avgAsym<10?'snapshot-status-watch':'snapshot-status-high'}">${avgAsym?(avgAsym<5?'Excellent':avgAsym<10?'Mild':'Notable'):'—'}</div>
       </div>
-
-      <div class="lab-section-title" style="margin-top:14px;">Gait & Mobility</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Walking metrics from Apple Health · relevant after hip replacement</div>
-      <div class="snapshot-grid">
-        <div class="snapshot-item">
-          <div class="snapshot-label">Walking Asymmetry</div>
-          <div class="snapshot-val" style="font-size:18px;">${avgWalkAsym?avgWalkAsym.toFixed(1)+'%':'—'}</div>
-          <div class="snapshot-sub ${avgWalkAsym&&avgWalkAsym<5?'snapshot-status-ok':avgWalkAsym<10?'snapshot-status-watch':'snapshot-status-high'}">${avgWalkAsym?(avgWalkAsym<5?'Excellent':avgWalkAsym<10?'Mild asymmetry':'Notable asymmetry'):'—'}</div>
-        </div>
-        <div class="snapshot-item">
-          <div class="snapshot-label">Double Support</div>
-          <div class="snapshot-val" style="font-size:18px;">${avgDoubleSupport?avgDoubleSupport.toFixed(1)+'%':'—'}</div>
-          <div class="snapshot-sub">${avgDoubleSupport?(avgDoubleSupport<25?'Normal':'Elevated — watch'):'—'}</div>
-        </div>
+      <div class="snapshot-item">
+        <div class="snapshot-label">Double Support</div>
+        <div class="snapshot-val" style="font-size:18px;">${avgDS?avgDS.toFixed(1)+'%':'—'}</div>
+        <div class="snapshot-sub">${avgDS?(avgDS<25?'Normal':'Elevated'):'—'}</div>
       </div>
-    `;
-  } catch(e){
-    el.innerHTML='<div class="log-empty">Upload your weekly CSV to see steps, sleep, weight and more.</div>';
+    </div>
+  `;
+}
+
+async function buildBodyCompositionMetrics(){
+  const elComp = document.getElementById('body-composition-metrics');
+  const elAct = document.getElementById('body-activity-metrics');
+  const rows = await getCSVRows();
+
+  if(elComp){
+    if(!rows.length){ elComp.innerHTML='<div class="log-empty">Upload your weekly CSV to see body composition.</div>'; }
+    else {
+      const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
+      const latestBMI = rows.find(r=>parseFloat(r.bmi)>0);
+      const latestFat = rows.find(r=>parseFloat(r.body_fat_pct)>0);
+      const latestLean = rows.find(r=>parseFloat(r.lean_mass_lbs)>0);
+      const latestBone = rows.find(r=>parseFloat(r.bone_mass_lbs)>0);
+      const fmt = (d) => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+      const bmi = latestBMI ? parseFloat(latestBMI.bmi) : null;
+
+      elComp.innerHTML = `
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">From Withings scale via Apple Health</div>
+        <div class="snapshot-grid">
+          <div class="snapshot-item">
+            <div class="snapshot-label">Weight</div>
+            <div class="snapshot-val">${latestWeight?parseFloat(latestWeight.weight_lbs).toFixed(1):'—'}</div>
+            <div class="snapshot-sub snapshot-status-ok">${fmt(latestWeight?.date)||'—'}</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">BMI</div>
+            <div class="snapshot-val">${bmi?bmi.toFixed(1):'—'}</div>
+            <div class="snapshot-sub ${bmi&&bmi<25?'snapshot-status-ok':bmi<30?'snapshot-status-watch':'snapshot-status-high'}">${bmi?(bmi<25?'Normal':bmi<30?'Overweight':'Obese'):'—'}</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Body Fat</div>
+            <div class="snapshot-val">${latestFat?parseFloat(latestFat.body_fat_pct).toFixed(1)+'%':'—'}</div>
+            <div class="snapshot-sub">${fmt(latestFat?.date)||'—'}</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Lean Mass</div>
+            <div class="snapshot-val" style="font-size:18px;">${latestLean?parseFloat(latestLean.lean_mass_lbs).toFixed(1):'—'}</div>
+            <div class="snapshot-sub">lbs · ${fmt(latestLean?.date)||'—'}</div>
+          </div>
+          ${latestBone?`<div class="snapshot-item"><div class="snapshot-label">Bone Mass</div><div class="snapshot-val" style="font-size:18px;">${parseFloat(latestBone.bone_mass_lbs).toFixed(1)}</div><div class="snapshot-sub">lbs · ${fmt(latestBone.date)}</div></div>`:''}
+          ${(()=>{const r=rows.find(row=>parseFloat(row.body_water_pct)>0);return r?`<div class="snapshot-item"><div class="snapshot-label">Body Water</div><div class="snapshot-val" style="font-size:18px;">${parseFloat(r.body_water_pct).toFixed(1)}%</div><div class="snapshot-sub">estimated · ${fmt(r.date)}</div></div>`:'';})()} 
+        </div>
+      `;
+    }
   }
+
+  if(elAct){
+    if(!rows.length){ elAct.innerHTML='<div class="log-empty">Upload your weekly CSV to see activity data.</div>'; }
+    else {
+      const recent7 = rows.slice(0,7);
+      const avgSteps = recent7.map(r=>parseInt(r.steps)||0).filter(v=>v>0);
+      const avg = avgSteps.length ? Math.round(avgSteps.reduce((a,b)=>a+b,0)/avgSteps.length) : null;
+      elAct.innerHTML = `
+        <div class="snapshot-grid">
+          <div class="snapshot-item">
+            <div class="snapshot-label">Avg Steps</div>
+            <div class="snapshot-val" style="font-size:20px;">${avg?avg.toLocaleString():'—'}</div>
+            <div class="snapshot-sub">7-day avg</div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Build body comp chart
+  buildBodyCompChart('weight_lbs', rows);
+}
+
+async function buildSleepAppleMetrics(){
+  const el = document.getElementById('sleep-apple-metrics');
+  if(!el) return;
+  const rows = await getCSVRows();
+  if(!rows.length){ el.innerHTML='<div class="log-empty">Upload your weekly CSV to see sleep data.</div>'; return; }
+
+  const recent7 = rows.slice(0,7).filter(r=>parseFloat(r.sleep_hrs)>0);
+  const avgSleep = recent7.length ? (recent7.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/recent7.length).toFixed(1) : null;
+  const latest = rows.find(r=>parseFloat(r.sleep_hrs)>0);
+  const fmt = (d) => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+
+  el.innerHTML = `
+    <div class="snapshot-grid">
+      <div class="snapshot-item">
+        <div class="snapshot-label">Last Night</div>
+        <div class="snapshot-val">${latest?parseFloat(latest.sleep_hrs).toFixed(1):'—'}</div>
+        <div class="snapshot-sub">${fmt(latest?.date)||'hrs'}</div>
+      </div>
+      <div class="snapshot-item">
+        <div class="snapshot-label">7-day Avg</div>
+        <div class="snapshot-val">${avgSleep||'—'}</div>
+        <div class="snapshot-sub ${avgSleep&&avgSleep>=7?'snapshot-status-ok':avgSleep>=6?'snapshot-status-watch':'snapshot-status-high'}">${avgSleep?(avgSleep>=7?'Good':'Low'):'hrs/night'}</div>
+      </div>
+    </div>
+  `;
+}
+
+// Body composition chart
+// Body composition charts for weekly/monthly/yearly views
+const activeBodyCompMetricByView = { weekly:'body_fat_pct', monthly:'body_fat_pct', yearly:'body_fat_pct' };
+
+function switchBodyCompChartView(metric, view, btn){
+  activeBodyCompMetricByView[view] = metric;
+  document.querySelectorAll(`#body-comp-tabs-${view} .chart-tab`).forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  getCSVRows().then(rows=>buildBodyCompChartForView(metric, view, rows));
+}
+
+async function buildBodyCompChartsForView(view){
+  const rows = await getCSVRows();
+  buildBodyCompChartForView(activeBodyCompMetricByView[view]||'body_fat_pct', view, rows);
+  if(view!=='yearly') buildStepsChartForView(view, rows);
+}
+
+function buildBodyCompChartForView(metric, view, rows){
+  const canvasId = `body-comp-chart-${view}`;
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  if(chartInstances[canvasId]){chartInstances[canvasId].destroy();delete chartInstances[canvasId];}
+
+  const metricLabels = {weight_lbs:'Weight (lbs)',bmi:'BMI',body_fat_pct:'Body Fat %',lean_mass_lbs:'Lean Mass (lbs)',bone_mass_lbs:'Bone Mass (lbs)',body_water_pct:'Body Water %'};
+  const colors = {weight_lbs:'#C4735A',bmi:'#A07850',body_fat_pct:'#E8A87C',lean_mass_lbs:'#6B9E78',bone_mass_lbs:'#9B8EC4',body_water_pct:'#5B9EC9'};
+  const now = new Date();
+  let labels, data;
+
+  if(view==='weekly'){
+    const days=[];for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+    labels=days.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    data=days.map(d=>{const r=rows.find(row=>row.date===d&&parseFloat(row[metric])>0);return r?parseFloat(r[metric]):null;});
+  } else if(view==='monthly'){
+    const days=[];for(let i=29;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+    labels=days.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    data=days.map(d=>{const r=rows.find(row=>row.date===d&&parseFloat(row[metric])>0);return r?parseFloat(r[metric]):null;});
+  } else {
+    const monthGroups={};
+    rows.filter(r=>parseFloat(r[metric])>0).forEach(r=>{
+      const d=new Date(r.date);const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      if(!monthGroups[key]){monthGroups[key]={vals:[],label:d.toLocaleDateString('en-US',{month:'short',year:'numeric'})};}
+      monthGroups[key].vals.push(parseFloat(r[metric]));
+    });
+    const months=Object.keys(monthGroups).sort();
+    labels=months.map(k=>monthGroups[k].label);
+    data=months.map(k=>parseFloat((monthGroups[k].vals.reduce((a,b)=>a+b,0)/monthGroups[k].vals.length).toFixed(2)));
+  }
+
+  if(!data.some(v=>v!==null)){
+    canvas.parentElement.innerHTML=`<div class="log-empty">No ${metricLabels[metric]||metric} data yet — upload your weekly CSV.</div>`;
+    return;
+  }
+
+  chartInstances[canvasId]=new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[{
+      label:metricLabels[metric]||metric,data,
+      borderColor:colors[metric]||'#A07850',
+      backgroundColor:`${colors[metric]||'#A07850'}22`,
+      borderWidth:2,pointRadius:view==='yearly'?4:2,
+      fill:true,tension:0.3,spanGaps:true,
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${metricLabels[metric]}: ${c.parsed.y}`}}},
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:view==='monthly'?10:7}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'},beginAtZero:false}
+      }
+    }
+  });
+}
+
+function buildStepsChartForView(view, rows){
+  const wrapId=view==='weekly'?'wrap-steps-week-chart':'wrap-steps-month-chart';
+  const wrap=document.getElementById(wrapId);if(!wrap)return;
+  const canvasId=`steps-${view}-chart`;
+  if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id=canvasId;wrap.appendChild(c);}
+  if(chartInstances[canvasId]){chartInstances[canvasId].destroy();delete chartInstances[canvasId];}
+  const now=new Date();
+  const daysCount=view==='weekly'?7:30;
+  const days=[];for(let i=daysCount-1;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+  const labels=days.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const data=days.map(d=>{const r=rows.find(row=>row.date===d&&parseInt(row.steps)>0);return r?parseInt(r.steps):null;});
+  if(!data.some(v=>v!==null)){wrap.innerHTML='<div class="log-empty">No steps data — upload your weekly CSV.</div>';return;}
+  chartInstances[canvasId]=new Chart(wrap.querySelector('canvas').getContext('2d'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'Steps',data,backgroundColor:'rgba(107,158,120,0.5)',borderColor:'#6B9E78',borderWidth:1,borderRadius:3}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y?.toLocaleString()} steps`}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:10}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',callback:v=>v>=1000?Math.round(v/1000)+'k':v},beginAtZero:true}
+      }
+    }
+  });
+}
+
+let activeBodyCompMetric = 'weight_lbs';
+function switchBodyCompChart(metric, btn){
+  activeBodyCompMetric = metric;
+  document.querySelectorAll('#body-comp-tabs .chart-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  getCSVRows().then(rows=>buildBodyCompChart(metric, rows));
+}
+
+function buildBodyCompChart(metric, rows){
+  const canvas = document.getElementById('body-comp-chart');
+  if(!canvas) return;
+  if(chartInstances['body-comp-chart']){chartInstances['body-comp-chart'].destroy();delete chartInstances['body-comp-chart'];}
+
+  const filtered = rows.filter(r=>parseFloat(r[metric])>0).reverse();
+  if(!filtered.length){ canvas.parentElement.innerHTML='<div class="log-empty">No '+metric+' data yet — run your Python script and upload.</div>'; return; }
+
+  const labels = filtered.map(r=>new Date(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const data = filtered.map(r=>parseFloat(r[metric]));
+
+  const metricLabels = {
+    weight_lbs:'Weight (lbs)', bmi:'BMI',
+    body_fat_pct:'Body Fat %', lean_mass_lbs:'Lean Mass (lbs)',
+    bone_mass_lbs:'Bone Mass (lbs)', body_water_pct:'Body Water %'
+  };
+  const colors = {
+    weight_lbs:'#C4735A', bmi:'#A07850',
+    body_fat_pct:'#E8A87C', lean_mass_lbs:'#6B9E78',
+    bone_mass_lbs:'#9B8EC4', body_water_pct:'#5B9EC9'
+  };
+
+  chartInstances['body-comp-chart'] = new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels, datasets:[{
+      label: metricLabels[metric]||metric,
+      data,
+      borderColor: colors[metric]||'#A07850',
+      backgroundColor: 'transparent',
+      borderWidth:2,
+      pointRadius:2,
+      tension:0.3,
+      spanGaps:true,
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>`${metricLabels[metric]||metric}: ${c.parsed.y}`}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:10}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'},beginAtZero:false}
+      }
+    }
+  });
+}
+
+async function buildAppleHealthMetrics(){
+  // Legacy function — now split into three focused functions
+  await buildHealthClinicalMetrics();
 }
 
 async function buildHealthSnapshot(){
@@ -1871,10 +2212,19 @@ async function buildHealthSnapshot(){
     }
   } catch(e){}
 
+  // Consistent date formatter for snapshot
+  const fmtDate = (d) => {
+    if(!d) return null;
+    const dt = d instanceof Date ? d : new Date(d);
+    if(isNaN(dt)) return null;
+    return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  };
+
   const pulseDisplay = lastManual?.pulse || csvPulse || '—';
-  const pulseDate = lastManual?.pulse ? displayDate : (csvPulse ? csvWeightDate : null);
+  const pulseDateFmt = fmtDate(lastManual?.pulse ? parseBPDate(displayBP?.date) : (csvPulse ? csvWeightDate : null));
   const weightDisplay = csvWeight || '170.7';
-  const weightDateDisplay = csvWeightDate ? new Date(csvWeightDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+  const weightDateFmt = fmtDate(csvWeightDate);
+  const bpDateFmt = displayDate ? fmtDate(parseBPDate(displayBP?.date)) : null;
 
   el.innerHTML = `
     <div class="snapshot-grid">
@@ -1882,18 +2232,18 @@ async function buildHealthSnapshot(){
         <div class="snapshot-label">Blood Pressure</div>
         <div class="snapshot-val">${displayBP ? displayBP.sys+'/'+displayBP.dia : '—'}</div>
         <div class="snapshot-sub ${bpColor}">${displayBP ? bpStatus : 'No reading yet'}</div>
-        ${displayDate ? `<div class="snapshot-sub" style="margin-top:4px;">${displayDate}</div>` : ''}
+        ${bpDateFmt ? `<div class="snapshot-sub" style="margin-top:4px;">${bpDateFmt}</div>` : ''}
       </div>
       <div class="snapshot-item">
         <div class="snapshot-label">Pulse</div>
         <div class="snapshot-val">${pulseDisplay}</div>
         <div class="snapshot-sub">bpm</div>
-        ${pulseDate ? `<div class="snapshot-sub" style="margin-top:4px;">${pulseDate}</div>` : ''}
+        ${pulseDateFmt ? `<div class="snapshot-sub" style="margin-top:4px;">${pulseDateFmt}</div>` : ''}
       </div>
       <div class="snapshot-item">
         <div class="snapshot-label">Weight</div>
         <div class="snapshot-val">${weightDisplay}</div>
-        <div class="snapshot-sub snapshot-status-ok">${weightDateDisplay||'↓ 30.7 lbs'}</div>
+        <div class="snapshot-sub snapshot-status-ok">${weightDateFmt||'↓ 30.7 lbs'}</div>
       </div>
       <div class="snapshot-item">
         <div class="snapshot-label">Next labs</div>
@@ -1954,6 +2304,8 @@ async function uploadHealthCSV(input) {
     checkLastUpload();
     // Rebuild charts with new data
     if (curTab === 'health') { buildBPChart(); buildAppleHealthMetrics(); }
+    if (curTab === 'body') buildBodyCompositionMetrics();
+    if (curTab === 'sleep') buildSleepAppleMetrics();
 
   } catch (err) {
     status.style.background = '#FAECE7';
@@ -1963,6 +2315,334 @@ async function uploadHealthCSV(input) {
   input.value = '';
 }
 
+
+// ── HYDRATION ─────────────────────────────────────────────────────────
+let todayWaterCount = 0;
+const WATER_GOAL = 10; // glasses — higher target for Zepbound + HCTZ
+
+async function loadTodayWater(){
+  const water = await dbAll('water');
+  const today = nowStr();
+  const todayEntry = water.filter(w=>w.date===today).pop();
+  todayWaterCount = todayEntry ? todayEntry.glasses : 0;
+  updateWaterDisplay();
+}
+
+function updateWaterDisplay(){
+  const countEl = document.getElementById('water-count');
+  const barEl = document.getElementById('water-goal-bar');
+  const labelEl = document.getElementById('water-goal-label');
+  if(countEl) countEl.textContent = todayWaterCount;
+  if(barEl) barEl.style.width = Math.min(100,(todayWaterCount/WATER_GOAL)*100)+'%';
+  if(barEl) barEl.style.background = todayWaterCount>=WATER_GOAL?'#27500A':todayWaterCount>=7?'#6B9E78':todayWaterCount>=4?'#E8A87C':'#C4735A';
+  if(labelEl) labelEl.textContent = todayWaterCount>=WATER_GOAL ? `✅ Goal reached! ${todayWaterCount}/${WATER_GOAL} glasses` : `${todayWaterCount}/${WATER_GOAL} glasses · Goal: ${WATER_GOAL} glasses (80 oz) on Zepbound + HCTZ`;
+}
+
+function adjustWater(delta){
+  todayWaterCount = Math.max(0, todayWaterCount + delta);
+  updateWaterDisplay();
+}
+
+async function saveWaterIntake(){
+  const today = nowStr();
+  const water = await dbAll('water');
+  const existing = water.findIndex(w=>w.date===today);
+  const entry = {date:today, glasses:todayWaterCount, oz:todayWaterCount*8};
+  if(existing>=0){
+    // Update existing
+    const t = db.transaction('water','readwrite');
+    const store = t.objectStore('water');
+    const all = await new Promise(r=>{const rq=store.getAll();rq.onsuccess=()=>r(rq.result);});
+    all[existing] = {...all[existing], ...entry};
+  } else {
+    await dbAdd('water', entry);
+  }
+  syncToBlob('water');
+  toast('wt');
+  buildHydrationStatus();
+}
+
+async function buildHydrationStatus(){
+  const el = document.getElementById('hydration-status');
+  if(!el) return;
+
+  // Get latest body water % from CSV
+  const rows = await getCSVRows();
+  const latestWater = rows.find(r=>parseFloat(r.body_water_pct)>0);
+  const waterPct = latestWater ? parseFloat(latestWater.body_water_pct) : null;
+  const waterDate = latestWater ? new Date(latestWater.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+
+  // Get today's water intake
+  const water = await dbAll('water');
+  const today = nowStr();
+  const todayEntry = water.filter(w=>w.date===today).pop();
+  const todayGlasses = todayEntry?.glasses || 0;
+
+  // Determine status
+  let statusIcon, statusTitle, statusColor, statusBg, statusMsg;
+  if(waterPct!==null){
+    if(waterPct>=50){ statusIcon='💧'; statusTitle='Well hydrated'; statusColor='#27500A'; statusBg='#EAF3DE'; }
+    else if(waterPct>=45){ statusIcon='💧'; statusTitle='Mildly low'; statusColor='#92400E'; statusBg='#FEF3C7'; }
+    else { statusIcon='⚠️'; statusTitle='Dehydrated'; statusColor='#7F1D1D'; statusBg='#FEE2E2'; }
+    statusMsg = `Body water ${waterPct}% (as of ${waterDate}) · Healthy range 45–60%`;
+  } else {
+    statusIcon='💧'; statusTitle='Upload CSV to track'; statusColor='var(--muted)'; statusBg='var(--warm)';
+    statusMsg = 'Upload your weekly Apple Health CSV to see body water % from your Withings scale';
+  }
+
+  el.innerHTML = `
+    <div class="hydration-status-bar" style="background:${statusBg};">
+      <div class="hydration-status-icon">${statusIcon}</div>
+      <div class="hydration-status-text">
+        <div class="hydration-status-title" style="color:${statusColor};">${statusTitle}</div>
+        <div class="hydration-status-sub">${statusMsg}</div>
+      </div>
+    </div>
+    <div class="hydration-status-bar" style="background:var(--warm);margin-top:6px;">
+      <div class="hydration-status-icon">🫙</div>
+      <div class="hydration-status-text">
+        <div class="hydration-status-title">Zepbound + HCTZ note</div>
+        <div class="hydration-status-sub">GLP-1 medications and your Irbesartan HCTZ diuretic both increase fluid loss. Aim for 80–100 oz (10–12 glasses) daily. Dehydration can raise BP and reduce Zepbound effectiveness.</div>
+      </div>
+    </div>
+  `;
+}
+
+async function buildWaterWeekChart(){
+  const wrap = document.getElementById('wrap-water-week-chart');
+  if(!wrap) return;
+  const canvasId = 'water-week-chart';
+  if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id=canvasId;wrap.appendChild(c);}
+  if(chartInstances[canvasId]){chartInstances[canvasId].destroy();delete chartInstances[canvasId];}
+
+  const water = await dbAll('water');
+  const now = new Date();
+  const days = [];
+  for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d);}
+  const labels = days.map(d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const data = days.map(d=>{
+    const dateStr = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const entry = water.filter(w=>w.date===dateStr).pop();
+    return entry?.glasses||0;
+  });
+
+  chartInstances[canvasId] = new Chart(wrap.querySelector('canvas').getContext('2d'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Glasses',data,backgroundColor:data.map(v=>v>=WATER_GOAL?'rgba(39,80,10,0.7)':v>=7?'rgba(107,158,120,0.7)':v>=4?'rgba(232,168,124,0.7)':'rgba(196,115,90,0.7)'),borderRadius:4,borderSkipped:false},
+      {label:`Goal (${WATER_GOAL})`,data:days.map(()=>WATER_GOAL),type:'line',borderColor:'rgba(91,158,201,0.6)',borderWidth:1.5,borderDash:[4,4],pointRadius:0,backgroundColor:'transparent'},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y} glasses`}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10},color:'#8C7B6B'}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'},min:0,max:Math.max(WATER_GOAL+2,...data)+1}
+      }
+    }
+  });
+}
+
+async function buildBodyWaterWeekChart(){
+  const wrap = document.getElementById('wrap-bodywater-week-chart');
+  if(!wrap) return;
+  const canvasId = 'bodywater-week-chart';
+  if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id=canvasId;wrap.appendChild(c);}
+  if(chartInstances[canvasId]){chartInstances[canvasId].destroy();delete chartInstances[canvasId];}
+
+  const rows = await getCSVRows();
+  const now = new Date();
+  const days=[];for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+  const labels=days.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const data=days.map(d=>{const r=rows.find(row=>row.date===d&&parseFloat(row.body_water_pct)>0);return r?parseFloat(r.body_water_pct):null;});
+
+  if(!data.some(v=>v!==null)){wrap.innerHTML='<div class="log-empty">No body water data — upload your weekly CSV.</div>';return;}
+
+  chartInstances[canvasId]=new Chart(wrap.querySelector('canvas').getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Body Water %',data,borderColor:'#5B9EC9',backgroundColor:'rgba(91,158,201,0.1)',borderWidth:2,pointRadius:4,fill:true,tension:0.3,spanGaps:true},
+      {label:'Low (45%)',data:days.map(()=>45),borderColor:'rgba(196,115,90,0.4)',borderWidth:1,borderDash:[4,4],pointRadius:0,backgroundColor:'transparent'},
+      {label:'Optimal (50%)',data:days.map(()=>50),borderColor:'rgba(107,158,120,0.4)',borderWidth:1,borderDash:[4,4],pointRadius:0,backgroundColor:'transparent'},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label.startsWith('Body')?`Body Water: ${c.parsed.y}%`:null}}},
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',callback:v=>v+'%'},min:40,max:65}
+      }
+    }
+  });
+}
+
+function hydrationCoach(){ callCoach('Health','I take Zepbound (GLP-1) and Irbesartan HCTZ (diuretic). My Withings scale frequently flags dehydration. Give me specific hydration advice for my situation including how much water to drink, timing, and signs to watch for.','hydration-coach-output'); }
+
+
+async function calculateGlowScore(save=false) {
+  const el = document.getElementById('health-score-content');
+  if(el) el.innerHTML = '<div class="log-empty">Calculating your Glow Score...</div>';
+
+  const [bps, checkins, sleeps, minds, exercises] = await Promise.all([
+    dbAll('bps'), dbAll('checkins'), dbAll('sleeps'), dbAll('minds'), dbAll('exercises')
+  ]);
+  const csvRows = await getCSVRows();
+
+  const recent7 = (arr) => arr.slice(-7);
+  const avgField = (arr, field) => {
+    const vals = arr.map(r=>parseFloat(r[field]||0)).filter(v=>v>0);
+    return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+  };
+
+  // ── CARDIOVASCULAR (0–20) ──
+  let cardioScore = 10;
+  const allBPs = [...(await getCSVBPData()), ...bps.map(b=>({sys:Number(b.sys),dia:Number(b.dia),date:b.date}))].filter(b=>b.sys&&b.dia);
+  const recentBPs = allBPs.sort((a,b)=>parseBPDate(b.date)-parseBPDate(a.date)).slice(0,7);
+  if(recentBPs.length){
+    const avgSys=recentBPs.reduce((a,b)=>a+b.sys,0)/recentBPs.length;
+    const avgDia=recentBPs.reduce((a,b)=>a+b.dia,0)/recentBPs.length;
+    if(avgSys<120&&avgDia<80) cardioScore=20;
+    else if(avgSys<130&&avgDia<85) cardioScore=16;
+    else if(avgSys<140&&avgDia<90) cardioScore=12;
+    else cardioScore=8;
+  }
+  const avgRestHR=avgField(csvRows.slice(0,7),'resting_hr');
+  if(avgRestHR){
+    if(avgRestHR<60) cardioScore=Math.min(20,cardioScore+2);
+    else if(avgRestHR<70) cardioScore=Math.min(20,cardioScore+1);
+    else if(avgRestHR>80) cardioScore=Math.max(0,cardioScore-2);
+  }
+
+  // ── METABOLIC (0–20) — from Feb 2026 labs ──
+  // Cholesterol 116✓ LDL 50✓ Glucose 88✓ ALT 25✓ Alk Phos 135⚠
+  let metabolicScore = 17;
+
+  // ── BODY COMPOSITION (0–20) ──
+  let bodyScore = 10;
+  const latestBMIRow = csvRows.find(r=>parseFloat(r.bmi)>0);
+  if(latestBMIRow){
+    const bmi=parseFloat(latestBMIRow.bmi);
+    if(bmi<25) bodyScore=18; else if(bmi<27) bodyScore=15; else if(bmi<30) bodyScore=12; else bodyScore=8;
+  }
+  // Weight loss trend bonus
+  const wRows=csvRows.filter(r=>parseFloat(r.weight_lbs)>0);
+  if(wRows.length>1&&parseFloat(wRows[0].weight_lbs)<parseFloat(wRows[wRows.length-1].weight_lbs)) bodyScore=Math.min(20,bodyScore+2);
+
+  // ── ACTIVITY (0–20) ──
+  let activityScore=10;
+  const avgSteps=avgField(csvRows.slice(0,7),'steps');
+  if(avgSteps){
+    if(avgSteps>=10000) activityScore=20; else if(avgSteps>=7500) activityScore=17;
+    else if(avgSteps>=5000) activityScore=14; else if(avgSteps>=2500) activityScore=10; else activityScore=7;
+  }
+  const recentEx=recent7(exercises);
+  if(recentEx.length>=4) activityScore=Math.min(20,activityScore+2);
+  else if(recentEx.length>=2) activityScore=Math.min(20,activityScore+1);
+
+  // ── SLEEP (0–20) ──
+  let sleepScore=10;
+  const csvSleep=avgField(csvRows.slice(0,7),'sleep_hrs');
+  const recentSleeps=recent7(sleeps);
+  const avgSleepHrs=recentSleeps.length?avgField(recentSleeps,'hrs'):csvSleep;
+  if(avgSleepHrs){
+    if(avgSleepHrs>=7&&avgSleepHrs<=9) sleepScore=20; else if(avgSleepHrs>=6) sleepScore=15;
+    else if(avgSleepHrs>=5) sleepScore=10; else sleepScore=6;
+  }
+  const cpapOk=recentSleeps.filter(s=>s.cpap==='Full night').length;
+  if(cpapOk>=5) sleepScore=Math.min(20,sleepScore+2);
+
+  // ── MIND (0–20) ──
+  let mindScore=12;
+  const recentMinds=recent7(minds);
+  if(recentMinds.length){
+    const moodMap={Great:5,Good:4,Okay:3,Low:2,Rough:1};
+    const avgMood=recentMinds.reduce((a,m)=>a+(moodMap[m.mood]||3),0)/recentMinds.length;
+    mindScore=Math.round(avgMood*4);
+  }
+  if(recent7(checkins).length>=5) mindScore=Math.min(20,mindScore+2);
+
+  // ── TOTAL ──
+  const totalScore=Math.round(cardioScore+metabolicScore+bodyScore+activityScore+sleepScore+mindScore);
+  const pillars=[
+    {name:'❤️ Cardio',score:cardioScore,max:20,color:'#C4735A'},
+    {name:'🧪 Metabolic',score:metabolicScore,max:20,color:'#A07850'},
+    {name:'💪 Body',score:bodyScore,max:20,color:'#6B9E78'},
+    {name:'🏃 Activity',score:activityScore,max:20,color:'#9B8EC4'},
+    {name:'😴 Sleep',score:sleepScore,max:20,color:'#6B9E78'},
+    {name:'🧠 Mind',score:mindScore,max:20,color:'#E8A87C'},
+  ];
+
+  // ── REAL AGE (based on RealAge methodology, chronological age 54) ──
+  let realAge=54;
+  if(cardioScore>=16) realAge-=3; else if(cardioScore<=8) realAge+=3;
+  if(metabolicScore>=16) realAge-=2;
+  if(bodyScore>=16) realAge-=2; else if(bodyScore<=8) realAge+=2;
+  if(activityScore>=17) realAge-=3; else if(activityScore<=7) realAge+=2;
+  if(sleepScore>=15) realAge-=2; else if(sleepScore<=6) realAge+=3;
+  if(mindScore>=16) realAge-=1;
+  realAge-=2; // Zepbound active weight loss bonus
+  realAge=Math.max(35,Math.min(75,Math.round(realAge)));
+
+  const scoreColor=totalScore>=85?'#27500A':totalScore>=70?'#6B9E78':totalScore>=55?'#92400E':'#7F1D1D';
+  const scoreBg=totalScore>=85?'#EAF3DE':totalScore>=70?'rgba(107,158,120,0.15)':totalScore>=55?'#FEF3C7':'#FEE2E2';
+  const scoreLabel=totalScore>=85?'Thriving':totalScore>=70?'Strong':totalScore>=55?'Building':'Needs attention';
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const timeStr=now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+
+  if(save){
+    const scoreEntry={date:now.toISOString(),totalScore,realAge,pillars:Object.fromEntries(pillars.map(p=>[p.name,p.score]))};
+    fetch(`${BACKEND}/api/sync?pillar=scores`).then(r=>r.json()).then(d=>{
+      const existing=d.data||[];existing.push(scoreEntry);
+      fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'scores',data:existing})});
+    }).catch(()=>{});
+  }
+
+  if(el) el.innerHTML=`
+    <div class="glow-score-hero">
+      <div class="glow-score-circle" style="background:${scoreBg};border-color:${scoreColor};">
+        <div class="glow-score-num" style="color:${scoreColor};">${totalScore}</div>
+        <div class="glow-score-label" style="color:${scoreColor};">${scoreLabel}</div>
+      </div>
+      <div class="glow-score-right">
+        <div class="glow-real-age">${realAge} <span style="font-size:14px;font-weight:400;color:var(--muted);">body age</span></div>
+        <div class="glow-real-age-label">vs. chronological age 54</div>
+        <div class="glow-score-date">${dateStr} · ${timeStr}</div>
+      </div>
+    </div>
+    <div class="glow-pillar-scores">
+      ${pillars.map(p=>`
+        <div class="glow-pillar-item">
+          <div class="glow-pillar-name">${p.name}</div>
+          <div class="glow-pillar-bar-wrap"><div class="glow-pillar-bar" style="width:${(p.score/p.max)*100}%;background:${p.color};"></div></div>
+          <div class="glow-pillar-score">${p.score}/${p.max}</div>
+        </div>`).join('')}
+    </div>
+    <button class="glow-recalc-btn" onclick="calculateGlowScore(true)">🔄 Recalculate &amp; save</button>
+    <div class="glow-score-trend" id="glow-score-trend">Loading history...</div>
+  `;
+  loadScoreTrend();
+}
+
+async function loadScoreTrend(){
+  try{
+    const res=await fetch(`${BACKEND}/api/sync?pillar=scores`);
+    if(!res.ok)return;
+    const {data}=await res.json();
+    if(!data||!data.length)return;
+    const el=document.getElementById('glow-score-trend');
+    if(!el)return;
+    if(data.length>=2){
+      const prev=data[data.length-2],curr=data[data.length-1];
+      const diff=curr.totalScore-prev.totalScore;
+      const prevDate=new Date(prev.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      el.textContent=diff>0?`↑ +${diff} points since ${prevDate}`:diff<0?`↓ ${diff} points since ${prevDate}`:`No change since ${prevDate}`;
+      el.style.color=diff>0?'#27500A':diff<0?'#7F1D1D':'var(--muted)';
+    } else {
+      el.textContent='First score saved! Recalculate weekly to track your trend.';
+    }
+  }catch(e){}
+}
 
 function parseCSVToRows(csv) {
   const lines = csv.trim().split('\n');
