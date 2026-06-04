@@ -381,6 +381,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toggle-row" onclick="ts('t-meds')"><div><div class="tl">Daily medications taken</div><div class="ts">Irbesartan · Metoprolol · Amlodipine · Osteo Biflex</div></div><div class="tog" id="t-meds"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-skin-am')"><div><div class="tl">AM skin routine done</div><div class="ts">Olay Cleanser · Serum · Vit C · SPF</div></div><div class="tog" id="t-skin-am"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-skin-pm')"><div><div class="tl">PM skin routine done</div><div class="ts">Musely (alt nights) · Olay Regenerist</div></div><div class="tog" id="t-skin-pm"><div class="tok"></div></div></div>
+      <div class="toggle-row" onclick="ts('t-exercise')"><div><div class="tl">Exercised today</div><div class="ts">Walk · Pilates · Strength · Yoga · any movement</div></div><div class="tog" id="t-exercise"><div class="tok"></div></div></div>
       <div class="fl">Note for today</div>
       <textarea id="today-note" rows="2" placeholder="Outfit win, energy, anything on your mind..."></textarea>
       <button class="btn-primary" onclick="saveCheckin()">Save check-in</button>
@@ -482,6 +483,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content" id="vc-style-weekly">
     <div class="section-label">This week's looks</div>
     <div class="card"><div class="card-title">Outfits this week</div><div id="weekly-outfits"><div class="log-empty">Log outfits daily to see them here.</div></div></div>
+    <div class="card"><div class="card-title">Wardrobe planning notes</div><div id="wardrobe-plan-log"><div class="log-empty">No wardrobe plans yet.</div></div></div>
   </div>
   <div class="view-content" id="vc-style-monthly">
     <div class="section-label">May 2026 · DailyLook box</div>
@@ -535,8 +537,24 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div class="fl">CPAP compliance</div>
       <div class="tags" id="cpap-tags">
-        <button class="tag" onclick="solo('cpap-tags',this)">Full night</button><button class="tag" onclick="solo('cpap-tags',this)">Partial</button><button class="tag" onclick="solo('cpap-tags',this)">Forgot</button><button class="tag" onclick="solo('cpap-tags',this)">Didn't use</button>
+        <button class="tag" onclick="solo('cpap-tags',this)">Full night (4+ hrs)</button>
+        <button class="tag" onclick="solo('cpap-tags',this)">3–4 hrs</button>
+        <button class="tag" onclick="solo('cpap-tags',this)">1–3 hrs</button>
+        <button class="tag" onclick="solo('cpap-tags',this)">Forgot</button>
+        <button class="tag" onclick="solo('cpap-tags',this)">Didn't use</button>
       </div>
+      <div class="fl">CPAP hours (approx)</div>
+      <div class="two-col">
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hours used</div>
+          <input type="number" id="cpap-hours" placeholder="e.g. 4" min="0" max="12" step="0.5">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">AHI (if shown)</div>
+          <input type="number" id="cpap-ahi" placeholder="e.g. 2.4" min="0" step="0.1">
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Medicare requires 4+ hrs/night · 70% of nights for compliance. Your ResMed shows usage hours on the device display each morning.</div>
       <div class="fl">Sleep quality</div>
       <div class="quality-row" id="sq-tags">
         <button class="qb" onclick="soloQ(this)">Awful</button><button class="qb" onclick="soloQ(this)">Poor</button><button class="qb" onclick="soloQ(this)">OK</button><button class="qb" onclick="soloQ(this)">Good</button><button class="qb" onclick="soloQ(this)">Great</button>
@@ -578,27 +596,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="stat-tile"><div class="stat-val" style="font-size:24px;">168.7</div><div class="stat-lbl">All-time low · May 19</div></div>
     </div>
     <div class="card">
-      <div class="card-title">Apple Health · body composition</div>
-      <div id="body-composition-metrics"><div class="log-empty">Upload your weekly CSV to see body composition data.</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Apple Health · activity</div>
-      <div id="body-activity-metrics"><div class="log-empty">Upload your weekly CSV to see steps data.</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Body composition · trends</div>
-      <div class="chart-tabs" id="body-comp-tabs">
-        <button class="chart-tab on" onclick="switchBodyCompChart('weight_lbs',this)">Weight</button>
-        <button class="chart-tab" onclick="switchBodyCompChart('bmi',this)">BMI</button>
-        <button class="chart-tab" onclick="switchBodyCompChart('body_fat_pct',this)">Body Fat %</button>
-        <button class="chart-tab" onclick="switchBodyCompChart('lean_mass_lbs',this)">Lean Mass</button>
-        <button class="chart-tab" onclick="switchBodyCompChart('bone_mass_lbs',this)">Bone Mass</button>
-        <button class="chart-tab" onclick="switchBodyCompChart('body_water_pct',this)">Water %</button>
-      </div>
-      <div class="chart-wrap" style="height:220px;"><canvas id="body-comp-chart"></canvas></div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Data from Apple Health via Withings scale · upload CSV weekly</div>
-    </div>
-    <div class="card">
       <div class="card-title">Weight charts</div>
       <div class="chart-tabs">
         <button class="chart-tab on" onclick="switchChart('journey',this)">Weight journey</button>
@@ -624,6 +621,48 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Goal weight (lbs)</div><input type="number" id="goal-weight" placeholder="e.g. 145" step="0.5" oninput="updateForecast()"></div>
         <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Target date (optional)</div><input type="text" id="goal-date" placeholder="e.g. Dec 2026"></div>
       </div>
+    </div>
+
+    <!-- CSV-based weight trend with goal line -->
+    <div class="card">
+      <div class="card-title">Weight trend · from Apple Health</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+        <div style="font-size:12px;color:var(--muted);">Goal weight:</div>
+        <input type="number" id="weight-goal-input" placeholder="e.g. 155" style="width:80px;padding:6px 8px;font-size:13px;">
+        <span style="font-size:12px;color:var(--muted);">lbs</span>
+        <button onclick="localStorage.setItem('glowWeightGoal',document.getElementById('weight-goal-input').value);getCSVRows().then(rows=>buildBodyCompChart('weight_lbs',rows));this.textContent='✓ Saved'" style="padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--accent);font-size:12px;cursor:pointer;">Set goal</button>
+      </div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="body-comp-chart"></canvas></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Daily data from Withings via Apple Health CSV · upload weekly</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Apple Health · body composition</div>
+      <div id="body-composition-metrics"><div class="log-empty">Upload your weekly CSV to see body composition data.</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Apple Health · activity</div>
+      <div id="body-activity-metrics"><div class="log-empty">Upload your weekly CSV to see steps data.</div></div>
+    </div>
+    <!-- Exercise goals -->
+    <div class="card">
+      <div class="card-title">Body fat %</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Healthy range for women: 21–33% · Athletic: 14–20%</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="body-fat-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Lean mass & bone mass</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Both in lbs · Lean mass = everything that isn't fat (muscle, organs, water)</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="body-lean-bone-chart"></canvas></div>
+    </div>
+
+    <!-- Exercise goals -->
+    <div class="card">
+      <div class="card-title">Today's exercise goal</div>
+      <div id="exercise-goal-display" style="padding:10px 0;font-size:14px;color:var(--text);">
+        <div style="color:var(--muted);font-size:13px;">Weekly targets: Pilates 2×/wk · Treadmill walk 3×/wk · Stretching daily</div>
+      </div>
+      <div id="exercise-today-status" style="margin-top:8px;"></div>
     </div>
     <div class="card">
       <div class="card-title">Exercise log</div>
@@ -1370,6 +1409,7 @@ function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
+  if(id==='sleep') buildSleepAppleMetrics();
   if(id==='skin') loadLatestSkinScan();
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); }
 }
@@ -1512,7 +1552,8 @@ async function saveCheckin(){
   const zep=document.getElementById('t-zep').classList.contains('on');
   const cpap=document.getElementById('t-cpap').classList.contains('on');
   const meds=document.getElementById('t-meds').classList.contains('on');
-  const entry={mood,note,zep,cpap,meds,date:nowStr()};
+  const exercise=document.getElementById('t-exercise')?.classList.contains('on')||false;
+  const entry={mood,note,zep,cpap,meds,exercise,date:nowStr()};
   await dbAdd('checkins',entry);
   syncToBlob('checkins'); // fire-and-forget — won't break local save
   document.getElementById('today-note').value='';
@@ -1549,12 +1590,16 @@ async function saveSleep(){
   const bed=document.getElementById('sl-bed').value,wake=document.getElementById('sl-wake').value;
   const cpap=gT('cpap-tags'),quality=document.getElementById('sq-tags').querySelector('.on')?.textContent||'';
   const energy=gT('energy-am-tags'),note=document.getElementById('sleep-note').value.trim();
+  const cpapHours=document.getElementById('cpap-hours')?.value||'';
+  const cpapAHI=document.getElementById('cpap-ahi')?.value||'';
   let hrs='—';
   if(bed&&wake){const[bh,bm]=bed.split(':').map(Number);const[wh,wm]=wake.split(':').map(Number);let m=(wh*60+wm)-(bh*60+bm);if(m<0)m+=1440;hrs=(m/60).toFixed(1);document.getElementById('sleep-display').textContent=hrs+'h';document.getElementById('s-sleep-h').textContent=hrs+'h';}
-  const sleepEntry={hrs,cpap:cpap[0]||'',quality,energy,note,date:nowStr()};
+  const sleepEntry={hrs,cpap:cpap[0]||'',cpapHours,cpapAHI,quality,energy,note,date:nowStr()};
   await dbAdd('sleeps',sleepEntry);
   syncToBlob('sleeps');
   document.getElementById('sleep-note').value='';
+  if(document.getElementById('cpap-hours')) document.getElementById('cpap-hours').value='';
+  if(document.getElementById('cpap-ahi')) document.getElementById('cpap-ahi').value='';
   ['cpap-tags','energy-am-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
   toast('slp-t');loadLogs();
@@ -1668,9 +1713,11 @@ async function saveReflection(){
 // ── LOAD LOGS ─────────────────────────────────────────────────────────
 async function loadLogs(){
   const checkins=await dbAll('checkins');
-  renderLog('checkin-log',checkins,e=>logItem(e.date,[...e.mood,...(e.zep?['Zepbound']:[]),...(e.cpap?['CPAP']:[]),...(e.meds?['Meds ✓']:[])],e.note));
+  renderLog('checkin-log',checkins,e=>logItem(e.date,[...e.mood,...(e.zep?['Zepbound']:[]),...(e.cpap?['CPAP ✓']:[]),...(e.meds?['Meds ✓']:[]),...(e.exercise?['Exercised ✓']:[])],e.note));
   const sleeps=await dbAll('sleeps');
-  renderLog('sleep-log',sleeps,e=>logItem(e.date,[e.hrs+'h',e.cpap,e.quality,...e.energy],e.note));
+  renderLog('sleep-log',sleeps,e=>logItem(e.date,[e.hrs+'h',e.cpap,e.cpapHours?e.cpapHours+'h CPAP':'',e.cpapAHI?'AHI '+e.cpapAHI:'',e.quality,...e.energy],e.note));
+  const wardrobeplans=await dbAll('wardrobeplans');
+  renderLog('wardrobe-plan-log',wardrobeplans,e=>logItem(e.date,[e.occasion||''].filter(Boolean),`${e.plan||''}${e.wishlist?'\nWishlist: '+e.wishlist:''}`));
   const skins=await dbAll('skins');
   renderLog('skin-log',skins.filter(s=>s.type==='checkin'),e=>logItem(e.date,[...e.skinT,...e.concerns,...(e.musely_aa?['Musely Anti-Age']:[]),...(e.musely_spot?['Musely Spot']:[])],e.derm));
   renderLog('facial-log',skins.filter(s=>s.type==='facial'),e=>logItem(e.date,[e.next?'Next: '+e.next:''],e.notes));
@@ -1970,7 +2017,7 @@ async function buildHealthClinicalMetrics(){
   const avgResp = avg('respiratory_rate');
   const avgAsym = avg('walking_asymmetry');
   const avgDS = avg('double_support');
-  const fmt = (d) => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+  const fmt = (d) => d ? safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
 
   el.innerHTML = `
     <div class="lab-section-title">Heart & Breathing · 7-day avg</div>
@@ -2006,93 +2053,101 @@ async function buildHealthClinicalMetrics(){
 async function buildBodyCompositionMetrics(){
   const elComp = document.getElementById('body-composition-metrics');
   const elAct = document.getElementById('body-activity-metrics');
-  const rows = await getCSVRows();
+  
+  let rows = [];
+  try { rows = await getCSVRows(); } catch(e){ console.error('CSV fetch error:', e); }
 
+  if(!rows.length){
+    if(elComp) elComp.innerHTML='<div class="log-empty">Upload your weekly CSV to see body composition.</div>';
+    if(elAct) elAct.innerHTML='<div class="log-empty">Upload your weekly CSV to see activity data.</div>';
+    return;
+  }
+  // rows has data — render composition metrics
   if(elComp){
-    if(!rows.length){ elComp.innerHTML='<div class="log-empty">Upload your weekly CSV to see body composition.</div>'; }
-    else {
-      const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
-      const latestBMI = rows.find(r=>parseFloat(r.bmi)>0);
-      const latestFat = rows.find(r=>parseFloat(r.body_fat_pct)>0);
-      const latestLean = rows.find(r=>parseFloat(r.lean_mass_lbs)>0);
-      const latestBone = rows.find(r=>parseFloat(r.bone_mass_lbs)>0);
-      const fmt = (d) => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
-      const bmi = latestBMI ? parseFloat(latestBMI.bmi) : null;
-
-      elComp.innerHTML = `
-        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">From Withings scale via Apple Health</div>
-        <div class="snapshot-grid">
-          <div class="snapshot-item">
-            <div class="snapshot-label">Weight</div>
-            <div class="snapshot-val">${latestWeight?parseFloat(latestWeight.weight_lbs).toFixed(1):'—'}</div>
-            <div class="snapshot-sub snapshot-status-ok">${fmt(latestWeight?.date)||'—'}</div>
-          </div>
-          <div class="snapshot-item">
-            <div class="snapshot-label">BMI</div>
-            <div class="snapshot-val">${bmi?bmi.toFixed(1):'—'}</div>
-            <div class="snapshot-sub ${bmi&&bmi<25?'snapshot-status-ok':bmi<30?'snapshot-status-watch':'snapshot-status-high'}">${bmi?(bmi<25?'Normal':bmi<30?'Overweight':'Obese'):'—'}</div>
-          </div>
-          <div class="snapshot-item">
-            <div class="snapshot-label">Body Fat</div>
-            <div class="snapshot-val">${latestFat?parseFloat(latestFat.body_fat_pct).toFixed(1)+'%':'—'}</div>
-            <div class="snapshot-sub">${fmt(latestFat?.date)||'—'}</div>
-          </div>
-          <div class="snapshot-item">
-            <div class="snapshot-label">Lean Mass</div>
-            <div class="snapshot-val" style="font-size:18px;">${latestLean?parseFloat(latestLean.lean_mass_lbs).toFixed(1):'—'}</div>
-            <div class="snapshot-sub">lbs · ${fmt(latestLean?.date)||'—'}</div>
-          </div>
-          ${latestBone?`<div class="snapshot-item"><div class="snapshot-label">Bone Mass</div><div class="snapshot-val" style="font-size:18px;">${parseFloat(latestBone.bone_mass_lbs).toFixed(1)}</div><div class="snapshot-sub">lbs · ${fmt(latestBone.date)}</div></div>`:''}
-          ${(()=>{const r=rows.find(row=>parseFloat(row.body_water_pct)>0);return r?`<div class="snapshot-item"><div class="snapshot-label">Body Water</div><div class="snapshot-val" style="font-size:18px;">${parseFloat(r.body_water_pct).toFixed(1)}%</div><div class="snapshot-sub">estimated · ${fmt(r.date)}</div></div>`:'';})()} 
+    const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
+    const latestBMI = rows.find(r=>parseFloat(r.bmi)>0);
+    const latestFat = rows.find(r=>parseFloat(r.body_fat_pct)>0);
+    const latestLean = rows.find(r=>parseFloat(r.lean_mass_lbs)>0);
+    const latestBone = rows.find(r=>parseFloat(r.bone_mass_lbs)>0);
+    const fmt = (d) => d ? safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+    const bmi = latestBMI ? parseFloat(latestBMI.bmi) : null;
+    elComp.innerHTML = `
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">From Withings scale via Apple Health</div>
+      <div class="snapshot-grid">
+        <div class="snapshot-item">
+          <div class="snapshot-label">Weight</div>
+          <div class="snapshot-val">${latestWeight?parseFloat(latestWeight.weight_lbs).toFixed(1):'—'}</div>
+          <div class="snapshot-sub snapshot-status-ok">${fmt(latestWeight?.date)||'—'}</div>
         </div>
-      `;
-    }
+        <div class="snapshot-item">
+          <div class="snapshot-label">BMI</div>
+          <div class="snapshot-val">${bmi?bmi.toFixed(1):'—'}</div>
+          <div class="snapshot-sub ${bmi&&bmi<25?'snapshot-status-ok':bmi<30?'snapshot-status-watch':'snapshot-status-high'}">${bmi?(bmi<25?'Normal':bmi<30?'Overweight':'Obese'):'—'}</div>
+        </div>
+        <div class="snapshot-item">
+          <div class="snapshot-label">Body Fat</div>
+          <div class="snapshot-val">${latestFat?parseFloat(latestFat.body_fat_pct).toFixed(1)+'%':'—'}</div>
+          <div class="snapshot-sub">${fmt(latestFat?.date)||'—'}</div>
+        </div>
+        <div class="snapshot-item">
+          <div class="snapshot-label">Lean Mass</div>
+          <div class="snapshot-val" style="font-size:18px;">${latestLean?parseFloat(latestLean.lean_mass_lbs).toFixed(1):'—'}</div>
+          <div class="snapshot-sub">lbs · ${fmt(latestLean?.date)||'—'}</div>
+        </div>
+        ${latestBone?`<div class="snapshot-item"><div class="snapshot-label">Bone Mass</div><div class="snapshot-val" style="font-size:18px;">${parseFloat(latestBone.bone_mass_lbs).toFixed(1)}</div><div class="snapshot-sub">lbs · ${fmt(latestBone.date)}</div></div>`:''}
+        ${(()=>{const r=rows.find(row=>parseFloat(row.body_water_pct)>0);return r?`<div class="snapshot-item"><div class="snapshot-label">Body Water</div><div class="snapshot-val" style="font-size:18px;">${parseFloat(r.body_water_pct).toFixed(1)}%</div><div class="snapshot-sub">estimated · ${fmt(r.date)}</div></div>`:'';})()} 
+      </div>
+    `;
   }
 
   if(elAct){
-    if(!rows.length){ elAct.innerHTML='<div class="log-empty">Upload your weekly CSV to see activity data.</div>'; }
-    else {
-      const recent7 = rows.slice(0,7);
-      const avgSteps = recent7.map(r=>parseInt(r.steps)||0).filter(v=>v>0);
-      const avg = avgSteps.length ? Math.round(avgSteps.reduce((a,b)=>a+b,0)/avgSteps.length) : null;
-      elAct.innerHTML = `
-        <div class="snapshot-grid">
-          <div class="snapshot-item">
-            <div class="snapshot-label">Avg Steps</div>
-            <div class="snapshot-val" style="font-size:20px;">${avg?avg.toLocaleString():'—'}</div>
-            <div class="snapshot-sub">7-day avg</div>
-          </div>
+    const recent7 = rows.slice(0,7);
+    const avgSteps = recent7.map(r=>parseInt(r.steps)||0).filter(v=>v>0);
+    const avg = avgSteps.length ? Math.round(avgSteps.reduce((a,b)=>a+b,0)/avgSteps.length) : null;
+    elAct.innerHTML = `
+      <div class="snapshot-grid">
+        <div class="snapshot-item">
+          <div class="snapshot-label">Avg Steps</div>
+          <div class="snapshot-val" style="font-size:20px;">${avg?avg.toLocaleString():'—'}</div>
+          <div class="snapshot-sub">7-day avg</div>
         </div>
-      `;
-    }
+      </div>
+    `;
   }
 
-  // Build body comp chart
+  // Build all body charts
   buildBodyCompChart('weight_lbs', rows);
+  buildBodyFatChart(rows);
+  buildLeanBoneChart(rows);
 }
 
 async function buildSleepAppleMetrics(){
   const el = document.getElementById('sleep-apple-metrics');
   if(!el) return;
   const rows = await getCSVRows();
-  if(!rows.length){ el.innerHTML='<div class="log-empty">Upload your weekly CSV to see sleep data.</div>'; return; }
+  if(!rows.length){ el.innerHTML='<div class="log-empty">Upload your weekly CSV to see sleep data from Apple Health.</div>'; return; }
 
-  const recent7 = rows.slice(0,7).filter(r=>parseFloat(r.sleep_hrs)>0);
-  const avgSleep = recent7.length ? (recent7.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/recent7.length).toFixed(1) : null;
-  const latest = rows.find(r=>parseFloat(r.sleep_hrs)>0);
-  const fmt = (d) => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+  const withSleep = rows.filter(r=>parseFloat(r.sleep_hrs)>0);
+  if(!withSleep.length){ el.innerHTML='<div class="log-empty">No sleep data in CSV yet.</div>'; return; }
+
+  const latest = withSleep[0]; // most recent with data
+  const recent7 = withSleep.slice(0,7);
+  const avgSleep = recent7.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/recent7.length;
+  const fmt = d => safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const dataDate = fmt(latest.date);
 
   el.innerHTML = `
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Last data: ${dataDate} · Upload CSV weekly to update</div>
     <div class="snapshot-grid">
       <div class="snapshot-item">
-        <div class="snapshot-label">Last Night</div>
-        <div class="snapshot-val">${latest?parseFloat(latest.sleep_hrs).toFixed(1):'—'}</div>
-        <div class="snapshot-sub">${fmt(latest?.date)||'hrs'}</div>
+        <div class="snapshot-label">Last recorded</div>
+        <div class="snapshot-val">${parseFloat(latest.sleep_hrs).toFixed(1)}</div>
+        <div class="snapshot-sub">${dataDate}</div>
       </div>
       <div class="snapshot-item">
-        <div class="snapshot-label">7-day Avg</div>
-        <div class="snapshot-val">${avgSleep||'—'}</div>
-        <div class="snapshot-sub ${avgSleep&&avgSleep>=7?'snapshot-status-ok':avgSleep>=6?'snapshot-status-watch':'snapshot-status-high'}">${avgSleep?(avgSleep>=7?'Good':'Low'):'hrs/night'}</div>
+        <div class="snapshot-label">7-day avg</div>
+        <div class="snapshot-val">${avgSleep.toFixed(1)}</div>
+        <div class="snapshot-sub ${avgSleep>=7?'snapshot-status-ok':avgSleep>=6?'snapshot-status-watch':'snapshot-status-high'}">${avgSleep>=7?'Good':avgSleep>=6?'Low':'Very low'}</div>
       </div>
     </div>
   `;
@@ -2128,16 +2183,16 @@ function buildBodyCompChartForView(metric, view, rows){
 
   if(view==='weekly'){
     const days=[];for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
-    labels=days.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    labels=days.map(d=>safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
     data=days.map(d=>{const r=rows.find(row=>row.date===d&&parseFloat(row[metric])>0);return r?parseFloat(r[metric]):null;});
   } else if(view==='monthly'){
     const days=[];for(let i=29;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
-    labels=days.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    labels=days.map(d=>safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
     data=days.map(d=>{const r=rows.find(row=>row.date===d&&parseFloat(row[metric])>0);return r?parseFloat(r[metric]):null;});
   } else {
     const monthGroups={};
     rows.filter(r=>parseFloat(r[metric])>0).forEach(r=>{
-      const d=new Date(r.date);const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      const d=safeDate(r.date);const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
       if(!monthGroups[key]){monthGroups[key]={vals:[],label:d.toLocaleDateString('en-US',{month:'short',year:'numeric'})};}
       monthGroups[key].vals.push(parseFloat(r[metric]));
     });
@@ -2180,7 +2235,7 @@ function buildStepsChartForView(view, rows){
   const now=new Date();
   const daysCount=view==='weekly'?7:30;
   const days=[];for(let i=daysCount-1;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
-  const labels=days.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const labels=days.map(d=>safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
   const data=days.map(d=>{const r=rows.find(row=>row.date===d&&parseInt(row.steps)>0);return r?parseInt(r.steps):null;});
   if(!data.some(v=>v!==null)){wrap.innerHTML='<div class="log-empty">No steps data — upload your weekly CSV.</div>';return;}
   chartInstances[canvasId]=new Chart(wrap.querySelector('canvas').getContext('2d'),{
@@ -2197,12 +2252,60 @@ function buildStepsChartForView(view, rows){
   });
 }
 
+function buildBodyFatChart(rows){
+  const canvas = document.getElementById('body-fat-chart');
+  if(!canvas) return;
+  if(chartInstances['body-fat-chart']){chartInstances['body-fat-chart'].destroy();}
+  const filtered = rows.filter(r=>parseFloat(r.body_fat_pct)>0).reverse();
+  if(!filtered.length){ canvas.parentElement.innerHTML='<div class="log-empty">No body fat data yet — upload your CSV.</div>'; return; }
+  const labels = filtered.map(r=>safeDate(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}));
+  const data = filtered.map(r=>parseFloat(r.body_fat_pct));
+  chartInstances['body-fat-chart'] = new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Body Fat %',data,borderColor:'#E8A87C',backgroundColor:'rgba(232,168,124,0.1)',borderWidth:2,pointRadius:2,fill:true,tension:0.3,spanGaps:true},
+      {label:'Healthy max (33%)',data:labels.map(()=>33),borderColor:'rgba(107,158,120,0.4)',borderWidth:1,borderDash:[4,4],pointRadius:0,backgroundColor:'transparent'},
+      {label:'Athletic (20%)',data:labels.map(()=>20),borderColor:'rgba(91,158,201,0.4)',borderWidth:1,borderDash:[4,4],pointRadius:0,backgroundColor:'transparent'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,labels:{font:{size:10},color:'#8C7B6B',boxWidth:10,filter:i=>!i.text.includes('max')&&!i.text.includes('Athlete')||true}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:10}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',callback:v=>v+'%'},beginAtZero:false}}}
+  });
+}
+
+function buildLeanBoneChart(rows){
+  const canvas = document.getElementById('body-lean-bone-chart');
+  if(!canvas) return;
+  if(chartInstances['body-lean-bone-chart']){chartInstances['body-lean-bone-chart'].destroy();}
+  const filtered = rows.filter(r=>parseFloat(r.lean_mass_lbs)>0||parseFloat(r.bone_mass_lbs)>0).reverse();
+  if(!filtered.length){ canvas.parentElement.innerHTML='<div class="log-empty">No lean/bone mass data yet — upload your CSV.</div>'; return; }
+  const labels = filtered.map(r=>safeDate(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}));
+  chartInstances['body-lean-bone-chart'] = new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Lean Mass (lbs)',data:filtered.map(r=>parseFloat(r.lean_mass_lbs)||null),borderColor:'#6B9E78',backgroundColor:'rgba(107,158,120,0.08)',borderWidth:2,pointRadius:2,fill:false,tension:0.3,spanGaps:true},
+      {label:'Bone Mass (lbs)',data:filtered.map(r=>parseFloat(r.bone_mass_lbs)||null),borderColor:'#9B8EC4',backgroundColor:'transparent',borderWidth:2,pointRadius:2,fill:false,tension:0.3,spanGaps:true},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,labels:{font:{size:10},color:'#8C7B6B',boxWidth:10}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:10}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',callback:v=>v+' lbs'},beginAtZero:false}}}
+  });
+}
+
 let activeBodyCompMetric = 'weight_lbs';
 function switchBodyCompChart(metric, btn){
   activeBodyCompMetric = metric;
   document.querySelectorAll('#body-comp-tabs .chart-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   getCSVRows().then(rows=>buildBodyCompChart(metric, rows));
+}
+
+function safeDate(dateStr){
+  if(!dateStr) return new Date(NaN);
+  // Handle YYYY-MM-DD format safely (Safari doesn't like ISO dates without time)
+  const parts = dateStr.split('-');
+  if(parts.length===3) return new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+  return new Date(dateStr);
 }
 
 function buildBodyCompChart(metric, rows){
@@ -2213,7 +2316,7 @@ function buildBodyCompChart(metric, rows){
   const filtered = rows.filter(r=>parseFloat(r[metric])>0).reverse();
   if(!filtered.length){ canvas.parentElement.innerHTML='<div class="log-empty">No '+metric+' data yet — run your Python script and upload.</div>'; return; }
 
-  const labels = filtered.map(r=>new Date(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const labels = filtered.map(r=>safeDate(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}));
   const data = filtered.map(r=>parseFloat(r[metric]));
 
   const metricLabels = {
@@ -2450,6 +2553,7 @@ async function runSkinAnalysis(input, isHistorical=false){
       r.readAsDataURL(file);
     });
     const mimeType = file.type || 'image/jpeg';
+    const photoDataUrl = `data:${mimeType};base64,${base64}`;
 
     const response = await fetch(`${BACKEND}/api/skin-analysis`,{
       method:'POST',
@@ -2460,7 +2564,7 @@ async function runSkinAnalysis(input, isHistorical=false){
     const {result} = await response.json();
     if(!result) throw new Error('No result returned');
 
-    const scan = { date:scanDate, isoDate, ...result };
+    const scan = { date:scanDate, isoDate, photo:photoDataUrl, ...result };
 
     // Save — insert in chronological order
     const existing = await fetch(`${BACKEND}/api/sync?pillar=skinscan`)
@@ -2497,33 +2601,38 @@ function renderSkinScanResults(scan, containerId){
   const scoreBg = score>=80?'#EAF3DE':score>=65?'rgba(107,158,120,0.15)':score>=50?'#FEF3C7':'#FEE2E2';
   const metrics = scan.metrics || {};
   const metricList = [
-    {key:'hydration',label:'Hydration',color:'#5B9EC9'},
-    {key:'elasticity',label:'Elasticity',color:'#6B9E78'},
-    {key:'texture',label:'Texture',color:'#A07850'},
-    {key:'acne',label:'Acne',color:'#E8A87C'},
-    {key:'wrinkles',label:'Wrinkles',color:'#9B8EC4'},
-    {key:'darkSpots',label:'Dark Spots',color:'#C4735A'},
-    {key:'pores',label:'Pores',color:'#6B9E78'},
-    {key:'redness',label:'Redness',color:'#C4735A'},
+    {key:'hydration',  label:'Hydration',     color:'#5B9EC9'},
+    {key:'elasticity', label:'Firmness',       color:'#6B9E78'},
+    {key:'texture',    label:'Texture',        color:'#A07850'},
+    {key:'acne',       label:'Acne-free',      color:'#E8A87C'},
+    {key:'wrinkles',   label:'No wrinkles',    color:'#9B8EC4'},
+    {key:'darkSpots',  label:'Spot-free',      color:'#C4735A'},
+    {key:'pores',      label:'Pore clarity',   color:'#6B9E78'},
+    {key:'redness',    label:'Redness-free',   color:'#C4735A'},
   ];
+  const scoreLabel = s => s>=90?'Excellent':s>=75?'Good':s>=60?'Fair':'Needs attention';
 
   el.innerHTML = `
-    <div class="skin-scan-date">${scan.date} · Skin age: <strong>${scan.skinAge}</strong></div>
-    <div class="skin-score-gauge">
-      <div class="skin-score-circle" style="background:${scoreBg};border-color:${scoreColor};">
-        <div class="skin-score-num" style="color:${scoreColor};">${score}</div>
-        <div class="skin-score-lbl" style="color:${scoreColor};">Skin Score</div>
-      </div>
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+      ${scan.photo ? `<img src="${scan.photo}" style="width:72px;height:72px;border-radius:12px;object-fit:cover;flex-shrink:0;border:2px solid var(--border);">` : ''}
       <div style="flex:1;">
-        ${scan.highlights?`<div class="skin-insight"><div class="skin-insight-label" style="color:#27500A;">✅ Looking good</div>${scan.highlights}</div>`:''}
+        <div class="skin-scan-date">${scan.date} · Skin age: <strong>${scan.skinAge}</strong></div>
+        <div class="skin-score-circle" style="background:${scoreBg};border-color:${scoreColor};width:60px;height:60px;">
+          <div class="skin-score-num" style="color:${scoreColor};font-size:22px;">${score}</div>
+          <div class="skin-score-lbl" style="color:${scoreColor};">Score</div>
+        </div>
       </div>
     </div>
+    ${scan.highlights?`<div class="skin-insight"><div class="skin-insight-label" style="color:#27500A;">✅ Looking good</div>${scan.highlights}</div>`:''}
     <div class="skin-metrics-grid">
       ${metricList.map(m=>`
         <div class="skin-metric-item">
           <div class="skin-metric-name">${m.label}</div>
           <div class="skin-metric-bar-wrap"><div class="skin-metric-bar" style="width:${metrics[m.key]||0}%;background:${m.color};"></div></div>
-          <div class="skin-metric-score">${metrics[m.key]||'—'}/100</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="skin-metric-score">${metrics[m.key]||'—'}/100</div>
+            <div style="font-size:10px;color:${metrics[m.key]>=90?'#27500A':metrics[m.key]>=75?'#6B9E78':metrics[m.key]>=60?'#92400E':'#7F1D1D'}">${metrics[m.key]?scoreLabel(metrics[m.key]):''}</div>
+          </div>
         </div>`).join('')}
     </div>
     ${scan.focus?`<div class="skin-insight"><div class="skin-insight-label" style="color:#92400E;">🎯 Focus area</div>${scan.focus}</div>`:''}
@@ -2604,10 +2713,13 @@ async function buildSkinCharts(){
     const yearlyEl = document.getElementById('skin-yearly-scans');
     if(yearlyEl && data.length){
       yearlyEl.innerHTML = data.slice().reverse().map(s=>`
-        <div class="log-item">
-          <div class="log-date">${s.date}</div>
-          <div style="font-size:13px;">Score: <strong>${s.overallScore}</strong> · Skin age: <strong>${s.skinAge}</strong></div>
-          <div style="font-size:12px;color:var(--muted);margin-top:2px;">${s.highlights||''}</div>
+        <div class="log-item" style="display:flex;gap:10px;align-items:flex-start;">
+          ${s.photo?`<img src="${s.photo}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;">`:''}
+          <div style="flex:1;">
+            <div class="log-date">${s.date}</div>
+            <div style="font-size:13px;">Score: <strong>${s.overallScore}</strong> · Skin age: <strong>${s.skinAge}</strong></div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">${s.highlights||''}</div>
+          </div>
         </div>`).join('');
     }
   } catch(e){ console.error('buildSkinCharts error:', e); }
@@ -2894,7 +3006,7 @@ async function buildBodyWaterWeekChart(){
   const rows = await getCSVRows();
   const now = new Date();
   const days=[];for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
-  const labels=days.map(d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const labels=days.map(d=>safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
   const data=days.map(d=>{const r=rows.find(row=>row.date===d&&parseFloat(row.body_water_pct)>0);return r?parseFloat(r.body_water_pct):null;});
 
   if(!data.some(v=>v!==null)){wrap.innerHTML='<div class="log-empty">No body water data — upload your weekly CSV.</div>';return;}
