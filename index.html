@@ -101,7 +101,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .he-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .he-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap;}
 .wins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
-.zep-dose-btn{padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);background:var(--warm);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);}
+.cpap-replace-btn{padding:8px 10px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--sans);text-align:left;}
+.cpap-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);}
+.cpap-item-name{font-size:13px;color:var(--text);}
+.cpap-item-due{font-size:11px;font-weight:600;padding:2px 7px;border-radius:8px;}
+.cpap-due-ok{background:#EAF3DE;color:#27500A;}
+.cpap-due-soon{background:#FEF3C7;color:#92400E;}
+.cpap-due-overdue{background:#FEE2E2;color:#7F1D1D;}border-radius:20px;border:1.5px solid var(--border);background:var(--warm);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);}
 .zep-dose-btn.selected{background:var(--accent);color:#fff;border-color:var(--accent);}
 .zep-days-since{font-size:28px;font-weight:700;color:var(--accent);}
 .zep-days-label{font-size:12px;color:var(--muted);}
@@ -389,8 +395,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="tags" id="mood-tags">
         <button class="tag" onclick="tog(this)">Energized</button><button class="tag" onclick="tog(this)">Tired</button><button class="tag" onclick="tog(this)">Confident</button><button class="tag" onclick="tog(this)">Bloated</button><button class="tag" onclick="tog(this)">Glowing</button><button class="tag" onclick="tog(this)">Stressed</button><button class="tag" onclick="tog(this)">Strong</button>
       </div>
-      <div class="fl">Treatments</div>
-      <div class="toggle-row" onclick="ts('t-zep')"><div><div class="tl">Zepbound dose</div><div class="ts">Weekly injection</div></div><div class="tog" id="t-zep"><div class="tok"></div></div></div>
+      <div class="fl">Treatments & compliance</div>
       <div class="toggle-row" onclick="ts('t-cpap')"><div><div class="tl">CPAP used last night</div><div class="ts">Sleep apnea</div></div><div class="tog" id="t-cpap"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-meds')"><div><div class="tl">Daily medications taken</div><div class="ts">Irbesartan · Metoprolol · Amlodipine · Osteo Biflex</div></div><div class="tog" id="t-meds"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-skin-am')"><div><div class="tl">AM skin routine done</div><div class="ts">Olay Cleanser · Serum · Vit C · SPF</div></div><div class="tog" id="t-skin-am"><div class="tok"></div></div></div>
@@ -544,6 +549,43 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="sleep-apple-metrics"><div class="log-empty">Upload your weekly CSV to see sleep hours from Apple Health.</div></div>
     </div>
     <div class="card">
+      <div class="card-title">😴 ResMed myAir · nightly log</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Enter your myAir scores from the ResMed app each morning</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Usage hours</div>
+          <input type="text" id="myair-hours" placeholder="e.g. 9:14" style="width:100%;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:15px;font-weight:600;">
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">Target: 4+ hrs · scored /70</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">AHI · events/hr</div>
+          <input type="number" id="myair-ahi" placeholder="e.g. 0.6" step="0.1" min="0" style="width:100%;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:15px;font-weight:600;">
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">Target: &lt;5 · scored /5</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Mask seal score</div>
+          <input type="number" id="myair-seal" placeholder="e.g. 20" min="0" max="20" style="width:100%;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:15px;font-weight:600;">
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">Out of 20</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Mask on/off count</div>
+          <input type="number" id="myair-onoff" placeholder="e.g. 6" min="0" style="width:100%;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:15px;font-weight:600;">
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">Target: &lt;1 · scored /5</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 12px;border-radius:10px;background:var(--warm);">
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">myAir total score</div>
+          <input type="number" id="myair-score" placeholder="e.g. 95" min="0" max="100" style="width:100%;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:22px;font-weight:700;">
+        </div>
+        <div style="font-size:28px;color:var(--muted);">/100</div>
+      </div>
+      <div id="myair-status" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>
+      <button class="btn-primary" style="margin-top:0;" onclick="saveMyAirLog()">Save myAir data</button>
+      <div class="toast-msg" id="myair-toast">Saved!</div>
+    </div>
+
+    <div class="card">
       <div class="card-title">Log sleep</div>
       <div class="fl">Bedtime & wake</div>
       <div class="two-col">
@@ -558,18 +600,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="tag" onclick="solo('cpap-tags',this)">Forgot</button>
         <button class="tag" onclick="solo('cpap-tags',this)">Didn't use</button>
       </div>
-      <div class="fl">CPAP hours (approx)</div>
-      <div class="two-col">
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hours used</div>
-          <input type="number" id="cpap-hours" placeholder="e.g. 4" min="0" max="12" step="0.5">
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">AHI (if shown)</div>
-          <input type="number" id="cpap-ahi" placeholder="e.g. 2.4" min="0" step="0.1">
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Medicare requires 4+ hrs/night · 70% of nights for compliance. Your ResMed shows usage hours on the device display each morning.</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:10px;">Medicare requires 4+ hrs/night · 70% of nights for compliance</div>
       <div class="fl">Sleep quality</div>
       <div class="quality-row" id="sq-tags">
         <button class="qb" onclick="soloQ(this)">Awful</button><button class="qb" onclick="soloQ(this)">Poor</button><button class="qb" onclick="soloQ(this)">OK</button><button class="qb" onclick="soloQ(this)">Good</button><button class="qb" onclick="soloQ(this)">Great</button>
@@ -586,13 +617,58 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="slp-t">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Sleep log</div><div id="sleep-log"><div class="log-empty">No entries yet.</div></div></div>
-  </div>
-  <div class="view-content" id="vc-sleep-weekly">
+
+    <!-- CPAP Equipment -->
+    <div class="card">
+      <div class="card-title">🔧 CPAP equipment · ResMed AirSense 11</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">AirTouch F30i Clear mask · Weekly cleaning: Sunday soak</div>
+      <div id="cpap-equipment-status">
+        <div class="log-empty">Loading equipment status...</div>
+      </div>
+      <div style="margin-top:14px;">
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">Mark as replaced today:</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="cpap-replace-buttons">
+          <button class="cpap-replace-btn" onclick="replaceCPAPItem('mask_cushion')">Mask cushion</button>
+          <button class="cpap-replace-btn" onclick="replaceCPAPItem('mask_frame')">Mask frame</button>
+          <button class="cpap-replace-btn" onclick="replaceCPAPItem('headgear')">Headgear</button>
+          <button class="cpap-replace-btn" onclick="replaceCPAPItem('tubing')">Tubing</button>
+          <button class="cpap-replace-btn" onclick="replaceCPAPItem('water_chamber')">Water chamber</button>
+          <button class="cpap-replace-btn" onclick="replaceCPAPItem('filter_disposable')">Disposable filter</button>
+          <button class="cpap-replace-btn" onclick="replaceCPAPItem('filter_nondisposable')">Non-disp. filter</button>
+        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Weekly cleaning log (Sunday):</div>
+        <div class="toggle-row" onclick="ts('cpap-clean-mask')"><div><div class="tl">Mask & cushion soaked</div><div class="ts">Warm water + mild soap</div></div><div class="tog" id="cpap-clean-mask"><div class="tok"></div></div></div>
+        <div class="toggle-row" onclick="ts('cpap-clean-tube')"><div><div class="tl">Tubing cleaned</div><div class="ts">Rinse through tube</div></div><div class="tog" id="cpap-clean-tube"><div class="tok"></div></div></div>
+        <div class="toggle-row" onclick="ts('cpap-clean-chamber')"><div><div class="tl">Water chamber cleaned</div><div class="ts">Empty & rinse daily · deep clean weekly</div></div><div class="tog" id="cpap-clean-chamber"><div class="tok"></div></div></div>
+        <button class="btn-primary" style="margin-top:10px;" onclick="saveCPAPCleaning()">Log cleaning done</button>
+        <div class="toast-msg" id="cpap-clean-toast">Cleaning logged!</div>
+      </div>
+    </div>
     <div class="section-label">Sleep this week</div>
+    <div class="card">
+      <div class="card-title">myAir score · this week</div>
+      <div id="myair-weekly-summary"><div class="log-empty">Log myAir data daily to see weekly trends.</div></div>
+      <div class="chart-wrap" style="height:160px;margin-top:12px;"><canvas id="myair-score-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">AHI · events per hour this week</div>
+      <div class="chart-wrap" style="height:160px;"><canvas id="myair-ahi-chart"></canvas></div>
+    </div>
     <div class="card"><div class="card-title">Hours & CPAP compliance</div><div class="chart-wrap" id="wrap-sleep-week-chart"></div></div>
   </div>
   <div class="view-content" id="vc-sleep-monthly">
-    <div class="section-label">Sleep · May 2026</div>
+    <div class="section-label">Sleep · Monthly</div>
+    <div class="card">
+      <div class="card-title">myAir score trend</div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="myair-score-monthly-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">AHI trend · lower is better</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Under 5 = normal · Under 1 = excellent · Your target: &lt;1</div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="myair-ahi-monthly-chart"></canvas></div>
+    </div>
     <div class="card"><div class="card-title">Monthly sleep trend</div><div class="chart-wrap" id="wrap-sleep-month-chart"></div></div>
   </div>
   <div class="view-content" id="vc-sleep-yearly">
@@ -787,11 +863,30 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-health-daily">
     <div class="section-label">Health · Today</div>
 
+    <!-- Medications & Vitamins -->
+    <div class="card">
+      <div class="card-title">💊 Medications & vitamins · daily</div>
+      <div id="meds-checklist">
+        <div class="toggle-row" onclick="toggleMed('med-irbesartan')"><div><div class="tl">Irbesartan HCTZ 300-12.5</div><div class="ts">BP · diuretic · morning</div></div><div class="tog" id="med-irbesartan"><div class="tok"></div></div></div>
+        <div class="toggle-row" onclick="toggleMed('med-metoprolol')"><div><div class="tl">Metoprolol Succ ER 100mg</div><div class="ts">BP · heart rate · morning</div></div><div class="tog" id="med-metoprolol"><div class="tok"></div></div></div>
+        <div class="toggle-row" onclick="toggleMed('med-amlodipine')"><div><div class="tl">Amlodipine Besylate 10mg</div><div class="ts">BP · calcium channel blocker</div></div><div class="tog" id="med-amlodipine"><div class="tok"></div></div></div>
+        <div class="toggle-row" onclick="toggleMed('med-osteo')"><div><div class="tl">Osteo Biflex</div><div class="ts">Joint support · hip</div></div><div class="tog" id="med-osteo"><div class="tok"></div></div></div>
+      </div>
+      <div style="margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--warm);font-size:12px;color:var(--muted);" id="meds-status">Tap each medication when taken today</div>
+      <button class="btn-primary" style="margin-top:10px;" onclick="saveMedsChecklist()">Save today's medications</button>
+      <div class="toast-msg" id="meds-toast">Saved!</div>
+    </div>
+
     <!-- Zepbound -->
     <div class="card">
       <div class="card-title">💉 Zepbound · weekly dose</div>
       <div id="zep-dose-status" style="margin-bottom:14px;"></div>
       <div class="fl">Log this week's injection</div>
+      <div style="display:flex;align-items:center;gap:10px;margin:8px 0 4px;">
+        <div style="font-size:12px;color:var(--muted);">Injection date:</div>
+        <input type="date" id="zep-injection-date" style="padding:6px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);">
+        <div style="font-size:11px;color:var(--muted);">(leave blank for today)</div>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;" id="zep-dose-buttons">
         <button class="zep-dose-btn" onclick="logZepDose(2.5)">2.5 mg</button>
         <button class="zep-dose-btn" onclick="logZepDose(5)">5 mg</button>
@@ -1095,6 +1190,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
       </div>
       <div class="toggle-row" onclick="ts('r-regen')"><div><div class="tl">Olay Regenerist Ultra Rich</div><div class="ts">After Musely — every night</div></div><div class="tog" id="r-regen"><div class="tok"></div></div></div>
+      <div id="musely-history" style="margin-top:10px;"></div>
       <a href="https://www.musely.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open Musely</a>
     </div>
     <div class="card">
@@ -1194,28 +1290,99 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ HAIR ═══════════════ -->
 <div id="s-hair" class="sec">
   <div class="view-content on" id="vc-hair-daily">
-    <div class="section-label">Hair Growth</div>
+    <div class="section-label">Hair Growth Journey</div>
+
+    <!-- Goal photos -->
     <div class="card">
-      <div class="card-title">Progression strip · starting May 2026</div>
-      <div class="progression-strip">
-        <div class="prog-item"><div class="prog-img prog-actual" id="prog-actual-may26" onclick="pickPhoto('prog-actual-may26')" style="cursor:pointer;"><i class="ti ti-camera" style="font-size:18px;color:var(--muted);" aria-hidden="true"></i></div><div class="prog-date">Now ✓</div><div class="prog-label">May 2026</div><div class="prog-label">Chin–ear</div></div>
-        <div class="prog-item"><div class="prog-img prog-ai" id="prog-ai-may26" onclick="pickPhoto('prog-ai-may26')" style="cursor:pointer;"><i class="ti ti-sparkles" style="font-size:18px;color:var(--muted);" aria-hidden="true"></i></div><div class="prog-date">AI ref</div><div class="prog-label">May 2026</div><div class="prog-label">Baseline</div></div>
-        <div class="prog-item"><div class="prog-img prog-future"><i class="ti ti-clock" style="font-size:16px;color:var(--muted);opacity:.5;" aria-hidden="true"></i></div><div class="prog-date">3 mo</div><div class="prog-label">Aug 2026</div><div class="prog-label">Slightly longer</div></div>
-        <div class="prog-item"><div class="prog-img prog-future"></div><div class="prog-date">6 mo</div><div class="prog-label">Nov 2026</div><div class="prog-label">Bottom jawline</div></div>
-        <div class="prog-item"><div class="prog-img prog-future"></div><div class="prog-date">12 mo</div><div class="prog-label">May 2027</div><div class="prog-label">Near shoulder</div></div>
-        <div class="prog-item"><div class="prog-img prog-future"></div><div class="prog-date">18 mo</div><div class="prog-label">Nov 2027</div><div class="prog-label">Past shoulder</div></div>
-        <div class="prog-item"><div class="prog-img prog-future"></div><div class="prog-date">36 mo</div><div class="prog-label">May 2029</div><div class="prog-label">Collarbone</div></div>
+      <div class="card-title">🎯 Goal photos · tap to upload</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Upload your AI-generated goal photos for each milestone. These will be used in monthly comparisons.</div>
+      <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;" id="hair-goals-strip">
+        <div style="flex-shrink:0;text-align:center;">
+          <div class="photo-slot" style="width:80px;height:100px;border:2px dashed var(--accent);" onclick="uploadHairGoal('aug-2026')" id="goal-aug-2026"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--accent);margin-top:4px;font-weight:600;">Aug 2026</div>
+        </div>
+        <div style="flex-shrink:0;text-align:center;">
+          <div class="photo-slot" style="width:80px;height:100px;border:2px dashed var(--accent);" onclick="uploadHairGoal('nov-2026')" id="goal-nov-2026"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--accent);margin-top:4px;font-weight:600;">Nov 2026</div>
+        </div>
+        <div style="flex-shrink:0;text-align:center;">
+          <div class="photo-slot" style="width:80px;height:100px;border:2px dashed var(--accent);" onclick="uploadHairGoal('feb-2027')" id="goal-feb-2027"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--accent);margin-top:4px;font-weight:600;">Feb 2027</div>
+        </div>
+        <div style="flex-shrink:0;text-align:center;">
+          <div class="photo-slot" style="width:80px;height:100px;border:2px dashed var(--accent);" onclick="uploadHairGoal('may-2027')" id="goal-may-2027"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--accent);margin-top:4px;font-weight:600;">May 2027</div>
+        </div>
       </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:3px;">Green border = actual · Dashed = AI ref · Tap to add</div>
+      <input type="file" id="hair-goal-input" accept="image/*" style="display:none" onchange="saveHairGoalPhoto(this)">
+      <div style="font-size:11px;color:var(--muted);">✨ = AI goal · green border = uploaded</div>
     </div>
+
+    <!-- Weekly quick log -->
     <div class="card">
-      <div class="card-title">Monthly photos · May 2026</div>
-      <div class="photo-grid">
-        <div onclick="pickPhoto('hair-may26-front')" id="hair-may26-front" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Front</div></div>
-        <div onclick="pickPhoto('hair-may26-left')" id="hair-may26-left" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Left</div></div>
-        <div onclick="pickPhoto('hair-may26-right')" id="hair-may26-right" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Right</div></div>
+      <div class="card-title">✂️ Weekly length log</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Length · front (inches)</div>
+          <input type="number" id="hair-length-front" placeholder="e.g. 7.5" step="0.25" style="width:90px;padding:8px;font-size:15px;font-weight:600;border-radius:10px;border:1px solid var(--border);">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Length · back (inches)</div>
+          <input type="number" id="hair-length-back" placeholder="e.g. 6.5" step="0.25" style="width:90px;padding:8px;font-size:15px;font-weight:600;border-radius:10px;border:1px solid var(--border);">
+        </div>
+      </div>
+      <div id="hair-length-status" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>
+      <button class="btn-primary" style="margin-top:0;" onclick="saveWeeklyHairLength()">📏 Save length measurement</button>
+      <div class="toast-msg" id="hair-length-toast">Length saved!</div>
+    </div>
+
+    <!-- Monthly AI assessment -->
+    <div class="card">
+      <div class="card-title">✨ Monthly hair assessment</div>
+      <div id="hair-scan-latest"><div class="log-empty">No assessment yet — tap below to analyze your hair.</div></div>
+      <div style="margin-top:14px;">
+        <input type="file" id="hair-scan-input" accept="image/*" capture="user" style="display:none" onchange="runHairAnalysis(this, false)">
+        <input type="file" id="hair-scan-historical-input" accept="image/*" style="display:none" onchange="runHairAnalysis(this, true)">
+        <button class="btn-primary" onclick="document.getElementById('hair-scan-input').click()">📷 Analyze my hair now</button>
+        <button class="btn-secondary" onclick="document.getElementById('hair-scan-historical-input').click()">📂 Upload historical photo</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Monthly assessments recommended · Upload goal photo first for comparison</div>
+        <div id="hair-scan-status" style="display:none;margin-top:10px;padding:12px;border-radius:12px;font-size:13px;"></div>
       </div>
     </div>
+
+    <!-- Check-in -->
+    <div class="card">
+      <div class="card-title">Daily hair check-in</div>
+      <div class="fl">Products used today</div>
+      <div class="tags" id="products-used-tags"></div>
+      <div class="fl">Hair today</div>
+      <div class="tags" id="hair-tags">
+        <button class="tag" onclick="tog(this)">New growth visible</button>
+        <button class="tag" onclick="tog(this)">Shedding</button>
+        <button class="tag" onclick="tog(this)">Healthy shine</button>
+        <button class="tag" onclick="tog(this)">Frizzy</button>
+        <button class="tag" onclick="tog(this)">Loving it</button>
+        <button class="tag" onclick="tog(this)">Dry</button>
+      </div>
+      <div class="fl">Haircare done</div>
+      <div class="tags" id="hcare-tags">
+        <button class="tag" onclick="tog(this)">Wash day</button>
+        <button class="tag" onclick="tog(this)">Deep condition</button>
+        <button class="tag" onclick="tog(this)">Protein treatment</button>
+        <button class="tag" onclick="tog(this)">Silk pillowcase</button>
+        <button class="tag" onclick="tog(this)">Protective style</button>
+        <button class="tag" onclick="tog(this)">Dusting trim</button>
+        <button class="tag" onclick="tog(this)">Salon visit</button>
+      </div>
+      <div class="fl">Note</div>
+      <textarea id="hair-note" rows="2" placeholder="e.g. Can pull into a bun now. Edges filling in."></textarea>
+      <button class="btn-primary" onclick="saveHair()">Log hair</button>
+      <button class="btn-ai" onclick="hairCoach()">Hair growth coaching ↗</button>
+      <div id="hair-coach-output" class="coach-response" style="display:none"></div>
+      <div class="toast-msg" id="ht">Saved!</div>
+    </div>
+
+    <!-- Current products -->
     <div class="card">
       <div class="card-title">Current products</div>
       <div id="product-list">
@@ -1230,52 +1397,58 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="btn-sm accent" onclick="addProduct()">Add</button>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Hair check-in</div>
-      <div class="fl">Products used today</div>
-      <div class="tags" id="products-used-tags"></div>
-      <div class="fl">Hair today</div>
-      <div class="tags" id="hair-tags">
-        <button class="tag" onclick="tog(this)">New growth visible</button><button class="tag" onclick="tog(this)">Shedding</button><button class="tag" onclick="tog(this)">Healthy shine</button><button class="tag" onclick="tog(this)">Frizzy</button><button class="tag" onclick="tog(this)">Loving it</button><button class="tag" onclick="tog(this)">Dry</button>
-      </div>
-      <div class="fl">Haircare done</div>
-      <div class="tags" id="hcare-tags">
-        <button class="tag" onclick="tog(this)">Wash day</button><button class="tag" onclick="tog(this)">Deep condition</button><button class="tag" onclick="tog(this)">Protein treatment</button><button class="tag" onclick="tog(this)">Silk pillowcase</button><button class="tag" onclick="tog(this)">Protective style</button><button class="tag" onclick="tog(this)">Dusting trim</button><button class="tag" onclick="tog(this)">Salon visit</button>
-      </div>
-      <div class="fl">Milestone or note</div>
-      <textarea id="hair-note" rows="2" placeholder="e.g. Can pull into a bun now. Edges filling in. Curl pattern gorgeous."></textarea>
-      <button class="btn-primary" onclick="saveHair()">Log hair</button>
-      <button class="btn-ai" onclick="hairCoach()">Hair growth coaching ↗</button>
-      <div id="hair-coach-output" class="coach-response" style="display:none"></div>
-      <div class="toast-msg" id="ht">Saved!</div>
-    </div>
     <div class="card"><div class="card-title">Hair log</div><div id="hair-log"><div class="log-empty">No entries yet.</div></div></div>
   </div>
+
   <div class="view-content" id="vc-hair-weekly">
     <div class="section-label">Hair · this week</div>
     <div class="card">
-      <div class="card-title">Weekly hair care summary</div>
-      <div id="weekly-hair-summary"><div class="log-empty">Log daily to see weekly summary.</div></div>
+      <div class="card-title">Length progress</div>
+      <div id="hair-weekly-length"><div class="log-empty">Log length measurements weekly to track growth.</div></div>
     </div>
+    <div class="card"><div class="card-title">Weekly hair care summary</div><div id="weekly-hair-summary"><div class="log-empty">Log daily to see weekly summary.</div></div></div>
   </div>
+
   <div class="view-content" id="vc-hair-monthly">
-    <div class="section-label">Hair · month by month</div>
+    <div class="section-label">Hair · Monthly</div>
     <div class="card">
-      <div class="card-title">Monthly comparison</div>
-      <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;">
-        <div style="flex-shrink:0;text-align:center;"><div class="photo-slot" style="width:95px;height:119px;" onclick="pickPhoto('hair-compare-may26')" id="hair-compare-may26"><i class="ti ti-plus" aria-hidden="true"></i></div><div style="font-size:11px;color:var(--accent);margin-top:5px;">May 2026</div></div>
-        <div style="flex-shrink:0;text-align:center;opacity:.4;"><div class="photo-slot" style="width:95px;height:119px;"><i class="ti ti-clock" aria-hidden="true"></i></div><div style="font-size:11px;color:var(--muted);margin-top:5px;">Jun 2026</div></div>
-        <div style="flex-shrink:0;text-align:center;opacity:.4;"><div class="photo-slot" style="width:95px;height:119px;"></div><div style="font-size:11px;color:var(--muted);margin-top:5px;">Jul 2026</div></div>
+      <div class="card-title">Length over time</div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="hair-length-chart"></canvas></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">~0.5 inch/month target · goal line shown</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Health score trend</div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="hair-score-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Metric trends</div>
+      <div class="chart-tabs" id="hair-metric-tabs">
+        <button class="chart-tab on" onclick="switchHairMetricChart('shine',this)">Shine</button>
+        <button class="chart-tab" onclick="switchHairMetricChart('thickness',this)">Thickness</button>
+        <button class="chart-tab" onclick="switchHairMetricChart('moisture',this)">Moisture</button>
+        <button class="chart-tab" onclick="switchHairMetricChart('curlDefinition',this)">Curl def.</button>
+      </div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="hair-metric-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Assessments · tap two to compare</div>
+      <div id="hair-scan-history-monthly"><div class="log-empty">No assessments yet — do your first monthly analysis above.</div></div>
+      <div id="hair-comparison-panel" style="display:none;margin-top:16px;">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">Side-by-side comparison</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="hair-comparison-content"></div>
+        <button onclick="clearHairComparison()" style="width:100%;margin-top:12px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;">Clear comparison</button>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Monthly hair care log</div>
-      <div id="monthly-hair-log"><div class="log-empty">Log daily to build your monthly summary.</div></div>
-    </div>
   </div>
+
   <div class="view-content" id="vc-hair-yearly">
     <div class="section-label">Hair · 2026–2029 journey</div>
-    <div class="card"><div class="card-title">Growth timeline</div><div class="log-empty" style="padding:2rem 0;">Your 3-year growth journey tracked here.</div></div>
+    <div class="card">
+      <div class="card-title">Full length journey</div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="hair-length-yearly-chart"></canvas></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Starting chin length May 2026 · Goal: collarbone by May 2029</div>
+    </div>
+    <div class="card"><div class="card-title">Assessment history</div><div id="hair-yearly-scans"><div class="log-empty">Complete monthly assessments to build your yearly picture.</div></div></div>
   </div>
 </div>
 
@@ -1406,6 +1579,7 @@ async function boot(){
   if(heroData){document.getElementById('hero-img').src=heroData;document.getElementById('hero-img').style.display='block';document.getElementById('hero-fallback').style.display='none';}
   buildProductTags();
   loadStartDates();
+  loadMuselyHistory();
   await loadAllPhotos();
   await loadLogs();
   buildBodyChart();
@@ -1444,13 +1618,16 @@ function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
-  if(id==='sleep') buildSleepAppleMetrics();
-  if(id==='skin') loadLatestSkinScan();
-  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); }
+  if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); }
+  if(id==='skin'){ loadLatestSkinScan(); loadMuselyHistory(); }
+  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); }
+  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();}}
   if(curTab==='skin'&&v!=='daily') buildSkinCharts();
+  if(curTab==='hair'&&v!=='daily') buildHairCharts();
+  if(curTab==='sleep'&&(v==='weekly'||v==='monthly')) buildMyAirCharts();
 }
 function applyView(){
   const c=document.getElementById('s-'+curTab);if(!c)return;
@@ -1817,6 +1994,45 @@ function updateMuselyTracker(){
   const spot=document.getElementById('r-musely-spot').classList.contains('on');
   document.getElementById('musely-antiaging-card').classList.toggle('active',aa);
   document.getElementById('musely-spot-card').classList.toggle('active',spot);
+
+  // Save selection with today's date
+  if(aa || spot){
+    const selection = {
+      treatment: aa ? 'Anti-Aging Cream' : 'Spot Treatment',
+      date: nowStr(),
+      isoDate: new Date().toISOString()
+    };
+    const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
+    // Only save if not already saved today
+    if(!history.length || history[history.length-1].date !== selection.date){
+      history.push(selection);
+      // Keep last 30 entries
+      if(history.length > 30) history.shift();
+      localStorage.setItem('glowMuselyHistory', JSON.stringify(history));
+    }
+  }
+  loadMuselyHistory();
+}
+
+function loadMuselyHistory(){
+  const el = document.getElementById('musely-history');
+  if(!el) return;
+  const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
+  if(!history.length){ el.innerHTML='<div style="font-size:12px;color:var(--muted);">No history yet — tap a treatment button above when you apply it tonight.</div>'; return; }
+
+  // Show last 3 entries
+  const recent = history.slice(-3).reverse();
+  const tonight = recent[0];
+  const nextTreatment = tonight.treatment === 'Anti-Aging Cream' ? 'Spot Treatment' : 'Anti-Aging Cream';
+
+  el.innerHTML = `
+    <div style="padding:10px 12px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Tonight → use</div>
+      <div style="font-size:15px;font-weight:600;color:var(--accent);">✨ ${nextTreatment}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">Last night: ${tonight.treatment} · ${tonight.date}</div>
+    </div>
+    ${recent.slice(1).map(e=>`<div style="font-size:12px;color:var(--muted);padding:3px 0;">${e.date}: ${e.treatment}</div>`).join('')}
+  `;
 }
 
 // ── CHARTS ────────────────────────────────────────────────────────────
@@ -2887,7 +3103,375 @@ function buildSkinMetricChart(metric, data){
 let todayWaterCount = 0;
 const WATER_GOAL = 10; // glasses — higher target for Zepbound + HCTZ
 
-// ── SKIN COMPARISON ───────────────────────────────────────────────────
+// ── HAIR ANALYSIS ─────────────────────────────────────────────────────
+let _currentHairGoalSlot = null;
+
+function uploadHairGoal(slot){
+  _currentHairGoalSlot = slot;
+  document.getElementById('hair-goal-input').click();
+}
+
+async function saveHairGoalPhoto(input){
+  const file = input.files[0]; if(!file) return;
+  const base64 = await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
+  const mimeType = file.type||'image/jpeg';
+  const dataUrl = `data:${mimeType};base64,${base64}`;
+
+  // Save goal photo
+  const goals = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`).then(r=>r.json()).then(d=>d.data||{}).catch(()=>({}));
+  goals[_currentHairGoalSlot] = { dataUrl, mimeType, base64, slot: _currentHairGoalSlot };
+  await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'hairgoals',data:goals})});
+
+  // Display
+  const el = document.getElementById(`goal-${_currentHairGoalSlot}`);
+  if(el){ el.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`; el.style.border='2px solid var(--accent)'; }
+  input.value='';
+}
+
+async function loadHairGoalPhotos(){
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!data) return;
+    Object.entries(data).forEach(([slot, goal])=>{
+      const el = document.getElementById(`goal-${slot}`);
+      if(el && goal.dataUrl){
+        el.innerHTML=`<img src="${goal.dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+        el.style.border='2px solid var(--accent)';
+      }
+    });
+  } catch(e){}
+}
+
+async function getNearestHairGoal(){
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`);
+    if(!res.ok) return null;
+    const {data} = await res.json();
+    if(!data||!Object.keys(data).length) return null;
+    // Find the next upcoming goal based on current date
+    const now = new Date();
+    const slotDates = {
+      'aug-2026': new Date('2026-08-01'),
+      'nov-2026': new Date('2026-11-01'),
+      'feb-2027': new Date('2027-02-01'),
+      'may-2027': new Date('2027-05-01'),
+    };
+    const upcoming = Object.entries(slotDates)
+      .filter(([slot]) => data[slot])
+      .sort((a,b) => Math.abs(a[1]-now) - Math.abs(b[1]-now));
+    return upcoming.length ? data[upcoming[0][0]] : null;
+  } catch(e){ return null; }
+}
+
+async function saveWeeklyHairLength(){
+  const front = parseFloat(document.getElementById('hair-length-front').value);
+  const back = parseFloat(document.getElementById('hair-length-back').value);
+  if(!front && !back) return;
+
+  const entry = { front: front||null, back: back||null, date: nowStr(), isoDate: new Date().toISOString() };
+  const existing = await fetch(`${BACKEND}/api/sync?pillar=hairscan`).then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
+  // Check if we already have an entry today — update instead of adding
+  const todayIdx = existing.findIndex(e=>e.date===entry.date&&!e.overallScore);
+  if(todayIdx>=0) existing[todayIdx] = {...existing[todayIdx], ...entry};
+  else existing.push(entry);
+  await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'hairscan',data:existing})});
+
+  toast('hair-length-toast');
+  updateHairLengthStatus(front, back);
+  document.getElementById('hair-length-front').value='';
+  document.getElementById('hair-length-back').value='';
+}
+
+function updateHairLengthStatus(front, back){
+  const el = document.getElementById('hair-length-status');
+  if(!el) return;
+  const startLength = 5.5; // May 2026 starting length ~chin
+  const targetLength = 14; // collarbone ~14 inches
+  if(front || back){
+    const avg = ((front||0)+(back||0)) / ((front?1:0)+(back?1:0));
+    const pct = Math.round(((avg-startLength)/(targetLength-startLength))*100);
+    const monthsGrown = Math.round((avg-startLength)/0.5);
+    el.textContent = `${avg.toFixed(1)}" avg · ${Math.max(0,pct)}% to collarbone goal · ~${monthsGrown} months of growth`;
+    el.style.color = 'var(--accent)';
+  }
+}
+
+async function runHairAnalysis(input, isHistorical=false){
+  const file = input.files[0]; if(!file) return;
+
+  let scanDate = nowStr(), isoDate = new Date().toISOString();
+  let lengthInches = null;
+
+  if(isHistorical){
+    const dateInput = prompt('What date was this photo taken?\nEnter as: March 3, 2025');
+    if(!dateInput) return;
+    try {
+      const parsed = new Date(dateInput);
+      if(isNaN(parsed)) throw new Error('Invalid date');
+      scanDate = parsed.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+      isoDate = parsed.toISOString();
+    } catch(e){ alert('Could not parse date — try: March 3, 2025'); return; }
+    const lenInput = prompt('What was the length at this time? (optional, enter inches or leave blank)');
+    if(lenInput && !isNaN(parseFloat(lenInput))) lengthInches = parseFloat(lenInput);
+  } else {
+    // Check for recent manual measurement
+    const frontVal = parseFloat(document.getElementById('hair-length-front')?.value);
+    const backVal = parseFloat(document.getElementById('hair-length-back')?.value);
+    if(frontVal||backVal) lengthInches = ((frontVal||0)+(backVal||0))/((frontVal?1:0)+(backVal?1:0));
+  }
+
+  const status = document.getElementById('hair-scan-status');
+  status.style.display='block'; status.style.background='#FEF3C7'; status.style.color='#92400E';
+  status.textContent='✨ Analyzing your hair... this takes about 15 seconds';
+
+  try {
+    const base64 = await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
+    const mimeType = file.type||'image/jpeg';
+    const photoDataUrl = `data:${mimeType};base64,${base64}`;
+
+    // Get nearest goal photo for comparison
+    const goalPhoto = await getNearestHairGoal();
+
+    const body = { imageBase64: base64, mimeType, lengthInches };
+    if(goalPhoto){ body.goalImageBase64 = goalPhoto.base64; body.goalMimeType = goalPhoto.mimeType; }
+
+    const response = await fetch(`${BACKEND}/api/hair-analysis`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!response.ok) throw new Error('Analysis failed');
+    const {result} = await response.json();
+    if(!result) throw new Error('No result');
+
+    const scan = { date:scanDate, isoDate, photo:photoDataUrl, lengthInches, hasGoalComparison:!!goalPhoto, ...result };
+    const existing = await fetch(`${BACKEND}/api/sync?pillar=hairscan`).then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
+    existing.push(scan);
+    existing.sort((a,b)=>new Date(a.isoDate)-new Date(b.isoDate));
+    await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'hairscan',data:existing})});
+
+    status.style.background='#EAF3DE'; status.style.color='#27500A';
+    status.textContent=`✅ Analysis complete! ${goalPhoto?'Compared to your goal photo.':'Upload a goal photo for comparison next time.'}`;
+    renderHairScanResult(scan, 'hair-scan-latest');
+    input.value='';
+  } catch(err){
+    status.style.background='#FAECE7'; status.style.color='#712B13';
+    status.textContent='❌ Analysis failed — try again with a clear, well-lit photo.';
+  }
+}
+
+function renderHairScanResult(scan, containerId){
+  const el = document.getElementById(containerId); if(!el) return;
+  const score = scan.overallScore||0;
+  const sColor = score>=80?'#27500A':score>=65?'#6B9E78':score>=50?'#92400E':'#7F1D1D';
+  const sBg = score>=80?'#EAF3DE':score>=65?'rgba(107,158,120,0.15)':score>=50?'#FEF3C7':'#FEE2E2';
+  const metrics = scan.metrics||{};
+  const mList = [
+    {key:'shine',label:'Shine',color:'#E8A87C'},
+    {key:'thickness',label:'Thickness',color:'#6B9E78'},
+    {key:'moisture',label:'Moisture',color:'#5B9EC9'},
+    {key:'curlDefinition',label:'Curl def.',color:'#9B8EC4'},
+    {key:'breakageFree',label:'Breakage-free',color:'#A07850'},
+    {key:'frizzControl',label:'Frizz control',color:'#C4735A'},
+    {key:'scalpHealth',label:'Scalp health',color:'#6B9E78'},
+    {key:'lengthProgress',label:'Length progress',color:'#E8A87C'},
+  ];
+  const sLabel = s => s>=90?'Excellent':s>=75?'Good':s>=60?'Fair':'Needs attention';
+
+  el.innerHTML = `
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+      ${scan.photo?`<img src="${scan.photo}" style="width:72px;height:72px;border-radius:12px;object-fit:cover;flex-shrink:0;border:2px solid var(--border);">`:''}
+      <div style="flex:1;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${scan.date}${scan.lengthInches?` · ${scan.lengthInches}" measured`:scan.estimatedLengthInches?` · ~${scan.estimatedLengthInches}" estimated`:''}</div>
+        <div style="background:${sBg};border-radius:50%;width:56px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid ${sColor};">
+          <div style="font-size:22px;font-weight:700;color:${sColor};line-height:1;">${score}</div>
+          <div style="font-size:9px;color:${sColor};text-transform:uppercase;">Score</div>
+        </div>
+      </div>
+    </div>
+    ${scan.highlights?`<div class="skin-insight"><div class="skin-insight-label" style="color:#27500A;">✅ Looking great</div>${scan.highlights}</div>`:''}
+    ${scan.goalComparison?`<div class="skin-insight"><div class="skin-insight-label" style="color:#9B8EC4;">🎯 vs. your goal</div>${scan.goalComparison}</div>`:''}
+    <div class="skin-metrics-grid">
+      ${mList.map(m=>`<div class="skin-metric-item"><div class="skin-metric-name">${m.label}</div><div class="skin-metric-bar-wrap"><div class="skin-metric-bar" style="width:${metrics[m.key]||0}%;background:${m.color};"></div></div><div style="display:flex;justify-content:space-between;"><div class="skin-metric-score">${metrics[m.key]||'—'}/100</div><div style="font-size:10px;color:${metrics[m.key]>=90?'#27500A':metrics[m.key]>=75?'#6B9E78':'#92400E'}">${metrics[m.key]?sLabel(metrics[m.key]):''}</div></div></div>`).join('')}
+    </div>
+    ${scan.focus?`<div class="skin-insight"><div class="skin-insight-label" style="color:#92400E;">🎯 Focus</div>${scan.focus}</div>`:''}
+    ${scan.tip?`<div class="skin-insight"><div class="skin-insight-label" style="color:var(--accent);">💡 Tip</div>${scan.tip}</div>`:''}
+  `;
+}
+
+async function loadLatestHairScan(){
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=hairscan`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!data||!data.length) return;
+    const withScore = data.filter(d=>d.overallScore);
+    if(withScore.length) renderHairScanResult(withScore[withScore.length-1], 'hair-scan-latest');
+  } catch(e){}
+}
+
+async function buildHairCharts(){
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=hairscan`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!data||!data.length) return;
+
+    const scansWithScore = data.filter(d=>d.overallScore);
+    const scansWithLength = data.filter(d=>d.lengthInches||d.estimatedLengthInches);
+
+    // Length chart
+    buildHairLengthChart(data, 'hair-length-chart');
+    buildHairLengthChart(data, 'hair-length-yearly-chart');
+
+    // Score chart
+    const scoreCanvas = document.getElementById('hair-score-chart');
+    if(scoreCanvas && scansWithScore.length){
+      if(chartInstances['hair-score-chart']) chartInstances['hair-score-chart'].destroy();
+      chartInstances['hair-score-chart'] = new Chart(scoreCanvas.getContext('2d'),{
+        type:'line',
+        data:{labels:scansWithScore.map(s=>s.date),datasets:[{label:'Hair Score',data:scansWithScore.map(s=>s.overallScore),borderColor:'#E8A87C',backgroundColor:'rgba(232,168,124,0.1)',borderWidth:2.5,pointRadius:5,fill:true,tension:0.3}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}}}
+      });
+    }
+
+    // Metric chart
+    buildHairMetricChart('shine', scansWithScore);
+
+    // Monthly history list
+    const historyEl = document.getElementById('hair-scan-history-monthly');
+    if(historyEl && scansWithScore.length){
+      const scans = scansWithScore.slice().reverse();
+      historyEl.innerHTML = `
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Tap any two to compare</div>
+        ${scans.map((s,i)=>`
+          <div class="skin-scan-selectable" id="hair-item-${i}" onclick="selectHairForComparison(${i})">
+            <div style="display:flex;gap:10px;align-items:center;">
+              ${s.photo?`<img src="${s.photo}" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;">`:'<div style="width:52px;height:52px;border-radius:10px;background:var(--warm);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;">💇</div>'}
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:600;">${s.date}</div>
+                <div style="font-size:12px;color:var(--muted);">Score: <strong>${s.overallScore}</strong>${s.lengthInches?` · ${s.lengthInches}"`:s.estimatedLengthInches?` · ~${s.estimatedLengthInches}"`:''}</div>
+              </div>
+              <div id="hair-badge-${i}" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;display:none;"></div>
+            </div>
+          </div>`).join('')}
+      `;
+      window._hairScans = scans;
+    }
+
+    // Yearly scans list
+    const yearlyEl = document.getElementById('hair-yearly-scans');
+    if(yearlyEl && scansWithScore.length){
+      yearlyEl.innerHTML = scansWithScore.slice().reverse().map(s=>`
+        <div class="log-item" style="display:flex;gap:10px;align-items:flex-start;">
+          ${s.photo?`<img src="${s.photo}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;">`:''}
+          <div style="flex:1;">
+            <div class="log-date">${s.date}</div>
+            <div style="font-size:13px;">Score: <strong>${s.overallScore}</strong>${s.lengthInches?` · ${s.lengthInches}"`:''}</div>
+            <div style="font-size:12px;color:var(--muted);">${s.highlights||''}</div>
+          </div>
+        </div>`).join('');
+    }
+  } catch(e){ console.error('buildHairCharts error:', e); }
+}
+
+function buildHairLengthChart(data, canvasId){
+  const canvas = document.getElementById(canvasId); if(!canvas) return;
+  if(chartInstances[canvasId]) chartInstances[canvasId].destroy();
+  const withLen = data.filter(d=>(d.lengthInches||d.estimatedLengthInches)&&d.isoDate);
+  if(!withLen.length) return;
+  const labels = withLen.map(d=>safeDate(d.isoDate.slice(0,10)).toLocaleDateString('en-US',{month:'short',year:'2-digit'}));
+  const actuals = withLen.map(d=>d.lengthInches||d.estimatedLengthInches);
+  // Goal line: starts at 5.5" May 2026, +0.5"/month
+  const startDate = new Date('2026-05-01');
+  const goals = withLen.map(d=>{ const months=(new Date(d.isoDate)-startDate)/(1000*60*60*24*30); return parseFloat((5.5+Math.max(0,months)*0.5).toFixed(1)); });
+  chartInstances[canvasId] = new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Actual length (in)',data:actuals,borderColor:'#E8A87C',backgroundColor:'rgba(232,168,124,0.1)',borderWidth:2.5,pointRadius:5,fill:true,tension:0.3},
+      {label:'Goal pace',data:goals,borderColor:'rgba(107,158,120,0.5)',backgroundColor:'transparent',borderWidth:1.5,borderDash:[4,4],pointRadius:0,fill:false,tension:0.3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},color:'#8C7B6B',boxWidth:12}}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B'}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',callback:v=>v+'"'},beginAtZero:false}}}
+  });
+}
+
+let activeHairMetric = 'shine';
+function switchHairMetricChart(metric, btn){
+  activeHairMetric = metric;
+  document.querySelectorAll('#hair-metric-tabs .chart-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  fetch(`${BACKEND}/api/sync?pillar=hairscan`).then(r=>r.json()).then(({data})=>{
+    if(data) buildHairMetricChart(metric, data.filter(d=>d.overallScore));
+  });
+}
+
+function buildHairMetricChart(metric, scans){
+  const canvas = document.getElementById('hair-metric-chart'); if(!canvas) return;
+  if(chartInstances['hair-metric-chart']) chartInstances['hair-metric-chart'].destroy();
+  const colors = {shine:'#E8A87C',thickness:'#6B9E78',moisture:'#5B9EC9',curlDefinition:'#9B8EC4',breakageFree:'#A07850',frizzControl:'#C4735A',scalpHealth:'#6B9E78',lengthProgress:'#E8A87C'};
+  chartInstances['hair-metric-chart'] = new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels:scans.map(s=>s.date),datasets:[{label:metric,data:scans.map(s=>s.metrics?.[metric]||null),borderColor:colors[metric]||'#A07850',backgroundColor:`${colors[metric]||'#A07850'}22`,borderWidth:2.5,pointRadius:5,fill:true,tension:0.3,spanGaps:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}}}
+  });
+}
+
+// Hair comparison (same pattern as skin)
+let _hairCompareA = null, _hairCompareB = null;
+function selectHairForComparison(idx){
+  const scans = window._hairScans; if(!scans) return;
+  if(_hairCompareA===null){
+    _hairCompareA=idx; document.getElementById(`hair-item-${idx}`)?.classList.add('selected-a');
+    const b=document.getElementById(`hair-badge-${idx}`); if(b){b.style.display='block';b.textContent='A';b.style.background='rgba(107,158,120,0.2)';b.style.color='#27500A';}
+  } else if(_hairCompareB===null&&idx!==_hairCompareA){
+    _hairCompareB=idx; document.getElementById(`hair-item-${idx}`)?.classList.add('selected-b');
+    const b=document.getElementById(`hair-badge-${idx}`); if(b){b.style.display='block';b.textContent='B';b.style.background='rgba(155,142,196,0.2)';b.style.color='#6B4EAB';}
+    showHairComparison(scans[_hairCompareA], scans[_hairCompareB]);
+  } else {
+    clearHairComparison(); _hairCompareA=idx;
+    document.getElementById(`hair-item-${idx}`)?.classList.add('selected-a');
+    const b=document.getElementById(`hair-badge-${idx}`); if(b){b.style.display='block';b.textContent='A';b.style.background='rgba(107,158,120,0.2)';b.style.color='#27500A';}
+  }
+}
+function clearHairComparison(){
+  _hairCompareA=null;_hairCompareB=null;
+  document.querySelectorAll('.skin-scan-selectable').forEach(el=>el.classList.remove('selected-a','selected-b'));
+  document.querySelectorAll('[id^="hair-badge-"]').forEach(el=>el.style.display='none');
+  const p=document.getElementById('hair-comparison-panel'); if(p) p.style.display='none';
+}
+function showHairComparison(a, b){
+  const panel=document.getElementById('hair-comparison-panel');
+  const content=document.getElementById('hair-comparison-content');
+  if(!panel||!content) return;
+  const mL={shine:'Shine',thickness:'Thickness',moisture:'Moisture',curlDefinition:'Curl def.',breakageFree:'Breakage-free',frizzControl:'Frizz control',scalpHealth:'Scalp health',lengthProgress:'Length progress'};
+  const sColor=s=>s>=80?'#27500A':s>=65?'#6B9E78':s>=50?'#92400E':'#7F1D1D';
+  const sBg=s=>s>=80?'#EAF3DE':s>=65?'rgba(107,158,120,0.15)':s>=50?'#FEF3C7':'#FEE2E2';
+  const col=(scan,lbl,lc)=>`
+    <div class="skin-compare-col">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${lc};margin-bottom:6px;">${lbl}</div>
+      ${scan.photo?`<img src="${scan.photo}" class="skin-compare-photo">`:'<div style="width:100%;aspect-ratio:1;border-radius:10px;background:var(--border);margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:32px;">💇</div>'}
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:6px;">${scan.date}</div>
+      <div style="text-align:center;margin-bottom:10px;">
+        <div style="font-size:24px;font-weight:700;color:${sColor(scan.overallScore)};background:${sBg(scan.overallScore)};border-radius:50%;width:52px;height:52px;line-height:52px;margin:0 auto;">${scan.overallScore}</div>
+        ${scan.lengthInches?`<div style="font-size:11px;color:var(--muted);margin-top:4px;">${scan.lengthInches}"</div>`:''}
+      </div>
+      <div style="font-size:11px;">${Object.entries(scan.metrics||{}).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:0.5px solid var(--border);"><span style="color:var(--muted);">${mL[k]||k}</span><strong>${v}</strong></div>`).join('')}</div>
+    </div>`;
+  const sd=b.overallScore-a.overallScore;
+  const ld=b.lengthInches&&a.lengthInches?b.lengthInches-a.lengthInches:null;
+  const deltas=Object.keys(a.metrics||{}).map(k=>{const diff=(b.metrics[k]||0)-(a.metrics[k]||0);if(diff===0)return'';return`<div style="font-size:11px;padding:2px 0;color:${diff>0?'#27500A':'#7F1D1D'};font-weight:600;">${diff>0?'↑':'↓'} ${Math.abs(diff)} ${mL[k]||k}</div>`;}).filter(Boolean).join('');
+  content.innerHTML=`${col(a,'Before · A','#6B9E78')}${col(b,'After · B','#9B8EC4')}
+    <div class="skin-compare-col" style="grid-column:1/-1;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Changes A → B</div>
+      <div style="display:flex;gap:20px;margin-bottom:10px;">
+        <div><div style="font-size:22px;font-weight:700;color:${sd>=0?'#27500A':'#7F1D1D'};">${sd>0?'+':''}${sd}</div><div style="font-size:10px;color:var(--muted);">Overall score</div></div>
+        ${ld!==null?`<div><div style="font-size:22px;font-weight:700;color:${ld>=0?'#27500A':'#7F1D1D'};">${ld>0?'+':''}${ld.toFixed(1)}"</div><div style="font-size:10px;color:var(--muted);">Length</div></div>`:''}
+      </div>
+      ${deltas||'<div style="font-size:12px;color:var(--muted);">No significant changes</div>'}
+    </div>`;
+  panel.style.display='block';
+  setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+
 let _skinCompareA = null, _skinCompareB = null;
 
 function selectScanForComparison(idx){
@@ -3395,9 +3979,265 @@ async function calculateGlowScore(save=false) {
   loadScoreTrend();
 }
 
-// ── ZEPBOUND DOSE TRACKING ─────────────────────────────────────────────
+// ── CPAP EQUIPMENT TRACKING ───────────────────────────────────────────
+const CPAP_ITEMS = [
+  { key:'mask_cushion',     label:'Mask cushion (F30i)',  days:14,  interval:'2 weeks'  },
+  { key:'mask_frame',       label:'Mask frame',           days:90,  interval:'3 months' },
+  { key:'headgear',         label:'Headgear',             days:180, interval:'6 months' },
+  { key:'tubing',           label:'Tubing',               days:90,  interval:'3 months' },
+  { key:'water_chamber',    label:'Water chamber',        days:180, interval:'6 months' },
+  { key:'filter_disposable',label:'Disposable filter',   days:14,  interval:'2 weeks'  },
+  { key:'filter_nondisposable',label:'Non-disp. filter', days:180, interval:'6 months' },
+];
+
+async function replaceCPAPItem(key){
+  const equipment = JSON.parse(localStorage.getItem('glowCPAPEquipment')||'{}');
+  equipment[key] = new Date().toISOString();
+  localStorage.setItem('glowCPAPEquipment', JSON.stringify(equipment));
+  // Also sync to Blob
+  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'cpap_equipment',data:equipment})}).catch(()=>{});
+  buildCPAPEquipmentStatus();
+  // Show quick confirmation
+  const btn = document.querySelector(`[onclick="replaceCPAPItem('${key}')"]`);
+  if(btn){ const orig=btn.textContent; btn.textContent='✓ Saved!'; btn.style.background='#EAF3DE'; setTimeout(()=>{btn.textContent=orig;btn.style.background='';},2000); }
+}
+
+async function loadCPAPEquipment(){
+  // Try Blob first, fall back to localStorage
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=cpap_equipment`);
+    if(res.ok){
+      const {data} = await res.json();
+      if(data && Object.keys(data).length){
+        localStorage.setItem('glowCPAPEquipment', JSON.stringify(data));
+      }
+    }
+  } catch(e){}
+  buildCPAPEquipmentStatus();
+}
+
+function buildCPAPEquipmentStatus(){
+  const el = document.getElementById('cpap-equipment-status');
+  if(!el) return;
+  const equipment = JSON.parse(localStorage.getItem('glowCPAPEquipment')||'{}');
+  const now = new Date();
+
+  const rows = CPAP_ITEMS.map(item => {
+    const lastReplaced = equipment[item.key] ? new Date(equipment[item.key]) : null;
+    const daysSince = lastReplaced ? Math.floor((now - lastReplaced)/(1000*60*60*24)) : null;
+    const daysUntilDue = lastReplaced ? item.days - daysSince : null;
+    const overdue = daysUntilDue !== null && daysUntilDue <= 0;
+    const dueSoon = daysUntilDue !== null && daysUntilDue <= 7 && daysUntilDue > 0;
+    const ok = daysUntilDue !== null && daysUntilDue > 7;
+
+    let dueLabel, dueClass;
+    if(!lastReplaced){ dueLabel='Never set'; dueClass='cpap-due-soon'; }
+    else if(overdue){ dueLabel=`${Math.abs(daysUntilDue)}d overdue`; dueClass='cpap-due-overdue'; }
+    else if(dueSoon){ dueLabel=`Due in ${daysUntilDue}d`; dueClass='cpap-due-soon'; }
+    else { dueLabel=`${daysUntilDue}d left`; dueClass='cpap-due-ok'; }
+
+    const lastStr = lastReplaced ? safeDate(lastReplaced.toISOString().slice(0,10)).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+
+    return `<div class="cpap-item">
+      <div>
+        <div class="cpap-item-name">${item.label}</div>
+        <div style="font-size:10px;color:var(--muted);">Replace every ${item.interval} · Last: ${lastStr}</div>
+      </div>
+      <div class="cpap-item-due ${dueClass}">${dueLabel}</div>
+    </div>`;
+  });
+
+  const overdueCount = CPAP_ITEMS.filter(item => {
+    const last = equipment[item.key] ? new Date(equipment[item.key]) : null;
+    if(!last) return true;
+    return Math.floor((now-last)/(1000*60*60*24)) >= item.days;
+  }).length;
+
+  el.innerHTML = `
+    ${overdueCount > 0 ? `<div style="padding:8px 12px;background:#FEE2E2;border-radius:10px;font-size:12px;color:#7F1D1D;margin-bottom:10px;font-weight:600;">⚠️ ${overdueCount} item${overdueCount>1?'s':''} due for replacement</div>` : '<div style="padding:8px 12px;background:#EAF3DE;border-radius:10px;font-size:12px;color:#27500A;margin-bottom:10px;">✅ All items up to date</div>'}
+    ${rows.join('')}
+  `;
+}
+
+async function saveCPAPCleaning(){
+  const entry = {
+    date: nowStr(),
+    isoDate: new Date().toISOString(),
+    mask: document.getElementById('cpap-clean-mask').classList.contains('on'),
+    tube: document.getElementById('cpap-clean-tube').classList.contains('on'),
+    chamber: document.getElementById('cpap-clean-chamber').classList.contains('on'),
+  };
+  const existing = await fetch(`${BACKEND}/api/sync?pillar=cpap_cleaning`).then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
+  existing.push(entry);
+  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'cpap_cleaning',data:existing})}).catch(()=>{});
+  localStorage.setItem('glowCPAPLastCleaned', entry.isoDate);
+  toast('cpap-clean-toast');
+  ['cpap-clean-mask','cpap-clean-tube','cpap-clean-chamber'].forEach(id=>document.getElementById(id)?.classList.remove('on'));
+}
+
+
+async function saveMyAirLog(){
+  const hours = document.getElementById('myair-hours').value.trim();
+  const ahi = parseFloat(document.getElementById('myair-ahi').value)||null;
+  const seal = parseFloat(document.getElementById('myair-seal').value)||null;
+  const onoff = parseInt(document.getElementById('myair-onoff').value)||null;
+  const score = parseInt(document.getElementById('myair-score').value)||null;
+  if(!hours && !ahi && !score) return;
+
+  const entry = { date: nowStr(), isoDate: new Date().toISOString(), hours, ahi, seal, onoff, score };
+
+  // Show status feedback
+  const statusEl = document.getElementById('myair-status');
+  if(score && statusEl){
+    const color = score>=90?'#27500A':score>=70?'#92400E':'#7F1D1D';
+    const label = score>=90?'Excellent night!':score>=70?'Good night':score>=50?'Fair night':'Needs attention';
+    statusEl.innerHTML = `<span style="color:${color};font-weight:600;">${label}</span> · ${score}/100 myAir score`;
+    if(ahi) statusEl.innerHTML += ` · AHI ${ahi} events/hr${ahi<1?' ✅ Excellent':ahi<5?' ✅ Normal':' ⚠️ Elevated'}`;
+  }
+
+  const existing = await fetch(`${BACKEND}/api/sync?pillar=myair`).then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
+  existing.push(entry);
+  await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'myair',data:existing})});
+
+  toast('myair-toast');
+  // Clear fields
+  ['myair-hours','myair-ahi','myair-seal','myair-onoff','myair-score'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+}
+
+async function buildMyAirCharts(){
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=myair`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!data||!data.length) return;
+
+    const recent = data.slice(-30);
+    const labels = recent.map(d=>safeDate(d.isoDate.slice(0,10)).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+
+    // Weekly summary
+    const weekData = data.slice(-7);
+    const weekSummaryEl = document.getElementById('myair-weekly-summary');
+    if(weekSummaryEl && weekData.length){
+      const avgScore = Math.round(weekData.reduce((a,d)=>a+(d.score||0),0)/weekData.filter(d=>d.score).length||0);
+      const avgAHI = (weekData.reduce((a,d)=>a+(d.ahi||0),0)/weekData.filter(d=>d.ahi).length||0).toFixed(1);
+      const color = avgScore>=90?'#27500A':avgScore>=70?'#92400E':'#7F1D1D';
+      weekSummaryEl.innerHTML = `
+        <div style="display:flex;gap:16px;padding:8px 0;">
+          <div style="text-align:center;"><div style="font-size:24px;font-weight:700;color:${color};">${avgScore||'—'}</div><div style="font-size:10px;color:var(--muted);">Avg score</div></div>
+          <div style="text-align:center;"><div style="font-size:24px;font-weight:700;color:#27500A;">${avgAHI||'—'}</div><div style="font-size:10px;color:var(--muted);">Avg AHI</div></div>
+          <div style="text-align:center;"><div style="font-size:24px;font-weight:700;color:var(--accent);">${weekData.filter(d=>d.score).length}/7</div><div style="font-size:10px;color:var(--muted);">Days logged</div></div>
+        </div>`;
+    }
+
+    // Score chart (weekly)
+    const scoreCanvas = document.getElementById('myair-score-chart');
+    if(scoreCanvas){
+      if(chartInstances['myair-score-chart']) chartInstances['myair-score-chart'].destroy();
+      const weekLabels = data.slice(-7).map(d=>safeDate(d.isoDate.slice(0,10)).toLocaleDateString('en-US',{weekday:'short'}));
+      chartInstances['myair-score-chart'] = new Chart(scoreCanvas.getContext('2d'),{
+        type:'bar',
+        data:{labels:weekLabels,datasets:[{label:'myAir Score',data:data.slice(-7).map(d=>d.score||null),backgroundColor:data.slice(-7).map(d=>d.score>=90?'#6B9E78':d.score>=70?'#E8A87C':'#C4735A'),borderRadius:6}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#8C7B6B'}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}}}
+      });
+    }
+
+    // AHI chart (weekly)
+    const ahiCanvas = document.getElementById('myair-ahi-chart');
+    if(ahiCanvas){
+      if(chartInstances['myair-ahi-chart']) chartInstances['myair-ahi-chart'].destroy();
+      const weekLabels = data.slice(-7).map(d=>safeDate(d.isoDate.slice(0,10)).toLocaleDateString('en-US',{weekday:'short'}));
+      chartInstances['myair-ahi-chart'] = new Chart(ahiCanvas.getContext('2d'),{
+        type:'bar',
+        data:{labels:weekLabels,datasets:[{label:'AHI',data:data.slice(-7).map(d=>d.ahi||null),backgroundColor:'#9B8EC4',borderRadius:6}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},annotation:{annotations:{line1:{type:'line',yMin:5,yMax:5,borderColor:'#C4735A',borderWidth:1,borderDash:[4,4]}}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#8C7B6B'}},y:{min:0,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}}}
+      });
+    }
+
+    // Monthly score trend
+    const scoreMoCanvas = document.getElementById('myair-score-monthly-chart');
+    if(scoreMoCanvas){
+      if(chartInstances['myair-score-monthly-chart']) chartInstances['myair-score-monthly-chart'].destroy();
+      chartInstances['myair-score-monthly-chart'] = new Chart(scoreMoCanvas.getContext('2d'),{
+        type:'line',
+        data:{labels,datasets:[{label:'myAir Score',data:recent.map(d=>d.score||null),borderColor:'#6B9E78',backgroundColor:'rgba(107,158,120,0.1)',borderWidth:2,pointRadius:3,fill:true,tension:0.3,spanGaps:true}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:10}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}}}
+      });
+    }
+
+    // Monthly AHI trend
+    const ahiMoCanvas = document.getElementById('myair-ahi-monthly-chart');
+    if(ahiMoCanvas){
+      if(chartInstances['myair-ahi-monthly-chart']) chartInstances['myair-ahi-monthly-chart'].destroy();
+      chartInstances['myair-ahi-monthly-chart'] = new Chart(ahiMoCanvas.getContext('2d'),{
+        type:'line',
+        data:{labels,datasets:[
+          {label:'AHI',data:recent.map(d=>d.ahi||null),borderColor:'#9B8EC4',backgroundColor:'rgba(155,142,196,0.1)',borderWidth:2,pointRadius:3,fill:true,tension:0.3,spanGaps:true},
+          {label:'Normal threshold (5)',data:recent.map(()=>5),borderColor:'rgba(196,115,90,0.4)',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false},
+        ]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},color:'#8C7B6B',boxWidth:10}}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:10}},y:{min:0,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}}}
+      });
+    }
+  } catch(e){ console.error('buildMyAirCharts error:', e); }
+}
+
+
+function toggleMed(id){
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle('on');
+  updateMedsStatus();
+}
+
+function updateMedsStatus(){
+  const meds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo'];
+  const taken = meds.filter(id=>document.getElementById(id)?.classList.contains('on')).length;
+  const el = document.getElementById('meds-status');
+  if(!el) return;
+  if(taken===0) el.textContent='Tap each medication when taken today';
+  else if(taken===meds.length){ el.textContent='✅ All medications taken today'; el.style.color='#27500A'; }
+  else { el.textContent=`${taken}/${meds.length} medications logged`; el.style.color='var(--muted)'; }
+}
+
+async function saveMedsChecklist(){
+  const meds = {
+    irbesartan: document.getElementById('med-irbesartan')?.classList.contains('on')||false,
+    metoprolol: document.getElementById('med-metoprolol')?.classList.contains('on')||false,
+    amlodipine: document.getElementById('med-amlodipine')?.classList.contains('on')||false,
+    osteo: document.getElementById('med-osteo')?.classList.contains('on')||false,
+    date: nowStr()
+  };
+  // Save to localStorage for today
+  localStorage.setItem('glowMedsToday', JSON.stringify(meds));
+  toast('meds-toast');
+}
+
+function loadMedsChecklist(){
+  const saved = localStorage.getItem('glowMedsToday');
+  if(!saved) return;
+  try {
+    const meds = JSON.parse(saved);
+    // Only restore if saved today
+    if(meds.date !== nowStr()) return;
+    if(meds.irbesartan) document.getElementById('med-irbesartan')?.classList.add('on');
+    if(meds.metoprolol) document.getElementById('med-metoprolol')?.classList.add('on');
+    if(meds.amlodipine) document.getElementById('med-amlodipine')?.classList.add('on');
+    if(meds.osteo) document.getElementById('med-osteo')?.classList.add('on');
+    updateMedsStatus();
+  } catch(e){}
+}
+
+
 async function logZepDose(mg){
-  const entry = { mg, date: nowStr(), isoDate: new Date().toISOString() };
+  // Use entered date or today
+  const dateInput = document.getElementById('zep-injection-date');
+  const enteredDate = dateInput?.value;
+  const injDate = enteredDate ? safeDate(enteredDate) : new Date();
+  const entry = {
+    mg,
+    date: injDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}),
+    isoDate: injDate.toISOString()
+  };
   const existing = await fetch(`${BACKEND}/api/sync?pillar=zepbound`)
     .then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
   existing.push(entry);
