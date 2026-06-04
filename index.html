@@ -101,7 +101,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .he-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .he-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap;}
 .wins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
-.cpap-replace-btn{padding:8px 10px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--sans);text-align:left;}
+.pillar-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;}
+.pillar-icon{font-size:20px;width:32px;text-align:center;flex-shrink:0;}
+.pillar-name{font-size:13px;font-weight:600;color:var(--text);}
+.pillar-example{font-size:11px;color:var(--muted);margin-top:1px;}
+.pillar-row .tog{margin-left:auto;flex-shrink:0;}
+@keyframes breatheIn{0%{transform:scale(1);background:rgba(155,142,196,0.1);}100%{transform:scale(1.4);background:rgba(155,142,196,0.3);}}
+@keyframes breatheOut{0%{transform:scale(1.4);background:rgba(155,142,196,0.3);}100%{transform:scale(1);background:rgba(155,142,196,0.1);}}border-radius:10px;border:0.5px solid var(--border);background:var(--warm);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--sans);text-align:left;}
 .cpap-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);}
 .cpap-item-name{font-size:13px;color:var(--text);}
 .cpap-item-due{font-size:11px;font-weight:600;padding:2px 7px;border-radius:8px;}
@@ -1456,6 +1462,109 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="s-mind" class="sec">
   <div class="view-content on" id="vc-mind-daily">
     <div class="section-label">Mind & Mood</div>
+
+    <!-- Daily Affirmation -->
+    <div class="card" style="background:linear-gradient(135deg,rgba(155,142,196,0.15),rgba(232,168,124,0.1));">
+      <div class="card-title">✨ Today's affirmation</div>
+      <div id="daily-affirmation" style="font-size:15px;line-height:1.6;color:var(--text);font-style:italic;padding:8px 0;min-height:48px;">"Loading your affirmation..."</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+        <button onclick="generateAffirmation()" style="padding:7px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);">✨ New affirmation</button>
+        <div class="tog" id="aff-saved" onclick="ts('aff-saved')" style="width:40px;height:22px;"><div class="tok"></div></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;">Toggle to save as a favourite</div>
+    </div>
+
+    <!-- Breathing Exercise -->
+    <div class="card">
+      <div class="card-title">🌬️ Box breathing · 60 seconds</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Inhale 4 · Hold 4 · Exhale 4 · Hold 4 · Lowers cortisol, resets your nervous system</div>
+      <div id="breath-display" style="text-align:center;padding:16px 0;">
+        <div id="breath-circle" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--accent);background:rgba(155,142,196,0.1);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--accent);font-weight:600;transition:all 0.5s ease;">Start</div>
+        <div id="breath-phase" style="font-size:14px;color:var(--muted);"></div>
+        <div id="breath-count" style="font-size:28px;font-weight:700;color:var(--accent);min-height:40px;"></div>
+      </div>
+      <button id="breath-btn" class="btn-primary" style="margin-top:0;" onclick="startBreathing()">▶ Start breathing exercise</button>
+    </div>
+
+    <!-- Daily Reflection Prompt -->
+    <div class="card">
+      <div class="card-title">💭 Today's reflection prompt</div>
+      <div id="reflection-prompt" style="font-size:14px;color:var(--text);line-height:1.5;padding:8px 0 12px;font-style:italic;"></div>
+      <textarea id="reflection-answer" rows="3" placeholder="Write your thoughts here..."></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+        <button onclick="newReflectionPrompt()" style="padding:6px 12px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--sans);">Different prompt</button>
+        <div class="toggle-row" style="border:none;padding:0;margin:0;" onclick="ts('journaled-today')">
+          <div style="font-size:12px;color:var(--muted);margin-right:8px;">Journaled today</div>
+          <div class="tog" id="journaled-today"><div class="tok"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7 Pillars weekly self-care -->
+    <div class="card">
+      <div class="card-title">🌟 7 pillars of self-care · this week</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Tap each pillar you've nurtured today — builds your weekly self-care picture</div>
+      <div id="pillars-checklist">
+        <div class="pillar-row" onclick="togglePillar('p-physical')">
+          <div class="pillar-icon">💪</div>
+          <div><div class="pillar-name">Physical</div><div class="pillar-example">Movement, sleep, nutrition, hydration</div></div>
+          <div class="tog" id="p-physical"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-row" onclick="togglePillar('p-emotional')">
+          <div class="pillar-icon">💛</div>
+          <div><div class="pillar-name">Emotional</div><div class="pillar-example">Feelings acknowledged, boundaries set</div></div>
+          <div class="tog" id="p-emotional"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-row" onclick="togglePillar('p-mental')">
+          <div class="pillar-icon">🧠</div>
+          <div><div class="pillar-name">Mental</div><div class="pillar-example">Learning, creativity, reflection, journaling</div></div>
+          <div class="tog" id="p-mental"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-row" onclick="togglePillar('p-social')">
+          <div class="pillar-icon">🤝</div>
+          <div><div class="pillar-name">Social</div><div class="pillar-example">Connection, conversation, community</div></div>
+          <div class="tog" id="p-social"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-row" onclick="togglePillar('p-spiritual')">
+          <div class="pillar-icon">🙏</div>
+          <div><div class="pillar-name">Spiritual</div><div class="pillar-example">Gratitude, prayer, purpose, breathing</div></div>
+          <div class="tog" id="p-spiritual"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-row" onclick="togglePillar('p-environmental')">
+          <div class="pillar-icon">🏡</div>
+          <div><div class="pillar-name">Environmental</div><div class="pillar-example">Tidy space, fresh air, nature, calm home</div></div>
+          <div class="tog" id="p-environmental"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-row" onclick="togglePillar('p-financial')">
+          <div class="pillar-icon">💚</div>
+          <div><div class="pillar-name">Financial</div><div class="pillar-example">Budget check-in, saving, stress reduction</div></div>
+          <div class="tog" id="p-financial"><div class="tok"></div></div>
+        </div>
+      </div>
+      <div id="pillars-status" style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--warm);">Tap pillars above when you've nurtured them today</div>
+    </div>
+
+    <!-- Weekly Intention -->
+    <div class="card">
+      <div class="card-title">🎯 Weekly intention word</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">One word to carry through this week</div>
+      <div id="week-intention-display" style="font-size:28px;font-weight:700;color:var(--accent);text-align:center;padding:10px 0;"></div>
+      <input type="text" id="week-intention-input" placeholder="e.g. Strength · Patience · Joy · Glow · Bold">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;" id="intention-suggestions">
+        <button class="tag" onclick="setIntentionWord('Strength')">Strength</button>
+        <button class="tag" onclick="setIntentionWord('Patience')">Patience</button>
+        <button class="tag" onclick="setIntentionWord('Joy')">Joy</button>
+        <button class="tag" onclick="setIntentionWord('Glow')">Glow</button>
+        <button class="tag" onclick="setIntentionWord('Bold')">Bold</button>
+        <button class="tag" onclick="setIntentionWord('Grace')">Grace</button>
+        <button class="tag" onclick="setIntentionWord('Peace')">Peace</button>
+        <button class="tag" onclick="setIntentionWord('Power')">Power</button>
+      </div>
+      <button class="btn-primary" style="margin-top:12px;" onclick="saveWeekIntention()">Set this week's word</button>
+      <div class="toast-msg" id="wi-toast">Intention set!</div>
+    </div>
+
+    <!-- Mood check-in -->
     <div class="card">
       <div class="card-title">Today's check-in</div>
       <div class="stars-row"><div class="stars-row-label">Energy level</div><div class="stars" id="energy-stars"><span class="star" onclick="setStars('energy-stars',1)">★</span><span class="star" onclick="setStars('energy-stars',2)">★</span><span class="star" onclick="setStars('energy-stars',3)">★</span><span class="star" onclick="setStars('energy-stars',4)">★</span><span class="star" onclick="setStars('energy-stars',5)">★</span></div></div>
@@ -1468,28 +1577,27 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <textarea id="gratitude" rows="3" placeholder="1. &#10;2. &#10;3. "></textarea>
     </div>
     <div class="card">
-      <div class="card-title">Intention for today</div>
-      <input type="text" id="intention" placeholder="One word or phrase to carry through your day...">
-    </div>
-    <div class="card">
       <div class="card-title">Today's vibe & wins</div>
       <div class="fl">Vibe</div>
       <div class="tags" id="vibe-tags">
         <button class="tag" onclick="tog(this)">Motivated</button><button class="tag" onclick="tog(this)">Overwhelmed</button><button class="tag" onclick="tog(this)">Grateful</button><button class="tag" onclick="tog(this)">Anxious</button><button class="tag" onclick="tog(this)">Grounded</button><button class="tag" onclick="tog(this)">In my power</button><button class="tag" onclick="tog(this)">Scattered</button>
       </div>
-      <div class="fl">Self-care done today (beyond routine)</div>
-      <div class="tags" id="selfcare-tags">
-        <button class="tag" onclick="tog(this)">Rest</button><button class="tag" onclick="tog(this)">Time alone</button><button class="tag" onclick="tog(this)">Time with friends</button><button class="tag" onclick="tog(this)">Good meal</button><button class="tag" onclick="tog(this)">Fresh air</button><button class="tag" onclick="tog(this)">Creative outlet</button>
-      </div>
       <div class="fl">Today's win</div>
       <textarea id="win-note" rows="2" placeholder="Big or small — new low, wore something I love, survived the school morning..."></textarea>
       <button class="btn-primary" onclick="saveMind()">Log mood</button>
+      <button class="btn-ai" onclick="mindCoach()">Weekly mind & mood reflection ↗</button>
+      <div id="mind-coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="mt">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Mood log</div><div id="mind-log"><div class="log-empty">No entries yet.</div></div></div>
   </div>
+
   <div class="view-content" id="vc-mind-weekly">
     <div class="section-label">Mind · this week</div>
+    <div class="card">
+      <div class="card-title">7 pillars · this week</div>
+      <div id="pillars-weekly"><div class="log-empty">Log daily to see your weekly pillar coverage.</div></div>
+    </div>
     <div class="card">
       <div class="card-title">Weekly AI insight</div>
       <div id="weekly-mind-insight"><div class="log-empty">Log daily this week to generate your insight.</div></div>
@@ -1497,11 +1605,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="card"><div class="card-title">Energy & confidence this week</div><div class="chart-wrap" id="wrap-mood-week-chart"></div></div>
   </div>
+
   <div class="view-content" id="vc-mind-monthly">
-    <div class="section-label">Mind · May 2026</div>
+    <div class="section-label">Mind · Monthly</div>
     <div class="card"><div class="card-title">Monthly mood trend</div><div class="chart-wrap" id="wrap-mood-month-chart"></div></div>
     <div class="card"><div class="card-title">Monthly reflection</div><div id="monthly-mind-log"><div class="log-empty">No reflections yet.</div></div></div>
   </div>
+
   <div class="view-content" id="vc-mind-yearly">
     <div class="section-label">Mind · 2026</div>
     <div class="card"><div class="card-title">Confidence journey 2026</div><div class="log-empty" style="padding:2rem 0;">Your yearly confidence arc tracked here.</div></div>
@@ -1580,6 +1690,10 @@ async function boot(){
   buildProductTags();
   loadStartDates();
   loadMuselyHistory();
+  loadDailyAffirmation();
+  loadReflectionPrompt();
+  loadPillarsToday();
+  loadWeekIntention();
   await loadAllPhotos();
   await loadLogs();
   buildBodyChart();
@@ -1619,7 +1733,7 @@ function tab(id){
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
   if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); }
-  if(id==='skin'){ loadLatestSkinScan(); loadMuselyHistory(); }
+  if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); }
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); }
 }
@@ -3977,6 +4091,154 @@ async function calculateGlowScore(save=false) {
     </div>
   `;
   loadScoreTrend();
+}
+
+// ── MIND PILLAR ───────────────────────────────────────────────────────
+const AFFIRMATIONS = [
+  "I am transforming every single day. My body, my mind, and my spirit are all becoming stronger.",
+  "I deserve to take up space. I am enough exactly as I am right now.",
+  "Every choice I make for my health is an act of love toward myself.",
+  "I am not defined by a number on a scale. I am defined by how I live my life.",
+  "My consistency is building a life I'm proud of. I show up for myself.",
+  "I am stronger than any challenge in front of me. I have already proven that.",
+  "Taking care of myself is not selfish — it is essential. I am worth the investment.",
+  "My progress is real, my effort is real, and my results are real.",
+  "I am becoming the healthiest, most vibrant version of myself.",
+  "I trust the process. Small steps every day add up to extraordinary change.",
+  "My body works hard for me every day. I honor it with care, rest, and nourishment.",
+  "I release what I cannot control and focus my energy on what I can.",
+  "I am glowing from the inside out. My wellness journey shows in everything I do.",
+  "I am not starting over — I am continuing forward, always.",
+  "I choose peace. I choose health. I choose myself.",
+];
+
+const REFLECTION_PROMPTS = [
+  "What is one thing your body did today that you're grateful for?",
+  "What does feeling your best look like — and are you closer to it today?",
+  "What's one small win from this week that you haven't celebrated yet?",
+  "What would you tell a close friend who was on your exact wellness journey?",
+  "What habit from this week are you most proud of?",
+  "What does 'taking care of yourself' mean to you right now — in this season of life?",
+  "What's something you're carrying that you could set down today?",
+  "How has your body changed in ways you didn't expect on this journey?",
+  "What does your future self at her healthiest look like — and what is she doing differently?",
+  "What relationship in your life energizes you most right now?",
+  "What's one thing you wish you'd started doing sooner on your wellness journey?",
+  "How do you want to feel at the end of this week?",
+  "What brings you the most peace right now?",
+  "What would make tomorrow a really good day for your health?",
+  "Describe a moment this week when you felt completely yourself.",
+];
+
+let breathTimer = null;
+let breathActive = false;
+
+function generateAffirmation(){
+  const el = document.getElementById('daily-affirmation'); if(!el) return;
+  const idx = Math.floor(Math.random()*AFFIRMATIONS.length);
+  el.textContent = `"${AFFIRMATIONS[idx]}"`;
+  localStorage.setItem('glowAffirmationDate', new Date().toDateString());
+  localStorage.setItem('glowAffirmationText', AFFIRMATIONS[idx]);
+}
+function loadDailyAffirmation(){
+  const el = document.getElementById('daily-affirmation'); if(!el) return;
+  const savedDate = localStorage.getItem('glowAffirmationDate');
+  const savedText = localStorage.getItem('glowAffirmationText');
+  if(savedDate === new Date().toDateString() && savedText){ el.textContent=`"${savedText}"`; return; }
+  const dayOfYear = Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(1000*60*60*24));
+  el.textContent = `"${AFFIRMATIONS[dayOfYear%AFFIRMATIONS.length]}"`;
+}
+function loadReflectionPrompt(){
+  const el = document.getElementById('reflection-prompt'); if(!el) return;
+  const savedDate = localStorage.getItem('glowPromptDate');
+  const savedIdx = localStorage.getItem('glowPromptIdx');
+  const today = new Date().toDateString();
+  if(savedDate===today && savedIdx!==null){ el.textContent=REFLECTION_PROMPTS[parseInt(savedIdx)]; return; }
+  const dayOfYear = Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(1000*60*60*24));
+  const idx = dayOfYear%REFLECTION_PROMPTS.length;
+  el.textContent = REFLECTION_PROMPTS[idx];
+  localStorage.setItem('glowPromptDate',today); localStorage.setItem('glowPromptIdx',idx);
+}
+function newReflectionPrompt(){
+  const el = document.getElementById('reflection-prompt'); if(!el) return;
+  const current = el.textContent;
+  let idx; do { idx=Math.floor(Math.random()*REFLECTION_PROMPTS.length); } while(REFLECTION_PROMPTS[idx]===current);
+  el.textContent=REFLECTION_PROMPTS[idx]; localStorage.setItem('glowPromptIdx',idx);
+}
+function startBreathing(){
+  if(breathActive){ stopBreathing(); return; }
+  breathActive=true;
+  const btn=document.getElementById('breath-btn');
+  const circle=document.getElementById('breath-circle');
+  const phase=document.getElementById('breath-phase');
+  const count=document.getElementById('breath-count');
+  if(btn) btn.textContent='■ Stop';
+  const phases=[{label:'Inhale',duration:4,color:'#9B8EC4'},{label:'Hold',duration:4,color:'#E8A87C'},{label:'Exhale',duration:4,color:'#6B9E78'},{label:'Hold',duration:4,color:'#A07850'}];
+  let phaseIdx=0,seconds=0,totalSeconds=0;
+  function tick(){
+    if(!breathActive){stopBreathing();return;}
+    totalSeconds++; if(totalSeconds>64){stopBreathing();return;}
+    seconds++; if(seconds>phases[phaseIdx].duration){phaseIdx=(phaseIdx+1)%4;seconds=1;}
+    const p=phases[phaseIdx];
+    if(phase) phase.textContent=p.label;
+    if(count) count.textContent=p.duration-seconds+1;
+    if(circle){
+      circle.style.borderColor=p.color; circle.style.color=p.color; circle.textContent=p.label.substring(0,3);
+      if(p.label==='Inhale') circle.style.transform=`scale(${1+(seconds/p.duration)*0.4})`;
+      else if(p.label==='Exhale') circle.style.transform=`scale(${1.4-(seconds/p.duration)*0.4})`;
+      else circle.style.transform='scale(1.2)';
+    }
+    breathTimer=setTimeout(tick,1000);
+  }
+  tick();
+}
+function stopBreathing(){
+  breathActive=false; if(breathTimer){clearTimeout(breathTimer);breathTimer=null;}
+  const btn=document.getElementById('breath-btn'); if(btn) btn.textContent='▶ Start breathing exercise';
+  const circle=document.getElementById('breath-circle');
+  if(circle){circle.textContent='Done ✓';circle.style.transform='scale(1)';circle.style.borderColor='var(--accent)';circle.style.color='var(--accent)';}
+  const phase=document.getElementById('breath-phase'); if(phase) phase.textContent='Great work 🌿';
+  const count=document.getElementById('breath-count'); if(count) count.textContent='';
+}
+function togglePillar(id){
+  document.getElementById(id)?.classList.toggle('on');
+  updatePillarsStatus(); savePillarsToday();
+}
+function updatePillarsStatus(){
+  const ids=['p-physical','p-emotional','p-mental','p-social','p-spiritual','p-environmental','p-financial'];
+  const done=ids.filter(p=>document.getElementById(p)?.classList.contains('on')).length;
+  const el=document.getElementById('pillars-status'); if(!el) return;
+  if(done===0){el.textContent="Tap pillars above when you've nurtured them today";el.style.color='var(--muted)';}
+  else if(done===7){el.innerHTML='🌟 All 7 pillars nurtured today — you\'re thriving!';el.style.color='#27500A';}
+  else{el.innerHTML=`${done}/7 pillars nurtured today · ${7-done} remaining`;el.style.color='var(--accent)';}
+}
+function savePillarsToday(){
+  const ids=['p-physical','p-emotional','p-mental','p-social','p-spiritual','p-environmental','p-financial'];
+  const state={}; ids.forEach(p=>{state[p]=document.getElementById(p)?.classList.contains('on')||false;});
+  state.date=nowStr(); localStorage.setItem('glowPillarsToday',JSON.stringify(state));
+}
+function loadPillarsToday(){
+  const saved=localStorage.getItem('glowPillarsToday'); if(!saved) return;
+  try{
+    const state=JSON.parse(saved); if(state.date!==nowStr()) return;
+    Object.keys(state).forEach(k=>{if(k==='date')return;if(state[k])document.getElementById(k)?.classList.add('on');});
+    updatePillarsStatus();
+  }catch(e){}
+}
+function setIntentionWord(word){const input=document.getElementById('week-intention-input');if(input)input.value=word;}
+function saveWeekIntention(){
+  const word=document.getElementById('week-intention-input')?.value?.trim(); if(!word) return;
+  const display=document.getElementById('week-intention-display'); if(display) display.textContent=word;
+  localStorage.setItem('glowWeekIntention',JSON.stringify({word,date:nowStr()}));
+  toast('wi-toast');
+}
+function loadWeekIntention(){
+  const saved=localStorage.getItem('glowWeekIntention'); if(!saved) return;
+  try{
+    const {word}=JSON.parse(saved);
+    const display=document.getElementById('week-intention-display'); if(display&&word) display.textContent=word;
+    const input=document.getElementById('week-intention-input'); if(input&&word) input.value=word;
+  }catch(e){}
 }
 
 // ── CPAP EQUIPMENT TRACKING ───────────────────────────────────────────
