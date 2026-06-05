@@ -514,13 +514,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-style-daily">
     <div class="section-label">Style & Wardrobe</div>
     <div class="card">
-      <div class="card-title">Lookbook</div>
-      <div class="outfit-grid" id="lookbook-grid">
-        <div class="lookbook-empty" style="grid-column:1/-1;"><i class="ti ti-shirt" aria-hidden="true"></i>Log your first outfit below to start your lookbook</div>
-      </div>
-      <a href="https://www.dailylook.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open DailyLook</a>
-    </div>
-    <div class="card">
       <div class="card-title">Log an outfit</div>
       <div style="display:flex;gap:10px;align-items:flex-start;margin:7px 0;">
         <div class="photo-slot" style="width:84px;height:105px;flex-shrink:0;" onclick="pickPhoto('outfit-new')" id="outfit-new">
@@ -572,6 +565,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button class="btn-ai" onclick="styleCoach()">Style coaching ↗</button>
       <div id="style-coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="st">Logged!</div>
+    </div>
+    <div class="card" id="lookbook-card" style="display:none;">
+      <div class="card-title">Your looks</div>
+      <div class="outfit-grid" id="lookbook-grid"></div>
+      <a href="https://www.dailylook.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open DailyLook</a>
     </div>
     <div class="card">
       <div class="card-title">Wardrobe planning</div>
@@ -2394,11 +2392,13 @@ function outfitCardHTML(e, slotId){
 async function renderLookbook(){
   const outfits=await dbAll('outfits');
   const grid=document.getElementById('lookbook-grid');
+  const card=document.getElementById('lookbook-card');
   if(!grid)return;
   if(!outfits||outfits.length===0){
-    grid.innerHTML='<div class="lookbook-empty" style="grid-column:1/-1;"><i class="ti ti-shirt" aria-hidden="true"></i>Log your first outfit below to start your lookbook</div>';
+    if(card)card.style.display='none';
     return;
   }
+  if(card)card.style.display='';
   // Show most recent 12
   const recent=[...outfits].reverse().slice(0,12);
   grid.innerHTML=recent.map((e,i)=>outfitCardHTML(e,i)).join('');
@@ -2807,19 +2807,13 @@ function triggerOutfitPhoto(idx){curPhotoTarget='outfit-grid-'+idx;document.getE
 
 async function handlePhoto(event){
   const file=event.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=async e=>{
-    try{
-      const compressed=await compressImage(e.target.result,curPhotoTarget==='hero'?220:420);
-      // Save to IndexedDB immediately for instant display
-      await dbPutPhoto(curPhotoTarget,compressed);
-      displayPhoto(curPhotoTarget,compressed);
-      // Upload to Vercel Blob in background
-      uploadPhotoToBlob(curPhotoTarget,compressed);
-    }catch(err){alert('Could not save photo: '+err.message);}
-    event.target.value='';
-  };
-  reader.readAsDataURL(file);
+  try{
+    const compressed=await compressImage(file,curPhotoTarget==='hero'?220:800,0.75);
+    await dbPutPhoto(curPhotoTarget,compressed);
+    displayPhoto(curPhotoTarget,compressed);
+    uploadPhotoToBlob(curPhotoTarget,compressed);
+  }catch(err){alert('Could not save photo: '+err.message);}
+  event.target.value='';
 }
 
 async function uploadPhotoToBlob(slotId,dataUrl){
