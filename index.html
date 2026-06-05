@@ -1047,67 +1047,64 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="margin-top:16px;">
         <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;">Injection site · tap to select</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Rotate sites each week to prevent buildup · last site shown in red</div>
-        <div id="injection-site-diagram" style="max-width:320px;margin:0 auto;">
-          <svg width="100%" viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg">
+        <div id="injection-site-diagram" style="max-width:340px;margin:0 auto;">
+          <svg width="100%" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
             <style>
               .site-zone{cursor:pointer;}
               .site-zone:hover ellipse{opacity:0.8;}
-              .szl{font-family:sans-serif;font-size:12px;font-weight:700;fill:white;pointer-events:none;}
-              .szs{font-family:sans-serif;font-size:10px;fill:rgba(255,255,255,0.9);pointer-events:none;}
+              .szl{font-family:sans-serif;font-size:14px;font-weight:700;fill:white;pointer-events:none;}
+              .szs{font-family:sans-serif;font-size:11px;fill:rgba(255,255,255,0.9);pointer-events:none;}
             </style>
             <!-- Abdomen box -->
-            <rect x="248" y="10" width="184" height="198" rx="16" fill="#E8C99A"/>
+            <rect x="230" y="10" width="220" height="220" rx="18" fill="#E8C99A"/>
             <!-- Left leg -->
-            <rect x="248" y="180" width="82" height="140" rx="34" fill="#E8C99A"/>
+            <rect x="230" y="200" width="96" height="148" rx="36" fill="#E8C99A"/>
             <!-- Right leg -->
-            <rect x="350" y="180" width="82" height="140" rx="34" fill="#E8C99A"/>
+            <rect x="354" y="200" width="96" height="148" rx="36" fill="#E8C99A"/>
             <!-- Gap between legs -->
-            <rect x="330" y="190" width="20" height="135" fill="#fff"/>
-            <!-- Navel -->
-            <ellipse cx="340" cy="163" rx="6" ry="4" fill="#D4A870"/>
-            <ellipse cx="340" cy="163" rx="3.5" ry="2.5" fill="#C49060"/>
+            <rect x="326" y="212" width="28" height="140" fill="#fff"/>
             <!-- Faint guides -->
-            <line x1="340" y1="30" x2="340" y2="310" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
-            <line x1="258" y1="130" x2="422" y2="130" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
+            <line x1="340" y1="28" x2="340" y2="330" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
+            <line x1="242" y1="120" x2="438" y2="120" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
 
             <!-- Upper Left -->
             <g class="site-zone" id="site-upper-left" onclick="selectInjectionSite('upper-left')">
-              <ellipse cx="295" cy="97" rx="44" ry="28" fill="#6B9E78"/>
-              <text x="295" y="94" text-anchor="middle" class="szl">Upper</text>
-              <text x="295" y="107" text-anchor="middle" class="szs">Left</text>
+              <ellipse cx="283" cy="78" rx="50" ry="36" fill="#6B9E78"/>
+              <text x="283" y="74" text-anchor="middle" class="szl">Upper</text>
+              <text x="283" y="90" text-anchor="middle" class="szs">Left</text>
             </g>
             <!-- Upper Right -->
             <g class="site-zone" id="site-upper-right" onclick="selectInjectionSite('upper-right')">
-              <ellipse cx="385" cy="97" rx="44" ry="28" fill="#6B9E78"/>
-              <text x="385" y="94" text-anchor="middle" class="szl">Upper</text>
-              <text x="385" y="107" text-anchor="middle" class="szs">Right</text>
+              <ellipse cx="397" cy="78" rx="50" ry="36" fill="#6B9E78"/>
+              <text x="397" y="74" text-anchor="middle" class="szl">Upper</text>
+              <text x="397" y="90" text-anchor="middle" class="szs">Right</text>
             </g>
             <!-- Lower Left -->
             <g class="site-zone" id="site-lower-left" onclick="selectInjectionSite('lower-left')">
-              <ellipse cx="295" cy="163" rx="44" ry="28" fill="#6B9E78"/>
-              <text x="295" y="160" text-anchor="middle" class="szl">Lower</text>
-              <text x="295" y="173" text-anchor="middle" class="szs">Left</text>
+              <ellipse cx="283" cy="162" rx="50" ry="36" fill="#6B9E78"/>
+              <text x="283" y="158" text-anchor="middle" class="szl">Lower</text>
+              <text x="283" y="174" text-anchor="middle" class="szs">Left</text>
             </g>
             <!-- Lower Right -->
             <g class="site-zone" id="site-lower-right" onclick="selectInjectionSite('lower-right')">
-              <ellipse cx="385" cy="163" rx="44" ry="28" fill="#6B9E78"/>
-              <text x="385" y="160" text-anchor="middle" class="szl">Lower</text>
-              <text x="385" y="173" text-anchor="middle" class="szs">Right</text>
+              <ellipse cx="397" cy="162" rx="50" ry="36" fill="#6B9E78"/>
+              <text x="397" y="158" text-anchor="middle" class="szl">Lower</text>
+              <text x="397" y="174" text-anchor="middle" class="szs">Right</text>
             </g>
-            <!-- Redraw navel on top -->
-            <ellipse cx="340" cy="163" rx="6" ry="4" fill="#D4A870"/>
-            <ellipse cx="340" cy="163" rx="3.5" ry="2.5" fill="#C49060"/>
+            <!-- Navel centered between 4 zones -->
+            <ellipse cx="340" cy="120" rx="7" ry="5" fill="#D4A870"/>
+            <ellipse cx="340" cy="120" rx="4" ry="3" fill="#C49060"/>
             <!-- Left Hip -->
             <g class="site-zone" id="site-left-hip" onclick="selectInjectionSite('left-hip')">
-              <ellipse cx="278" cy="258" rx="44" ry="34" fill="#6B9E78"/>
-              <text x="278" y="255" text-anchor="middle" class="szl">Left</text>
-              <text x="278" y="268" text-anchor="middle" class="szs">Hip</text>
+              <ellipse cx="268" cy="286" rx="50" ry="38" fill="#6B9E78"/>
+              <text x="268" y="282" text-anchor="middle" class="szl">Left</text>
+              <text x="268" y="298" text-anchor="middle" class="szs">Hip</text>
             </g>
             <!-- Right Hip -->
             <g class="site-zone" id="site-right-hip" onclick="selectInjectionSite('right-hip')">
-              <ellipse cx="402" cy="258" rx="44" ry="34" fill="#6B9E78"/>
-              <text x="402" y="255" text-anchor="middle" class="szl">Right</text>
-              <text x="402" y="268" text-anchor="middle" class="szs">Hip</text>
+              <ellipse cx="412" cy="286" rx="50" ry="38" fill="#6B9E78"/>
+              <text x="412" y="282" text-anchor="middle" class="szl">Right</text>
+              <text x="412" y="298" text-anchor="middle" class="szs">Hip</text>
             </g>
           </svg>
         </div>
@@ -2038,8 +2035,8 @@ function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
-  if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); }
-  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); }
+  if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); }
+  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); }
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); }
@@ -2189,7 +2186,8 @@ async function saveCheckin(){
   const sleepGummies=document.getElementById('t-sleep-gummies')?.classList.contains('on')||false;
   const skinAM=document.getElementById('t-skin-am')?.classList.contains('on')||false;
   const skinPM=document.getElementById('t-skin-pm')?.classList.contains('on')||false;
-  const entry={mood,note,cpap,meds,exercise,melatonin,sleepGummies,skinAM,skinPM,date:nowStr()};
+  const timeStr = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  const entry={mood,note,cpap,meds,exercise,melatonin,sleepGummies,skinAM,skinPM,date:nowStr(),time:timeStr};
   await dbAdd('checkins',entry);
   syncToBlob('checkins');
 
@@ -2262,20 +2260,30 @@ async function saveBoxSummary(){
   toast('bxt');
 }
 async function saveSleep(){
-  const bed=document.getElementById('sl-bed').value,wake=document.getElementById('sl-wake').value;
   const cpap=gT('cpap-tags'),quality=document.getElementById('sq-tags').querySelector('.on')?.textContent||'';
   const energy=gT('energy-am-tags'),note=document.getElementById('sleep-note').value.trim();
-  const cpapHours=document.getElementById('cpap-hours')?.value||'';
-  const cpapAHI=document.getElementById('cpap-ahi')?.value||'';
-  let hrs='—';
-  if(bed&&wake){const[bh,bm]=bed.split(':').map(Number);const[wh,wm]=wake.split(':').map(Number);let m=(wh*60+wm)-(bh*60+bm);if(m<0)m+=1440;hrs=(m/60).toFixed(1);document.getElementById('sleep-display').textContent=hrs+'h';document.getElementById('s-sleep-h').textContent=hrs+'h';}
-  const sleepEntry={hrs,cpap:cpap[0]||'',cpapHours,cpapAHI,quality,energy,note,date:nowStr()};
+
+  // Get bedtime/wake from CSV display (populated from Apple Health)
+  const bed = document.getElementById('csv-bedtime')?.textContent||'';
+  const wake = document.getElementById('csv-waketime')?.textContent||'';
+  const csvHrs = document.getElementById('csv-sleephrs')?.textContent||'';
+
+  // Calculate hours from displayed times or use CSV hours
+  let hrs = csvHrs.replace('h','').trim() || '—';
+  if(bed && wake && bed!=='—' && wake!=='—'){
+    // Parse 12hr format back to calculate
+    const parseT = t => { const m=t.match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m)return null; let h=parseInt(m[1]); if(m[3].toUpperCase()==='PM'&&h!==12)h+=12; if(m[3].toUpperCase()==='AM'&&h===12)h=0; return h*60+parseInt(m[2]); };
+    const bm=parseT(bed),wm=parseT(wake);
+    if(bm!==null&&wm!==null){ let diff=wm-bm; if(diff<0)diff+=1440; hrs=(diff/60).toFixed(1); }
+  }
+
+  if(hrs!=='—'){ document.getElementById('sleep-display').textContent=hrs+'h'; document.getElementById('s-sleep-h').textContent=hrs+'h'; }
+
+  const sleepEntry={hrs,bed,wake,cpap:cpap[0]||'',quality,energy,note,date:nowStr()};
   await dbAdd('sleeps',sleepEntry);
   syncToBlob('sleeps');
   document.getElementById('sleep-note').value='';
-  if(document.getElementById('cpap-hours')) document.getElementById('cpap-hours').value='';
-  if(document.getElementById('cpap-ahi')) document.getElementById('cpap-ahi').value='';
-  ['cpap-tags','energy-am-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
+  ['cpap-tags','energy-am-tags'].forEach(id=>document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
   toast('slp-t');loadLogs();
 }
@@ -2388,7 +2396,7 @@ async function saveReflection(){
 // ── LOAD LOGS ─────────────────────────────────────────────────────────
 async function loadLogs(){
   const checkins=await dbAll('checkins');
-  renderLog('checkin-log',checkins,e=>logItem(e.date,[...e.mood,...(e.zep?['Zepbound']:[]),...(e.cpap?['CPAP ✓']:[]),...(e.meds?['Meds ✓']:[]),...(e.exercise?['Exercised ✓']:[])],e.note));
+  renderLog('checkin-log',checkins,e=>logItem(e.time?`${e.date} · ${e.time}`:e.date,[...e.mood,...(e.zep?['Zepbound']:[]),...(e.cpap?['CPAP ✓']:[]),...(e.meds?['Meds ✓']:[]),...(e.exercise?['Exercised ✓']:[])],e.note));
   const sleeps=await dbAll('sleeps');
   renderLog('sleep-log',sleeps,e=>logItem(e.date,[e.hrs+'h',e.cpap,e.cpapHours?e.cpapHours+'h CPAP':'',e.cpapAHI?'AHI '+e.cpapAHI:'',e.quality,...e.energy],e.note));
   const wardrobeplans=await dbAll('wardrobeplans');
@@ -4944,18 +4952,37 @@ async function saveMyAirLog(){
 
   await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'myair',data:existing})});
   toast('myair-toast');
-  ['myair-hours','myair-ahi','myair-seal-lmin','myair-onoff'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
-  });
-  // Reset calculated displays
-  ['myair-usage-score','myair-ahi-score','myair-seal-score','myair-onoff-score'].forEach(id=>{
-    const el=document.getElementById(id); if(el){ el.textContent='—'; el.style.color='var(--muted)';}
-  });
-  const totalEl = document.getElementById('myair-total-calc');
-  if(totalEl){ totalEl.textContent='—'; totalEl.style.color='var(--muted)'; }
-  const barEl = document.getElementById('myair-total-bar');
-  if(barEl) barEl.style.width='0%';
+
+  // Persist values to localStorage — stay visible until next day or overwritten
+  localStorage.setItem('glowMyAirState', JSON.stringify({
+    date: isoStr,
+    hours, ahi: document.getElementById('myair-ahi').value,
+    sealLmin: document.getElementById('myair-seal-lmin').value,
+    onoff: document.getElementById('myair-onoff').value,
+    usageScore, ahiScore, sealScore, onoffScore, score
+  }));
   loadMyAirLastLogged();
+}
+
+function loadMyAirState(){
+  const saved = localStorage.getItem('glowMyAirState');
+  if(!saved) return;
+  try {
+    const state = JSON.parse(saved);
+    // Keep showing until a new day starts
+    const today = new Date().toISOString().slice(0,10);
+    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    if(state.date !== today && state.date !== yesterday){ localStorage.removeItem('glowMyAirState'); return; }
+
+    // Restore raw input values
+    if(state.hours){ const el=document.getElementById('myair-hours'); if(el) el.value=state.hours; }
+    if(state.ahi){ const el=document.getElementById('myair-ahi'); if(el) el.value=state.ahi; }
+    if(state.sealLmin){ const el=document.getElementById('myair-seal-lmin'); if(el) el.value=state.sealLmin; }
+    if(state.onoff){ const el=document.getElementById('myair-onoff'); if(el) el.value=state.onoff; }
+
+    // Restore calculated scores
+    calcMyAirScores();
+  } catch(e){}
 }
 
 async function updateUploadStatusBanner(){
@@ -4966,16 +4993,15 @@ async function updateUploadStatusBanner(){
   try {
     const rows = await getCSVRows();
     if(!rows.length){
-      textEl.textContent = '⚠️ No Apple Health data uploaded yet';
-      if(bannerEl) bannerEl.style.borderColor = '#E8A87C';
+      if(bannerEl) bannerEl.style.display='none';
       return;
     }
+    if(bannerEl) bannerEl.style.display='flex';
     const latest = rows[0];
     const uploadDate = safeDate(latest.date);
     const today = new Date();
     const diffDays = Math.floor((today - uploadDate)/(1000*60*60*24));
     const dateStr = uploadDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-
     if(diffDays === 0){
       textEl.textContent = '✅ Apple Health data is current';
       if(dateEl) dateEl.textContent = `Updated today · ${dateStr}`;
@@ -4983,44 +5009,49 @@ async function updateUploadStatusBanner(){
     } else if(diffDays === 1){
       textEl.textContent = '🕐 Last upload: yesterday';
       if(dateEl) dateEl.textContent = dateStr;
+      if(bannerEl){ bannerEl.style.background=''; bannerEl.style.borderColor=''; }
     } else {
-      textEl.textContent = `⚠️ Last upload: ${diffDays} days ago`;
+      textEl.textContent = `⚠️ Last upload: ${diffDays} days ago — upload before 7:30 AM`;
       if(dateEl) dateEl.textContent = dateStr;
-      if(bannerEl) bannerEl.style.borderColor='#E8A87C';
+      if(bannerEl){ bannerEl.style.background=''; bannerEl.style.borderColor='#E8A87C'; }
     }
   } catch(e){
-    textEl.textContent = '⚠️ Could not check upload status';
+    if(bannerEl) bannerEl.style.display='none';
   }
 }
 
 async function loadTodaySleepFromCSV(){
   const sleepEl = document.getElementById('s-sleep-h');
   const sleepSrcEl = document.getElementById('s-sleep-src');
+  const weightEl = document.getElementById('sw-weight');
   const weightSrcEl = document.getElementById('s-weight-src');
-  const stepsSrcEl = document.getElementById('s-steps-src');
   const stepsEl = document.getElementById('sw-steps');
+  const stepsSrcEl = document.getElementById('s-steps-src');
 
   // Prefer manual sleep entry for today
-  const manualSleeps = await dbAll('sleeps');
-  const todaySleep = manualSleeps.find(s=>s.date===nowStr());
-  if(todaySleep && todaySleep.hrs && todaySleep.hrs!=='—'){
-    if(sleepEl) sleepEl.textContent = todaySleep.hrs+'h';
-    if(sleepSrcEl) sleepSrcEl.textContent = 'manually logged';
-  }
+  try {
+    const manualSleeps = await dbAll('sleeps');
+    const todaySleep = manualSleeps.find(s=>s.date===nowStr());
+    if(todaySleep && todaySleep.hrs && todaySleep.hrs!=='—'){
+      if(sleepEl) sleepEl.textContent = todaySleep.hrs+'h';
+      if(sleepSrcEl) sleepSrcEl.textContent = 'manually logged';
+    }
+  } catch(e){}
 
-  // Pull CSV data for all tiles
+  // Pull CSV data for all stat tiles
   try {
     const rows = await getCSVRows();
-    if(!rows.length) return;
+    if(!rows||!rows.length) return;
 
-    // Weight — most recent entry
+    // Weight — most recent entry with value
     const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
-    if(latestWeight && weightSrcEl){
+    if(latestWeight){
       const d = safeDate(latestWeight.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      weightSrcEl.textContent = `Withings · ${d}`;
+      if(weightEl) weightEl.textContent = parseFloat(latestWeight.weight_lbs).toFixed(1);
+      if(weightSrcEl) weightSrcEl.textContent = `Withings · ${d}`;
     }
 
-    // Steps — most recent entry
+    // Steps — most recent entry with value
     const latestSteps = rows.find(r=>parseInt(r.steps)>0);
     if(latestSteps){
       const d = safeDate(latestSteps.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
@@ -5029,16 +5060,20 @@ async function loadTodaySleepFromCSV(){
     }
 
     // Sleep from CSV — only if no manual entry today
-    if(!todaySleep || !todaySleep.hrs || todaySleep.hrs==='—'){
-      const withSleep = rows.filter(r=>parseFloat(r.sleep_hrs)>0);
-      if(withSleep.length){
-        const latest = withSleep[0];
-        const d = safeDate(latest.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-        if(sleepEl) sleepEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
+    const withSleep = rows.filter(r=>parseFloat(r.sleep_hrs)>0);
+    if(withSleep.length){
+      const latest = withSleep[0];
+      const d = safeDate(latest.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      // Only update if not already set by manual entry
+      if(sleepEl && (sleepEl.textContent==='—'||sleepEl.textContent==='')){
+        sleepEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
+        if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${d}`;
+      } else if(sleepSrcEl && sleepSrcEl.textContent==='log below'){
+        // Has value from manual but update source label with date
         if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${d}`;
       }
     }
-  } catch(e){}
+  } catch(e){ console.warn('loadTodaySleepFromCSV error:', e); }
 }
 async function buildMedsWeeklyCompliance(){
   const el = document.getElementById('meds-weekly-compliance');
