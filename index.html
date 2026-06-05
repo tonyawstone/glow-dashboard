@@ -5848,40 +5848,38 @@ async function logZepDose(mg){
   buildZepboundStatus();
 }
 
-function initZepboundDefaults(){
-  // Fix Zepbound dose to May 30 if stored date is wrong (Jun 3)
-  const stored = localStorage.getItem('glowZepDose');
-  if(stored){
-    try{
-      const d = JSON.parse(stored);
-      if(d.isoDate && d.isoDate.slice(0,10) === '2026-06-03'){
-        d.date = 'Sat, May 30, 2026';
-        d.isoDate = '2026-05-30T00:00:00.000Z';
-        localStorage.setItem('glowZepDose', JSON.stringify(d));
-        // Also fix in Blob
-        fetch(`${BACKEND}/api/sync?pillar=zepbound`).then(r=>r.json()).then(({data})=>{
-          if(!Array.isArray(data)) return;
-          const idx = data.findIndex(e=>e.isoDate?.slice(0,10)==='2026-06-03');
-          if(idx>=0){ data[idx].date='Sat, May 30, 2026'; data[idx].isoDate='2026-05-30T00:00:00.000Z';
-            fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'zepbound',data})}).catch(()=>{});
-          }
-        }).catch(()=>{});
-      }
-    } catch(e){}
-  } else {
-    localStorage.setItem('glowZepDose', JSON.stringify({
-      mg: 5, date: 'Sat, May 30, 2026', isoDate: '2026-05-30T00:00:00.000Z'
-    }));
+function fixZepDate(d){
+  if(d && d.isoDate && (d.isoDate.slice(0,10)==='2026-06-03'||d.isoDate.slice(0,10)==='2026-06-04'||d.isoDate.slice(0,10)==='2026-06-05')){
+    d.date='Sat, May 30, 2026'; d.isoDate='2026-05-30T00:00:00.000Z';
   }
+  return d;
+}
+
+function initZepboundDefaults(){
+  // Always correct local storage
+  try{
+    let stored = localStorage.getItem('glowZepDose');
+    if(stored){
+      let d = fixZepDate(JSON.parse(stored));
+      localStorage.setItem('glowZepDose', JSON.stringify(d));
+    } else {
+      localStorage.setItem('glowZepDose', JSON.stringify({mg:5,date:'Sat, May 30, 2026',isoDate:'2026-05-30T00:00:00.000Z'}));
+    }
+  } catch(e){}
+
+  // Always correct Blob too — fire and forget
+  fetch(`${BACKEND}/api/sync?pillar=zepbound`).then(r=>r.json()).then(({data})=>{
+    if(!Array.isArray(data)) return;
+    let changed=false;
+    data.forEach(e=>{ const before=e.isoDate; fixZepDate(e); if(e.isoDate!==before) changed=true; });
+    if(changed) fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'zepbound',data})}).catch(()=>{});
+  }).catch(()=>{});
 
   // Pre-populate injection site if none stored
-  const sites = localStorage.getItem('glowInjectionSites');
-  if(!sites || JSON.parse(sites||'[]').length === 0){
-    localStorage.setItem('glowInjectionSites', JSON.stringify([{
-      site: 'upper-left', label: 'Upper Left Abdomen',
-      date: 'Sat, May 30, 2026', isoDate: '2026-05-30T00:00:00.000Z'
-    }]));
-  }
+  try{
+    const sites = JSON.parse(localStorage.getItem('glowInjectionSites')||'[]');
+    if(sites.length===0) localStorage.setItem('glowInjectionSites',JSON.stringify([{site:'upper-left',label:'Upper Left Abdomen',date:'Sat, May 30, 2026',isoDate:'2026-05-30T00:00:00.000Z'}]));
+  }catch(e){}
 }
 
 async function buildZepboundStatus(){
@@ -5893,7 +5891,7 @@ async function buildZepboundStatus(){
   if(!lastDose){
     try{
       const res = await fetch(`${BACKEND}/api/sync?pillar=zepbound`);
-      if(res.ok){ const {data}=await res.json(); if(data&&data.length){ lastDose=data[data.length-1]; localStorage.setItem('glowZepDose',JSON.stringify(lastDose)); }}
+      if(res.ok){ const {data}=await res.json(); if(data&&data.length){ lastDose=fixZepDate(data[data.length-1]); localStorage.setItem('glowZepDose',JSON.stringify(lastDose)); }}
     }catch(e){}
   }
   document.querySelectorAll('.zep-dose-btn').forEach(btn=>{
