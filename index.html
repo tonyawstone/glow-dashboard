@@ -2750,11 +2750,8 @@ async function loadAllPhotos(){
 
 async function getCSVRows() {
   try {
-    // Add timestamp to bust browser/PWA cache — ensures fresh data after every upload
-    const res = await fetch(`${BACKEND}/api/health-data?t=${Date.now()}`, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' }
-    });
+    // Timestamp param busts cache without triggering Safari CORS preflight
+    const res = await fetch(`${BACKEND}/api/health-data?t=${Date.now()}`);
     if(!res.ok) return [];
     const { csv } = await res.json();
     if(!csv) return [];
@@ -2764,10 +2761,7 @@ async function getCSVRows() {
 
 async function fetchFromBlob(pillar){
   try {
-    const res = await fetch(`${BACKEND}/api/sync?pillar=${pillar}&t=${Date.now()}`, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' }
-    });
+    const res = await fetch(`${BACKEND}/api/sync?pillar=${pillar}&t=${Date.now()}`);
     if(!res.ok) return null;
     const {data} = await res.json();
     return data;
