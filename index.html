@@ -393,7 +393,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="stat-strip">
       <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src">Withings</div></div>
       <div class="stat-tile"><div class="stat-val">4,715</div><div class="stat-lbl">steps</div><div class="stat-src">Apple Health</div></div>
-      <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src">log below</div></div>
+      <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src" id="s-sleep-src">log below</div></div>
       <div class="stat-tile"><div class="stat-val" id="zep-day-count">—</div><div class="stat-lbl" id="zep-tile-lbl">loading...</div><div class="stat-src">since Oct 25, 2025</div></div>
     </div>
     <div class="affirmation-card">
@@ -995,6 +995,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px;">☕ Afternoon</div>
       <div id="meds-afternoon">
         <div class="med-row" id="med-collagen" onclick="toggleMed('med-collagen')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Collagen protein</div><div class="med-note">In decaf coffee</div></div></div>
+        <div class="med-row" id="med-superbeets" onclick="toggleMed('med-superbeets')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">SuperBeets chew</div><div class="med-note">Nitric oxide · cardiovascular support</div></div></div>
       </div>
 
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px;">🌙 Evening</div>
@@ -1006,8 +1007,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
 
       <div id="meds-progress" style="margin-top:12px;padding:8px 12px;border-radius:10px;background:var(--warm);font-size:12px;color:var(--muted);">Tap each item above when taken</div>
-      <button class="btn-primary" style="margin-top:10px;" onclick="saveMedsChecklist()">Save today's medications</button>
-      <div class="toast-msg" id="meds-toast">Saved!</div>
+      <button id="meds-save-btn" class="btn-primary" style="margin-top:10px;display:none;" onclick="saveMedsChecklist()">✅ Log all Rx meds taken today</button>
+      <div class="toast-msg" id="meds-toast">Logged!</div>
     </div>
 
     <!-- Zepbound -->
@@ -1028,6 +1029,70 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div style="font-size:11px;color:var(--muted);margin-top:10px;">Tap your dose when you inject · date is automatically saved · stays selected until next week's dose</div>
       <div class="toast-msg" id="zep-toast">💉 Dose logged!</div>
+
+      <!-- Injection site tracker -->
+      <div style="margin-top:16px;">
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;">Injection site · tap to select</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Rotate sites each week to prevent buildup · last site shown in red</div>
+        <div id="injection-site-diagram" style="position:relative;max-width:280px;margin:0 auto;">
+          <svg viewBox="0 0 280 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <!-- Body outline - torso -->
+            <ellipse cx="140" cy="160" rx="90" ry="130" fill="rgba(196,115,90,0.06)" stroke="var(--border)" stroke-width="1.5"/>
+            <!-- Waist indent -->
+            <path d="M70 140 Q50 160 65 185 M210 140 Q230 160 215 185" fill="none" stroke="var(--border)" stroke-width="1"/>
+            <!-- Belly button -->
+            <circle cx="140" cy="165" r="4" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+            <!-- Hip curves -->
+            <path d="M65 185 Q50 230 75 270 Q100 295 140 300 Q180 295 205 270 Q230 230 215 185" fill="rgba(196,115,90,0.04)" stroke="var(--border)" stroke-width="1.5"/>
+
+            <!-- Zone labels -->
+            <text x="140" y="28" text-anchor="middle" font-size="11" fill="#8C7B6B" font-family="sans-serif">Abdomen</text>
+            <text x="140" y="295" text-anchor="middle" font-size="11" fill="#8C7B6B" font-family="sans-serif">Hips</text>
+            <line x1="80" y1="160" x2="200" y2="160" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
+            <line x1="140" y1="60" x2="140" y2="280" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
+
+            <!-- 6 injection zones — tappable -->
+            <!-- Upper Left Abdomen -->
+            <g id="site-upper-left" onclick="selectInjectionSite('upper-left')" style="cursor:pointer;">
+              <ellipse cx="105" cy="125" rx="28" ry="22" fill="rgba(107,158,120,0.15)" stroke="#6B9E78" stroke-width="1.5" class="site-zone"/>
+              <text x="105" y="121" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Upper</text>
+              <text x="105" y="132" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Left</text>
+            </g>
+            <!-- Upper Right Abdomen -->
+            <g id="site-upper-right" onclick="selectInjectionSite('upper-right')" style="cursor:pointer;">
+              <ellipse cx="175" cy="125" rx="28" ry="22" fill="rgba(107,158,120,0.15)" stroke="#6B9E78" stroke-width="1.5" class="site-zone"/>
+              <text x="175" y="121" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Upper</text>
+              <text x="175" y="132" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Right</text>
+            </g>
+            <!-- Lower Left Abdomen -->
+            <g id="site-lower-left" onclick="selectInjectionSite('lower-left')" style="cursor:pointer;">
+              <ellipse cx="105" cy="185" rx="28" ry="22" fill="rgba(107,158,120,0.15)" stroke="#6B9E78" stroke-width="1.5" class="site-zone"/>
+              <text x="105" y="181" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Lower</text>
+              <text x="105" y="192" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Left</text>
+            </g>
+            <!-- Lower Right Abdomen -->
+            <g id="site-lower-right" onclick="selectInjectionSite('lower-right')" style="cursor:pointer;">
+              <ellipse cx="175" cy="185" rx="28" ry="22" fill="rgba(107,158,120,0.15)" stroke="#6B9E78" stroke-width="1.5" class="site-zone"/>
+              <text x="175" y="181" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Lower</text>
+              <text x="175" y="192" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Right</text>
+            </g>
+            <!-- Left Hip -->
+            <g id="site-left-hip" onclick="selectInjectionSite('left-hip')" style="cursor:pointer;">
+              <ellipse cx="92" cy="255" rx="26" ry="20" fill="rgba(107,158,120,0.15)" stroke="#6B9E78" stroke-width="1.5" class="site-zone"/>
+              <text x="92" y="251" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Left</text>
+              <text x="92" y="262" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Hip</text>
+            </g>
+            <!-- Right Hip -->
+            <g id="site-right-hip" onclick="selectInjectionSite('right-hip')" style="cursor:pointer;">
+              <ellipse cx="188" cy="255" rx="26" ry="20" fill="rgba(107,158,120,0.15)" stroke="#6B9E78" stroke-width="1.5" class="site-zone"/>
+              <text x="188" y="251" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Right</text>
+              <text x="188" y="262" text-anchor="middle" font-size="9" fill="#6B9E78" font-family="sans-serif" font-weight="600">Hip</text>
+            </g>
+          </svg>
+        </div>
+        <div id="injection-site-status" style="text-align:center;font-size:13px;color:var(--muted);margin-top:8px;">Tap a zone above to log this week's site</div>
+        <div id="injection-site-history" style="margin-top:10px;font-size:12px;color:var(--muted);"></div>
+      </div>
     </div>
 
     <!-- Zepbound side effects -->
@@ -1141,7 +1206,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <!-- Today's log -->
       <div id="water-entries-today" style="margin-top:12px;font-size:12px;color:var(--muted);min-height:20px;"></div>
 
-      <button class="btn-primary" style="margin-top:10px;" onclick="saveWaterIntake()">💾 Save today's total</button>
+      <button class="btn-primary" style="margin-top:10px;" onclick="saveWaterIntake()">💾 Sync to cloud & save daily total</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Your progress auto-saves as you tap · tap Sync to save to charts & cross-device</div>
       <div class="toast-msg" id="wt">Saved!</div>
       <button class="btn-ai" style="margin-top:8px;" onclick="hydrationCoach()">Hydration coaching ↗</button>
       <div id="hydration-coach-output" class="coach-response" style="display:none"></div>
@@ -1257,6 +1323,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <button class="btn-ai" onclick="zepCoach()">Ask coach about my BP trend ↗</button>
       <div id="zep-coach-output" class="coach-response" style="display:none"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💊 Medication compliance · this week</div>
+      <div id="meds-weekly-compliance"><div class="log-empty">Loading...</div></div>
     </div>
 
     <div class="card">
@@ -1914,6 +1985,7 @@ async function boot(){
   loadCoachingInsights();
   loadSavedScore();
   loadTodayWater();
+  loadTodaySleepFromCSV();
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
@@ -1948,10 +2020,10 @@ function tab(id){
   if(id==='today') loadCheckinState();
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); }
-  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); }
+  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
-  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();}}
+  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();}}
   if(curTab==='skin'&&v!=='daily') buildSkinCharts();
   if(curTab==='hair'&&v!=='daily') buildHairCharts();
   if(curTab==='sleep'&&(v==='weekly'||v==='monthly')) buildMyAirCharts();
@@ -3977,6 +4049,23 @@ let todayWaterOz = 0;
 let todayWaterEntries = []; // [{oz, label, time}]
 
 async function loadTodayWater(){
+  // Check localStorage first — instant restore, resets if date has changed
+  const localState = localStorage.getItem('glowWaterToday');
+  if(localState){
+    try {
+      const state = JSON.parse(localState);
+      if(state.date === nowStr()){
+        todayWaterOz = state.oz || 0;
+        todayWaterEntries = state.entries || [];
+        updateWaterDisplay();
+        return; // localStorage is fresh for today — use it
+      } else {
+        // New day — clear yesterday's local state
+        localStorage.removeItem('glowWaterToday');
+      }
+    } catch(e){}
+  }
+  // Fall back to Blob/IndexedDB
   const water = await dbAll('water');
   const today = nowStr();
   const todayEntry = water.filter(w=>w.date===today).pop();
@@ -3989,6 +4078,7 @@ function addWater(oz, label=''){
   todayWaterOz += oz;
   todayWaterEntries.push({oz, label, time: new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
   updateWaterDisplay();
+  autoSaveWater(); // save immediately on every tap
 }
 
 function addWaterCustom(){
@@ -4004,6 +4094,17 @@ function undoWater(){
   const last = todayWaterEntries.pop();
   todayWaterOz = Math.max(0, todayWaterOz - last.oz);
   updateWaterDisplay();
+  autoSaveWater();
+}
+
+function autoSaveWater(){
+  // Save current state to localStorage immediately — persists across navigation
+  const state = {
+    date: nowStr(),
+    oz: todayWaterOz,
+    entries: todayWaterEntries
+  };
+  localStorage.setItem('glowWaterToday', JSON.stringify(state));
 }
 
 function updateWaterDisplay(){
@@ -4746,7 +4847,115 @@ async function saveMyAirLog(){
   loadMyAirLastLogged();
 }
 
-// ── MYAIR SCORE CALCULATORS ───────────────────────────────────────────
+async function loadTodaySleepFromCSV(){
+  const el = document.getElementById('s-sleep-h');
+  const srcEl = document.getElementById('s-sleep-src');
+  if(!el) return;
+  // Prefer manual entry for today
+  const manualSleeps = await dbAll('sleeps');
+  const todaySleep = manualSleeps.find(s=>s.date===nowStr());
+  if(todaySleep && todaySleep.hrs && todaySleep.hrs!=='—'){
+    el.textContent = todaySleep.hrs+'h';
+    if(srcEl) srcEl.textContent = 'manually logged';
+    return;
+  }
+  // Fall back to CSV — most recent night
+  try {
+    const rows = await getCSVRows();
+    const withSleep = rows.filter(r=>parseFloat(r.sleep_hrs)>0);
+    if(!withSleep.length) return;
+    const latest = withSleep[0];
+    const hrs = parseFloat(latest.sleep_hrs).toFixed(1);
+    const dateStr = safeDate(latest.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    el.textContent = hrs+'h';
+    if(srcEl) srcEl.textContent = `Apple Health · ${dateStr}`;
+  } catch(e){}
+}
+async function buildMedsWeeklyCompliance(){
+  const el = document.getElementById('meds-weekly-compliance');
+  if(!el) return;
+
+  const rxMeds = [
+    {id:'med-irbesartan', label:'Irbesartan HCTZ'},
+    {id:'med-metoprolol', label:'Metoprolol'},
+    {id:'med-amlodipine', label:'Amlodipine'},
+    {id:'med-osteo', label:'Osteo Biflex'},
+    {id:'med-rosuvastatin', label:'Rosuvastatin'},
+  ];
+  const suppMeds = [
+    {id:'med-multivitamin', label:'Multivitamin'},
+    {id:'med-biotin', label:'Biotin'},
+    {id:'med-vitc', label:'Vitamin C'},
+    {id:'med-collagen', label:'Collagen'},{id:'med-superbeets', label:'SuperBeets'},
+    {id:'med-miralax', label:'Miralax (as needed)'},
+  ];
+
+  let logs = [];
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=meds_log`);
+    if(res.ok){ const {data}=await res.json(); if(Array.isArray(data)) logs=data; }
+  } catch(e){}
+
+  // Build last 7 days
+  const days = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const dateStr = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+    const log = logs.find(l=>l.date===dateStr);
+    days.push({dateStr, dayLabel:d.toLocaleDateString('en-US',{weekday:'short'}), log});
+  }
+
+  const daysLogged = days.filter(d=>d.log).length;
+  const rxDaysDone = days.filter(d=>d.log&&rxMeds.every(m=>d.log[m.id])).length;
+  const overallColor = rxDaysDone===7?'#27500A':rxDaysDone>=5?'#6B9E78':rxDaysDone>=3?'#92400E':'#7F1D1D';
+  const overallBg = rxDaysDone===7?'#EAF3DE':rxDaysDone>=5?'rgba(107,158,120,0.1)':rxDaysDone>=3?'#FEF3C7':'#FEE2E2';
+
+  const dayDots = days.map(d=>{
+    const allRx = d.log&&rxMeds.every(m=>d.log[m.id]);
+    const someRx = d.log&&rxMeds.some(m=>d.log[m.id]);
+    const color = allRx?'#6B9E78':someRx?'#E8A87C':d.log?'#C4735A':'rgba(0,0,0,0.1)';
+    return `<div style="text-align:center;">
+      <div style="width:28px;height:28px;border-radius:50%;background:${color};margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;">${allRx?'✓':someRx?'~':'—'}</div>
+      <div style="font-size:10px;color:var(--muted);">${d.dayLabel}</div>
+    </div>`;
+  }).join('');
+
+  const medRow = (med) => {
+    const count = days.filter(d=>d.log?.[med.id]).length;
+    const pct = (count/7)*100;
+    const color = count===7?'#27500A':count>=5?'#6B9E78':count>=3?'#92400E':'#7F1D1D';
+    return `<div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+        <div style="font-size:12px;color:var(--text);">${med.label}</div>
+        <div style="font-size:12px;font-weight:600;color:${color};">${count}/7</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.06);border-radius:20px;height:6px;">
+        <div style="width:${pct}%;height:6px;border-radius:20px;background:${color};"></div>
+      </div>
+    </div>`;
+  };
+
+  el.innerHTML = `
+    <div style="padding:12px;border-radius:12px;background:${overallBg};margin-bottom:14px;text-align:center;">
+      <div style="font-size:36px;font-weight:700;color:${overallColor};">${rxDaysDone}/7</div>
+      <div style="font-size:13px;color:${overallColor};margin-top:2px;">${rxDaysDone===7?'Perfect week! All Rx meds every day ✅':rxDaysDone>=5?`${7-rxDaysDone} day${7-rxDaysDone>1?'s':''} missed — great consistency`:`${7-rxDaysDone} days need attention`}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Days all 5 Rx meds taken · ${daysLogged}/7 days logged this week</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px;">${dayDots}</div>
+    <div style="display:flex;gap:12px;font-size:11px;color:var(--muted);margin-bottom:16px;">
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#6B9E78;display:inline-block;"></span>All Rx</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#E8A87C;display:inline-block;"></span>Partial</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#C4735A;display:inline-block;"></span>Missed</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:rgba(0,0,0,0.1);display:inline-block;"></span>No log</span>
+    </div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Rx medications</div>
+    ${rxMeds.map(medRow).join('')}
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:12px 0 8px;">Supplements & as-needed</div>
+    ${suppMeds.map(medRow).join('')}
+    ${daysLogged===0?'<div style="font-size:12px;color:var(--muted);margin-top:10px;padding:10px;background:var(--warm);border-radius:10px;">Tip: Tap each med as you take it then tap "✅ Log all Rx meds taken today" to record compliance.</div>':''}
+  `;
+}
+
 function calcUsageScore(hoursStr){
   if(!hoursStr) return null;
   // Parse "H:MM" or decimal hours
@@ -4947,29 +5156,45 @@ function toggleMed(id){
 
 function updateMedsProgress(){
   const allMeds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo',
-    'med-multivitamin','med-biotin','med-vitc','med-collagen',
+    'med-multivitamin','med-biotin','med-vitc','med-collagen','med-superbeets',
     'med-rosuvastatin','med-miralax','med-melatonin-eve','med-sleep-gummies-eve'];
   const required = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo','med-rosuvastatin'];
   const done = allMeds.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
   const reqDone = required.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
   const el = document.getElementById('meds-progress');
-  if(!el) return;
+  const btn = document.getElementById('meds-save-btn');
+
+  // Auto-save state to localStorage on every tap
+  const state = { date: nowStr() };
+  allMeds.forEach(id=>{ state[id] = document.getElementById(id)?.classList.contains('done')||false; });
+  localStorage.setItem('glowMedsToday', JSON.stringify(state));
+
   if(reqDone === required.length){
-    el.innerHTML='✅ All Rx meds taken today' + (done > required.length ? ` · ${done - required.length} supplements also logged`:'');
-    el.style.color='#27500A';
+    if(el){ el.innerHTML='✅ All Rx meds taken today' + (done > required.length ? ` · ${done - required.length} supplements also logged`:''); el.style.color='#27500A'; el.style.background='#EAF3DE'; }
+    if(btn) btn.style.display='block';
   } else {
-    el.innerHTML=`${reqDone}/${required.length} Rx meds taken · ${done} total logged today`;
-    el.style.color='var(--muted)';
+    if(el){ el.innerHTML=`${reqDone}/${required.length} Rx meds taken · ${done} total logged today`; el.style.color='var(--muted)'; el.style.background='var(--warm)'; }
+    if(btn) btn.style.display='none';
   }
 }
 
 async function saveMedsChecklist(){
   const allMeds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo',
-    'med-multivitamin','med-biotin','med-vitc','med-collagen',
+    'med-multivitamin','med-biotin','med-vitc','med-collagen','med-superbeets',
     'med-rosuvastatin','med-miralax','med-melatonin-eve','med-sleep-gummies-eve'];
-  const state = { date: nowStr() };
+  const state = { date: nowStr(), isoDate: new Date().toISOString() };
   allMeds.forEach(id=>{ state[id] = document.getElementById(id)?.classList.contains('done')||false; });
   localStorage.setItem('glowMedsToday', JSON.stringify(state));
+
+  // Log to Blob for history
+  const existing = await fetch(`${BACKEND}/api/sync?pillar=meds_log`)
+    .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
+  const idx = existing.findIndex(e=>e.date===state.date);
+  if(idx>=0) existing[idx]=state; else existing.push(state);
+  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'meds_log',data:existing})}).catch(()=>{});
+
+  const btn = document.getElementById('meds-save-btn');
+  if(btn){ btn.textContent='✅ Logged for today!'; btn.style.background='#EAF3DE'; btn.style.borderColor='#6B9E78'; btn.style.color='#27500A'; setTimeout(()=>{ btn.textContent='✅ Log all Rx meds taken today'; btn.style.background=''; btn.style.borderColor=''; btn.style.color=''; },3000); }
   toast('meds-toast');
 }
 
@@ -4978,17 +5203,118 @@ function loadMedsChecklist(){
   if(!saved) return;
   try {
     const state = JSON.parse(saved);
-    if(state.date !== nowStr()) return; // Reset daily
+    if(state.date !== nowStr()){ localStorage.removeItem('glowMedsToday'); return; }
     Object.keys(state).forEach(key=>{
-      if(key==='date') return;
+      if(key==='date'||key==='isoDate') return;
       if(state[key]) document.getElementById(key)?.classList.add('done');
     });
-    updateMedsProgress();
+    updateMedsProgress(); // restores button state and counter
   } catch(e){}
 }
 
 
-// ── ZEPBOUND SIDE EFFECTS ─────────────────────────────────────────────
+// ── INJECTION SITE TRACKER ────────────────────────────────────────────
+const SITE_LABELS = {
+  'upper-left': 'Upper Left Abdomen',
+  'upper-right': 'Upper Right Abdomen',
+  'lower-left': 'Lower Left Abdomen',
+  'lower-right': 'Lower Right Abdomen',
+  'left-hip': 'Left Hip',
+  'right-hip': 'Right Hip',
+};
+
+async function selectInjectionSite(site){
+  // Save with current Zepbound entry
+  const history = JSON.parse(localStorage.getItem('glowInjectionSites')||'[]');
+  const last = history[history.length-1];
+
+  // Update most recent entry's site, or add new
+  const entry = {
+    site,
+    label: SITE_LABELS[site],
+    date: nowStr(),
+    isoDate: new Date().toISOString()
+  };
+
+  if(last && last.date === entry.date){
+    history[history.length-1] = entry;
+  } else {
+    history.push(entry);
+    if(history.length > 20) history.shift();
+  }
+  localStorage.setItem('glowInjectionSites', JSON.stringify(history));
+
+  // Also save to Blob alongside Zepbound data
+  const zepData = await fetch(`${BACKEND}/api/sync?pillar=zepbound`)
+    .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
+  if(zepData.length){
+    zepData[zepData.length-1].injectionSite = site;
+    zepData[zepData.length-1].injectionSiteLabel = SITE_LABELS[site];
+    fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'zepbound',data:zepData})}).catch(()=>{});
+  }
+
+  updateInjectionSiteDiagram(site, history);
+}
+
+function updateInjectionSiteDiagram(selectedSite, history){
+  const sites = Object.keys(SITE_LABELS);
+
+  // Reset all zones
+  sites.forEach(s=>{
+    const el = document.getElementById(`site-${s}`);
+    if(!el) return;
+    const ellipse = el.querySelector('ellipse');
+    const texts = el.querySelectorAll('text');
+    if(ellipse){ ellipse.setAttribute('fill','rgba(107,158,120,0.15)'); ellipse.setAttribute('stroke','#6B9E78'); }
+    texts.forEach(t=>t.setAttribute('fill','#6B9E78'));
+  });
+
+  // Highlight last used site (red = avoid)
+  if(history && history.length > 1){
+    const prevSite = history[history.length-2].site;
+    const prevEl = document.getElementById(`site-${prevSite}`);
+    if(prevEl){
+      const ellipse = prevEl.querySelector('ellipse');
+      const texts = prevEl.querySelectorAll('text');
+      if(ellipse){ ellipse.setAttribute('fill','rgba(196,115,90,0.2)'); ellipse.setAttribute('stroke','#C4735A'); }
+      texts.forEach(t=>t.setAttribute('fill','#C4735A'));
+    }
+  }
+
+  // Highlight selected site (dark green = this week)
+  if(selectedSite){
+    const selEl = document.getElementById(`site-${selectedSite}`);
+    if(selEl){
+      const ellipse = selEl.querySelector('ellipse');
+      const texts = selEl.querySelectorAll('text');
+      if(ellipse){ ellipse.setAttribute('fill','rgba(39,80,10,0.25)'); ellipse.setAttribute('stroke','#27500A'); ellipse.setAttribute('stroke-width','2.5'); }
+      texts.forEach(t=>t.setAttribute('fill','#27500A'));
+    }
+  }
+
+  // Update status text
+  const statusEl = document.getElementById('injection-site-status');
+  if(statusEl && selectedSite){
+    statusEl.innerHTML = `<strong style="color:#27500A;">✓ This week: ${SITE_LABELS[selectedSite]}</strong>`;
+  }
+
+  // Show recent history
+  const histEl = document.getElementById('injection-site-history');
+  if(histEl && history && history.length > 1){
+    const recent = history.slice(-4).reverse().slice(1); // exclude current
+    histEl.innerHTML = `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Previous sites</div>`
+      + recent.map(e=>`<div style="padding:3px 0;">${e.date} · ${e.label}</div>`).join('');
+  }
+}
+
+function loadInjectionSiteHistory(){
+  const history = JSON.parse(localStorage.getItem('glowInjectionSites')||'[]');
+  if(!history.length) return;
+  const last = history[history.length-1];
+  updateInjectionSiteDiagram(last.site, history);
+}
+
+
 async function saveZepSideEffects(){
   const gi = gT('zep-gi-tags');
   const other = gT('zep-other-tags');
@@ -5038,10 +5364,10 @@ async function loadZepSideHistory(){
 }
 
 async function logZepDose(mg){
-  // Use entered date or today
   const dateInput = document.getElementById('zep-injection-date');
   const enteredDate = dateInput?.value;
   const injDate = enteredDate ? safeDate(enteredDate) : new Date();
+  const isoStr = enteredDate || injDate.toISOString().slice(0,10);
   const entry = {
     mg,
     date: injDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}),
@@ -5049,9 +5375,15 @@ async function logZepDose(mg){
   };
   const existing = await fetch(`${BACKEND}/api/sync?pillar=zepbound`)
     .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
-  existing.push(entry);
+  // Update existing entry for same date or append
+  const idx = existing.findIndex(e=>e.isoDate?.slice(0,10)===isoStr);
+  if(idx>=0) existing[idx]={...existing[idx],...entry};
+  else existing.push(entry);
+  existing.sort((a,b)=>(a.isoDate||'').localeCompare(b.isoDate||''));
   fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'zepbound',data:existing})}).catch(()=>{});
   localStorage.setItem('glowZepDose', JSON.stringify(entry));
+  // Clear date picker after logging
+  if(dateInput) dateInput.value='';
   toast('zep-toast');
   buildZepboundStatus();
 }
