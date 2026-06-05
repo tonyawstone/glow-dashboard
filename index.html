@@ -161,7 +161,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .insight-impact{font-size:12px;font-weight:500;margin-bottom:4px;}
 .insight-detail{font-size:12px;color:var(--muted);line-height:1.4;}
 .insight-action{font-size:12px;color:var(--accent);margin-top:6px;font-style:italic;line-height:1.4;}border-radius:50%;border:1.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.hydration-status-bar{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;margin-bottom:4px;}
+.water-container-btn{padding:10px 6px;border-radius:12px;border:1.5px solid var(--border);background:var(--warm);cursor:pointer;font-family:var(--sans);text-align:center;transition:all 0.15s;}
+.water-container-btn:active{background:rgba(91,158,201,0.15);border-color:#5B9EC9;transform:scale(0.96);}
+.water-btn-label{font-size:11px;color:var(--text);font-weight:500;margin-top:3px;}
+.water-btn-oz{font-size:11px;color:#5B9EC9;font-weight:600;}
 .hydration-status-icon{font-size:24px;flex-shrink:0;}
 .hydration-status-text{flex:1;}
 .hydration-status-title{font-size:14px;font-weight:600;}
@@ -594,43 +597,88 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="card">
       <div class="card-title">😴 ResMed myAir · nightly log</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Enter raw values from your machine — scores calculated automatically</div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div style="font-size:12px;color:var(--muted);">Date:</div>
         <input type="date" id="myair-date" style="padding:6px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);">
         <div style="font-size:11px;color:var(--muted);">(leave blank for today)</div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Usage hours</div>
-          <input type="text" id="myair-hours" placeholder="e.g. 9:14" style="width:100%;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:15px;font-weight:600;">
-          <div style="font-size:10px;color:var(--muted);margin-top:2px;">Target: 4+ hrs · scored /70</div>
+
+      <!-- Usage hours -->
+      <div style="padding:10px 12px;border-radius:10px;background:var(--warm);margin-bottom:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:13px;font-weight:600;">Usage hours</div>
+          <div style="font-size:11px;color:var(--muted);">max 70 pts · 10 pts/hr</div>
         </div>
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">AHI · events/hr</div>
-          <input type="number" id="myair-ahi" placeholder="e.g. 0.6" step="0.1" min="0" style="width:100%;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:15px;font-weight:600;">
-          <div style="font-size:10px;color:var(--muted);margin-top:2px;">Target: &lt;5 · scored /5</div>
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Mask seal score</div>
-          <input type="number" id="myair-seal" placeholder="e.g. 20" min="0" max="20" style="width:100%;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:15px;font-weight:600;">
-          <div style="font-size:10px;color:var(--muted);margin-top:2px;">Out of 20</div>
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Mask on/off count</div>
-          <input type="number" id="myair-onoff" placeholder="e.g. 6" min="0" style="width:100%;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:15px;font-weight:600;">
-          <div style="font-size:10px;color:var(--muted);margin-top:2px;">Target: &lt;1 · scored /5</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="text" id="myair-hours" placeholder="e.g. 9:14" style="width:90px;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:16px;font-weight:600;" oninput="calcMyAirScores()">
+          <div style="font-size:12px;color:var(--muted);">hrs:min from machine</div>
+          <div style="margin-left:auto;text-align:right;"><div id="myair-usage-score" style="font-size:22px;font-weight:700;color:var(--accent);">—</div><div style="font-size:10px;color:var(--muted);">/70 pts</div></div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 12px;border-radius:10px;background:var(--warm);">
-        <div style="flex:1;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">myAir total score</div>
-          <input type="number" id="myair-score" placeholder="e.g. 95" min="0" max="100" style="width:100%;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:22px;font-weight:700;">
+
+      <!-- AHI -->
+      <div style="padding:10px 12px;border-radius:10px;background:var(--warm);margin-bottom:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:13px;font-weight:600;">Events per hour (AHI)</div>
+          <div style="font-size:11px;color:var(--muted);">max 5 pts</div>
         </div>
-        <div style="font-size:28px;color:var(--muted);">/100</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="number" id="myair-ahi" placeholder="e.g. 0.6" step="0.1" min="0" style="width:90px;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:16px;font-weight:600;" oninput="calcMyAirScores()">
+          <div style="font-size:12px;color:var(--muted);">events/hr from machine</div>
+          <div style="margin-left:auto;text-align:right;"><div id="myair-ahi-score" style="font-size:22px;font-weight:700;color:var(--accent);">—</div><div style="font-size:10px;color:var(--muted);">/5 pts</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">0–6 = 5pts · 7–9 = 4pts · 10–12 = 3pts · 13–15 = 2pts · 16–18 = 1pt · 19+ = 0pts</div>
       </div>
+
+      <!-- Mask seal -->
+      <div style="padding:10px 12px;border-radius:10px;background:var(--warm);margin-bottom:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:13px;font-weight:600;">Mask seal (leak rate)</div>
+          <div style="font-size:11px;color:var(--muted);">max 20 pts · lower L/min = better</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="number" id="myair-seal-lmin" placeholder="e.g. 8" min="0" style="width:90px;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:16px;font-weight:600;" oninput="calcMyAirScores()">
+          <div style="font-size:12px;color:var(--muted);">L/min from machine</div>
+          <div style="margin-left:auto;text-align:right;"><div id="myair-seal-score" style="font-size:22px;font-weight:700;color:var(--accent);">—</div><div style="font-size:10px;color:var(--muted);">/20 pts</div></div>
+        </div>
+      </div>
+
+      <!-- Mask on/off -->
+      <div style="padding:10px 12px;border-radius:10px;background:var(--warm);margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:13px;font-weight:600;">Mask on/off events</div>
+          <div style="font-size:11px;color:var(--muted);">max 5 pts · 1-2 events = perfect</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="number" id="myair-onoff" placeholder="e.g. 6" min="0" style="width:90px;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:16px;font-weight:600;" oninput="calcMyAirScores()">
+          <div style="font-size:12px;color:var(--muted);">events from machine</div>
+          <div style="margin-left:auto;text-align:right;"><div id="myair-onoff-score" style="font-size:22px;font-weight:700;color:var(--accent);">—</div><div style="font-size:10px;color:var(--muted);">/5 pts</div></div>
+        </div>
+      </div>
+
+      <!-- Calculated total -->
+      <div style="padding:14px;border-radius:12px;background:linear-gradient(135deg,rgba(107,158,120,0.1),rgba(91,158,201,0.1));border:0.5px solid var(--border);margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">myAir total score</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Calculated from values above</div>
+          </div>
+          <div style="text-align:right;">
+            <div id="myair-total-calc" style="font-size:36px;font-weight:700;color:var(--accent);">—</div>
+            <div style="font-size:11px;color:var(--muted);">/100</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;background:rgba(0,0,0,0.06);border-radius:20px;height:8px;overflow:hidden;">
+          <div id="myair-total-bar" style="height:8px;border-radius:20px;background:var(--accent);width:0%;transition:width 0.4s;"></div>
+        </div>
+        <div id="myair-score-breakdown" style="font-size:11px;color:var(--muted);margin-top:6px;"></div>
+      </div>
+
       <div id="myair-status" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>
       <button class="btn-primary" style="margin-top:0;" onclick="saveMyAirLog()">Save myAir data</button>
       <div class="toast-msg" id="myair-toast">Saved!</div>
+      <div id="myair-last-logged" style="margin-top:14px;"></div>
     </div>
 
     <div class="card">
@@ -705,13 +753,21 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="section-label">Sleep this week</div>
     <div class="card">
-      <div class="card-title">myAir score · this week</div>
-      <div id="myair-weekly-summary"><div class="log-empty">Log myAir data daily to see weekly trends.</div></div>
-      <div class="chart-wrap" style="height:160px;margin-top:12px;"><canvas id="myair-score-chart"></canvas></div>
+      <div class="card-title">myAir total score</div>
+      <div id="myair-weekly-summary"></div>
+      <div class="chart-wrap" style="height:150px;margin-top:10px;"><canvas id="myair-score-chart"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-title">AHI · events per hour this week</div>
-      <div class="chart-wrap" style="height:160px;"><canvas id="myair-ahi-chart"></canvas></div>
+      <div class="card-title">AHI · events/hr <span style="font-size:11px;color:var(--muted);">Target: &lt;5 · dotted line = threshold</span></div>
+      <div class="chart-wrap" style="height:140px;"><canvas id="myair-ahi-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Mask seal <span style="font-size:11px;color:var(--muted);">Out of 20 · higher is better</span></div>
+      <div class="chart-wrap" style="height:140px;"><canvas id="myair-seal-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Mask on/off count <span style="font-size:11px;color:var(--muted);">Lower is better · your improvement area</span></div>
+      <div class="chart-wrap" style="height:140px;"><canvas id="myair-onoff-chart"></canvas></div>
     </div>
     <div class="card"><div class="card-title">Hours & CPAP compliance</div><div class="chart-wrap" id="wrap-sleep-week-chart"></div></div>
   </div>
@@ -1027,27 +1083,66 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Hydration -->
     <div class="card">
-      <div class="card-title">💧 Hydration</div>
-      <div id="hydration-status"><div class="log-empty">Loading hydration data...</div></div>
-      <div style="margin-top:14px;">
-        <div class="fl">Log water intake today</div>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
-          <button class="hydration-btn" onclick="adjustWater(-1)">−</button>
-          <div style="text-align:center;flex:1;">
-            <div style="font-size:28px;font-weight:700;color:var(--accent);" id="water-count">0</div>
-            <div style="font-size:11px;color:var(--muted);">glasses (8 oz each)</div>
-          </div>
-          <button class="hydration-btn" onclick="adjustWater(1)">+</button>
+      <div class="card-title">💧 Hydration tracker</div>
+      <div id="hydration-status"><div class="log-empty">Loading...</div></div>
+
+      <!-- Live total display -->
+      <div style="text-align:center;padding:14px 0 6px;">
+        <div style="font-size:42px;font-weight:700;color:#5B9EC9;" id="water-oz-total">0</div>
+        <div style="font-size:13px;color:var(--muted);">oz today</div>
+        <div style="margin-top:10px;background:rgba(0,0,0,0.06);border-radius:20px;height:10px;overflow:hidden;">
+          <div id="water-goal-bar" style="height:10px;border-radius:20px;background:#5B9EC9;transition:width 0.4s ease;width:0%;"></div>
         </div>
-        <div style="margin-top:8px;" id="water-goal-bar-wrap">
-          <div style="background:rgba(0,0,0,0.06);border-radius:20px;height:8px;">
-            <div id="water-goal-bar" style="height:8px;border-radius:20px;background:#5B9EC9;transition:width 0.4s ease;width:0%;"></div>
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;" id="water-goal-label">Goal: 10 glasses (80 oz) · recommended on Zepbound + diuretics</div>
-        </div>
-        <button class="btn-primary" style="margin-top:12px;" onclick="saveWaterIntake()">Log water intake</button>
-        <div class="toast-msg" id="wt">Saved!</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:5px;" id="water-goal-label">Goal: 80 oz · recommended on Zepbound + diuretics</div>
       </div>
+
+      <!-- Container buttons -->
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin:12px 0 8px;">Tap to add a drink:</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="water-container-buttons">
+        <button class="water-container-btn" onclick="addWater(8)">
+          <div style="font-size:22px;">🥛</div>
+          <div class="water-btn-label">Glass</div>
+          <div class="water-btn-oz">8 oz</div>
+        </button>
+        <button class="water-container-btn" onclick="addWater(12)">
+          <div style="font-size:22px;">☕</div>
+          <div class="water-btn-label">Mug</div>
+          <div class="water-btn-oz">12 oz</div>
+        </button>
+        <button class="water-container-btn" onclick="addWater(16)">
+          <div style="font-size:22px;">🍶</div>
+          <div class="water-btn-label">Bottle (sm)</div>
+          <div class="water-btn-oz">16 oz</div>
+        </button>
+        <button class="water-container-btn" onclick="addWater(20)">
+          <div style="font-size:22px;">💧</div>
+          <div class="water-btn-label">Tumbler</div>
+          <div class="water-btn-oz">20 oz</div>
+        </button>
+        <button class="water-container-btn" onclick="addWater(24)">
+          <div style="font-size:22px;">🧴</div>
+          <div class="water-btn-label">Bottle (lg)</div>
+          <div class="water-btn-oz">24 oz</div>
+        </button>
+        <button class="water-container-btn" onclick="addWater(32)">
+          <div style="font-size:22px;">🫙</div>
+          <div class="water-btn-label">Quart</div>
+          <div class="water-btn-oz">32 oz</div>
+        </button>
+      </div>
+
+      <!-- Custom amount -->
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+        <input type="number" id="water-custom-oz" placeholder="Custom oz" min="1" max="64" style="flex:1;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;">
+        <button onclick="addWaterCustom()" style="padding:8px 14px;border-radius:8px;border:0.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);">Add</button>
+        <button onclick="undoWater()" style="padding:8px 14px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);">Undo</button>
+      </div>
+
+      <!-- Today's log -->
+      <div id="water-entries-today" style="margin-top:12px;font-size:12px;color:var(--muted);min-height:20px;"></div>
+
+      <button class="btn-primary" style="margin-top:10px;" onclick="saveWaterIntake()">💾 Save today's total</button>
+      <div class="toast-msg" id="wt">Saved!</div>
       <button class="btn-ai" style="margin-top:8px;" onclick="hydrationCoach()">Hydration coaching ↗</button>
       <div id="hydration-coach-output" class="coach-response" style="display:none"></div>
     </div>
@@ -1810,6 +1905,7 @@ async function boot(){
   loadReflectionPrompt();
   loadPillarsToday();
   loadWeekIntention();
+  loadCheckinState();
   await loadAllPhotos();
   await loadLogs();
   buildBodyChart();
@@ -1848,7 +1944,8 @@ function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
-  if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); }
+  if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); }
+  if(id==='today') loadCheckinState();
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); }
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); }
@@ -1996,14 +2093,54 @@ async function saveCheckin(){
   const exercise=document.getElementById('t-exercise')?.classList.contains('on')||false;
   const melatonin=document.getElementById('t-melatonin')?.classList.contains('on')||false;
   const sleepGummies=document.getElementById('t-sleep-gummies')?.classList.contains('on')||false;
-  const entry={mood,note,cpap,meds,exercise,melatonin,sleepGummies,date:nowStr()};
+  const skinAM=document.getElementById('t-skin-am')?.classList.contains('on')||false;
+  const skinPM=document.getElementById('t-skin-pm')?.classList.contains('on')||false;
+  const entry={mood,note,cpap,meds,exercise,melatonin,sleepGummies,skinAM,skinPM,date:nowStr()};
   await dbAdd('checkins',entry);
   syncToBlob('checkins');
-  document.getElementById('today-note').value='';
-  document.getElementById('mood-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
-  ['t-cpap','t-meds','t-skin-am','t-skin-pm','t-exercise','t-melatonin','t-sleep-gummies'].forEach(id=>document.getElementById(id)?.classList.remove('on'));
+
+  // Save state to localStorage so it persists until midnight
+  localStorage.setItem('glowCheckinState', JSON.stringify({...entry, savedAt: new Date().toISOString()}));
+
+  // Show saved confirmation without resetting fields
+  const btn = document.querySelector('[onclick="saveCheckin()"]');
+  if(btn){ const orig=btn.textContent; btn.textContent='✅ Check-in saved!'; btn.style.background='#EAF3DE'; btn.style.borderColor='#6B9E78'; btn.style.color='#27500A'; setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; btn.style.borderColor=''; btn.style.color=''; },3000); }
+
   toast('tt');loadLogs();
 }
+
+function loadCheckinState(){
+  const saved = localStorage.getItem('glowCheckinState');
+  if(!saved) return;
+  try {
+    const state = JSON.parse(saved);
+    // Only restore if saved today
+    if(state.date !== nowStr()){ localStorage.removeItem('glowCheckinState'); return; }
+
+    // Restore mood tags
+    if(state.mood?.length){
+      document.querySelectorAll('#mood-tags .tag').forEach(t=>{
+        if(state.mood.includes(t.textContent)) t.classList.add('on');
+      });
+    }
+    // Restore note
+    if(state.note) document.getElementById('today-note').value = state.note;
+    // Restore toggles
+    if(state.cpap) document.getElementById('t-cpap')?.classList.add('on');
+    if(state.meds) document.getElementById('t-meds')?.classList.add('on');
+    if(state.exercise) document.getElementById('t-exercise')?.classList.add('on');
+    if(state.melatonin) document.getElementById('t-melatonin')?.classList.add('on');
+    if(state.sleepGummies) document.getElementById('t-sleep-gummies')?.classList.add('on');
+    if(state.skinAM) document.getElementById('t-skin-am')?.classList.add('on');
+    if(state.skinPM) document.getElementById('t-skin-pm')?.classList.add('on');
+
+    // Show subtle "already checked in today" indicator
+    const btn = document.querySelector('[onclick="saveCheckin()"]');
+    if(btn){ btn.textContent='✅ Update check-in'; }
+  } catch(e){}
+}
+
+
 async function saveOutfit(){
   const desc=document.getElementById('outfit-desc').value.trim();if(!desc)return;
   const outfitEntry={desc,occ:gT('occ-tags'),src:gT('src-tags')[0]||'',keep:gT('keep-tags')[0]||'',stars:getStars('outfit-stars'),date:nowStr()};
@@ -3364,8 +3501,8 @@ function buildSkinMetricChart(metric, data){
 }
 
 
-let todayWaterCount = 0;
-const WATER_GOAL = 10; // glasses — higher target for Zepbound + HCTZ
+let todayWaterCount = 0; // legacy alias
+const WATER_GOAL = 10; // legacy alias
 
 // ── HAIR ANALYSIS ─────────────────────────────────────────────────────
 let _currentHairGoalSlot = null;
@@ -3835,26 +3972,57 @@ function showSkinComparison(a, b){
   setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
 
+const WATER_GOAL_OZ = 80; // 80 oz goal
+let todayWaterOz = 0;
+let todayWaterEntries = []; // [{oz, label, time}]
+
 async function loadTodayWater(){
   const water = await dbAll('water');
   const today = nowStr();
   const todayEntry = water.filter(w=>w.date===today).pop();
-  todayWaterCount = todayEntry ? todayEntry.glasses : 0;
+  todayWaterOz = todayEntry ? (todayEntry.oz || (todayEntry.glasses||0)*8) : 0;
+  todayWaterEntries = todayEntry?.entries || [];
+  updateWaterDisplay();
+}
+
+function addWater(oz, label=''){
+  todayWaterOz += oz;
+  todayWaterEntries.push({oz, label, time: new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
+  updateWaterDisplay();
+}
+
+function addWaterCustom(){
+  const input = document.getElementById('water-custom-oz');
+  const oz = parseInt(input?.value);
+  if(!oz||oz<1||oz>128) return;
+  addWater(oz, `${oz} oz`);
+  input.value='';
+}
+
+function undoWater(){
+  if(!todayWaterEntries.length) return;
+  const last = todayWaterEntries.pop();
+  todayWaterOz = Math.max(0, todayWaterOz - last.oz);
   updateWaterDisplay();
 }
 
 function updateWaterDisplay(){
-  const countEl = document.getElementById('water-count');
+  const ozEl = document.getElementById('water-oz-total');
   const barEl = document.getElementById('water-goal-bar');
   const labelEl = document.getElementById('water-goal-label');
-  if(countEl) countEl.textContent = todayWaterCount;
-  if(barEl) barEl.style.width = Math.min(100,(todayWaterCount/WATER_GOAL)*100)+'%';
-  if(barEl) barEl.style.background = todayWaterCount>=WATER_GOAL?'#27500A':todayWaterCount>=7?'#6B9E78':todayWaterCount>=4?'#E8A87C':'#C4735A';
-  if(labelEl) labelEl.textContent = todayWaterCount>=WATER_GOAL ? `✅ Goal reached! ${todayWaterCount}/${WATER_GOAL} glasses` : `${todayWaterCount}/${WATER_GOAL} glasses · Goal: ${WATER_GOAL} glasses (80 oz) on Zepbound + HCTZ`;
+  const entriesEl = document.getElementById('water-entries-today');
+
+  if(ozEl) ozEl.textContent = todayWaterOz;
+  const pct = Math.min(100,(todayWaterOz/WATER_GOAL_OZ)*100);
+  if(barEl){ barEl.style.width=pct+'%'; barEl.style.background=todayWaterOz>=WATER_GOAL_OZ?'#27500A':todayWaterOz>=60?'#6B9E78':todayWaterOz>=40?'#E8A87C':'#5B9EC9'; }
+  if(labelEl) labelEl.textContent = todayWaterOz>=WATER_GOAL_OZ ? `✅ Goal reached! ${todayWaterOz}/${WATER_GOAL_OZ} oz` : `${todayWaterOz}/${WATER_GOAL_OZ} oz · ${WATER_GOAL_OZ-todayWaterOz} oz to go`;
+  if(entriesEl && todayWaterEntries.length){
+    entriesEl.innerHTML = todayWaterEntries.map(e=>`<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;background:rgba(91,158,201,0.12);border-radius:8px;font-size:11px;color:#5B9EC9;">${e.oz} oz${e.time?' · '+e.time:''}</span>`).join('');
+  } else if(entriesEl){ entriesEl.innerHTML=''; }
 }
 
-function adjustWater(delta){
-  todayWaterCount = Math.max(0, todayWaterCount + delta);
+function adjustWater(delta){ // legacy — keep for any old references
+  todayWaterOz = Math.max(0, todayWaterOz + delta*8);
   updateWaterDisplay();
 }
 
@@ -3862,9 +4030,8 @@ async function saveWaterIntake(){
   const today = nowStr();
   const water = await dbAll('water');
   const existing = water.findIndex(w=>w.date===today);
-  const entry = {date:today, glasses:todayWaterCount, oz:todayWaterCount*8};
+  const entry = {date:today, oz:todayWaterOz, glasses:Math.round(todayWaterOz/8), entries:todayWaterEntries};
   if(existing>=0){
-    // Update existing
     const t = db.transaction('water','readwrite');
     const store = t.objectStore('water');
     const all = await new Promise(r=>{const rq=store.getAll();rq.onsuccess=()=>r(rq.result);});
@@ -3876,6 +4043,8 @@ async function saveWaterIntake(){
   toast('wt');
   buildHydrationStatus();
 }
+
+
 
 async function buildHealthInsights(){
   const el = document.getElementById('health-insights-content');
@@ -4525,28 +4694,36 @@ async function saveCPAPCleaning(){
 async function saveMyAirLog(){
   const hours = document.getElementById('myair-hours').value.trim();
   const ahi = parseFloat(document.getElementById('myair-ahi').value)||null;
-  const seal = parseFloat(document.getElementById('myair-seal').value)||null;
+  const sealLmin = parseFloat(document.getElementById('myair-seal-lmin').value)||null;
   const onoff = parseInt(document.getElementById('myair-onoff').value)||null;
-  const score = parseInt(document.getElementById('myair-score').value)||null;
-  if(!hours && !ahi && !score) return;
+  if(!hours && !ahi && sealLmin==null && onoff==null) return;
 
-  // Use entered date or today
+  const usageScore = calcUsageScore(hours);
+  const ahiScore = calcAHIScore(ahi);
+  const sealScore = calcSealScore(sealLmin);
+  const onoffScore = calcOnOffScore(onoff);
+  const score = (usageScore||0) + (ahiScore||0) + (sealScore||0) + (onoffScore||0);
+
   const datePickerEl = document.getElementById('myair-date');
   const isoStr = datePickerEl?.value || new Date().toISOString().slice(0,10);
   const logDate = safeDate(isoStr);
   const dateStr = logDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
 
-  const entry = { date: dateStr, isoDate: isoStr, hours, ahi, seal, onoff, score };
+  const entry = {
+    date: dateStr, isoDate: isoStr,
+    hours, ahi, sealLmin, onoff, // raw values
+    usageScore, sealScore, onoffScore, ahiScore, // calculated
+    seal: sealScore, // legacy alias for charts
+    score // total
+  };
 
-  // Show status
   const statusEl = document.getElementById('myair-status');
-  if(score && statusEl){
+  if(statusEl){
     const color = score>=90?'#27500A':score>=70?'#92400E':'#7F1D1D';
-    const label = score>=90?'Excellent night!':score>=70?'Good night':'Needs attention';
-    statusEl.innerHTML = `<span style="color:${color};font-weight:600;">${label}</span> · ${score}/100${ahi?` · AHI ${ahi}${ahi<1?' ✅':ahi<5?' ✅':' ⚠️'}`:''}`;
+    const label = score>=90?'Excellent!':score>=70?'Good night':'Needs attention';
+    statusEl.innerHTML = `<span style="color:${color};font-weight:600;">${label}</span> · ${score}/100${ahi!=null?` · AHI ${ahi}${ahi<1?' ✅ Excellent':ahi<5?' ✅ Normal':' ⚠️ Elevated'}`:''}`;
   }
 
-  // Update existing entry for this date or append — prevents overwriting other days
   const existing = await fetch(`${BACKEND}/api/sync?pillar=myair`).then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
   const idx = existing.findIndex(e=>e.isoDate===isoStr);
   if(idx>=0) existing[idx] = entry;
@@ -4555,9 +4732,142 @@ async function saveMyAirLog(){
 
   await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'myair',data:existing})});
   toast('myair-toast');
-  ['myair-hours','myair-ahi','myair-seal','myair-onoff','myair-score'].forEach(id=>{
+  ['myair-hours','myair-ahi','myair-seal-lmin','myair-onoff'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
+  // Reset calculated displays
+  ['myair-usage-score','myair-ahi-score','myair-seal-score','myair-onoff-score'].forEach(id=>{
+    const el=document.getElementById(id); if(el){ el.textContent='—'; el.style.color='var(--muted)';}
+  });
+  const totalEl = document.getElementById('myair-total-calc');
+  if(totalEl){ totalEl.textContent='—'; totalEl.style.color='var(--muted)'; }
+  const barEl = document.getElementById('myair-total-bar');
+  if(barEl) barEl.style.width='0%';
+  loadMyAirLastLogged();
+}
+
+// ── MYAIR SCORE CALCULATORS ───────────────────────────────────────────
+function calcUsageScore(hoursStr){
+  if(!hoursStr) return null;
+  // Parse "H:MM" or decimal hours
+  let hours;
+  if(hoursStr.includes(':')){
+    const [h,m] = hoursStr.split(':').map(Number);
+    hours = h + (m||0)/60;
+  } else {
+    hours = parseFloat(hoursStr);
+  }
+  if(isNaN(hours)||hours<0) return null;
+  if(hours < 1) return 0;
+  return Math.min(70, Math.floor(hours * 10));
+}
+
+function calcSealScore(lmin){
+  if(lmin==null||lmin==='') return null;
+  const l = parseFloat(lmin);
+  if(isNaN(l)) return null;
+  if(l <= 16) return 20;
+  if(l >= 55) return 0;
+  // Each 2 L/min above 16 = -1 point from 20
+  // 17-18=19, 19-20=18, ... 53-54=1, 55+=0
+  return Math.max(0, 20 - Math.ceil((l - 16) / 2));
+}
+
+function calcOnOffScore(events){
+  if(events==null||events==='') return null;
+  const e = parseInt(events);
+  if(isNaN(e)) return null;
+  if(e <= 2) return 5;
+  if(e === 3) return 4;
+  if(e === 4) return 3;
+  if(e === 5) return 1;
+  return 0; // 6+
+}
+
+function calcAHIScore(ahi){
+  if(ahi==null||ahi==='') return null;
+  const a = parseFloat(ahi);
+  if(isNaN(a)) return null;
+  if(a <= 6) return 5;
+  if(a <= 9) return 4;
+  if(a <= 12) return 3;
+  if(a <= 15) return 2;
+  if(a <= 18) return 1;
+  return 0;
+}
+
+function calcMyAirScores(){
+  const hoursStr = document.getElementById('myair-hours')?.value.trim()||'';
+  const ahiVal = document.getElementById('myair-ahi')?.value;
+  const sealLmin = document.getElementById('myair-seal-lmin')?.value;
+  const onoffVal = document.getElementById('myair-onoff')?.value;
+
+  const usageScore = calcUsageScore(hoursStr);
+  const ahiScore = calcAHIScore(ahiVal);
+  const sealScore = calcSealScore(sealLmin);
+  const onoffScore = calcOnOffScore(onoffVal);
+
+  const setScore = (id, score, max) => {
+    const el = document.getElementById(id); if(!el) return;
+    if(score===null){ el.textContent='—'; el.style.color='var(--muted)'; return; }
+    const pct = score/max;
+    el.textContent = score;
+    el.style.color = pct>=0.9?'#27500A':pct>=0.7?'#6B9E78':pct>=0.5?'#92400E':'#7F1D1D';
+  };
+  setScore('myair-usage-score', usageScore, 70);
+  setScore('myair-ahi-score', ahiScore, 5);
+  setScore('myair-seal-score', sealScore, 20);
+  setScore('myair-onoff-score', onoffScore, 5);
+
+  // Calculate total if we have at least one value
+  const scores = [usageScore, ahiScore, sealScore, onoffScore];
+  if(scores.some(s=>s!==null)){
+    const total = (usageScore||0)+(ahiScore||0)+(sealScore||0)+(onoffScore||0);
+    const totalEl = document.getElementById('myair-total-calc');
+    const barEl = document.getElementById('myair-total-bar');
+    const breakdownEl = document.getElementById('myair-score-breakdown');
+    if(totalEl){
+      totalEl.textContent = total;
+      totalEl.style.color = total>=90?'#27500A':total>=70?'#6B9E78':total>=50?'#92400E':'#7F1D1D';
+    }
+    if(barEl) barEl.style.width = Math.min(100,total)+'%';
+    if(breakdownEl){
+      breakdownEl.textContent = [
+        usageScore!=null?`Usage ${usageScore}/70`:'',
+        ahiScore!=null?`AHI ${ahiScore}/5`:'',
+        sealScore!=null?`Seal ${sealScore}/20`:'',
+        onoffScore!=null?`On/off ${onoffScore}/5`:'',
+      ].filter(Boolean).join(' + ');
+    }
+  }
+}
+
+async function loadMyAirLastLogged(){
+  const el = document.getElementById('myair-last-logged');
+  if(!el) return;
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=myair`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!data||!data.length){ el.innerHTML='<div style="font-size:12px;color:var(--muted);">No myAir data logged yet.</div>'; return; }
+
+    const recent = data.slice(-5).reverse();
+    el.innerHTML = `
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Recent entries</div>
+      ${recent.map(e=>{
+        const scoreColor = e.score>=90?'#27500A':e.score>=70?'#92400E':'#7F1D1D';
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);">
+          <div>
+            <div style="font-size:12px;font-weight:600;">${e.date}</div>
+            <div style="font-size:11px;color:var(--muted);">
+              ${e.hours?`${e.hours} hrs`:''}${e.ahi?` · AHI ${e.ahi}`:''}${e.seal?` · Seal ${e.seal}/20`:''}${e.onoff!=null?` · On/off ${e.onoff}`:''}
+            </div>
+          </div>
+          ${e.score?`<div style="font-size:20px;font-weight:700;color:${scoreColor};">${e.score}</div>`:''}
+        </div>`;
+      }).join('')}
+    `;
+  } catch(e){}
 }
 
 async function buildMyAirCharts(){
@@ -4585,54 +4895,45 @@ async function buildMyAirCharts(){
         </div>`;
     }
 
-    // Score chart (weekly)
-    const scoreCanvas = document.getElementById('myair-score-chart');
-    if(scoreCanvas){
-      if(chartInstances['myair-score-chart']) chartInstances['myair-score-chart'].destroy();
-      const weekLabels = data.slice(-7).map(d=>safeDate(d.isoDate.slice(0,10)).toLocaleDateString('en-US',{weekday:'short'}));
-      chartInstances['myair-score-chart'] = new Chart(scoreCanvas.getContext('2d'),{
-        type:'bar',
-        data:{labels:weekLabels,datasets:[{label:'myAir Score',data:data.slice(-7).map(d=>d.score||null),backgroundColor:data.slice(-7).map(d=>d.score>=90?'#6B9E78':d.score>=70?'#E8A87C':'#C4735A'),borderRadius:6}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#8C7B6B'}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}}}
+    // Helper to build a myAir metric chart
+    const makeMyAirChart = (canvasId, metric, label, color, maxY, refLine=null) => {
+      const canvas = document.getElementById(canvasId); if(!canvas) return;
+      if(chartInstances[canvasId]) chartInstances[canvasId].destroy();
+      const recent30 = data.slice(-30);
+      const labels = recent30.map(d=>{
+        const dateStr = (d.isoDate||d.date||'').slice(0,10);
+        try{ return safeDate(dateStr).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+        catch(e){ return d.date||''; }
       });
-    }
+      // For numeric metrics only — hours is a string like "9:14" so skip it
+      const vals = recent30.map(d=>{
+        const v = d[metric];
+        if(v==null||v==='') return null;
+        const n = parseFloat(v);
+        return isNaN(n) ? null : n;
+      });
+      // Skip chart if all values are null
+      if(vals.every(v=>v===null)){ canvas.parentElement.innerHTML=`<div class="log-empty">No ${label} data yet.</div>`; return; }
+      const datasets = [{label,data:vals,borderColor:color,backgroundColor:`${color}22`,borderWidth:2,pointRadius:recent30.length===1?8:3,fill:true,tension:0.3,spanGaps:true}];
+      if(refLine!=null) datasets.push({label:`Threshold (${refLine})`,data:recent30.map(()=>refLine),borderColor:'rgba(196,115,90,0.5)',borderWidth:1.5,borderDash:[5,5],pointRadius:0,fill:false});
+      chartInstances[canvasId] = new Chart(canvas.getContext('2d'),{
+        type: vals.filter(v=>v!=null).length<=1 ? 'bar' : 'line',
+        data:{labels,datasets},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:refLine!=null,labels:{font:{size:10},color:'#8C7B6B',boxWidth:10}}},
+          scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:10}},
+            y:{min:0,max:maxY||undefined,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}}}
+      });
+    };
 
-    // AHI chart (weekly)
-    const ahiCanvas = document.getElementById('myair-ahi-chart');
-    if(ahiCanvas){
-      if(chartInstances['myair-ahi-chart']) chartInstances['myair-ahi-chart'].destroy();
-      const weekLabels = data.slice(-7).map(d=>safeDate(d.isoDate.slice(0,10)).toLocaleDateString('en-US',{weekday:'short'}));
-      chartInstances['myair-ahi-chart'] = new Chart(ahiCanvas.getContext('2d'),{
-        type:'bar',
-        data:{labels:weekLabels,datasets:[{label:'AHI',data:data.slice(-7).map(d=>d.ahi||null),backgroundColor:'#9B8EC4',borderRadius:6}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},annotation:{annotations:{line1:{type:'line',yMin:5,yMax:5,borderColor:'#C4735A',borderWidth:1,borderDash:[4,4]}}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#8C7B6B'}},y:{min:0,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}}}
-      });
-    }
+    makeMyAirChart('myair-score-chart','score','myAir Score','#6B9E78',100);
+    makeMyAirChart('myair-ahi-chart','ahi','AHI events/hr','#9B8EC4',null,5);
+    makeMyAirChart('myair-seal-chart','seal','Mask seal','#5B9EC9',20);
+    makeMyAirChart('myair-onoff-chart','onoff','Mask on/off','#E8A87C',null,1);
 
-    // Monthly score trend
-    const scoreMoCanvas = document.getElementById('myair-score-monthly-chart');
-    if(scoreMoCanvas){
-      if(chartInstances['myair-score-monthly-chart']) chartInstances['myair-score-monthly-chart'].destroy();
-      chartInstances['myair-score-monthly-chart'] = new Chart(scoreMoCanvas.getContext('2d'),{
-        type:'line',
-        data:{labels,datasets:[{label:'myAir Score',data:recent.map(d=>d.score||null),borderColor:'#6B9E78',backgroundColor:'rgba(107,158,120,0.1)',borderWidth:2,pointRadius:3,fill:true,tension:0.3,spanGaps:true}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:10}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}}}
-      });
-    }
-
-    // Monthly AHI trend
-    const ahiMoCanvas = document.getElementById('myair-ahi-monthly-chart');
-    if(ahiMoCanvas){
-      if(chartInstances['myair-ahi-monthly-chart']) chartInstances['myair-ahi-monthly-chart'].destroy();
-      chartInstances['myair-ahi-monthly-chart'] = new Chart(ahiMoCanvas.getContext('2d'),{
-        type:'line',
-        data:{labels,datasets:[
-          {label:'AHI',data:recent.map(d=>d.ahi||null),borderColor:'#9B8EC4',backgroundColor:'rgba(155,142,196,0.1)',borderWidth:2,pointRadius:3,fill:true,tension:0.3,spanGaps:true},
-          {label:'Normal threshold (5)',data:recent.map(()=>5),borderColor:'rgba(196,115,90,0.4)',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false},
-        ]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},color:'#8C7B6B',boxWidth:10}}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:10}},y:{min:0,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}}}}
-      });
-    }
+    // Monthly charts
+    makeMyAirChart('myair-score-monthly-chart','score','myAir Score','#6B9E78',100);
+    makeMyAirChart('myair-ahi-monthly-chart','ahi','AHI','#9B8EC4',null,5);
   } catch(e){ console.error('buildMyAirCharts error:', e); }
 }
 
