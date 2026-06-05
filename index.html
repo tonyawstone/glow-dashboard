@@ -2839,19 +2839,21 @@ async function uploadPhotoToBlob(slotId,dataUrl){
   }
 }
 
-function compressImage(dataUrl,maxWidth){
+function compressImage(input, maxWidth=800, quality=0.75){
   return new Promise(resolve=>{
     const img=new Image();
     img.onload=()=>{
-      const canvas=document.createElement('canvas');
       let w=img.width,h=img.height;
       if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}
+      const canvas=document.createElement('canvas');
       canvas.width=w;canvas.height=h;
       canvas.getContext('2d').drawImage(img,0,0,w,h);
-      resolve(canvas.toDataURL('image/jpeg',0.75));
+      resolve(canvas.toDataURL('image/jpeg',quality));
     };
-    img.onerror=()=>resolve(dataUrl);
-    img.src=dataUrl;
+    img.onerror=()=>resolve(typeof input==='string'?input:'');
+    // Accept either a dataUrl string or a File/Blob object
+    if(typeof input==='string'){img.src=input;}
+    else{const url=URL.createObjectURL(input);img.onload=()=>{let w=img.width,h=img.height;if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);URL.revokeObjectURL(url);resolve(canvas.toDataURL('image/jpeg',quality));};img.src=url;}
   });
 }
 
@@ -3995,22 +3997,7 @@ async function saveHairGoalPhoto(input){
 }
 
 // Compress image to max width/height and quality
-function compressImage(file, maxDim=800, quality=0.8){
-  return new Promise(res=>{
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = ()=>{
-      const scale = Math.min(1, maxDim/Math.max(img.width, img.height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(img.width*scale);
-      canvas.height = Math.round(img.height*scale);
-      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
-      URL.revokeObjectURL(url);
-      res(canvas.toDataURL('image/jpeg', quality));
-    };
-    img.src = url;
-  });
-}
+/* compressImage — second definition removed; consolidated into the one at line ~2842 */
 
 function saveGoalNote(slot, text){
   const notes = JSON.parse(localStorage.getItem('glowHairGoalNotes')||'{}');
