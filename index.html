@@ -399,13 +399,40 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="card-title">Daily check-in</div>
       <div class="fl">How are you feeling?</div>
       <div class="tags" id="mood-tags">
-        <button class="tag" onclick="tog(this)">Energized</button><button class="tag" onclick="tog(this)">Tired</button><button class="tag" onclick="tog(this)">Confident</button><button class="tag" onclick="tog(this)">Bloated</button><button class="tag" onclick="tog(this)">Glowing</button><button class="tag" onclick="tog(this)">Stressed</button><button class="tag" onclick="tog(this)">Strong</button>
+        <button class="tag" onclick="tog(this)">Calm</button>
+        <button class="tag" onclick="tog(this)">Happy</button>
+        <button class="tag" onclick="tog(this)">Joyful</button>
+        <button class="tag" onclick="tog(this)">Excited</button>
+        <button class="tag" onclick="tog(this)">Grateful</button>
+        <button class="tag" onclick="tog(this)">Energized</button>
+        <button class="tag" onclick="tog(this)">Focused</button>
+        <button class="tag" onclick="tog(this)">Confident</button>
+        <button class="tag" onclick="tog(this)">Strong</button>
+        <button class="tag" onclick="tog(this)">Fierce</button>
+        <button class="tag" onclick="tog(this)">Fearless</button>
+        <button class="tag" onclick="tog(this)">Beautiful</button>
+        <button class="tag" onclick="tog(this)">Pretty</button>
+        <button class="tag" onclick="tog(this)">Fashionable</button>
+        <button class="tag" onclick="tog(this)">Playful</button>
+        <button class="tag" onclick="tog(this)">Glowing</button>
+        <button class="tag" onclick="tog(this)">Successful</button>
+        <button class="tag" onclick="tog(this)">Insightful</button>
+        <button class="tag" onclick="tog(this)">Patient</button>
+        <button class="tag" onclick="tog(this)">Grounded</button>
+        <button class="tag" onclick="tog(this)">Tired</button>
+        <button class="tag" onclick="tog(this)">Stressed</button>
+        <button class="tag" onclick="tog(this)">Overwhelmed</button>
+        <button class="tag" onclick="tog(this)">Frustrated</button>
+        <button class="tag" onclick="tog(this)">Sad</button>
+        <button class="tag" onclick="tog(this)">Anxious</button>
+        <button class="tag" onclick="tog(this)">Bloated</button>
+        <button class="tag" onclick="tog(this)">Scattered</button>
       </div>
       <div class="fl">Treatments & compliance</div>
       <div class="toggle-row" onclick="ts('t-cpap')"><div><div class="tl">CPAP used last night</div><div class="ts">Sleep apnea</div></div><div class="tog" id="t-cpap"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-meds')"><div><div class="tl">Daily medications taken</div><div class="ts">Irbesartan · Metoprolol · Amlodipine · Osteo Biflex</div></div><div class="tog" id="t-meds"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-skin-am')"><div><div class="tl">AM skin routine done</div><div class="ts">Olay Cleanser · Serum · Vit C · SPF</div></div><div class="tog" id="t-skin-am"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('t-skin-pm')"><div><div class="tl">PM skin routine done</div><div class="ts">Musely (alt nights) · Olay Regenerist</div></div><div class="tog" id="t-skin-pm"><div class="tok"></div></div></div>
+      <div class="toggle-row" onclick="ts('t-skin-pm')"><div><div class="tl">Last night's PM routine done</div><div class="ts">Musely (alt nights) · Olay Regenerist · done before bed</div></div><div class="tog" id="t-skin-pm"><div class="tok"></div></div></div>
       <div class="toggle-row" onclick="ts('t-exercise')"><div><div class="tl">Exercised today</div><div class="ts">Walk · Pilates · Strength · Yoga · any movement</div></div><div class="tog" id="t-exercise"><div class="tok"></div></div></div>
       <div class="fl">Note for today</div>
       <textarea id="today-note" rows="2" placeholder="Outfit win, energy, anything on your mind..."></textarea>
@@ -556,7 +583,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="card">
       <div class="card-title">😴 ResMed myAir · nightly log</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Enter your myAir scores from the ResMed app each morning</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div style="font-size:12px;color:var(--muted);">Date:</div>
+        <input type="date" id="myair-date" style="padding:6px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);">
+        <div style="font-size:11px;color:var(--muted);">(leave blank for today)</div>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Usage hours</div>
@@ -613,8 +644,16 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div class="fl">Morning energy</div>
       <div class="tags" id="energy-am-tags">
-        <button class="tag" onclick="tog(this)">Rested</button><button class="tag" onclick="tog(this)">Groggy</button><button class="tag" onclick="tog(this)">Foggy</button><button class="tag" onclick="tog(this)">Energized</button><button class="tag" onclick="tog(this)">Exhausted</button>
+        <button class="tag" onclick="tog(this)">Rested</button>
+        <button class="tag" onclick="tog(this)">Energized</button>
+        <button class="tag" onclick="tog(this)">Tired</button>
+        <button class="tag" onclick="tog(this)">Groggy</button>
+        <button class="tag" onclick="tog(this)">Foggy</button>
+        <button class="tag" onclick="tog(this)">Exhausted</button>
       </div>
+      <div class="fl">Sleep aids taken last night</div>
+      <div class="toggle-row" onclick="ts('t-melatonin')"><div><div class="tl">Melatonin</div><div class="ts">Sleep onset support</div></div><div class="tog" id="t-melatonin"><div class="tok"></div></div></div>
+      <div class="toggle-row" onclick="ts('t-sleep-gummies')"><div><div class="tl">Sleep gummies</div><div class="ts">CBD / magnesium / other</div></div><div class="tog" id="t-sleep-gummies"><div class="tok"></div></div></div>
       <div class="fl">Notes</div>
       <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..."></textarea>
       <button class="btn-primary" onclick="saveSleep()">Log sleep</button>
@@ -1184,17 +1223,19 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div class="musely-day-label">Anti-Aging Cream</div>
           <div class="musely-day-sub">Tonight?</div>
           <div style="margin-top:10px;">
-            <div class="tog" id="r-musely-aa" onclick="ts('r-musely-aa');updateMuselyTracker()" style="margin:0 auto;"><div class="tok"></div></div>
+            <div class="tog" id="r-musely-aa" onclick="selectMusely('aa')" style="margin:0 auto;"><div class="tok"></div></div>
           </div>
         </div>
         <div class="musely-day" id="musely-spot-card">
           <div class="musely-day-label">Spot Treatment</div>
           <div class="musely-day-sub">Tonight?</div>
           <div style="margin-top:10px;">
-            <div class="tog" id="r-musely-spot" onclick="ts('r-musely-spot');updateMuselyTracker()" style="margin:0 auto;"><div class="tok"></div></div>
+            <div class="tog" id="r-musely-spot" onclick="selectMusely('spot')" style="margin:0 auto;"><div class="tok"></div></div>
           </div>
         </div>
       </div>
+      <button class="btn-primary" style="margin-top:12px;" onclick="confirmMuselyApplied()">✓ Log tonight's treatment as applied</button>
+      <div class="toast-msg" id="musely-toast">Treatment logged!</div>
       <div class="toggle-row" onclick="ts('r-regen')"><div><div class="tl">Olay Regenerist Ultra Rich</div><div class="ts">After Musely — every night</div></div><div class="tog" id="r-regen"><div class="tok"></div></div></div>
       <div id="musely-history" style="margin-top:10px;"></div>
       <a href="https://www.musely.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open Musely</a>
@@ -1875,15 +1916,17 @@ async function syncAllFromBlob() {
 async function saveCheckin(){
   const mood=gT('mood-tags'),note=document.getElementById('today-note').value.trim();
   if(!mood.length&&!note)return;
-  const zep=document.getElementById('t-zep').classList.contains('on');
-  const cpap=document.getElementById('t-cpap').classList.contains('on');
-  const meds=document.getElementById('t-meds').classList.contains('on');
+  const cpap=document.getElementById('t-cpap')?.classList.contains('on')||false;
+  const meds=document.getElementById('t-meds')?.classList.contains('on')||false;
   const exercise=document.getElementById('t-exercise')?.classList.contains('on')||false;
-  const entry={mood,note,zep,cpap,meds,exercise,date:nowStr()};
+  const melatonin=document.getElementById('t-melatonin')?.classList.contains('on')||false;
+  const sleepGummies=document.getElementById('t-sleep-gummies')?.classList.contains('on')||false;
+  const entry={mood,note,cpap,meds,exercise,melatonin,sleepGummies,date:nowStr()};
   await dbAdd('checkins',entry);
-  syncToBlob('checkins'); // fire-and-forget — won't break local save
+  syncToBlob('checkins');
   document.getElementById('today-note').value='';
   document.getElementById('mood-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+  ['t-cpap','t-meds','t-skin-am','t-skin-pm','t-exercise','t-melatonin','t-sleep-gummies'].forEach(id=>document.getElementById(id)?.classList.remove('on'));
   toast('tt');loadLogs();
 }
 async function saveOutfit(){
@@ -2103,49 +2146,81 @@ function loadStartDates(){
     }
   });
 }
-function updateMuselyTracker(){
-  const aa=document.getElementById('r-musely-aa').classList.contains('on');
-  const spot=document.getElementById('r-musely-spot').classList.contains('on');
-  document.getElementById('musely-antiaging-card').classList.toggle('active',aa);
-  document.getElementById('musely-spot-card').classList.toggle('active',spot);
-
-  // Save selection with today's date
-  if(aa || spot){
-    const selection = {
-      treatment: aa ? 'Anti-Aging Cream' : 'Spot Treatment',
-      date: nowStr(),
-      isoDate: new Date().toISOString()
-    };
-    const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
-    // Only save if not already saved today
-    if(!history.length || history[history.length-1].date !== selection.date){
-      history.push(selection);
-      // Keep last 30 entries
-      if(history.length > 30) history.shift();
-      localStorage.setItem('glowMuselyHistory', JSON.stringify(history));
-    }
+function selectMusely(which){
+  // Just toggle selection visually — doesn't save yet
+  if(which==='aa'){
+    document.getElementById('r-musely-aa').classList.toggle('on');
+    document.getElementById('r-musely-spot').classList.remove('on');
+    document.getElementById('musely-antiaging-card').classList.toggle('active', document.getElementById('r-musely-aa').classList.contains('on'));
+    document.getElementById('musely-spot-card').classList.remove('active');
+  } else {
+    document.getElementById('r-musely-spot').classList.toggle('on');
+    document.getElementById('r-musely-aa').classList.remove('on');
+    document.getElementById('musely-spot-card').classList.toggle('active', document.getElementById('r-musely-spot').classList.contains('on'));
+    document.getElementById('musely-antiaging-card').classList.remove('active');
   }
+}
+
+function confirmMuselyApplied(){
+  const aa = document.getElementById('r-musely-aa').classList.contains('on');
+  const spot = document.getElementById('r-musely-spot').classList.contains('on');
+  if(!aa && !spot){ alert('Please select Anti-Aging Cream or Spot Treatment first.'); return; }
+
+  const treatment = aa ? 'Anti-Aging Cream' : 'Spot Treatment';
+  const selection = { treatment, date: nowStr(), isoDate: new Date().toISOString() };
+
+  const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
+  // Update today's entry if already logged, otherwise append
+  const todayIdx = history.findIndex(e => e.date === selection.date);
+  if(todayIdx >= 0) history[todayIdx] = selection;
+  else history.push(selection);
+  if(history.length > 30) history.shift();
+  localStorage.setItem('glowMuselyHistory', JSON.stringify(history));
+
+  toast('musely-toast');
   loadMuselyHistory();
 }
+
+function updateMuselyTracker(){ loadMuselyHistory(); } // legacy alias
 
 function loadMuselyHistory(){
   const el = document.getElementById('musely-history');
   if(!el) return;
   const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
-  if(!history.length){ el.innerHTML='<div style="font-size:12px;color:var(--muted);">No history yet — tap a treatment button above when you apply it tonight.</div>'; return; }
+  if(!history.length){ el.innerHTML='<div style="font-size:12px;color:var(--muted);">No history yet — select a treatment above and tap "Log tonight\'s treatment" when you apply it.</div>'; return; }
 
-  // Show last 3 entries
   const recent = history.slice(-3).reverse();
-  const tonight = recent[0];
-  const nextTreatment = tonight.treatment === 'Anti-Aging Cream' ? 'Spot Treatment' : 'Anti-Aging Cream';
+  const lastEntry = recent[0];
+  const nextTreatment = lastEntry.treatment === 'Anti-Aging Cream' ? 'Spot Treatment' : 'Anti-Aging Cream';
+
+  // Pre-select the recommended treatment in the toggles (visual only, not saved)
+  const aaEl = document.getElementById('r-musely-aa');
+  const spotEl = document.getElementById('r-musely-spot');
+  const aaCard = document.getElementById('musely-antiaging-card');
+  const spotCard = document.getElementById('musely-spot-card');
+  // Only pre-select if neither is currently selected (don't override user's choice)
+  if(aaEl && spotEl && !aaEl.classList.contains('on') && !spotEl.classList.contains('on')){
+    if(nextTreatment === 'Anti-Aging Cream'){
+      aaEl.classList.add('on'); aaCard?.classList.add('active');
+    } else {
+      spotEl.classList.add('on'); spotCard?.classList.add('active');
+    }
+  }
+
+  // Check if already logged today
+  const loggedToday = recent[0].date === nowStr();
+  const todayLabel = loggedToday
+    ? `<div style="font-size:11px;color:#27500A;margin-top:2px;">✅ Logged tonight: ${recent[0].treatment}</div>`
+    : `<div style="font-size:11px;color:var(--muted);margin-top:2px;">Not yet logged tonight — apply and tap "Log tonight's treatment"</div>`;
 
   el.innerHTML = `
     <div style="padding:10px 12px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;">
       <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Tonight → use</div>
       <div style="font-size:15px;font-weight:600;color:var(--accent);">✨ ${nextTreatment}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px;">Last night: ${tonight.treatment} · ${tonight.date}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">Last logged: ${lastEntry.treatment} · ${lastEntry.date}</div>
+      ${todayLabel}
     </div>
-    ${recent.slice(1).map(e=>`<div style="font-size:12px;color:var(--muted);padding:3px 0;">${e.date}: ${e.treatment}</div>`).join('')}
+    ${recent.slice(1).map(e=>`<div style="font-size:12px;color:var(--muted);padding:2px 0;">${e.date}: ${e.treatment}</div>`).join('')}
   `;
 }
 
@@ -2998,7 +3073,7 @@ async function runSkinAnalysis(input, isHistorical=false){
 
     // Save — insert in chronological order
     const existing = await fetch(`${BACKEND}/api/sync?pillar=skinscan`)
-      .then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
+      .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
     existing.push(scan);
     // Sort by date
     existing.sort((a,b)=>new Date(a.isoDate)-new Date(b.isoDate));
@@ -3232,7 +3307,7 @@ async function saveHairGoalPhoto(input){
   const dataUrl = `data:${mimeType};base64,${base64}`;
 
   // Save goal photo
-  const goals = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`).then(r=>r.json()).then(d=>d.data||{}).catch(()=>({}));
+  const goals = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`).then(r=>r.json()).then(d=>d.data&&!Array.isArray(d.data)?d.data:{}).catch(()=>({}));
   goals[_currentHairGoalSlot] = { dataUrl, mimeType, base64, slot: _currentHairGoalSlot };
   await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'hairgoals',data:goals})});
 
@@ -3247,7 +3322,7 @@ async function loadHairGoalPhotos(){
     const res = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`);
     if(!res.ok) return;
     const {data} = await res.json();
-    if(!data) return;
+    if(!data || Array.isArray(data)) return; // null or array = no goals saved yet
     Object.entries(data).forEach(([slot, goal])=>{
       const el = document.getElementById(`goal-${slot}`);
       if(el && goal.dataUrl){
@@ -3263,8 +3338,7 @@ async function getNearestHairGoal(){
     const res = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`);
     if(!res.ok) return null;
     const {data} = await res.json();
-    if(!data||!Object.keys(data).length) return null;
-    // Find the next upcoming goal based on current date
+    if(!data || Array.isArray(data) || !Object.keys(data).length) return null;
     const now = new Date();
     const slotDates = {
       'aug-2026': new Date('2026-08-01'),
@@ -3285,7 +3359,7 @@ async function saveWeeklyHairLength(){
   if(!front && !back) return;
 
   const entry = { front: front||null, back: back||null, date: nowStr(), isoDate: new Date().toISOString() };
-  const existing = await fetch(`${BACKEND}/api/sync?pillar=hairscan`).then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
+  const existing = await fetch(`${BACKEND}/api/sync?pillar=hairscan`).then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
   // Check if we already have an entry today — update instead of adding
   const todayIdx = existing.findIndex(e=>e.date===entry.date&&!e.overallScore);
   if(todayIdx>=0) existing[todayIdx] = {...existing[todayIdx], ...entry};
@@ -3357,7 +3431,7 @@ async function runHairAnalysis(input, isHistorical=false){
     if(!result) throw new Error('No result');
 
     const scan = { date:scanDate, isoDate, photo:photoDataUrl, lengthInches, hasGoalComparison:!!goalPhoto, ...result };
-    const existing = await fetch(`${BACKEND}/api/sync?pillar=hairscan`).then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
+    const existing = await fetch(`${BACKEND}/api/sync?pillar=hairscan`).then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
     existing.push(scan);
     existing.sort((a,b)=>new Date(a.isoDate)-new Date(b.isoDate));
     await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'hairscan',data:existing})});
@@ -4329,7 +4403,7 @@ async function saveCPAPCleaning(){
     tube: document.getElementById('cpap-clean-tube').classList.contains('on'),
     chamber: document.getElementById('cpap-clean-chamber').classList.contains('on'),
   };
-  const existing = await fetch(`${BACKEND}/api/sync?pillar=cpap_cleaning`).then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
+  const existing = await fetch(`${BACKEND}/api/sync?pillar=cpap_cleaning`).then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
   existing.push(entry);
   fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'cpap_cleaning',data:existing})}).catch(()=>{});
   localStorage.setItem('glowCPAPLastCleaned', entry.isoDate);
@@ -4346,23 +4420,31 @@ async function saveMyAirLog(){
   const score = parseInt(document.getElementById('myair-score').value)||null;
   if(!hours && !ahi && !score) return;
 
-  const entry = { date: nowStr(), isoDate: new Date().toISOString(), hours, ahi, seal, onoff, score };
+  // Use entered date or today
+  const datePickerEl = document.getElementById('myair-date');
+  const isoStr = datePickerEl?.value || new Date().toISOString().slice(0,10);
+  const logDate = safeDate(isoStr);
+  const dateStr = logDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
 
-  // Show status feedback
+  const entry = { date: dateStr, isoDate: isoStr, hours, ahi, seal, onoff, score };
+
+  // Show status
   const statusEl = document.getElementById('myair-status');
   if(score && statusEl){
     const color = score>=90?'#27500A':score>=70?'#92400E':'#7F1D1D';
-    const label = score>=90?'Excellent night!':score>=70?'Good night':score>=50?'Fair night':'Needs attention';
-    statusEl.innerHTML = `<span style="color:${color};font-weight:600;">${label}</span> · ${score}/100 myAir score`;
-    if(ahi) statusEl.innerHTML += ` · AHI ${ahi} events/hr${ahi<1?' ✅ Excellent':ahi<5?' ✅ Normal':' ⚠️ Elevated'}`;
+    const label = score>=90?'Excellent night!':score>=70?'Good night':'Needs attention';
+    statusEl.innerHTML = `<span style="color:${color};font-weight:600;">${label}</span> · ${score}/100${ahi?` · AHI ${ahi}${ahi<1?' ✅':ahi<5?' ✅':' ⚠️'}`:''}`;
   }
 
-  const existing = await fetch(`${BACKEND}/api/sync?pillar=myair`).then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
-  existing.push(entry);
-  await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'myair',data:existing})});
+  // Update existing entry for this date or append — prevents overwriting other days
+  const existing = await fetch(`${BACKEND}/api/sync?pillar=myair`).then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
+  const idx = existing.findIndex(e=>e.isoDate===isoStr);
+  if(idx>=0) existing[idx] = entry;
+  else existing.push(entry);
+  existing.sort((a,b)=>(a.isoDate||'').localeCompare(b.isoDate||''));
 
+  await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'myair',data:existing})});
   toast('myair-toast');
-  // Clear fields
   ['myair-hours','myair-ahi','myair-seal','myair-onoff','myair-score'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
@@ -4501,7 +4583,7 @@ async function logZepDose(mg){
     isoDate: injDate.toISOString()
   };
   const existing = await fetch(`${BACKEND}/api/sync?pillar=zepbound`)
-    .then(r=>r.json()).then(d=>d.data||[]).catch(()=>[]);
+    .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
   existing.push(entry);
   fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'zepbound',data:existing})}).catch(()=>{});
   localStorage.setItem('glowZepDose', JSON.stringify(entry));
