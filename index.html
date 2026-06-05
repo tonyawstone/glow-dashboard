@@ -1571,10 +1571,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content" id="vc-skin-weekly">
     <div class="section-label">Skin · this week</div>
     <div class="card">
-      <div class="card-title">Latest scan results</div>
-      <div id="skin-scan-weekly"><div class="log-empty">No scan this week — tap "Scan my skin" on Daily view.</div></div>
+      <div class="card-title">✨ Most recent scan</div>
+      <div id="skin-scan-weekly"><div class="log-empty">No scan yet — tap "Scan my skin" on Daily view.</div></div>
     </div>
-    <div class="card"><div class="card-title">Routine compliance & Musely alternation</div><div id="weekly-skin"><div class="log-empty">Log daily to see weekly routine compliance.</div></div></div>
+    <div class="card"><div class="card-title">Routine compliance · this week</div><div id="weekly-skin"><div class="log-empty">Log daily to see weekly routine compliance.</div></div></div>
     <div class="card">
       <div class="card-title">✨ AI skin & treatment analysis</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Considers your scan scores, Musely treatments, and routine compliance to identify what's working</div>
@@ -3579,11 +3579,12 @@ async function runSkinAnalysis(input, isHistorical=false){
 
     const scan = { date:scanDate, isoDate, photo:photoDataUrl, ...result };
 
-    // Save — insert in chronological order
+    // Save — update existing entry for same date or insert new, then sort
     const existing = await fetch(`${BACKEND}/api/sync?pillar=skinscan`)
       .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
-    existing.push(scan);
-    // Sort by date
+    const idx = existing.findIndex(e=>e.isoDate===isoDate||(e.date===scanDate));
+    if(idx>=0) existing[idx] = scan; // replace — fresh scores AND fresh notes
+    else existing.push(scan);
     existing.sort((a,b)=>new Date(a.isoDate)-new Date(b.isoDate));
 
     await fetch(`${BACKEND}/api/sync`,{
@@ -3606,7 +3607,7 @@ async function runSkinAnalysis(input, isHistorical=false){
   }
 }
 
-function renderSkinScanResults(scan, containerId){
+function renderSkinScanResults(scan, containerId, compact=false){
   const el = document.getElementById(containerId);
   if(!el) return;
   const score = scan.overallScore || 0;
@@ -3624,6 +3625,32 @@ function renderSkinScanResults(scan, containerId){
     {key:'redness',    label:'Redness-free',   color:'#C4735A'},
   ];
   const scoreLabel = s => s>=90?'Excellent':s>=75?'Good':s>=60?'Fair':'Needs attention';
+
+  if(compact){
+    // Weekly view — photo prominent at top, scores in a compact 2-col grid
+    el.innerHTML = `
+      ${scan.photo?`<img src="${scan.photo}" style="width:100%;max-height:240px;object-fit:cover;border-radius:14px;margin-bottom:12px;border:1.5px solid var(--border);">` : ''}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-size:12px;color:var(--muted);">${scan.date}</div>
+          <div style="font-size:12px;color:var(--muted);">Skin age: <strong style="color:var(--text);">${scan.skinAge}</strong></div>
+        </div>
+        <div style="text-align:center;background:${scoreBg};border-radius:50%;width:56px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <div style="font-size:22px;font-weight:700;color:${scoreColor};line-height:1;">${score}</div>
+          <div style="font-size:9px;color:${scoreColor};">Score</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        ${metricList.map(m=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;background:var(--warm);font-size:12px;">
+            <span style="color:var(--muted);">${m.label}</span>
+            <strong style="color:${metrics[m.key]>=80?m.color:'var(--text)'};">${metrics[m.key]||'—'}</strong>
+          </div>`).join('')}
+      </div>
+      ${scan.highlights?`<div class="skin-insight" style="margin-top:10px;"><div class="skin-insight-label" style="color:#27500A;">✅ Looking good</div>${scan.highlights}</div>`:''}
+    `;
+    return;
+  }
 
   el.innerHTML = `
     <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
@@ -3660,9 +3687,8 @@ async function loadLatestSkinScan(){
     const {data} = await res.json();
     if(!data||!data.length) return;
     const latest = data[data.length-1];
-    renderSkinScanResults(latest, 'skin-scan-latest');
-    // Also update weekly view
-    renderSkinScanResults(latest, 'skin-scan-weekly');
+    renderSkinScanResults(latest, 'skin-scan-latest');         // daily — full detail
+    renderSkinScanResults(latest, 'skin-scan-weekly', true);   // weekly — photo + compact
   } catch(e){}
 }
 
@@ -3772,7 +3798,10 @@ async function buildSkinCharts(){
                 <div style="font-size:13px;font-weight:600;">${s.date}</div>
                 <div style="font-size:12px;color:var(--muted);">Score: <strong>${s.overallScore}</strong> · Skin age: <strong>${s.skinAge}</strong></div>
               </div>
-              <div id="scan-badge-${i}" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;display:none;"></div>
+              <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+                <div id="scan-badge-${i}" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;display:none;"></div>
+                ${s.photo?`<button onclick="event.stopPropagation();reanalyzeScan(${i})" style="font-size:10px;padding:3px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);">Re-analyze ↗</button>`:''}
+              </div>
             </div>
           </div>`).join('')}
       `;
@@ -6329,6 +6358,52 @@ function styleCoach(){ callCoach('Style','I am down 30.7 lbs on Zepbound in 7 mo
 function sleepCoach(){ callCoach('Sleep','I have sleep apnea and use a CPAP. What patterns should I watch for and what should I discuss with my sleep doctor?','sleep-coach-output'); }
 function zepCoach(){ callCoach('Body','How is my Zepbound journey going and what should I discuss with my doctor at my next visit?','zep-coach-output'); }
 function labCoach(){ callCoach('Health','Review my recent lab trends and tell me what they show and what I should discuss with my doctor.','lab-coach-output'); }
+async function reanalyzeScan(idx){
+  const scans = window._skinScans;
+  if(!scans||!scans[idx]) return;
+  const scan = scans[idx];
+  if(!scan.photo){ alert('No photo stored for this scan — cannot re-analyze.'); return; }
+
+  // Find the scan item row and show loading
+  const row = document.getElementById(`scan-item-${idx}`);
+  const btn = row?.querySelector('button');
+  if(btn){ btn.textContent='Analyzing...'; btn.disabled=true; }
+
+  try {
+    // Extract base64 from stored dataUrl
+    const dataUrl = scan.photo;
+    const base64 = dataUrl.split(',')[1];
+    const mimeType = dataUrl.split(';')[0].split(':')[1]||'image/jpeg';
+
+    const res = await fetch(`${BACKEND}/api/skin-analysis`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ imageBase64: base64, mimeType })
+    });
+    const result = await res.json();
+    if(!result.overallScore) throw new Error('No score returned');
+
+    // Update this scan entry in Blob
+    const blobRes = await fetch(`${BACKEND}/api/sync?pillar=skinscan`);
+    const {data} = await blobRes.json();
+    if(Array.isArray(data)){
+      // Find by date and update
+      const scanIdx = data.findIndex(s=>s.date===scan.date||(s.isoDate&&scan.isoDate&&s.isoDate===scan.isoDate));
+      if(scanIdx>=0){
+        data[scanIdx] = {...data[scanIdx], ...result, photo: scan.photo};
+        await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'skinscan',data})});
+      }
+    }
+
+    // Refresh the charts
+    buildSkinCharts();
+    if(btn){ btn.textContent='Re-analyzed ✓'; btn.style.color='#27500A'; }
+    setTimeout(()=>{ if(btn){ btn.textContent='Re-analyze ↗'; btn.disabled=false; btn.style.color=''; }},3000);
+  } catch(e){
+    if(btn){ btn.textContent='Re-analyze ↗'; btn.disabled=false; }
+    alert('Re-analysis failed — check your connection and try again.');
+  }
+}
+
 async function skinTreatmentInsight(period){
   const outputId = `skin-treatment-insight-${period}`;
   const el = document.getElementById(outputId);
