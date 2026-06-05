@@ -390,9 +390,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ TODAY ═══════════════ -->
 <div id="s-today" class="sec on">
   <div class="view-content on" id="vc-today-daily">
+    <div id="upload-status-banner" style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;font-size:11px;color:var(--muted);">
+      <div id="upload-status-text">⏳ Checking last upload...</div>
+      <div id="upload-status-date" style="color:var(--accent);font-weight:500;"></div>
+    </div>
     <div class="stat-strip">
-      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src">Withings</div></div>
-      <div class="stat-tile"><div class="stat-val">4,715</div><div class="stat-lbl">steps</div><div class="stat-src">Apple Health</div></div>
+      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div></div>
+      <div class="stat-tile"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src" id="s-steps-src">Apple Health</div></div>
       <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src" id="s-sleep-src">log below</div></div>
       <div class="stat-tile"><div class="stat-val" id="zep-day-count">—</div><div class="stat-lbl" id="zep-tile-lbl">loading...</div><div class="stat-src">since Oct 25, 2025</div></div>
     </div>
@@ -586,7 +590,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="s-sleep" class="sec">
   <div class="view-content on" id="vc-sleep-daily">
     <div class="section-label">Sleep & Energy</div>
-    <div class="info-banner"><strong>Sleep apnea tracking.</strong> Log CPAP compliance and quality here. Apple Health sleep sync calibrating — log manually for now.</div>
     <div class="sleep-score-big">
       <div class="sleep-num" id="sleep-display">—</div>
       <div class="sleep-lbl">hours last night</div>
@@ -596,8 +599,31 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="sleep-apple-metrics"><div class="log-empty">Upload your weekly CSV to see sleep hours from Apple Health.</div></div>
     </div>
     <div class="card">
-      <div class="card-title">😴 ResMed myAir · nightly log</div>
+      <div class="card-title">😴 ResMed myAir · nightly log & CPAP compliance</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Enter raw values from your machine — scores calculated automatically</div>
+
+      <!-- Bedtime & Wake from Apple Health -->
+      <div id="sleep-times-from-csv" style="padding:10px 12px;border-radius:10px;background:var(--warm);margin-bottom:12px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">Bedtime & wake · from Withings via Apple Health</div>
+        <div style="display:flex;gap:16px;">
+          <div><div style="font-size:11px;color:var(--muted);">Bedtime</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-bedtime">—</div></div>
+          <div><div style="font-size:11px;color:var(--muted);">Wake time</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-waketime">—</div></div>
+          <div><div style="font-size:11px;color:var(--muted);">Total sleep</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-sleephrs">—</div></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
+      </div>
+
+      <!-- CPAP compliance grouped here -->
+      <div class="fl">CPAP compliance last night</div>
+      <div class="tags" id="cpap-tags">
+        <button class="tag" onclick="solo('cpap-tags',this)">Full night (4+ hrs)</button>
+        <button class="tag" onclick="solo('cpap-tags',this)">3–4 hrs</button>
+        <button class="tag" onclick="solo('cpap-tags',this)">1–3 hrs</button>
+        <button class="tag" onclick="solo('cpap-tags',this)">Forgot</button>
+        <button class="tag" onclick="solo('cpap-tags',this)">Didn't use</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:14px;">Medicare requires 4+ hrs/night · 70% of nights for compliance</div>
+
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div style="font-size:12px;color:var(--muted);">Date:</div>
         <input type="date" id="myair-date" style="padding:6px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);">
@@ -642,6 +668,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div style="font-size:12px;color:var(--muted);">L/min from machine</div>
           <div style="margin-left:auto;text-align:right;"><div id="myair-seal-score" style="font-size:22px;font-weight:700;color:var(--accent);">—</div><div style="font-size:10px;color:var(--muted);">/20 pts</div></div>
         </div>
+        <div id="myair-seal-msg"></div>
       </div>
 
       <!-- Mask on/off -->
@@ -682,21 +709,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
 
     <div class="card">
-      <div class="card-title">Log sleep</div>
-      <div class="fl">Bedtime & wake</div>
-      <div class="two-col">
-        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Bedtime</div><input type="time" id="sl-bed"></div>
-        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Wake time</div><input type="time" id="sl-wake"></div>
-      </div>
-      <div class="fl">CPAP compliance</div>
-      <div class="tags" id="cpap-tags">
-        <button class="tag" onclick="solo('cpap-tags',this)">Full night (4+ hrs)</button>
-        <button class="tag" onclick="solo('cpap-tags',this)">3–4 hrs</button>
-        <button class="tag" onclick="solo('cpap-tags',this)">1–3 hrs</button>
-        <button class="tag" onclick="solo('cpap-tags',this)">Forgot</button>
-        <button class="tag" onclick="solo('cpap-tags',this)">Didn't use</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:10px;">Medicare requires 4+ hrs/night · 70% of nights for compliance</div>
+      <div class="card-title">Sleep quality & morning notes</div>
       <div class="fl">Sleep quality</div>
       <div class="quality-row" id="sq-tags">
         <button class="qb" onclick="soloQ(this)">Awful</button><button class="qb" onclick="soloQ(this)">Poor</button><button class="qb" onclick="soloQ(this)">OK</button><button class="qb" onclick="soloQ(this)">Good</button><button class="qb" onclick="soloQ(this)">Great</button>
@@ -1986,6 +1999,7 @@ async function boot(){
   loadSavedScore();
   loadTodayWater();
   loadTodaySleepFromCSV();
+  updateUploadStatusBanner();
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
@@ -2017,7 +2031,7 @@ function tab(id){
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
   if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); }
-  if(id==='today') loadCheckinState();
+  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); }
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); }
@@ -2884,6 +2898,51 @@ async function buildBodyCompositionMetrics(){
   buildLeanBoneChart(rows);
 }
 
+function buildSleepStagesDisplay(row){
+  const core = parseFloat(row.sleep_core)||0;
+  const deep = parseFloat(row.sleep_deep)||0;
+  const rem = parseFloat(row.sleep_rem)||0;
+  const awake = parseFloat(row.sleep_awake)||0;
+  const total = core + deep + rem + awake;
+  if(!total && !parseFloat(row.sleep_hrs)) return '';
+  if(!total) return '<div style="font-size:11px;color:var(--muted);margin-top:8px;">Re-run Python script to see sleep stages</div>';
+
+  const pct = (val) => total>0 ? Math.round((val/total)*100) : 0;
+  const fmt = (h) => h>0 ? `${Math.floor(h)}h ${Math.round((h%1)*60)}m` : '—';
+
+  // Stacked bar
+  const barHtml = `
+    <div style="display:flex;border-radius:8px;overflow:hidden;height:14px;margin:8px 0;">
+      ${deep>0?`<div style="width:${pct(deep)}%;background:#5B9EC9;" title="Deep ${fmt(deep)}"></div>`:''}
+      ${core>0?`<div style="width:${pct(core)}%;background:#9B8EC4;" title="Core ${fmt(core)}"></div>`:''}
+      ${rem>0?`<div style="width:${pct(rem)}%;background:#E8A87C;" title="REM ${fmt(rem)}"></div>`:''}
+      ${awake>0?`<div style="width:${pct(awake)}%;background:rgba(0,0,0,0.1);" title="Awake ${fmt(awake)}"></div>`:''}
+    </div>`;
+
+  const stages = [
+    {label:'Deep', val:deep, pct:pct(deep), color:'#5B9EC9', note:'Most restorative · target 15-20%'},
+    {label:'Core', val:core, pct:pct(core), color:'#9B8EC4', note:'Light sleep · largest portion'},
+    {label:'REM', val:rem, pct:pct(rem), color:'#E8A87C', note:'Memory & mood · target 20-25%'},
+    {label:'Awake', val:awake, pct:pct(awake), color:'rgba(0,0,0,0.15)', note:'Interruptions'},
+  ].filter(s=>s.val>0);
+
+  return `
+    <div style="margin-top:12px;">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px;">Sleep stages</div>
+      ${barHtml}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+        ${stages.map(s=>`
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;background:var(--warm);">
+            <div style="width:10px;height:10px;border-radius:3px;background:${s.color};flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:12px;font-weight:600;">${s.label} <span style="color:var(--accent);">${fmt(s.val)}</span></div>
+              <div style="font-size:10px;color:var(--muted);">${s.pct}% · ${s.note}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
 async function buildSleepAppleMetrics(){
   const el = document.getElementById('sleep-apple-metrics');
   if(!el) return;
@@ -2893,26 +2952,44 @@ async function buildSleepAppleMetrics(){
   const withSleep = rows.filter(r=>parseFloat(r.sleep_hrs)>0);
   if(!withSleep.length){ el.innerHTML='<div class="log-empty">No sleep data in CSV yet.</div>'; return; }
 
-  const latest = withSleep[0]; // most recent with data
+  const latest = withSleep[0];
   const recent7 = withSleep.slice(0,7);
   const avgSleep = recent7.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/recent7.length;
-  const fmt = d => safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const fmt = d => safeDate(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
   const dataDate = fmt(latest.date);
 
+  // Populate bedtime/wake display from CSV
+  const withTimes = withSleep.find(r=>r.bedtime||r.wake_time);
+  const bedtimeEl = document.getElementById('csv-bedtime');
+  const wakeEl = document.getElementById('csv-waketime');
+  const hrsEl = document.getElementById('csv-sleephrs');
+  const dateLabelEl = document.getElementById('csv-sleep-date-label');
+  if(withTimes){
+    if(bedtimeEl) bedtimeEl.textContent = formatTime12h(withTimes.bedtime)||'—';
+    if(wakeEl) wakeEl.textContent = formatTime12h(withTimes.wake_time)||'—';
+    if(hrsEl) hrsEl.textContent = parseFloat(withTimes.sleep_hrs||0).toFixed(1)+'h';
+    const d = safeDate(withTimes.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    if(dateLabelEl) dateLabelEl.textContent = `Apple Health · ${d} · upload CSV to update`;
+  } else {
+    if(hrsEl) hrsEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
+    if(dateLabelEl) dateLabelEl.textContent = 'Re-run Python script to add bedtime/wake times · last known shown';
+  }
+
   el.innerHTML = `
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Last data: ${dataDate} · Upload CSV weekly to update</div>
+    <div style="padding:8px 12px;border-radius:10px;background:var(--warm);margin-bottom:12px;font-size:12px;color:var(--muted);">Last Apple Health data: <strong style="color:var(--text);">${dataDate}</strong> · Upload CSV weekly to update</div>
     <div class="snapshot-grid">
       <div class="snapshot-item">
         <div class="snapshot-label">Last recorded</div>
-        <div class="snapshot-val">${parseFloat(latest.sleep_hrs).toFixed(1)}</div>
+        <div class="snapshot-val">${parseFloat(latest.sleep_hrs).toFixed(1)}<span style="font-size:14px;">h</span></div>
         <div class="snapshot-sub">${dataDate}</div>
       </div>
       <div class="snapshot-item">
         <div class="snapshot-label">7-day avg</div>
-        <div class="snapshot-val">${avgSleep.toFixed(1)}</div>
+        <div class="snapshot-val">${avgSleep.toFixed(1)}<span style="font-size:14px;">h</span></div>
         <div class="snapshot-sub ${avgSleep>=7?'snapshot-status-ok':avgSleep>=6?'snapshot-status-watch':'snapshot-status-high'}">${avgSleep>=7?'Good':avgSleep>=6?'Low':'Very low'}</div>
       </div>
     </div>
+    ${buildSleepStagesDisplay(latest)}
   `;
 }
 
@@ -3064,6 +3141,16 @@ function switchBodyCompChart(metric, btn){
   document.querySelectorAll('#body-comp-tabs .chart-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   getCSVRows().then(rows=>buildBodyCompChart(metric, rows));
+}
+
+function formatTime12h(timeStr){
+  if(!timeStr) return null;
+  try {
+    const [h,m] = timeStr.split(':').map(Number);
+    const ampm = h>=12?'PM':'AM';
+    const h12 = h%12||12;
+    return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+  } catch(e){ return timeStr; }
 }
 
 function safeDate(dateStr){
@@ -4847,28 +4934,86 @@ async function saveMyAirLog(){
   loadMyAirLastLogged();
 }
 
+async function updateUploadStatusBanner(){
+  const textEl = document.getElementById('upload-status-text');
+  const dateEl = document.getElementById('upload-status-date');
+  const bannerEl = document.getElementById('upload-status-banner');
+  if(!textEl) return;
+  try {
+    const rows = await getCSVRows();
+    if(!rows.length){
+      textEl.textContent = '⚠️ No Apple Health data uploaded yet';
+      if(bannerEl) bannerEl.style.borderColor = '#E8A87C';
+      return;
+    }
+    const latest = rows[0];
+    const uploadDate = safeDate(latest.date);
+    const today = new Date();
+    const diffDays = Math.floor((today - uploadDate)/(1000*60*60*24));
+    const dateStr = uploadDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+    if(diffDays === 0){
+      textEl.textContent = '✅ Apple Health data is current';
+      if(dateEl) dateEl.textContent = `Updated today · ${dateStr}`;
+      if(bannerEl){ bannerEl.style.background='rgba(107,158,120,0.08)'; bannerEl.style.borderColor='rgba(107,158,120,0.3)'; }
+    } else if(diffDays === 1){
+      textEl.textContent = '🕐 Last upload: yesterday';
+      if(dateEl) dateEl.textContent = dateStr;
+    } else {
+      textEl.textContent = `⚠️ Last upload: ${diffDays} days ago`;
+      if(dateEl) dateEl.textContent = dateStr;
+      if(bannerEl) bannerEl.style.borderColor='#E8A87C';
+    }
+  } catch(e){
+    textEl.textContent = '⚠️ Could not check upload status';
+  }
+}
+
 async function loadTodaySleepFromCSV(){
-  const el = document.getElementById('s-sleep-h');
-  const srcEl = document.getElementById('s-sleep-src');
-  if(!el) return;
-  // Prefer manual entry for today
+  const sleepEl = document.getElementById('s-sleep-h');
+  const sleepSrcEl = document.getElementById('s-sleep-src');
+  const weightSrcEl = document.getElementById('s-weight-src');
+  const stepsSrcEl = document.getElementById('s-steps-src');
+  const stepsEl = document.getElementById('sw-steps');
+
+  // Prefer manual sleep entry for today
   const manualSleeps = await dbAll('sleeps');
   const todaySleep = manualSleeps.find(s=>s.date===nowStr());
   if(todaySleep && todaySleep.hrs && todaySleep.hrs!=='—'){
-    el.textContent = todaySleep.hrs+'h';
-    if(srcEl) srcEl.textContent = 'manually logged';
-    return;
+    if(sleepEl) sleepEl.textContent = todaySleep.hrs+'h';
+    if(sleepSrcEl) sleepSrcEl.textContent = 'manually logged';
   }
-  // Fall back to CSV — most recent night
+
+  // Pull CSV data for all tiles
   try {
     const rows = await getCSVRows();
-    const withSleep = rows.filter(r=>parseFloat(r.sleep_hrs)>0);
-    if(!withSleep.length) return;
-    const latest = withSleep[0];
-    const hrs = parseFloat(latest.sleep_hrs).toFixed(1);
-    const dateStr = safeDate(latest.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    el.textContent = hrs+'h';
-    if(srcEl) srcEl.textContent = `Apple Health · ${dateStr}`;
+    if(!rows.length) return;
+
+    // Weight — most recent entry
+    const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
+    if(latestWeight && weightSrcEl){
+      const d = safeDate(latestWeight.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      weightSrcEl.textContent = `Withings · ${d}`;
+    }
+
+    // Steps — most recent entry
+    const latestSteps = rows.find(r=>parseInt(r.steps)>0);
+    if(latestSteps){
+      const d = safeDate(latestSteps.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      if(stepsEl) stepsEl.textContent = parseInt(latestSteps.steps).toLocaleString();
+      if(stepsSrcEl) stepsSrcEl.textContent = `Apple Health · ${d}`;
+    }
+
+    // Sleep from CSV — only if no manual entry today
+    if(!todaySleep || !todaySleep.hrs || todaySleep.hrs==='—'){
+      const withSleep = rows.filter(r=>parseFloat(r.sleep_hrs)>0);
+      if(withSleep.length){
+        const latest = withSleep[0];
+        const d = safeDate(latest.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        if(sleepEl) sleepEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
+        if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${d}`;
+      }
+    }
   } catch(e){}
 }
 async function buildMedsWeeklyCompliance(){
@@ -5027,6 +5172,19 @@ function calcMyAirScores(){
   setScore('myair-ahi-score', ahiScore, 5);
   setScore('myair-seal-score', sealScore, 20);
   setScore('myair-onoff-score', onoffScore, 5);
+
+  // Mask seal advisory message
+  const sealMsgEl = document.getElementById('myair-seal-msg');
+  if(sealMsgEl && sealLmin!==''&&sealLmin!=null){
+    const lmin = parseFloat(sealLmin);
+    if(!isNaN(lmin)){
+      if(lmin > 24){
+        sealMsgEl.innerHTML = `<div style="padding:8px 10px;border-radius:8px;background:#FEE2E2;color:#7F1D1D;font-size:12px;margin-top:6px;">⚠️ Mask leak is high (${lmin} L/min) — adjust your mask fit before sleeping tonight. If it persists, try reseating the cushion or check headgear tension.</div>`;
+      } else {
+        sealMsgEl.innerHTML = `<div style="padding:8px 10px;border-radius:8px;background:#EAF3DE;color:#27500A;font-size:12px;margin-top:6px;">✅ Good seal (${lmin} L/min) — mask fit is within normal range.</div>`;
+      }
+    }
+  }
 
   // Calculate total if we have at least one value
   const scores = [usageScore, ahiScore, sealScore, onoffScore];
