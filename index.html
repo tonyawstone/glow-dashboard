@@ -281,6 +281,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .outfit-info{padding:10px 12px;}
 .outfit-name{font-size:13px;font-weight:500;color:var(--text);}
 .outfit-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.outfit-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.outfit-tag{font-size:10px;padding:2px 7px;border-radius:6px;background:var(--warm);color:var(--muted);border:0.5px solid var(--border);}
+.outfit-tag.wear-again{background:#EAF3DE;color:#27500A;font-weight:600;}
+.badge-wear{background:#EAF3DE;color:#27500A;}
+.lookbook-empty{text-align:center;padding:30px 16px;color:var(--muted);font-size:13px;}
+.lookbook-empty i{font-size:36px;display:block;margin-bottom:10px;opacity:0.4;}
 
 /* HAIR PROGRESSION */
 .progression-strip{display:flex;gap:9px;overflow-x:auto;padding-bottom:6px;margin:9px 0;scrollbar-width:none;}
@@ -508,12 +514,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-style-daily">
     <div class="section-label">Style & Wardrobe</div>
     <div class="card">
-      <div class="card-title">Recent looks</div>
-      <div class="outfit-grid" id="outfit-grid">
-        <div class="outfit-card">
-          <div class="outfit-img" onclick="triggerOutfitPhoto(0)" id="outfit-img-0"><i class="ti ti-plus" aria-hidden="true"></i></div>
-          <div class="outfit-info"><div class="outfit-name" style="color:var(--muted);font-size:12px;">Add first look</div></div>
-        </div>
+      <div class="card-title">Lookbook</div>
+      <div class="outfit-grid" id="lookbook-grid">
+        <div class="lookbook-empty" style="grid-column:1/-1;"><i class="ti ti-shirt" aria-hidden="true"></i>Log your first outfit below to start your lookbook</div>
       </div>
       <a href="https://www.dailylook.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open DailyLook</a>
     </div>
@@ -535,12 +538,32 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div class="fl">Occasion</div>
       <div class="tags" id="occ-tags">
-        <button class="tag" onclick="tog(this)">Work</button><button class="tag" onclick="tog(this)">Weekend</button><button class="tag" onclick="tog(this)">Event</button><button class="tag" onclick="tog(this)">Date night</button><button class="tag" onclick="tog(this)">School run</button>
+        <button class="tag" onclick="tog(this)">Work</button><button class="tag" onclick="tog(this)">Weekend</button><button class="tag" onclick="tog(this)">Event</button><button class="tag" onclick="tog(this)">Date night</button><button class="tag" onclick="tog(this)">School run</button><button class="tag" onclick="tog(this)">Casual</button>
+      </div>
+      <div class="fl">Vibe</div>
+      <div class="tags" id="outfit-vibe-tags">
+        <button class="tag" onclick="tog(this)">Polished</button><button class="tag" onclick="tog(this)">Cozy</button><button class="tag" onclick="tog(this)">Chic</button><button class="tag" onclick="tog(this)">Feminine</button><button class="tag" onclick="tog(this)">Sporty</button><button class="tag" onclick="tog(this)">Boho</button><button class="tag" onclick="tog(this)">Bold</button>
+      </div>
+      <div class="fl">Season</div>
+      <div class="tags" id="season-tags">
+        <button class="tag" onclick="solo('season-tags',this)">Spring</button><button class="tag" onclick="solo('season-tags',this)">Summer</button><button class="tag" onclick="solo('season-tags',this)">Fall</button><button class="tag" onclick="solo('season-tags',this)">Winter</button>
+      </div>
+      <div class="fl">Color palette</div>
+      <div class="tags" id="color-tags">
+        <button class="tag" onclick="tog(this)">Neutral</button><button class="tag" onclick="tog(this)">Black</button><button class="tag" onclick="tog(this)">White</button><button class="tag" onclick="tog(this)">Navy</button><button class="tag" onclick="tog(this)">Camel</button><button class="tag" onclick="tog(this)">Olive</button><button class="tag" onclick="tog(this)">Blush</button><button class="tag" onclick="tog(this)">Pattern</button>
       </div>
       <div class="fl">Keep or return?</div>
       <div class="tags" id="keep-tags">
         <button class="tag" onclick="solo('keep-tags',this)">Keeping</button><button class="tag" onclick="solo('keep-tags',this)">Returned</button><button class="tag" onclick="solo('keep-tags',this)">Inspo only</button>
       </div>
+      <div class="fl" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Wear again?</span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" id="wear-again-toggle" style="width:16px;height:16px;accent-color:var(--accent);"> Yes, I'd wear this again
+        </label>
+      </div>
+      <div class="fl">Notes</div>
+      <textarea id="outfit-notes" rows="2" placeholder="e.g. Felt so confident in this! Fits my new size perfectly."></textarea>
       <div class="fl">Rating</div>
       <div class="stars" id="outfit-stars">
         <span class="star" onclick="setStars('outfit-stars',1)">★</span><span class="star" onclick="setStars('outfit-stars',2)">★</span><span class="star" onclick="setStars('outfit-stars',3)">★</span><span class="star" onclick="setStars('outfit-stars',4)">★</span><span class="star" onclick="setStars('outfit-stars',5)">★</span>
@@ -565,7 +588,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
   <div class="view-content" id="vc-style-weekly">
     <div class="section-label">This week's looks</div>
-    <div class="card"><div class="card-title">Outfits this week</div><div id="weekly-outfits"><div class="log-empty">Log outfits daily to see them here.</div></div></div>
+    <div class="card"><div class="card-title">Outfits this week</div><div class="outfit-grid" id="weekly-outfits-grid"><div class="lookbook-empty" style="grid-column:1/-1;"><i class="ti ti-shirt" aria-hidden="true"></i>No outfits logged this week yet</div></div></div>
     <div class="card"><div class="card-title">Wardrobe planning notes</div><div id="wardrobe-plan-log"><div class="log-empty">No wardrobe plans yet.</div></div></div>
   </div>
   <div class="view-content" id="vc-style-monthly">
@@ -2075,6 +2098,7 @@ async function boot(){
   loadCheckinState();
   await loadAllPhotos();
   await loadLogs();
+  renderLookbook();
   buildBodyChart();
   // Sync from Blob in background — loads any data from other devices
   syncAllFromBlob();
@@ -2115,6 +2139,7 @@ function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
+  if(id==='style') { renderLookbook(); }
   if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); }
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); updateBPBanners(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
@@ -2315,11 +2340,81 @@ function loadCheckinState(){
 
 async function saveOutfit(){
   const desc=document.getElementById('outfit-desc').value.trim();if(!desc)return;
-  const outfitEntry={desc,occ:gT('occ-tags'),src:gT('src-tags')[0]||'',keep:gT('keep-tags')[0]||'',stars:getStars('outfit-stars'),date:nowStr()};
+  // Grab photo if one was selected into 'outfit-new' slot
+  let photo='';
+  const photoSlot=document.getElementById('outfit-new');
+  if(photoSlot){const img=photoSlot.querySelector('img');if(img)photo=img.src;}
+  const outfitEntry={
+    desc,
+    occ:gT('occ-tags'),
+    src:gT('src-tags')[0]||'',
+    vibe:gT('outfit-vibe-tags'),
+    season:gT('season-tags')[0]||'',
+    colors:gT('color-tags'),
+    keep:gT('keep-tags')[0]||'',
+    wearAgain:document.getElementById('wear-again-toggle').checked,
+    notes:document.getElementById('outfit-notes').value.trim(),
+    stars:getStars('outfit-stars'),
+    photo,
+    date:nowStr()
+  };
   await dbAdd('outfits',outfitEntry);
   syncToBlob('outfits');
+  // Reset form
   document.getElementById('outfit-desc').value='';
+  document.getElementById('outfit-notes').value='';
+  document.getElementById('wear-again-toggle').checked=false;
+  ['occ-tags','outfit-vibe-tags','season-tags','color-tags','keep-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
+  setStars('outfit-stars',0);
+  if(photoSlot){photoSlot.innerHTML='<i class="ti ti-camera" aria-hidden="true"></i>';}
+  await renderLookbook();
   toast('st');
+}
+
+function outfitCardHTML(e, slotId){
+  const keepLabel={Keeping:'Keeping ✓',Returned:'Returned',['Inspo only']:'Inspo'}[e.keep]||e.keep;
+  const keepClass={Keeping:'badge-keep',Returned:'badge-ret',['Inspo only']:'badge-inspo'}[e.keep]||'';
+  const imgContent=e.photo?`<img src="${e.photo}" alt="${e.desc}">`:`<i class="ti ti-shirt" aria-hidden="true"></i>`;
+  const wearBadge=e.wearAgain?`<span class="outfit-badge badge-wear" style="bottom:7px;right:7px;top:auto;">↩ Wear again</span>`:'';
+  const keepBadge=e.keep?`<span class="outfit-badge ${keepClass}" style="top:7px;right:7px;">${keepLabel}</span>`:'';
+  const allTags=[...(e.occ||[]),...(e.vibe||[]),...(e.colors||[]),...(e.season?[e.season]:[])].filter(Boolean);
+  const tagsHTML=allTags.length?`<div class="outfit-tags">${allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('')}</div>`:'';
+  const starsHTML=e.stars?`<span style="font-size:11px;color:#D4A96A;letter-spacing:1px;">${'★'.repeat(e.stars)}</span>`:'';
+  return `<div class="outfit-card">
+    <div class="outfit-img" style="cursor:default;">${imgContent}${keepBadge}${wearBadge}</div>
+    <div class="outfit-info">
+      <div class="outfit-name">${e.desc}</div>
+      <div class="outfit-meta">${e.date}${e.src?' · '+e.src:''} ${starsHTML}</div>
+      ${tagsHTML}
+      ${e.notes?`<div style="font-size:11px;color:var(--muted);margin-top:5px;font-style:italic;">"${e.notes}"</div>`:''}
+    </div>
+  </div>`;
+}
+
+async function renderLookbook(){
+  const outfits=await dbAll('outfits');
+  const grid=document.getElementById('lookbook-grid');
+  if(!grid)return;
+  if(!outfits||outfits.length===0){
+    grid.innerHTML='<div class="lookbook-empty" style="grid-column:1/-1;"><i class="ti ti-shirt" aria-hidden="true"></i>Log your first outfit below to start your lookbook</div>';
+    return;
+  }
+  // Show most recent 12
+  const recent=[...outfits].reverse().slice(0,12);
+  grid.innerHTML=recent.map((e,i)=>outfitCardHTML(e,i)).join('');
+
+  // Weekly grid
+  const weeklyGrid=document.getElementById('weekly-outfits-grid');
+  if(weeklyGrid){
+    const today=new Date();const weekStart=new Date(today);weekStart.setDate(today.getDate()-today.getDay());
+    const weekStr=weekStart.toISOString().slice(0,10);
+    const thisWeek=outfits.filter(e=>e.date>=weekStr);
+    if(thisWeek.length===0){
+      weeklyGrid.innerHTML='<div class="lookbook-empty" style="grid-column:1/-1;"><i class="ti ti-shirt" aria-hidden="true"></i>No outfits logged this week yet</div>';
+    } else {
+      weeklyGrid.innerHTML=[...thisWeek].reverse().map((e,i)=>outfitCardHTML(e,i)).join('');
+    }
+  }
 }
 async function saveWardrobePlan(){
   const occasion=document.getElementById('wardrobe-occasion').value.trim();
