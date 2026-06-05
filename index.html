@@ -390,12 +390,24 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ TODAY ═══════════════ -->
 <div id="s-today" class="sec on">
   <div class="view-content on" id="vc-today-daily">
-    <div id="upload-status-banner" style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;font-size:11px;color:var(--muted);">
+    <div id="upload-status-banner" style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:6px;font-size:11px;color:var(--muted);">
       <div id="upload-status-text">⏳ Checking last upload...</div>
       <div id="upload-status-date" style="color:var(--accent);font-weight:500;"></div>
     </div>
+    <!-- BP quick view -->
+    <div id="today-bp-banner" onclick="switchTab('health')" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:12px;color:var(--muted);">❤️ Last BP reading</div>
+      <div>
+        <span id="today-bp-value" style="font-size:15px;font-weight:600;color:var(--text);"></span>
+        <span id="today-bp-date" style="font-size:11px;color:var(--muted);margin-left:6px;"></span>
+      </div>
+    </div>
+    <!-- BP reminder if not logged today -->
+    <div id="today-bp-reminder" style="display:none;padding:7px 12px;border-radius:8px;background:#FEF3C7;border:0.5px solid #E8A87C;margin-bottom:10px;cursor:pointer;font-size:12px;color:#92400E;" onclick="switchTab('health')">
+      ❤️ No BP reading today — tap to log
+    </div>
     <div class="stat-strip">
-      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div></div>
+      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl" id="s-weight-date" style="font-size:10px;color:var(--accent);"></div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div></div>
       <div class="stat-tile"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src" id="s-steps-src">Apple Health</div></div>
       <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src" id="s-sleep-src">log below</div></div>
       <div class="stat-tile"><div class="stat-val" id="zep-day-count">—</div><div class="stat-lbl" id="zep-tile-lbl">loading...</div><div class="stat-src">since Oct 25, 2025</div></div>
@@ -590,28 +602,26 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="s-sleep" class="sec">
   <div class="view-content on" id="vc-sleep-daily">
     <div class="section-label">Sleep & Energy</div>
-    <div class="sleep-score-big">
-      <div class="sleep-num" id="sleep-display">—</div>
-      <div class="sleep-lbl">hours last night</div>
-    </div>
     <div class="card">
       <div class="card-title">Apple Health · sleep data</div>
-      <div id="sleep-apple-metrics"><div class="log-empty">Upload your weekly CSV to see sleep hours from Apple Health.</div></div>
+      <!-- Last night's hours — prominently shown -->
+      <div style="text-align:center;padding:10px 0 8px;">
+        <div style="font-size:42px;font-weight:700;color:var(--accent);" id="sleep-display">—</div>
+        <div style="font-size:13px;color:var(--muted);">hours last night</div>
+      </div>
+      <!-- Bedtime & Wake — directly below hours -->
+      <div id="sleep-times-from-csv" style="display:flex;justify-content:center;gap:24px;padding:10px 12px;border-radius:10px;background:var(--warm);margin:8px 0 4px;">
+        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Bedtime</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-bedtime">—</div></div>
+        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Wake time</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-waketime">—</div></div>
+        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Total</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-sleephrs">—</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:10px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
+      <!-- Sleep stages & additional metrics -->
+      <div id="sleep-apple-metrics"></div>
     </div>
     <div class="card">
       <div class="card-title">😴 ResMed myAir · nightly log & CPAP compliance</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Enter raw values from your machine — scores calculated automatically</div>
-
-      <!-- Bedtime & Wake from Apple Health -->
-      <div id="sleep-times-from-csv" style="padding:10px 12px;border-radius:10px;background:var(--warm);margin-bottom:12px;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">Bedtime & wake · from Withings via Apple Health</div>
-        <div style="display:flex;gap:16px;">
-          <div><div style="font-size:11px;color:var(--muted);">Bedtime</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-bedtime">—</div></div>
-          <div><div style="font-size:11px;color:var(--muted);">Wake time</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-waketime">—</div></div>
-          <div><div style="font-size:11px;color:var(--muted);">Total sleep</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-sleephrs">—</div></div>
-        </div>
-        <div style="font-size:10px;color:var(--muted);margin-top:4px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
-      </div>
 
       <!-- CPAP compliance grouped here -->
       <div class="fl">CPAP compliance last night</div>
@@ -764,7 +774,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="toast-msg" id="cpap-clean-toast">Cleaning logged!</div>
       </div>
     </div>
+  </div>
+
+  <div class="view-content" id="vc-sleep-weekly">
     <div class="section-label">Sleep this week</div>
+    <div class="card">
+      <div class="card-title">Sleep · 7-day average</div>
+      <div id="sleep-weekly-avg"><div class="log-empty">Loading...</div></div>
+    </div>
     <div class="card">
       <div class="card-title">myAir total score</div>
       <div id="myair-weekly-summary"></div>
@@ -989,6 +1006,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-health-daily">
     <div class="section-label">Health · Today</div>
 
+    <!-- BP reminder banner -->
+    <div id="bp-reminder-banner" style="display:none;padding:8px 12px;border-radius:10px;background:#FEF3C7;border:0.5px solid #E8A87C;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:12px;color:#92400E;">❤️ No blood pressure reading today — tap below to log</div>
+      <div id="bp-last-reading" style="font-size:11px;color:#B45309;"></div>
+    </div>
+
     <!-- Medications & Vitamins -->
     <div class="card">
       <div class="card-title">💊 Medications & supplements · daily</div>
@@ -1022,6 +1045,27 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="meds-progress" style="margin-top:12px;padding:8px 12px;border-radius:10px;background:var(--warm);font-size:12px;color:var(--muted);">Tap each item above when taken</div>
       <button id="meds-save-btn" class="btn-primary" style="margin-top:10px;display:none;" onclick="saveMedsChecklist()">✅ Log all Rx meds taken today</button>
       <div class="toast-msg" id="meds-toast">Logged!</div>
+    </div>
+
+    <!-- BP Log — after meds, before Zepbound -->
+    <div class="card">
+      <div class="card-title">❤️ Blood pressure · log today</div>
+      <div id="bp-today-status" style="margin-bottom:10px;"></div>
+      <div class="bp-row">
+        <div class="bp-input-wrap"><div class="bp-lbl">Systolic</div><input type="number" id="bp-sys" placeholder="120"></div>
+        <div class="bp-input-wrap"><div class="bp-lbl">Diastolic</div><input type="number" id="bp-dia" placeholder="80"></div>
+        <div class="bp-input-wrap"><div class="bp-lbl">Pulse</div><input type="number" id="bp-pulse" placeholder="72"></div>
+      </div>
+      <div class="fl">Time of reading</div>
+      <div class="tags" id="bp-time-tags">
+        <button class="tag" onclick="solo('bp-time-tags',this)">Morning</button>
+        <button class="tag" onclick="solo('bp-time-tags',this)">Afternoon</button>
+        <button class="tag" onclick="solo('bp-time-tags',this)">Evening</button>
+      </div>
+      <div class="fl">Notes</div>
+      <textarea id="bp-note" rows="2" placeholder="e.g. After medication, before exercise, felt dizzy..."></textarea>
+      <button class="btn-primary" onclick="saveBP()">Log blood pressure</button>
+      <div class="toast-msg" id="bpt">Saved!</div>
     </div>
 
     <!-- Zepbound -->
@@ -1235,26 +1279,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
       <div class="card-title">Apple Health · clinical metrics</div>
       <div id="health-clinical-metrics"><div class="log-empty">Upload your weekly CSV to see resting HR, gait and respiratory data.</div></div>
-    </div>
-
-    <!-- BP Log -->
-    <div class="card">
-      <div class="card-title">Blood pressure · log today</div>
-      <div class="bp-row">
-        <div class="bp-input-wrap"><div class="bp-lbl">Systolic</div><input type="number" id="bp-sys" placeholder="120"></div>
-        <div class="bp-input-wrap"><div class="bp-lbl">Diastolic</div><input type="number" id="bp-dia" placeholder="80"></div>
-        <div class="bp-input-wrap"><div class="bp-lbl">Pulse</div><input type="number" id="bp-pulse" placeholder="72"></div>
-      </div>
-      <div class="fl">Time of reading</div>
-      <div class="tags" id="bp-time-tags">
-        <button class="tag" onclick="solo('bp-time-tags',this)">Morning</button>
-        <button class="tag" onclick="solo('bp-time-tags',this)">Afternoon</button>
-        <button class="tag" onclick="solo('bp-time-tags',this)">Evening</button>
-      </div>
-      <div class="fl">Notes</div>
-      <textarea id="bp-note" rows="2" placeholder="e.g. After medication, before exercise, felt dizzy..."></textarea>
-      <button class="btn-primary" onclick="saveBP()">Log blood pressure</button>
-      <div class="toast-msg" id="bpt">Saved!</div>
     </div>
 
     <!-- Lab results -->
@@ -1601,27 +1625,69 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Goal photos -->
     <div class="card">
       <div class="card-title">🎯 Goal photos · tap to upload</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Upload your AI-generated goal photos for each milestone. These will be used in monthly comparisons.</div>
-      <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;" id="hair-goals-strip">
-        <div style="flex-shrink:0;text-align:center;">
-          <div class="photo-slot" style="width:80px;height:100px;border:2px dashed var(--accent);" onclick="uploadHairGoal('aug-2026')" id="goal-aug-2026"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--accent);margin-top:4px;font-weight:600;">Aug 2026</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Upload your AI-generated goal photos for each milestone. Add notes to track expected growth rate and style details.</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="hair-goals-strip">
+
+        <!-- Aug 2026 -->
+        <div style="text-align:center;">
+          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--accent);" onclick="uploadHairGoal('aug-2026')" id="goal-aug-2026"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
+          <div style="font-size:11px;color:var(--accent);margin-top:4px;font-weight:600;">Aug 2026</div>
+          <textarea id="goal-note-aug-2026" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('aug-2026',this.value)"></textarea>
         </div>
-        <div style="flex-shrink:0;text-align:center;">
-          <div class="photo-slot" style="width:80px;height:100px;border:2px dashed var(--accent);" onclick="uploadHairGoal('nov-2026')" id="goal-nov-2026"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--accent);margin-top:4px;font-weight:600;">Nov 2026</div>
+
+        <!-- Nov 2026 -->
+        <div style="text-align:center;">
+          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--accent);" onclick="uploadHairGoal('nov-2026')" id="goal-nov-2026"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
+          <div style="font-size:11px;color:var(--accent);margin-top:4px;font-weight:600;">Nov 2026</div>
+          <textarea id="goal-note-nov-2026" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('nov-2026',this.value)"></textarea>
         </div>
-        <div style="flex-shrink:0;text-align:center;">
-          <div class="photo-slot" style="width:80px;height:100px;border:2px dashed var(--accent);" onclick="uploadHairGoal('feb-2027')" id="goal-feb-2027"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--accent);margin-top:4px;font-weight:600;">Feb 2027</div>
+
+        <!-- Feb 2027 -->
+        <div style="text-align:center;">
+          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--accent);" onclick="uploadHairGoal('feb-2027')" id="goal-feb-2027"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
+          <div style="font-size:11px;color:var(--accent);margin-top:4px;font-weight:600;">Feb 2027</div>
+          <textarea id="goal-note-feb-2027" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('feb-2027',this.value)"></textarea>
         </div>
-        <div style="flex-shrink:0;text-align:center;">
-          <div class="photo-slot" style="width:80px;height:100px;border:2px dashed var(--accent);" onclick="uploadHairGoal('may-2027')" id="goal-may-2027"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--accent);margin-top:4px;font-weight:600;">May 2027</div>
+
+        <!-- May 2027 -->
+        <div style="text-align:center;">
+          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--accent);" onclick="uploadHairGoal('may-2027')" id="goal-may-2027"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
+          <div style="font-size:11px;color:var(--accent);margin-top:4px;font-weight:600;">May 2027</div>
+          <textarea id="goal-note-may-2027" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('may-2027',this.value)"></textarea>
         </div>
+
+        <!-- Aug 2027 -->
+        <div style="text-align:center;">
+          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--border);" onclick="uploadHairGoal('aug-2027')" id="goal-aug-2027"><i class="ti ti-sparkles" style="color:var(--muted);" aria-hidden="true"></i></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;">Aug 2027</div>
+          <textarea id="goal-note-aug-2027" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('aug-2027',this.value)"></textarea>
+        </div>
+
+        <!-- Nov 2027 -->
+        <div style="text-align:center;">
+          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--border);" onclick="uploadHairGoal('nov-2027')" id="goal-nov-2027"><i class="ti ti-sparkles" style="color:var(--muted);" aria-hidden="true"></i></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;">Nov 2027</div>
+          <textarea id="goal-note-nov-2027" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('nov-2027',this.value)"></textarea>
+        </div>
+
+        <!-- Feb 2028 -->
+        <div style="text-align:center;">
+          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--border);" onclick="uploadHairGoal('feb-2028')" id="goal-feb-2028"><i class="ti ti-sparkles" style="color:var(--muted);" aria-hidden="true"></i></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;">Feb 2028</div>
+          <textarea id="goal-note-feb-2028" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('feb-2028',this.value)"></textarea>
+        </div>
+
+        <!-- May 2028 -->
+        <div style="text-align:center;">
+          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--border);" onclick="uploadHairGoal('may-2028')" id="goal-may-2028"><i class="ti ti-sparkles" style="color:var(--muted);" aria-hidden="true"></i></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;">May 2028</div>
+          <textarea id="goal-note-may-2028" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('may-2028',this.value)"></textarea>
+        </div>
+
       </div>
       <input type="file" id="hair-goal-input" accept="image/*" style="display:none" onchange="saveHairGoalPhoto(this)">
-      <div style="font-size:11px;color:var(--muted);">✨ = AI goal · green border = uploaded</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">✨ = AI goal photo · green border = uploaded · first 4 slots used in monthly comparisons</div>
     </div>
 
     <!-- Weekly quick log -->
@@ -2005,6 +2071,8 @@ async function boot(){
   loadTodayWater();
   loadTodaySleepFromCSV();
   updateUploadStatusBanner();
+  initZepboundDefaults();
+  updateBPBanners();
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
@@ -2036,16 +2104,16 @@ function tab(id){
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
   if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); }
-  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); }
+  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); updateBPBanners(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
-  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); }
-  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); }
+  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); }
+  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();}}
   if(curTab==='skin'&&v!=='daily') buildSkinCharts();
   if(curTab==='hair'&&v!=='daily') buildHairCharts();
-  if(curTab==='sleep'&&(v==='weekly'||v==='monthly')) buildMyAirCharts();
+  if(curTab==='sleep'&&(v==='weekly'||v==='monthly')) { buildMyAirCharts(); buildSleepWeeklyAvg(); }
 }
 function applyView(){
   const c=document.getElementById('s-'+curTab);if(!c)return;
@@ -2328,7 +2396,7 @@ async function saveBP(){
   syncToBlob('bps');
   document.getElementById('bp-sys').value='';document.getElementById('bp-dia').value='';document.getElementById('bp-pulse').value='';
   document.getElementById('bp-note').value='';
-  toast('bpt');loadLogs();
+  toast('bpt');loadLogs();updateBPBanners();
 }
 async function saveLab(){
   const date=document.getElementById('lab-date').value.trim(),notes=document.getElementById('lab-notes').value.trim();
@@ -2969,6 +3037,38 @@ function buildSleepStagesDisplay(row){
     </div>`;
 }
 
+async function buildSleepWeeklyAvg(){
+  const el = document.getElementById('sleep-weekly-avg');
+  if(!el) return;
+  const rows = await getCSVRows();
+  const withSleep = rows.filter(r=>parseFloat(r.sleep_hrs)>0).slice(0,7);
+  if(!withSleep.length){ el.innerHTML='<div class="log-empty">Upload CSV to see weekly average.</div>'; return; }
+  const avg = withSleep.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/withSleep.length;
+  const color = avg>=7?'#27500A':avg>=6?'#6B9E78':avg>=5?'#92400E':'#7F1D1D';
+  const label = avg>=7?'Excellent':avg>=6?'Good':avg>=5?'Low':'Very low';
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+      <div>
+        <div style="font-size:36px;font-weight:700;color:${color};">${avg.toFixed(1)}<span style="font-size:16px;">h</span></div>
+        <div style="font-size:12px;color:var(--muted);">7-night average · target 7–9 hrs</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:14px;font-weight:600;color:${color};">${label}</div>
+        <div style="font-size:11px;color:var(--muted);">${withSleep.length} nights logged</div>
+      </div>
+    </div>
+    <div style="background:rgba(0,0,0,0.06);border-radius:20px;height:8px;overflow:hidden;margin-top:4px;">
+      <div style="width:${Math.min(100,(avg/9)*100)}%;height:8px;border-radius:20px;background:${color};"></div>
+    </div>
+    <div style="margin-top:12px;">
+      ${withSleep.map(r=>{
+        const h=parseFloat(r.sleep_hrs); const d=safeDate(r.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+        const c=h>=7?'#27500A':h>=6?'#6B9E78':'#92400E';
+        return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:0.5px solid var(--border);font-size:12px;"><span style="color:var(--muted);">${d}</span><span style="font-weight:600;color:${c};">${h.toFixed(1)}h</span></div>`;
+      }).join('')}
+    </div>`;
+}
+
 async function buildSleepAppleMetrics(){
   const el = document.getElementById('sleep-apple-metrics');
   if(!el) return;
@@ -3001,22 +3101,21 @@ async function buildSleepAppleMetrics(){
     if(dateLabelEl) dateLabelEl.textContent = 'Re-run Python script to add bedtime/wake times · last known shown';
   }
 
-  el.innerHTML = `
-    <div style="padding:8px 12px;border-radius:10px;background:var(--warm);margin-bottom:12px;font-size:12px;color:var(--muted);">Last Apple Health data: <strong style="color:var(--text);">${dataDate}</strong> · Upload CSV weekly to update</div>
-    <div class="snapshot-grid">
-      <div class="snapshot-item">
-        <div class="snapshot-label">Last recorded</div>
-        <div class="snapshot-val">${parseFloat(latest.sleep_hrs).toFixed(1)}<span style="font-size:14px;">h</span></div>
-        <div class="snapshot-sub">${dataDate}</div>
-      </div>
-      <div class="snapshot-item">
-        <div class="snapshot-label">7-day avg</div>
-        <div class="snapshot-val">${avgSleep.toFixed(1)}<span style="font-size:14px;">h</span></div>
-        <div class="snapshot-sub ${avgSleep>=7?'snapshot-status-ok':avgSleep>=6?'snapshot-status-watch':'snapshot-status-high'}">${avgSleep>=7?'Good':avgSleep>=6?'Low':'Very low'}</div>
-      </div>
-    </div>
-    ${buildSleepStagesDisplay(latest)}
-  `;
+  // Update the big sleep number display inside the card
+  const sleepDisplayEl = document.getElementById('sleep-display');
+  const latestHrs = parseFloat(latest.sleep_hrs).toFixed(1);
+  if(sleepDisplayEl) sleepDisplayEl.textContent = latestHrs + 'h';
+
+  // Also update s-sleep-h on Today strip
+  const sleepStripEl = document.getElementById('s-sleep-h');
+  const sleepSrcEl = document.getElementById('s-sleep-src');
+  if(sleepStripEl && sleepStripEl.textContent === '—'){
+    sleepStripEl.textContent = latestHrs + 'h';
+    if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${safeDate(latest.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+  }
+
+  // Daily view — just sleep stages, no 7-day avg (that goes on weekly)
+  el.innerHTML = `${buildSleepStagesDisplay(latest)}`;
 }
 
 // Body composition chart
@@ -3738,9 +3837,22 @@ function compressImage(file, maxDim=800, quality=0.8){
   });
 }
 
+function saveGoalNote(slot, text){
+  const notes = JSON.parse(localStorage.getItem('glowHairGoalNotes')||'{}');
+  notes[slot] = text;
+  localStorage.setItem('glowHairGoalNotes', JSON.stringify(notes));
+}
+
+function loadGoalNotes(){
+  const notes = JSON.parse(localStorage.getItem('glowHairGoalNotes')||'{}');
+  Object.keys(notes).forEach(slot=>{
+    const el = document.getElementById(`goal-note-${slot}`);
+    if(el) el.value = notes[slot]||'';
+  });
+}
+
 async function loadHairGoalPhotos(){
   try {
-    const res = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`);
     if(!res.ok) return;
     const {data} = await res.json();
     if(!data || Array.isArray(data)) return; // null or array = no goals saved yet
@@ -3766,6 +3878,10 @@ async function getNearestHairGoal(){
       'nov-2026': new Date('2026-11-01'),
       'feb-2027': new Date('2027-02-01'),
       'may-2027': new Date('2027-05-01'),
+      'aug-2027': new Date('2027-08-01'),
+      'nov-2027': new Date('2027-11-01'),
+      'feb-2028': new Date('2028-02-01'),
+      'may-2028': new Date('2028-05-01'),
     };
     const upcoming = Object.entries(slotDates)
       .filter(([slot]) => data[slot])
@@ -4799,7 +4915,7 @@ function loadWeekIntention(){
 
 // ── CPAP EQUIPMENT TRACKING ───────────────────────────────────────────
 const CPAP_ITEMS = [
-  { key:'mask_cushion',     label:'Mask cushion (F30i)',  days:14,  interval:'2 weeks'  },
+  { key:'mask_cushion',     label:'Mask cushion (F30i)',  days:30,  interval:'4–6 weeks' },
   { key:'mask_frame',       label:'Mask frame',           days:90,  interval:'3 months' },
   { key:'headgear',         label:'Headgear',             days:180, interval:'6 months' },
   { key:'tubing',           label:'Tubing',               days:90,  interval:'3 months' },
@@ -5043,6 +5159,8 @@ async function loadTodaySleepFromCSV(){
       const d = safeDate(latestWeight.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
       if(weightEl) weightEl.textContent = parseFloat(latestWeight.weight_lbs).toFixed(1);
       if(weightSrcEl) weightSrcEl.textContent = `Withings · ${d}`;
+      const weightDateEl = document.getElementById('s-weight-date');
+      if(weightDateEl) weightDateEl.textContent = d;
     }
 
     // Steps — most recent entry with value
@@ -5069,6 +5187,60 @@ async function loadTodaySleepFromCSV(){
     }
   } catch(e){ console.warn('loadTodaySleepFromCSV error:', e); }
 }
+async function updateBPBanners(){
+  try {
+    const bps = await dbAll('bps');
+    const today = nowStr();
+    const todayBP = bps.filter(b=>b.date===today).pop();
+    const lastBP = bps.slice().reverse().find(b=>b.sys&&b.dia);
+
+    // Today pillar banners
+    const todayBanner = document.getElementById('today-bp-banner');
+    const todayReminder = document.getElementById('today-bp-reminder');
+    const todayVal = document.getElementById('today-bp-value');
+    const todayDate = document.getElementById('today-bp-date');
+
+    if(todayBP && todayBP.sys){
+      // Show last reading
+      if(todayBanner) todayBanner.style.display='flex';
+      if(todayReminder) todayReminder.style.display='none';
+      if(todayVal) todayVal.textContent = `${todayBP.sys}/${todayBP.dia}`;
+      if(todayDate) todayDate.textContent = `Today${todayBP.time?' · '+todayBP.time:''}`;
+      // Color code
+      const sys = parseInt(todayBP.sys);
+      if(todayVal) todayVal.style.color = sys>=140?'#7F1D1D':sys>=130?'#92400E':sys>=120?'#6B9E78':'#27500A';
+    } else if(lastBP){
+      if(todayBanner) todayBanner.style.display='flex';
+      if(todayReminder) todayReminder.style.display='block';
+      if(todayVal) todayVal.textContent = `${lastBP.sys}/${lastBP.dia}`;
+      if(todayDate) todayDate.textContent = lastBP.date;
+      if(todayVal) todayVal.style.color='var(--muted)';
+    } else {
+      if(todayBanner) todayBanner.style.display='none';
+      if(todayReminder) todayReminder.style.display='block';
+    }
+
+    // Health pillar reminder banner
+    const hBanner = document.getElementById('bp-reminder-banner');
+    const hLast = document.getElementById('bp-last-reading');
+    const bpStatus = document.getElementById('bp-today-status');
+
+    if(todayBP && todayBP.sys){
+      if(hBanner) hBanner.style.display='none';
+      if(bpStatus){
+        const sys=parseInt(todayBP.sys), dia=parseInt(todayBP.dia);
+        const color = sys>=140?'#7F1D1D':sys>=130?'#92400E':sys>=120?'#E8A87C':'#27500A';
+        const label = sys>=140?'Stage 2 High':sys>=130||dia>=80?'Stage 1 High':sys>=120?'Elevated':'Normal';
+        bpStatus.innerHTML=`<div style="padding:8px 12px;border-radius:10px;background:var(--warm);display:flex;justify-content:space-between;align-items:center;"><div><span style="font-size:20px;font-weight:700;color:${color};">${todayBP.sys}/${todayBP.dia}</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">${todayBP.pulse?'Pulse '+todayBP.pulse:''}</span></div><div style="text-align:right;"><div style="font-size:12px;font-weight:600;color:${color};">${label}</div><div style="font-size:11px;color:var(--muted);">Today${todayBP.time?' · '+todayBP.time:''}</div></div></div>`;
+      }
+    } else {
+      if(hBanner){ hBanner.style.display='flex'; }
+      if(hLast && lastBP) hLast.textContent = `Last: ${lastBP.sys}/${lastBP.dia} · ${lastBP.date}`;
+      if(bpStatus) bpStatus.innerHTML='';
+    }
+  } catch(e){}
+}
+
 async function buildMedsWeeklyCompliance(){
   const el = document.getElementById('meds-weekly-compliance');
   if(!el) return;
@@ -5315,14 +5487,19 @@ async function buildMyAirCharts(){
         </div>`;
     }
 
-    // Helper to build a myAir metric chart
     const makeMyAirChart = (canvasId, metric, label, color, maxY, refLine=null) => {
       const canvas = document.getElementById(canvasId); if(!canvas) return;
       if(chartInstances[canvasId]) chartInstances[canvasId].destroy();
       const recent30 = data.slice(-30);
       const labels = recent30.map(d=>{
-        const dateStr = (d.isoDate||d.date||'').slice(0,10);
-        try{ return safeDate(dateStr).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+        // isoDate is most reliable — always try it first
+        const iso = (d.isoDate||'').slice(0,10);
+        if(iso && iso.match(/^\d{4}-\d{2}-\d{2}$/)){
+          try{ return safeDate(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+          catch(e){}
+        }
+        // Fall back to parsing the human-readable date string
+        try{ return new Date(d.date||'').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
         catch(e){ return d.date||''; }
       });
       // For numeric metrics only — hours is a string like "9:14" so skip it
@@ -5586,6 +5763,42 @@ async function logZepDose(mg){
   buildZepboundStatus();
 }
 
+function initZepboundDefaults(){
+  // Fix Zepbound dose to May 30 if stored date is wrong (Jun 3)
+  const stored = localStorage.getItem('glowZepDose');
+  if(stored){
+    try{
+      const d = JSON.parse(stored);
+      if(d.isoDate && d.isoDate.slice(0,10) === '2026-06-03'){
+        d.date = 'Sat, May 30, 2026';
+        d.isoDate = '2026-05-30T00:00:00.000Z';
+        localStorage.setItem('glowZepDose', JSON.stringify(d));
+        // Also fix in Blob
+        fetch(`${BACKEND}/api/sync?pillar=zepbound`).then(r=>r.json()).then(({data})=>{
+          if(!Array.isArray(data)) return;
+          const idx = data.findIndex(e=>e.isoDate?.slice(0,10)==='2026-06-03');
+          if(idx>=0){ data[idx].date='Sat, May 30, 2026'; data[idx].isoDate='2026-05-30T00:00:00.000Z';
+            fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'zepbound',data})}).catch(()=>{});
+          }
+        }).catch(()=>{});
+      }
+    } catch(e){}
+  } else {
+    localStorage.setItem('glowZepDose', JSON.stringify({
+      mg: 5, date: 'Sat, May 30, 2026', isoDate: '2026-05-30T00:00:00.000Z'
+    }));
+  }
+
+  // Pre-populate injection site if none stored
+  const sites = localStorage.getItem('glowInjectionSites');
+  if(!sites || JSON.parse(sites||'[]').length === 0){
+    localStorage.setItem('glowInjectionSites', JSON.stringify([{
+      site: 'upper-left', label: 'Upper Left Abdomen',
+      date: 'Sat, May 30, 2026', isoDate: '2026-05-30T00:00:00.000Z'
+    }]));
+  }
+}
+
 async function buildZepboundStatus(){
   const el = document.getElementById('zep-dose-status');
   if(!el) return;
@@ -5725,10 +5938,14 @@ async function getCSVBPData() {
 }
 
 function parseBPDate(dateStr){
-  // Handle both "Mon, Jun 1" and "2026-06-01" formats
   if(!dateStr) return null;
-  if(dateStr.match(/^\d{4}-\d{2}-\d{2}/)) return new Date(dateStr);
-  try { return new Date(dateStr + ' 2026'); } catch(e){ return null; }
+  // ISO format: 2026-06-01
+  if(dateStr.match(/^\d{4}-\d{2}-\d{2}/)) return safeDate(dateStr.slice(0,10));
+  // Already has year: "Fri, Jun 6, 2026" or "Jun 6, 2026"
+  if(dateStr.match(/\d{4}/)) { try{ const d=new Date(dateStr); if(!isNaN(d)) return d; }catch(e){} }
+  // Short format without year: "Jun 6" — append current year
+  try { const d=new Date(dateStr+' '+new Date().getFullYear()); if(!isNaN(d)) return d; } catch(e){}
+  return null;
 }
 
 async function buildBPChart(){
