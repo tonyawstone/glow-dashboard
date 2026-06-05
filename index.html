@@ -102,6 +102,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .he-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap;}
 .wins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
 .pillar-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;}
+.med-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;margin-bottom:4px;cursor:pointer;border:0.5px solid var(--border);background:var(--card);transition:all 0.15s;}
+.med-row.done{background:#EAF3DE;border-color:rgba(107,158,120,0.3);}
+.med-row.done .med-name{text-decoration:line-through;color:var(--muted);}
+.med-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:transparent;flex-shrink:0;transition:all 0.15s;}
+.med-row.done .med-check{background:#6B9E78;border-color:#6B9E78;color:#fff;}
+.med-name{font-size:13px;font-weight:500;color:var(--text);}
+.med-note{font-size:11px;color:var(--muted);margin-top:1px;}
 .pillar-icon{font-size:20px;width:32px;text-align:center;flex-shrink:0;}
 .pillar-name{font-size:13px;font-weight:600;color:var(--text);}
 .pillar-example{font-size:11px;color:var(--muted);margin-top:1px;}
@@ -109,6 +116,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
 @keyframes breatheIn{0%{transform:scale(1);background:rgba(155,142,196,0.1);}100%{transform:scale(1.4);background:rgba(155,142,196,0.3);}}
 @keyframes breatheOut{0%{transform:scale(1.4);background:rgba(155,142,196,0.3);}100%{transform:scale(1);background:rgba(155,142,196,0.1);}}border-radius:10px;border:0.5px solid var(--border);background:var(--warm);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--sans);text-align:left;}
 .cpap-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);}
+.cpap-replace-btn{padding:8px 10px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--sans);text-align:left;}
+.cpap-date-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--text);}
+.cpap-date-input{padding:5px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);}
+.cpap-save-btn{padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);}
 .cpap-item-name{font-size:13px;color:var(--text);}
 .cpap-item-due{font-size:11px;font-weight:600;padding:2px 7px;border-radius:8px;}
 .cpap-due-ok{background:#EAF3DE;color:#27500A;}
@@ -671,16 +682,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="log-empty">Loading equipment status...</div>
       </div>
       <div style="margin-top:14px;">
-        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">Mark as replaced today:</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="cpap-replace-buttons">
-          <button class="cpap-replace-btn" onclick="replaceCPAPItem('mask_cushion')">Mask cushion</button>
-          <button class="cpap-replace-btn" onclick="replaceCPAPItem('mask_frame')">Mask frame</button>
-          <button class="cpap-replace-btn" onclick="replaceCPAPItem('headgear')">Headgear</button>
-          <button class="cpap-replace-btn" onclick="replaceCPAPItem('tubing')">Tubing</button>
-          <button class="cpap-replace-btn" onclick="replaceCPAPItem('water_chamber')">Water chamber</button>
-          <button class="cpap-replace-btn" onclick="replaceCPAPItem('filter_disposable')">Disposable filter</button>
-          <button class="cpap-replace-btn" onclick="replaceCPAPItem('filter_nondisposable')">Non-disp. filter</button>
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">Enter replacement date:</div>
+        <div class="cpap-date-row"><span>Mask cushion</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_cushion" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_cushion')">Save</button></div></div>
+        <div class="cpap-date-row"><span>Mask frame</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_frame" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_frame')">Save</button></div></div>
+        <div class="cpap-date-row"><span>Headgear</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-headgear" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('headgear')">Save</button></div></div>
+        <div class="cpap-date-row"><span>Tubing</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-tubing" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('tubing')">Save</button></div></div>
+        <div class="cpap-date-row"><span>Water chamber</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-water_chamber" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('water_chamber')">Save</button></div></div>
+        <div style="margin-top:12px;">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Disposable filter · replaced frequently:</div>
+          <button class="cpap-replace-btn" style="width:100%;" onclick="replaceCPAPItem('filter_disposable')">✓ Replaced disposable filter today</button>
         </div>
+        <div class="toast-msg" id="cpap-replace-toast">Saved!</div>
       </div>
       <div style="margin-top:14px;">
         <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Weekly cleaning log (Sunday):</div>
@@ -910,14 +922,34 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Medications & Vitamins -->
     <div class="card">
-      <div class="card-title">💊 Medications & vitamins · daily</div>
-      <div id="meds-checklist">
-        <div class="toggle-row" onclick="toggleMed('med-irbesartan')"><div><div class="tl">Irbesartan HCTZ 300-12.5</div><div class="ts">BP · diuretic · morning</div></div><div class="tog" id="med-irbesartan"><div class="tok"></div></div></div>
-        <div class="toggle-row" onclick="toggleMed('med-metoprolol')"><div><div class="tl">Metoprolol Succ ER 100mg</div><div class="ts">BP · heart rate · morning</div></div><div class="tog" id="med-metoprolol"><div class="tok"></div></div></div>
-        <div class="toggle-row" onclick="toggleMed('med-amlodipine')"><div><div class="tl">Amlodipine Besylate 10mg</div><div class="ts">BP · calcium channel blocker</div></div><div class="tog" id="med-amlodipine"><div class="tok"></div></div></div>
-        <div class="toggle-row" onclick="toggleMed('med-osteo')"><div><div class="tl">Osteo Biflex</div><div class="ts">Joint support · hip</div></div><div class="tog" id="med-osteo"><div class="tok"></div></div></div>
+      <div class="card-title">💊 Medications & supplements · daily</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Tap each item when taken · resets at midnight</div>
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;">☀️ Morning</div>
+      <div id="meds-morning">
+        <div class="med-row" id="med-irbesartan" onclick="toggleMed('med-irbesartan')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Irbesartan HCTZ 300-12.5</div><div class="med-note">BP · diuretic</div></div></div>
+        <div class="med-row" id="med-metoprolol" onclick="toggleMed('med-metoprolol')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Metoprolol Succ ER 100mg</div><div class="med-note">BP · heart rate</div></div></div>
+        <div class="med-row" id="med-amlodipine" onclick="toggleMed('med-amlodipine')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Amlodipine Besylate 10mg</div><div class="med-note">BP · calcium channel blocker</div></div></div>
+        <div class="med-row" id="med-osteo" onclick="toggleMed('med-osteo')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Osteo Biflex</div><div class="med-note">Joint support · hip</div></div></div>
+        <div class="med-row" id="med-multivitamin" onclick="toggleMed('med-multivitamin')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Women's multivitamin gummy</div><div class="med-note">Daily supplement</div></div></div>
+        <div class="med-row" id="med-biotin" onclick="toggleMed('med-biotin')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Biotin gummy</div><div class="med-note">Hair & nails</div></div></div>
+        <div class="med-row" id="med-vitc" onclick="toggleMed('med-vitc')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Vitamin C gummy</div><div class="med-note">Immune support</div></div></div>
       </div>
-      <div style="margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--warm);font-size:12px;color:var(--muted);" id="meds-status">Tap each medication when taken today</div>
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px;">☕ Afternoon</div>
+      <div id="meds-afternoon">
+        <div class="med-row" id="med-collagen" onclick="toggleMed('med-collagen')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Collagen protein</div><div class="med-note">In decaf coffee</div></div></div>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px;">🌙 Evening</div>
+      <div id="meds-evening">
+        <div class="med-row" id="med-rosuvastatin" onclick="toggleMed('med-rosuvastatin')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Rosuvastatin</div><div class="med-note">Cholesterol · statin</div></div></div>
+        <div class="med-row" id="med-miralax" onclick="toggleMed('med-miralax')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Miralax chews</div><div class="med-note">As needed · Zepbound GI support · every ~2 days</div></div></div>
+        <div class="med-row" id="med-melatonin-eve" onclick="toggleMed('med-melatonin-eve')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Melatonin</div><div class="med-note">As needed · sleep onset</div></div></div>
+        <div class="med-row" id="med-sleep-gummies-eve" onclick="toggleMed('med-sleep-gummies-eve')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Sleep gummies</div><div class="med-note">As needed</div></div></div>
+      </div>
+
+      <div id="meds-progress" style="margin-top:12px;padding:8px 12px;border-radius:10px;background:var(--warm);font-size:12px;color:var(--muted);">Tap each item above when taken</div>
       <button class="btn-primary" style="margin-top:10px;" onclick="saveMedsChecklist()">Save today's medications</button>
       <div class="toast-msg" id="meds-toast">Saved!</div>
     </div>
@@ -940,6 +972,49 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div style="font-size:11px;color:var(--muted);margin-top:10px;">Tap your dose when you inject · date is automatically saved · stays selected until next week's dose</div>
       <div class="toast-msg" id="zep-toast">💉 Dose logged!</div>
+    </div>
+
+    <!-- Zepbound side effects -->
+    <div class="card">
+      <div class="card-title">💊 Zepbound · side effects log</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Track GI and other symptoms · important for dose discussions with your doctor</div>
+      <div class="fl">GI symptoms today</div>
+      <div class="tags" id="zep-gi-tags">
+        <button class="tag" onclick="tog(this)">Constipation</button>
+        <button class="tag" onclick="tog(this)">Nausea</button>
+        <button class="tag" onclick="tog(this)">Stomach upset</button>
+        <button class="tag" onclick="tog(this)">Bloating</button>
+        <button class="tag" onclick="tog(this)">Diarrhea</button>
+        <button class="tag" onclick="tog(this)">Acid reflux</button>
+        <button class="tag" onclick="tog(this)">Loss of appetite</button>
+        <button class="tag" onclick="tog(this)">None today ✓</button>
+      </div>
+      <div class="fl">Other symptoms</div>
+      <div class="tags" id="zep-other-tags">
+        <button class="tag" onclick="tog(this)">Fatigue</button>
+        <button class="tag" onclick="tog(this)">Injection site reaction</button>
+        <button class="tag" onclick="tog(this)">Headache</button>
+        <button class="tag" onclick="tog(this)">Hair thinning</button>
+        <button class="tag" onclick="tog(this)">Muscle loss concern</button>
+        <button class="tag" onclick="tog(this)">Low energy</button>
+        <button class="tag" onclick="tog(this)">No symptoms ✓</button>
+      </div>
+      <div class="fl">Severity</div>
+      <div class="tags" id="zep-severity-tags">
+        <button class="tag" onclick="solo('zep-severity-tags',this)">Mild</button>
+        <button class="tag" onclick="solo('zep-severity-tags',this)">Moderate</button>
+        <button class="tag" onclick="solo('zep-severity-tags',this)">Severe</button>
+      </div>
+      <div class="fl">Miralax taken today</div>
+      <div class="toggle-row" onclick="ts('zep-miralax-today')" style="border:none;padding:0;">
+        <div><div class="tl">Miralax chews</div><div class="ts">GI support · Zepbound constipation</div></div>
+        <div class="tog" id="zep-miralax-today"><div class="tok"></div></div>
+      </div>
+      <div class="fl">Note</div>
+      <textarea id="zep-side-note" rows="2" placeholder="Any patterns, timing, what helped..."></textarea>
+      <button class="btn-primary" onclick="saveZepSideEffects()">Log symptoms</button>
+      <div class="toast-msg" id="zep-side-toast">Logged!</div>
+      <div style="margin-top:14px;" id="zep-side-history"></div>
     </div>
 
     <!-- Today's snapshot -->
@@ -1776,7 +1851,7 @@ function tab(id){
   if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); }
-  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); }
+  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();}}
@@ -2187,40 +2262,45 @@ function loadMuselyHistory(){
   const el = document.getElementById('musely-history');
   if(!el) return;
   const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
-  if(!history.length){ el.innerHTML='<div style="font-size:12px;color:var(--muted);">No history yet — select a treatment above and tap "Log tonight\'s treatment" when you apply it.</div>'; return; }
 
-  const recent = history.slice(-3).reverse();
-  const lastEntry = recent[0];
-  const nextTreatment = lastEntry.treatment === 'Anti-Aging Cream' ? 'Spot Treatment' : 'Anti-Aging Cream';
-
-  // Pre-select the recommended treatment in the toggles (visual only, not saved)
-  const aaEl = document.getElementById('r-musely-aa');
-  const spotEl = document.getElementById('r-musely-spot');
-  const aaCard = document.getElementById('musely-antiaging-card');
-  const spotCard = document.getElementById('musely-spot-card');
-  // Only pre-select if neither is currently selected (don't override user's choice)
-  if(aaEl && spotEl && !aaEl.classList.contains('on') && !spotEl.classList.contains('on')){
-    if(nextTreatment === 'Anti-Aging Cream'){
-      aaEl.classList.add('on'); aaCard?.classList.add('active');
-    } else {
-      spotEl.classList.add('on'); spotCard?.classList.add('active');
-    }
+  if(!history.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--muted);">No history yet — select a treatment and tap "Log as applied" when you use it.</div>';
+    return;
   }
 
-  // Check if already logged today
-  const loggedToday = recent[0].date === nowStr();
-  const todayLabel = loggedToday
-    ? `<div style="font-size:11px;color:#27500A;margin-top:2px;">✅ Logged tonight: ${recent[0].treatment}</div>`
-    : `<div style="font-size:11px;color:var(--muted);margin-top:2px;">Not yet logged tonight — apply and tap "Log tonight's treatment"</div>`;
+  const last = history[history.length-1];
+  const alreadyLoggedTonight = last.date === nowStr();
+  const nextTreatment = last.treatment === 'Anti-Aging Cream' ? 'Spot Treatment' : 'Anti-Aging Cream';
+
+  // Pre-select suggested treatment (visual only, not saved)
+  const suggestedToggle = nextTreatment === 'Anti-Aging Cream' ? 'r-musely-aa' : 'r-musely-spot';
+  const otherToggle = nextTreatment === 'Anti-Aging Cream' ? 'r-musely-spot' : 'r-musely-aa';
+  const suggestedCard = nextTreatment === 'Anti-Aging Cream' ? 'musely-antiaging-card' : 'musely-spot-card';
+  const otherCard = nextTreatment === 'Anti-Aging Cream' ? 'musely-spot-card' : 'musely-antiaging-card';
+  if(!document.getElementById(suggestedToggle)?.classList.contains('on') &&
+     !document.getElementById(otherToggle)?.classList.contains('on')){
+    document.getElementById(suggestedToggle)?.classList.add('on');
+    document.getElementById(suggestedCard)?.classList.add('active');
+  }
+
+  // Show last 3 confirmed entries (excluding tonight if already logged)
+  const displayHistory = history.slice(-4).reverse();
 
   el.innerHTML = `
-    <div style="padding:10px 12px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;">
-      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Tonight → use</div>
-      <div style="font-size:15px;font-weight:600;color:var(--accent);">✨ ${nextTreatment}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px;">Last logged: ${lastEntry.treatment} · ${lastEntry.date}</div>
-      ${todayLabel}
+    <div style="padding:10px 12px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;">
+      ${alreadyLoggedTonight
+        ? `<div style="font-size:11px;color:#27500A;font-weight:600;margin-bottom:4px;">✅ Tonight logged</div>
+           <div style="font-size:14px;font-weight:600;color:var(--text);">${last.treatment}</div>
+           <div style="font-size:11px;color:var(--muted);margin-top:2px;">Tomorrow → use: <strong>${nextTreatment}</strong></div>`
+        : `<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Tonight → use</div>
+           <div style="font-size:15px;font-weight:600;color:var(--accent);">✨ ${nextTreatment}</div>`
+      }
     </div>
-    ${recent.slice(1).map(e=>`<div style="font-size:12px;color:var(--muted);padding:2px 0;">${e.date}: ${e.treatment}</div>`).join('')}
+    <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Recent history</div>
+    ${displayHistory.map(e=>`
+      <div style="font-size:12px;color:var(--muted);padding:3px 0;border-bottom:0.5px solid var(--border);">
+        ${e.date} · ${e.treatment}
+      </div>`).join('')}
   `;
 }
 
@@ -3051,14 +3131,9 @@ async function runSkinAnalysis(input, isHistorical=false){
   status.textContent=`✨ Analyzing ${isHistorical?'historical photo':'your skin'}... this takes about 15 seconds`;
 
   try {
-    const base64 = await new Promise((res,rej)=>{
-      const r=new FileReader();
-      r.onload=()=>res(r.result.split(',')[1]);
-      r.onerror=rej;
-      r.readAsDataURL(file);
-    });
-    const mimeType = file.type || 'image/jpeg';
-    const photoDataUrl = `data:${mimeType};base64,${base64}`;
+    const photoDataUrl = await compressImage(file, 800, 0.8);
+    const base64 = photoDataUrl.split(',')[1];
+    const mimeType = 'image/jpeg';
 
     const response = await fetch(`${BACKEND}/api/skin-analysis`,{
       method:'POST',
@@ -3302,19 +3377,43 @@ function uploadHairGoal(slot){
 
 async function saveHairGoalPhoto(input){
   const file = input.files[0]; if(!file) return;
-  const base64 = await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
-  const mimeType = file.type||'image/jpeg';
-  const dataUrl = `data:${mimeType};base64,${base64}`;
 
-  // Save goal photo
-  const goals = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`).then(r=>r.json()).then(d=>d.data&&!Array.isArray(d.data)?d.data:{}).catch(()=>({}));
+  // Compress image before saving to stay under Blob size limits
+  const dataUrl = await compressImage(file, 600, 0.75);
+  const base64 = dataUrl.split(',')[1];
+  const mimeType = 'image/jpeg';
+
+  // Load existing goals first (preserves other slots)
+  const goals = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`)
+    .then(r=>r.json())
+    .then(d=>d.data&&!Array.isArray(d.data)?d.data:{})
+    .catch(()=>({}));
+
   goals[_currentHairGoalSlot] = { dataUrl, mimeType, base64, slot: _currentHairGoalSlot };
+
   await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'hairgoals',data:goals})});
 
-  // Display
   const el = document.getElementById(`goal-${_currentHairGoalSlot}`);
   if(el){ el.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`; el.style.border='2px solid var(--accent)'; }
   input.value='';
+}
+
+// Compress image to max width/height and quality
+function compressImage(file, maxDim=800, quality=0.8){
+  return new Promise(res=>{
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      const scale = Math.min(1, maxDim/Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width*scale);
+      canvas.height = Math.round(img.height*scale);
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      URL.revokeObjectURL(url);
+      res(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = url;
+  });
 }
 
 async function loadHairGoalPhotos(){
@@ -3415,9 +3514,9 @@ async function runHairAnalysis(input, isHistorical=false){
   status.textContent='✨ Analyzing your hair... this takes about 15 seconds';
 
   try {
-    const base64 = await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
-    const mimeType = file.type||'image/jpeg';
-    const photoDataUrl = `data:${mimeType};base64,${base64}`;
+    const photoDataUrl = await compressImage(file, 800, 0.8);
+    const base64 = photoDataUrl.split(',')[1];
+    const mimeType = 'image/jpeg';
 
     // Get nearest goal photo for comparison
     const goalPhoto = await getNearestHairGoal();
@@ -4323,8 +4422,19 @@ const CPAP_ITEMS = [
   { key:'tubing',           label:'Tubing',               days:90,  interval:'3 months' },
   { key:'water_chamber',    label:'Water chamber',        days:180, interval:'6 months' },
   { key:'filter_disposable',label:'Disposable filter',   days:14,  interval:'2 weeks'  },
-  { key:'filter_nondisposable',label:'Non-disp. filter', days:180, interval:'6 months' },
 ];
+
+async function replaceCPAPItemDate(key){
+  const input = document.getElementById(`cpap-date-${key}`);
+  if(!input?.value){ alert('Please select a date first.'); return; }
+  const equipment = JSON.parse(localStorage.getItem('glowCPAPEquipment')||'{}');
+  equipment[key] = safeDate(input.value).toISOString();
+  localStorage.setItem('glowCPAPEquipment', JSON.stringify(equipment));
+  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'cpap_equipment',data:equipment})}).catch(()=>{});
+  input.value='';
+  buildCPAPEquipmentStatus();
+  toast('cpap-replace-toast');
+}
 
 async function replaceCPAPItem(key){
   const equipment = JSON.parse(localStorage.getItem('glowCPAPEquipment')||'{}');
@@ -4529,30 +4639,36 @@ async function buildMyAirCharts(){
 
 function toggleMed(id){
   const el = document.getElementById(id);
-  if(el) el.classList.toggle('on');
-  updateMedsStatus();
+  if(!el) return;
+  el.classList.toggle('done');
+  updateMedsProgress();
 }
 
-function updateMedsStatus(){
-  const meds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo'];
-  const taken = meds.filter(id=>document.getElementById(id)?.classList.contains('on')).length;
-  const el = document.getElementById('meds-status');
+function updateMedsProgress(){
+  const allMeds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo',
+    'med-multivitamin','med-biotin','med-vitc','med-collagen',
+    'med-rosuvastatin','med-miralax','med-melatonin-eve','med-sleep-gummies-eve'];
+  const required = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo','med-rosuvastatin'];
+  const done = allMeds.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
+  const reqDone = required.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
+  const el = document.getElementById('meds-progress');
   if(!el) return;
-  if(taken===0) el.textContent='Tap each medication when taken today';
-  else if(taken===meds.length){ el.textContent='✅ All medications taken today'; el.style.color='#27500A'; }
-  else { el.textContent=`${taken}/${meds.length} medications logged`; el.style.color='var(--muted)'; }
+  if(reqDone === required.length){
+    el.innerHTML='✅ All Rx meds taken today' + (done > required.length ? ` · ${done - required.length} supplements also logged`:'');
+    el.style.color='#27500A';
+  } else {
+    el.innerHTML=`${reqDone}/${required.length} Rx meds taken · ${done} total logged today`;
+    el.style.color='var(--muted)';
+  }
 }
 
 async function saveMedsChecklist(){
-  const meds = {
-    irbesartan: document.getElementById('med-irbesartan')?.classList.contains('on')||false,
-    metoprolol: document.getElementById('med-metoprolol')?.classList.contains('on')||false,
-    amlodipine: document.getElementById('med-amlodipine')?.classList.contains('on')||false,
-    osteo: document.getElementById('med-osteo')?.classList.contains('on')||false,
-    date: nowStr()
-  };
-  // Save to localStorage for today
-  localStorage.setItem('glowMedsToday', JSON.stringify(meds));
+  const allMeds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo',
+    'med-multivitamin','med-biotin','med-vitc','med-collagen',
+    'med-rosuvastatin','med-miralax','med-melatonin-eve','med-sleep-gummies-eve'];
+  const state = { date: nowStr() };
+  allMeds.forEach(id=>{ state[id] = document.getElementById(id)?.classList.contains('done')||false; });
+  localStorage.setItem('glowMedsToday', JSON.stringify(state));
   toast('meds-toast');
 }
 
@@ -4560,17 +4676,65 @@ function loadMedsChecklist(){
   const saved = localStorage.getItem('glowMedsToday');
   if(!saved) return;
   try {
-    const meds = JSON.parse(saved);
-    // Only restore if saved today
-    if(meds.date !== nowStr()) return;
-    if(meds.irbesartan) document.getElementById('med-irbesartan')?.classList.add('on');
-    if(meds.metoprolol) document.getElementById('med-metoprolol')?.classList.add('on');
-    if(meds.amlodipine) document.getElementById('med-amlodipine')?.classList.add('on');
-    if(meds.osteo) document.getElementById('med-osteo')?.classList.add('on');
-    updateMedsStatus();
+    const state = JSON.parse(saved);
+    if(state.date !== nowStr()) return; // Reset daily
+    Object.keys(state).forEach(key=>{
+      if(key==='date') return;
+      if(state[key]) document.getElementById(key)?.classList.add('done');
+    });
+    updateMedsProgress();
   } catch(e){}
 }
 
+
+// ── ZEPBOUND SIDE EFFECTS ─────────────────────────────────────────────
+async function saveZepSideEffects(){
+  const gi = gT('zep-gi-tags');
+  const other = gT('zep-other-tags');
+  const severity = document.querySelector('#zep-severity-tags .on')?.textContent||'';
+  const miralax = document.getElementById('zep-miralax-today')?.classList.contains('on')||false;
+  const note = document.getElementById('zep-side-note')?.value.trim()||'';
+  if(!gi.length && !other.length && !note) return;
+  const entry = { date:nowStr(), isoDate:new Date().toISOString(), gi, other, severity, miralax, note };
+  const existing = await fetch(`${BACKEND}/api/sync?pillar=zep_side_effects`)
+    .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
+  existing.push(entry);
+  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'zep_side_effects',data:existing})}).catch(()=>{});
+  toast('zep-side-toast');
+  document.getElementById('zep-side-note').value='';
+  document.getElementById('zep-miralax-today')?.classList.remove('on');
+  ['zep-gi-tags','zep-other-tags','zep-severity-tags'].forEach(id=>
+    document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'))
+  );
+  loadZepSideHistory();
+}
+
+async function loadZepSideHistory(){
+  const el = document.getElementById('zep-side-history');
+  if(!el) return;
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=zep_side_effects`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!data||!data.length){ el.innerHTML=''; return; }
+    const recent = data.slice(-5).reverse();
+    const sColor = s=>s==='Severe'?'#7F1D1D':s==='Moderate'?'#92400E':'var(--muted)';
+    el.innerHTML = `
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Recent log</div>
+      ${recent.map(e=>{
+        const symptoms=[...(e.gi||[]),...(e.other||[])].filter(s=>!s.includes('✓'));
+        return `<div style="padding:8px 0;border-bottom:0.5px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;">
+            <div style="font-size:12px;font-weight:600;">${e.date}</div>
+            ${e.severity?`<span style="font-size:11px;color:${sColor(e.severity)};">${e.severity}</span>`:''}
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">${symptoms.length?symptoms.join(' · '):'No symptoms logged'}</div>
+          ${e.miralax?'<div style="font-size:11px;color:#6B9E78;margin-top:2px;">💊 Miralax taken</div>':''}
+          ${e.note?`<div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;">${e.note}</div>`:''}
+        </div>`;
+      }).join('')}`;
+  } catch(e){}
+}
 
 async function logZepDose(mg){
   // Use entered date or today
