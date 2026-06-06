@@ -457,8 +457,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="stat-strip">
       <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
-      <div class="stat-tile"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src" id="s-steps-src">Apple Health</div></div>
-      <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src" id="s-sleep-src">log below</div></div>
+      <div class="stat-tile"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-steps-src"></div></div>
+      <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-sleep-src"></div></div>
       <div class="stat-tile"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses today</div><div class="stat-src">💧 Hydration</div></div>
     </div>
     <div class="stat-strip" style="margin-top:6px;">
@@ -2393,8 +2393,8 @@ function smartDate(dateStr){
   const todayStr=nowStr();
   const yest=new Date(); yest.setDate(yest.getDate()-1);
   const yesterdayStr=`${yest.getFullYear()}-${String(yest.getMonth()+1).padStart(2,'0')}-${String(yest.getDate()).padStart(2,'0')}`;
-  if(dateStr===todayStr) return 'today';
-  if(dateStr===yesterdayStr) return 'yesterday';
+  if(dateStr===todayStr) return 'Today';
+  if(dateStr===yesterdayStr) return 'Yesterday';
   return safeDate(dateStr).toLocaleDateString('en-US',{month:'short',day:'numeric'});
 }
 
@@ -4320,9 +4320,9 @@ async function checkLastUpload(){
     let uploadStr = '';
     if(uploadedAt){
       const ua = new Date(uploadedAt);
-      const uaDate = ua.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      const uaDateStr = ua.toISOString().slice(0,10);
       const uaTime = ua.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
-      uploadStr = `Uploaded ${uaDate} at ${uaTime} · `;
+      uploadStr = `Uploaded ${smartDate(uaDateStr)} at ${uaTime} · `;
     }
     el.textContent = `${uploadStr}Data: ${earliest} → ${latest} (${rows.length} days)`;
     el.style.color = 'var(--muted)';
@@ -6102,9 +6102,10 @@ async function updateUploadStatusBanner(){
       const r = await fetch(`${BACKEND}/api/health-data`);
       if(r.ok){ const {uploadedAt} = await r.json(); if(uploadedAt){
         const ua = new Date(uploadedAt);
-        const uaDate = ua.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        const uaDateStr = ua.toISOString().slice(0,10);
+        const uaDateLabel = smartDate(uaDateStr);
         const uaTime = ua.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
-        uploadedAtStr = `${uaDate} at ${uaTime}`;
+        uploadedAtStr = `${uaDateLabel} at ${uaTime}`;
       }}
     } catch(e){}
 
@@ -6155,9 +6156,9 @@ async function loadTodaySleepFromCSV(){
     const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
     if(latestWeight){
       if(weightEl) weightEl.textContent = parseFloat(latestWeight.weight_lbs).toFixed(1);
-      if(weightSrcEl) weightSrcEl.textContent = `Withings · ${smartDate(latestWeight.date)}`;
+      if(weightSrcEl) weightSrcEl.textContent = 'Withings';
       const weightDateEl = document.getElementById('s-weight-date');
-      if(weightDateEl) weightDateEl.textContent = '';
+      if(weightDateEl) weightDateEl.textContent = smartDate(latestWeight.date);
     }
 
     // Steps — prefer today, fall back to most recent
@@ -6166,7 +6167,7 @@ async function loadTodaySleepFromCSV(){
     const latestSteps = todaySteps || rows.find(r=>parseInt(r.steps)>0);
     if(latestSteps){
       if(stepsEl) stepsEl.textContent = parseInt(latestSteps.steps).toLocaleString();
-      if(stepsSrcEl) stepsSrcEl.textContent = `Apple Health · ${smartDate(latestSteps.date)}`;
+      if(stepsSrcEl) stepsSrcEl.textContent = smartDate(latestSteps.date);
     }
 
     // Sleep from CSV — only if no manual entry today
@@ -6175,9 +6176,9 @@ async function loadTodaySleepFromCSV(){
       const latest = withSleep[0];
       if(sleepEl && (sleepEl.textContent==='—'||sleepEl.textContent==='')){
         sleepEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
-        if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${smartDate(latest.date)}`;
-      } else if(sleepSrcEl && sleepSrcEl.textContent==='log below'){
-        if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${smartDate(latest.date)}`;
+        if(sleepSrcEl) sleepSrcEl.textContent = smartDate(latest.date);
+      } else if(sleepSrcEl && (sleepSrcEl.textContent===''||sleepSrcEl.textContent==='log below')){
+        if(sleepSrcEl) sleepSrcEl.textContent = smartDate(latest.date);
       }
     }
   } catch(e){ console.warn('loadTodaySleepFromCSV error:', e); }
