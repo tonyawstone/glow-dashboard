@@ -2093,6 +2093,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div class="tog" id="journaled-today"><div class="tok"></div></div>
         </div>
       </div>
+      <!-- App links -->
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <a href="dayone://journal" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">📖 Open Day One</a>
+        <a href="https://www.wellspoken.me" target="_blank" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">🗣 Wellspoken</a>
+      </div>
     </div>
 
     <!-- 7 Pillars weekly self-care -->
@@ -2332,7 +2337,8 @@ req.onupgradeneeded=e=>{
   });
   if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});
 };
-req.onsuccess=e=>{db=e.target.result;boot();};
+req.onsuccess=e=>{db=e.target.result;boot().catch(err=>console.error('Boot error:',err));};
+req.onerror=e=>console.error('IndexedDB error:',e);
 
 function dbAdd(store,data){return new Promise(r=>{const t=db.transaction(store,'readwrite');t.objectStore(store).add({...data,ts:Date.now()});t.oncomplete=r;});}
 function dbAll(store){return new Promise(r=>{const t=db.transaction(store,'readonly');const rq=t.objectStore(store).getAll();rq.onsuccess=()=>r(rq.result);});}
