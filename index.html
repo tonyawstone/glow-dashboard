@@ -456,7 +456,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <span style="font-size:16px;">📷</span>
     </div>
     <div class="stat-strip">
-      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date" style="font-size:9px;opacity:0.7;"></div></div>
+      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
       <div class="stat-tile"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src" id="s-steps-src">Apple Health</div></div>
       <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src" id="s-sleep-src">log below</div></div>
       <div class="stat-tile"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses today</div><div class="stat-src">💧 Hydration</div></div>
@@ -468,7 +468,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="stat-src">May 19, 2026 🎉</div>
       </div>
       <div class="stat-tile" style="grid-column:span 2;">
-        <div class="stat-val" id="today-loss-val" style="font-size:20px;">−30.7</div>
+        <div class="stat-val" id="today-loss-val" style="font-size:20px;">30.7</div>
         <div class="stat-lbl">lbs lost · <span id="zep-day-count">Day 224</span></div>
         <div class="stat-src"><span id="zep-tile-lbl">Month 7 · since Oct 25, 2025</span> · Zepbound</div>
       </div>
@@ -2386,6 +2386,16 @@ viewingDate.setHours(0,0,0,0);
 function isToday(d){
   const t=new Date(); t.setHours(0,0,0,0);
   return d.getTime()===t.getTime();
+}
+
+function smartDate(dateStr){
+  if(!dateStr) return '';
+  const todayStr=nowStr();
+  const yest=new Date(); yest.setDate(yest.getDate()-1);
+  const yesterdayStr=`${yest.getFullYear()}-${String(yest.getMonth()+1).padStart(2,'0')}-${String(yest.getDate()).padStart(2,'0')}`;
+  if(dateStr===todayStr) return 'today';
+  if(dateStr===yesterdayStr) return 'yesterday';
+  return safeDate(dateStr).toLocaleDateString('en-US',{month:'short',day:'numeric'});
 }
 
 function changeDate(dir){
@@ -6144,11 +6154,10 @@ async function loadTodaySleepFromCSV(){
     // Weight — most recent entry with value
     const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
     if(latestWeight){
-      const d = safeDate(latestWeight.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
       if(weightEl) weightEl.textContent = parseFloat(latestWeight.weight_lbs).toFixed(1);
-      if(weightSrcEl) weightSrcEl.textContent = 'Withings';
+      if(weightSrcEl) weightSrcEl.textContent = `Withings · ${smartDate(latestWeight.date)}`;
       const weightDateEl = document.getElementById('s-weight-date');
-      if(weightDateEl) weightDateEl.textContent = d;
+      if(weightDateEl) weightDateEl.textContent = '';
     }
 
     // Steps — prefer today, fall back to most recent
@@ -6156,25 +6165,19 @@ async function loadTodaySleepFromCSV(){
     const todaySteps = rows.find(r=>r.date===todayStr&&parseInt(r.steps)>0);
     const latestSteps = todaySteps || rows.find(r=>parseInt(r.steps)>0);
     if(latestSteps){
-      const isToday = latestSteps.date===todayStr;
-      const isYesterday = latestSteps.date===(() => { const d=new Date(); d.setDate(d.getDate()-1); const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; })();
-      const d = safeDate(latestSteps.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
       if(stepsEl) stepsEl.textContent = parseInt(latestSteps.steps).toLocaleString();
-      if(stepsSrcEl) stepsSrcEl.textContent = isToday ? 'Apple Health · today' : isYesterday ? `Apple Health · yesterday` : `Apple Health · ${d}`;
+      if(stepsSrcEl) stepsSrcEl.textContent = `Apple Health · ${smartDate(latestSteps.date)}`;
     }
 
     // Sleep from CSV — only if no manual entry today
     const withSleep = rows.filter(r=>parseFloat(r.sleep_hrs)>0);
     if(withSleep.length){
       const latest = withSleep[0];
-      const d = safeDate(latest.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      // Only update if not already set by manual entry
       if(sleepEl && (sleepEl.textContent==='—'||sleepEl.textContent==='')){
         sleepEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
-        if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${d}`;
+        if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${smartDate(latest.date)}`;
       } else if(sleepSrcEl && sleepSrcEl.textContent==='log below'){
-        // Has value from manual but update source label with date
-        if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${d}`;
+        if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${smartDate(latest.date)}`;
       }
     }
   } catch(e){ console.warn('loadTodaySleepFromCSV error:', e); }
