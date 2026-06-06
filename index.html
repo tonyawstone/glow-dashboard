@@ -5925,29 +5925,35 @@ async function updateBPBanners(){
     const todayBP = bps.filter(b=>b.date===today).pop();
     const lastBP = bps.slice().reverse().find(b=>b.sys&&b.dia);
 
+    // Also check CSV BP data for today
+    const csvBPs = await getCSVBPData();
+    const todayCSVBP = csvBPs.find(b=>b.date===today&&b.sys&&b.dia);
+    const lastCSVBP = csvBPs.find(b=>b.sys&&b.dia);
+
+    // Use today's reading from either source
+    const todayReading = todayBP?.sys ? todayBP : todayCSVBP;
+    const lastReading = lastBP || lastCSVBP;
+
     // Today pillar banners
     const todayBanner = document.getElementById('today-bp-banner');
     const todayReminder = document.getElementById('today-bp-reminder');
     const todayVal = document.getElementById('today-bp-value');
     const todayDate = document.getElementById('today-bp-date');
 
-    if(todayBP && todayBP.sys){
-      // Today's reading logged — show banner, hide reminder
+    if(todayReading && todayReading.sys){
       if(todayBanner) todayBanner.style.display='flex';
       if(todayReminder) todayReminder.style.display='none';
-      if(todayVal) todayVal.textContent = `${todayBP.sys}/${todayBP.dia}`;
-      if(todayDate) todayDate.textContent = `Today${todayBP.time?' · '+todayBP.time:''}`;
-      const sys = parseInt(todayBP.sys);
+      if(todayVal) todayVal.textContent = `${todayReading.sys}/${todayReading.dia}`;
+      if(todayDate) todayDate.textContent = `Today${todayReading.time?' · '+todayReading.time:''}`;
+      const sys = parseInt(todayReading.sys);
       if(todayVal) todayVal.style.color = sys>=140?'#7F1D1D':sys>=130?'#92400E':sys>=120?'#6B9E78':'#27500A';
-    } else if(lastBP){
-      // No reading today but have a previous one — show last reading quietly + reminder
+    } else if(lastReading){
       if(todayBanner) todayBanner.style.display='flex';
       if(todayReminder) todayReminder.style.display='block';
-      if(todayVal) todayVal.textContent = `${lastBP.sys}/${lastBP.dia}`;
-      if(todayDate) todayDate.textContent = fmtOutfitDate(lastBP.date)||lastBP.date;
+      if(todayVal) todayVal.textContent = `${lastReading.sys}/${lastReading.dia}`;
+      if(todayDate) todayDate.textContent = fmtOutfitDate(lastReading.date)||lastReading.date;
       if(todayVal) todayVal.style.color='var(--muted)';
     } else {
-      // No readings at all
       if(todayBanner) todayBanner.style.display='none';
       if(todayReminder) todayReminder.style.display='block';
       todayReminder.innerHTML = `❤️ No BP reading today — tap to log`;
