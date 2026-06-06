@@ -434,7 +434,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div id="upload-status-banner" style="display:none;align-items:center;gap:8px;margin-bottom:6px;">
       <div style="flex:1;display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);font-size:11px;color:var(--muted);">
         <div id="upload-status-text">⏳ Checking last upload...</div>
-        <div id="upload-status-date" style="color:var(--muted);font-weight:500;font-size:11px;opacity:0.85;"></div>
+        <div id="upload-status-date" style="color:var(--muted);font-weight:400;font-size:11px;"></div>
       </div>
       <button class="guide-btn" onclick="openGuide('today')">?</button>
     </div>
@@ -6114,7 +6114,7 @@ async function updateUploadStatusBanner(){
     const dateStr = uploadDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     if(diffDays === 0){
       textEl.textContent = '✅ Apple Health data is current';
-      if(dateEl) dateEl.textContent = uploadedAtStr ? `Updated ${uploadedAtStr}` : `Updated today · ${dateStr}`;
+      if(dateEl) dateEl.textContent = uploadedAtStr ? uploadedAtStr : dateStr;
       if(innerBanner){ innerBanner.style.background='rgba(107,158,120,0.08)'; innerBanner.style.borderColor='rgba(107,158,120,0.3)'; }
     } else if(diffDays === 1){
       textEl.textContent = '🕐 Last upload: yesterday';
