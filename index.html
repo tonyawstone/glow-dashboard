@@ -538,11 +538,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content" id="vc-today-weekly">
     <div class="section-label">This week</div>
     <div class="card">
-      <div class="card-title">Weekly AI insight</div>
-      <div id="weekly-summary"><div class="log-empty">Log daily check-ins to generate your weekly insight.</div></div>
-      <button class="btn-ai" onclick="weeklyInsight()">Generate weekly insight ↗</button>
+      <div class="card-title">This week's summary</div>
+      <div id="weekly-summary"><div class="log-empty">Log daily check-ins to see your weekly summary.</div></div>
     </div>
-    <div class="card"><div class="card-title">Treatment streaks this week</div><div id="weekly-treatments"><div class="log-empty">Log daily to see your streaks.</div></div></div>
+    <div class="card"><div class="card-title">Treatment streaks</div><div id="weekly-treatments"><div class="log-empty">Log daily to see your streaks.</div></div>
+      <button class="btn-ai" style="margin-top:12px;" onclick="weeklyInsight()">Generate AI weekly insight ↗</button>
+      <div id="weekly-ai-output" style="display:none;" class="coach-response"></div>
+    </div>
   </div>
   <div class="view-content" id="vc-today-monthly">
     <div class="section-label">May 2026</div>
@@ -2837,18 +2839,21 @@ async function buildWeeklyTodayView(){
   const avgSys = weekBPs.length ? Math.round(weekBPs.reduce((a,b)=>a+Number(b.sys),0)/weekBPs.length) : null;
   const avgDia = weekBPs.length ? Math.round(weekBPs.reduce((a,b)=>a+Number(b.dia),0)/weekBPs.length) : null;
 
-  // Build summary card
+  // Build summary card — always update
   const summaryEl = document.getElementById('weekly-summary');
-  if(summaryEl && summaryEl.querySelector('.log-empty')){
-    summaryEl.innerHTML = `
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
-        <div style="font-size:12px;font-weight:600;color:var(--muted);width:100%;margin-bottom:2px;">This week's mood</div>
-        ${topMoods.map(m=>`<span class="chip">${m}</span>`).join('')}
-      </div>
-      ${avgSys?`<div style="font-size:13px;color:var(--text);margin-bottom:6px;">❤️ Avg BP this week: <strong>${avgSys}/${avgDia}</strong></div>`:''}
-      <div style="font-size:13px;color:var(--text);">📋 <strong>${thisWeek.length}</strong> check-in${thisWeek.length!==1?'s':''} logged this week</div>
-      <button class="btn-ai" style="margin-top:12px;" onclick="weeklyInsight()">Generate AI weekly insight ↗</button>
-    `;
+  if(summaryEl){
+    if(!thisWeek.length){
+      summaryEl.innerHTML='<div class="log-empty">No check-ins this week yet.</div>';
+    } else {
+      summaryEl.innerHTML = `
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+          <div style="font-size:12px;font-weight:600;color:var(--muted);width:100%;margin-bottom:2px;">This week's mood</div>
+          ${topMoods.map(m=>`<span class="chip">${m}</span>`).join('')}
+        </div>
+        ${avgSys?`<div style="font-size:13px;color:var(--text);margin-bottom:6px;">❤️ Avg BP this week: <strong>${avgSys}/${avgDia}</strong></div>`:''}
+        <div style="font-size:13px;color:var(--text);">📋 <strong>${thisWeek.length}</strong> check-in${thisWeek.length!==1?'s':''} logged this week</div>
+      `;
+    }
   }
 }
 
@@ -3416,7 +3421,7 @@ async function saveReflection(){
 // ── LOAD LOGS ─────────────────────────────────────────────────────────
 async function loadLogs(){
   const checkins=await dbAll('checkins');
-  renderLog('checkin-log',checkins,e=>logItem(e.time?`${e.date} · ${e.time}`:e.date,[...e.mood,...(e.zep?['Zepbound']:[]),...(e.cpap?['CPAP ✓']:[]),...(e.meds?['Meds ✓']:[]),...(e.exercise?['Exercised ✓']:[])],e.note));
+  renderLog('checkin-log',checkins,e=>logItem(e.time?`${fmtOutfitDate(e.date)} · ${e.time}`:fmtOutfitDate(e.date),[...e.mood,...(e.zep?['Zepbound']:[]),...(e.cpap?['CPAP ✓']:[]),...(e.meds?['Meds ✓']:[]),...(e.exercise?['Exercised ✓']:[])],e.note));
   const sleeps=await dbAll('sleeps');
   renderLog('sleep-log',sleeps,e=>logItem(e.date,[e.hrs+'h',e.cpap,e.cpapHours?e.cpapHours+'h CPAP':'',e.cpapAHI?'AHI '+e.cpapAHI:'',e.quality,...e.energy],e.note));
   const wardrobeplans=await dbAll('wardrobeplans');
@@ -3432,9 +3437,9 @@ async function loadLogs(){
   const minds=await dbAll('minds');
   renderLog('mind-log',minds,e=>logItem(e.date,[...e.vibe,...(e.energy?['Energy '+'★'.repeat(e.energy)]:[]),...(e.conf?['Conf '+'★'.repeat(e.conf)]:[]),...(e.stress?['Stress '+'★'.repeat(e.stress)]:[])],e.win+(e.gratitude?'\nGrateful: '+e.gratitude:'')+(e.intention?'\nIntention: '+e.intention:'')));
   const bps=await dbAll('bps');
-  renderLog('bp-log',bps,e=>logItem(e.date,[e.sys+'/'+e.dia,e.pulse?'Pulse '+e.pulse:'',e.time],''));
+  renderLog('bp-log',bps,e=>logItem(e.time?`${fmtOutfitDate(e.date)} · ${e.time}`:fmtOutfitDate(e.date),[e.sys+'/'+e.dia,e.pulse?'Pulse '+e.pulse:''],''));
   const exercises=await dbAll('exercises');
-  renderLog('exercise-log',exercises,e=>logItem(e.date,[...(e.summary||[]),e.time,e.intensity],e.note));
+  renderLog('exercise-log',exercises,e=>logItem(fmtOutfitDate(e.date),[...(e.summary||[]),e.time,e.intensity],e.note));
   const refs=await dbAll('reflections');
   renderLog('reflection-log',refs,e=>logItem(e.month,[],e.text));
 }
@@ -6746,14 +6751,15 @@ async function saveInjectionNotes(){
     if(res.ok){
       const {data} = await res.json();
       const zepData = Array.isArray(data) ? data : [];
-      // Find today's entry or add new
-      const idx = zepData.findIndex(e=>e.date===date);
+      // Match by isoDate prefix (YYYY-MM-DD) since that's how logZepDose stores it
+      const idx = zepData.findIndex(e=>e.isoDate?.slice(0,10)===date);
       if(idx>=0){
         zepData[idx].injectionPain = pain;
         zepData[idx].injectionSensation = sensation;
         zepData[idx].injectionNotes = notes;
       } else {
-        zepData.push({ date, injectionPain:pain, injectionSensation:sensation, injectionNotes:notes });
+        // No dose entry yet — create a notes-only entry
+        zepData.push({ isoDate: date+'T12:00:00.000Z', date, injectionPain:pain, injectionSensation:sensation, injectionNotes:notes });
       }
       fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({pillar:'zepbound',data:zepData})}).catch(()=>{});
