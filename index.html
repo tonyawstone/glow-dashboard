@@ -426,7 +426,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="upload-status-date" style="color:var(--accent);font-weight:500;"></div>
     </div>
     <!-- BP quick view -->
-    <div id="today-bp-banner" onclick="tab('health')" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;cursor:pointer;align-items:center;justify-content:space-between;">
+    <div id="today-bp-banner" onclick="tab('health');setTimeout(()=>document.getElementById('bp-entry-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;cursor:pointer;align-items:center;justify-content:space-between;">
       <div style="font-size:12px;color:var(--muted);">❤️ Last BP reading</div>
       <div>
         <span id="today-bp-value" style="font-size:15px;font-weight:600;color:var(--text);"></span>
@@ -434,7 +434,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
     <!-- BP reminder if not logged today -->
-    <div id="today-bp-reminder" style="display:none;padding:7px 12px;border-radius:8px;background:#FEF3C7;border:0.5px solid #E8A87C;margin-bottom:10px;cursor:pointer;font-size:12px;color:#92400E;" onclick="tab('health')">
+    <div id="today-bp-reminder" style="display:none;padding:7px 12px;border-radius:8px;background:#FEF3C7;border:0.5px solid #E8A87C;margin-bottom:10px;cursor:pointer;font-size:12px;color:#92400E;" onclick="tab('health');setTimeout(()=>document.getElementById('bp-entry-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)">
       ❤️ No BP reading today — tap to log
     </div>
     <!-- Outfit nudge -->
@@ -1144,7 +1144,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
 
     <!-- BP Log — after meds, before Zepbound -->
-    <div class="card">
+    <div class="card" id="bp-entry-card">
       <div class="card-title">❤️ Blood pressure · log today</div>
       <div id="bp-today-status" style="margin-bottom:10px;"></div>
       <div class="bp-row">
@@ -2297,6 +2297,15 @@ function applyView(){
 
 // ── UI HELPERS ────────────────────────────────────────────────────────
 function tog(b){b.classList.toggle('on');}
+function fmtOutfitDate(d){
+  if(!d)return '';
+  // Handle both YYYY-MM-DD (new) and legacy friendly formats
+  if(d.match(/^\d{4}-\d{2}-\d{2}$/)){
+    const dt=new Date(d+'T12:00:00');
+    return dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  }
+  return d; // already friendly format from old saves
+}
 function selectOutfitType(btn, type){
   solo('src-tags', btn);
   // Show keep/return only for DailyLook
@@ -2352,7 +2361,9 @@ function updateDateUI(){
 }
 
 function nowStr(){
-  return viewingDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  const d=viewingDate;
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
 }
 function logItem(date,chips,note){return`<div class="log-item"><div class="log-date">${date}</div><div class="chips">${chips.filter(Boolean).map(c=>'<span class="chip">'+c+'</span>').join('')}</div>${note?'<div class="log-note">'+note+'</div>':''}</div>`;}
 function renderLog(id,items,fn){
@@ -2541,7 +2552,7 @@ function outfitCardHTML(e, slotId){
     <div class="outfit-img" style="cursor:default;">${imgContent}${keepBadge}${wearBadge}</div>
     <div class="outfit-info">
       <div class="outfit-name">${e.desc}</div>
-      <div class="outfit-meta">${e.date}${e.src?' · '+e.src:''} ${starsHTML}</div>
+      <div class="outfit-meta">${fmtOutfitDate(e.date)}${e.src?' · '+e.src:''} ${starsHTML}</div>
       ${tagsHTML}
       ${e.notes?`<div style="font-size:11px;color:var(--muted);margin-top:5px;font-style:italic;">"${e.notes}"</div>`:''}
     </div>
@@ -2570,7 +2581,8 @@ async function renderLookbook(){
   const weeklyGrid=document.getElementById('weekly-outfits-grid');
   if(weeklyGrid){
     const today=new Date();const weekStart=new Date(today);weekStart.setDate(today.getDate()-today.getDay());
-    const weekStr=weekStart.toISOString().slice(0,10);
+    const y=weekStart.getFullYear(),m=String(weekStart.getMonth()+1).padStart(2,'0'),d=String(weekStart.getDate()).padStart(2,'0');
+    const weekStr=`${y}-${m}-${d}`;
     const thisWeek=worn.filter(e=>e.date>=weekStr);
     if(thisWeek.length===0){
       weeklyGrid.innerHTML='<div class="lookbook-empty" style="grid-column:1/-1;"><i class="ti ti-shirt" aria-hidden="true"></i>No outfits logged this week yet</div>';
@@ -2605,7 +2617,7 @@ function inspoCardHTML(e, idx){
     <div style="aspect-ratio:3/4;overflow:hidden;">${imgContent}</div>
     <div style="padding:10px;display:flex;flex-direction:column;gap:4px;">
       <div style="font-size:13px;font-weight:500;color:var(--text);">${e.desc}</div>
-      <div style="font-size:11px;color:var(--muted);">${e.date}${e.src?' · '+e.src:''} ${starsHTML}</div>
+      <div style="font-size:11px;color:var(--muted);">${fmtOutfitDate(e.date)}${e.src?' · '+e.src:''} ${starsHTML}</div>
       ${allTags.length?`<div class="outfit-tags">${allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('')}</div>`:''}
       ${e.notes?`<div style="font-size:11px;color:var(--muted);font-style:italic;">"${e.notes}"</div>`:''}
       ${hasBuyNotes?`<div style="font-size:11px;color:var(--accent);font-style:italic;">🛍 ${e.buyNotes}</div>`:''}
@@ -2744,7 +2756,7 @@ async function renderStyleCalendar(){
   titleEl.textContent=styleCalMonth.toLocaleDateString('en-US',{month:'long',year:'numeric'});
 
   const allOutfits=await dbAll('outfits');
-  const worn=(allOutfits||[]).filter(e=>e.keep!=='Inspo only'&&e.date&&e.date.startsWith(prefix));
+  const worn=(allOutfits||[]).filter(e=>(e.src==='My outfit'||(!e.src&&e.keep!=='Inspo only'))&&e.date&&e.date.startsWith(prefix));
 
   // Index by date string
   const byDate={};
@@ -2753,7 +2765,7 @@ async function renderStyleCalendar(){
   // Build calendar
   const firstDay=new Date(year,month,1).getDay(); // 0=Sun
   const daysInMonth=new Date(year,month+1,0).getDate();
-  const today=new Date().toISOString().slice(0,10);
+  const today=nowStr();
 
   let cells='';
   // Leading empty cells
@@ -2784,8 +2796,10 @@ async function renderStyleCalendar(){
         ${colorBar}
       </div>`;
     } else {
-      cells+=`<div class="cal-cell${isToday?' has-outfit':''}${!e?' empty-day':''}" style="background:var(--warm);${todayRing};cursor:default;">
+      const isPast=dateStr<today;
+      cells+=`<div class="cal-cell${isToday?' has-outfit':''}" style="background:var(--warm);${todayRing};cursor:default;">
         <div class="cal-date" style="color:var(--muted);text-shadow:none;">${d}</div>
+        ${isPast?`<span class="cal-no-photo">👗</span>`:''}
       </div>`;
     }
   }
@@ -4169,10 +4183,24 @@ async function runSkinAnalysis(input, isHistorical=false){
   }
 }
 
+function calcSkinScore(metrics){
+  if(!metrics) return 0;
+  return Math.round(
+    (metrics.hydration  || 0) * 0.15 +
+    (metrics.elasticity || 0) * 0.15 +
+    (metrics.texture    || 0) * 0.12 +
+    (metrics.acne       || 0) * 0.15 +
+    (metrics.wrinkles   || 0) * 0.15 +
+    (metrics.darkSpots  || 0) * 0.12 +
+    (metrics.pores      || 0) * 0.08 +
+    (metrics.redness    || 0) * 0.08
+  );
+}
+
 function renderSkinScanResults(scan, containerId, compact=false){
   const el = document.getElementById(containerId);
   if(!el) return;
-  const score = scan.overallScore || 0;
+  const score = scan.metrics ? calcSkinScore(scan.metrics) : (scan.overallScore || 0);
   const scoreColor = score>=80?'#27500A':score>=65?'#6B9E78':score>=50?'#92400E':'#7F1D1D';
   const scoreBg = score>=80?'#EAF3DE':score>=65?'rgba(107,158,120,0.15)':score>=50?'#FEF3C7':'#FEE2E2';
   const metrics = scan.metrics || {};
@@ -4266,7 +4294,7 @@ async function buildSkinCharts(){
     if(scoreCanvas){
       if(chartInstances['skin-score-chart']){chartInstances['skin-score-chart'].destroy();}
       const labels = data.map(s=>s.date);
-      const scores = data.map(s=>s.overallScore);
+      const scores = data.map(s=>s.metrics?calcSkinScore(s.metrics):(s.overallScore||0));
       const minScore = Math.max(0, Math.min(...scores) - 10);
       const maxScore = Math.min(100, Math.max(...scores) + 10);
       chartInstances['skin-score-chart'] = new Chart(scoreCanvas.getContext('2d'),{
@@ -4358,7 +4386,7 @@ async function buildSkinCharts(){
               ${s.photo?`<img src="${s.photo}" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;">`:'<div style="width:52px;height:52px;border-radius:10px;background:var(--warm);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;">📷</div>'}
               <div style="flex:1;">
                 <div style="font-size:13px;font-weight:600;">${s.date}</div>
-                <div style="font-size:12px;color:var(--muted);">Score: <strong>${s.overallScore}</strong> · Skin age: <strong>${s.skinAge}</strong></div>
+                <div style="font-size:12px;color:var(--muted);">Score: <strong>${s.metrics?calcSkinScore(s.metrics):(s.overallScore||0)}</strong> · Skin age: <strong>${s.skinAge}</strong></div>
               </div>
               <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
                 <div id="scan-badge-${i}" style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;display:none;"></div>
@@ -4376,7 +4404,7 @@ async function buildSkinCharts(){
           ${s.photo?`<img src="${s.photo}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;">`:''}
           <div style="flex:1;">
             <div class="log-date">${s.date}</div>
-            <div style="font-size:13px;">Score: <strong>${s.overallScore}</strong> · Skin age: <strong>${s.skinAge}</strong></div>
+            <div style="font-size:13px;">Score: <strong>${s.metrics?calcSkinScore(s.metrics):(s.overallScore||0)}</strong> · Skin age: <strong>${s.skinAge}</strong></div>
             <div style="font-size:12px;color:var(--muted);margin-top:2px;">${s.highlights||''}</div>
           </div>
         </div>`).join('');
@@ -4658,7 +4686,7 @@ async function runHairAnalysis(input, isHistorical=false){
 
 function renderHairScanResult(scan, containerId){
   const el = document.getElementById(containerId); if(!el) return;
-  const score = scan.overallScore||0;
+  const score = scan.metrics?calcSkinScore(scan.metrics):(scan.overallScore||0);
   const sColor = score>=80?'#27500A':score>=65?'#6B9E78':score>=50?'#92400E':'#7F1D1D';
   const sBg = score>=80?'#EAF3DE':score>=65?'rgba(107,158,120,0.15)':score>=50?'#FEF3C7':'#FEE2E2';
   const metrics = scan.metrics||{};
@@ -4848,12 +4876,12 @@ function showHairComparison(a, b){
       ${scan.photo?`<img src="${scan.photo}" class="skin-compare-photo">`:'<div style="width:100%;aspect-ratio:1;border-radius:10px;background:var(--border);margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:32px;">💇</div>'}
       <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:6px;">${scan.date}</div>
       <div style="text-align:center;margin-bottom:10px;">
-        <div style="font-size:24px;font-weight:700;color:${sColor(scan.overallScore)};background:${sBg(scan.overallScore)};border-radius:50%;width:52px;height:52px;line-height:52px;margin:0 auto;">${scan.overallScore}</div>
+        <div style="font-size:24px;font-weight:700;color:${sColor(scan.metrics?calcSkinScore(scan.metrics):(scan.overallScore||0))};background:${sBg(scan.metrics?calcSkinScore(scan.metrics):(scan.overallScore||0))};border-radius:50%;width:52px;height:52px;line-height:52px;margin:0 auto;">${scan.metrics?calcSkinScore(scan.metrics):(scan.overallScore||0)}</div>
         ${scan.lengthInches?`<div style="font-size:11px;color:var(--muted);margin-top:4px;">${scan.lengthInches}"</div>`:''}
       </div>
       <div style="font-size:11px;">${Object.entries(scan.metrics||{}).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:0.5px solid var(--border);"><span style="color:var(--muted);">${mL[k]||k}</span><strong>${v}</strong></div>`).join('')}</div>
     </div>`;
-  const sd=b.overallScore-a.overallScore;
+  const sd=(b.metrics?calcSkinScore(b.metrics):(b.overallScore||0))-(a.metrics?calcSkinScore(a.metrics):(a.overallScore||0));
   const ld=b.lengthInches&&a.lengthInches?b.lengthInches-a.lengthInches:null;
   const deltas=Object.keys(a.metrics||{}).map(k=>{const diff=(b.metrics[k]||0)-(a.metrics[k]||0);if(diff===0)return'';return`<div style="font-size:11px;padding:2px 0;color:${diff>0?'#27500A':'#7F1D1D'};font-weight:600;">${diff>0?'↑':'↓'} ${Math.abs(diff)} ${mL[k]||k}</div>`;}).filter(Boolean).join('');
   content.innerHTML=`${col(a,'Before · A','#6B9E78')}${col(b,'After · B','#9B8EC4')}
@@ -4923,7 +4951,7 @@ function showSkinComparison(a, b){
       ${scan.photo?`<img src="${scan.photo}" class="skin-compare-photo">`:'<div style="width:100%;aspect-ratio:1;border-radius:10px;background:var(--border);margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:32px;">📷</div>'}
       <div class="skin-compare-date">${scan.date}</div>
       <div style="text-align:center;margin-bottom:10px;">
-        <div style="font-size:28px;font-weight:700;color:${sColor(scan.overallScore)};background:${sBg(scan.overallScore)};border-radius:50%;width:56px;height:56px;line-height:56px;margin:0 auto;">${scan.overallScore}</div>
+        <div style="font-size:28px;font-weight:700;color:${sColor(scan.metrics?calcSkinScore(scan.metrics):(scan.overallScore||0))};background:${sBg(scan.metrics?calcSkinScore(scan.metrics):(scan.overallScore||0))};border-radius:50%;width:56px;height:56px;line-height:56px;margin:0 auto;">${scan.metrics?calcSkinScore(scan.metrics):(scan.overallScore||0)}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px;">Skin age: ${scan.skinAge}</div>
       </div>
       <div style="font-size:11px;">
@@ -4936,7 +4964,7 @@ function showSkinComparison(a, b){
     if(diff===0) return '';
     return `<div style="font-size:11px;padding:2px 0;color:${diff>0?'#27500A':'#7F1D1D'};font-weight:600;">${diff>0?'↑':'↓'} ${Math.abs(diff)} ${mL[k]||k}</div>`;
   }).filter(Boolean).join('');
-  const sd=after.overallScore-before.overallScore, ad=after.skinAge-before.skinAge;
+  const sd=(after.metrics?calcSkinScore(after.metrics):(after.overallScore||0))-(before.metrics?calcSkinScore(before.metrics):(before.overallScore||0)), ad=after.skinAge-before.skinAge;
   content.innerHTML=`
     ${col(before,'Before · '+before.date,'#6B9E78')}
     ${col(after,'After · '+after.date,'#9B8EC4')}
@@ -5370,7 +5398,7 @@ async function calculateGlowScore(save=false) {
       const {data} = await skinRes.json();
       if(data&&data.length){
         const latestScan = data[data.length-1];
-        const s = latestScan.overallScore || 50;
+        const s = latestScan.metrics ? calcSkinScore(latestScan.metrics) : (latestScan.overallScore || 50);
         if(s>=85) skinScore=20; else if(s>=75) skinScore=17;
         else if(s>=65) skinScore=14; else if(s>=50) skinScore=10; else skinScore=7;
       }
@@ -6970,8 +6998,12 @@ async function reanalyzeScan(idx){
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ imageBase64: base64, mimeType })
     });
-    const result = await res.json();
-    if(!result.overallScore) throw new Error('No score returned');
+    if(!res.ok) throw new Error('Analysis failed');
+    const {result} = await res.json();
+    if(!result||!result.metrics) throw new Error('No score returned');
+
+    // Calculate overallScore from metrics
+    result.overallScore = calcSkinScore(result.metrics);
 
     // Update this scan entry in Blob
     const blobRes = await fetch(`${BACKEND}/api/sync?pillar=skinscan`);
@@ -7007,7 +7039,7 @@ async function skinTreatmentInsight(period){
     const scanRes = await fetch(`${BACKEND}/api/sync?pillar=skinscan`);
     const scanData = await scanRes.json().then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
     const recentScans = scanData.slice(-8).map(s=>({
-      date: s.date, score: s.overallScore, skinAge: s.skinAge,
+      date: s.date, score: s.metrics?calcSkinScore(s.metrics):(s.overallScore||0), skinAge: s.skinAge,
       metrics: s.metrics, isoDate: s.isoDate
     }));
 
