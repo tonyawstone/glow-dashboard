@@ -285,8 +285,33 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .outfit-tag{font-size:10px;padding:2px 7px;border-radius:6px;background:var(--warm);color:var(--muted);border:0.5px solid var(--border);}
 .outfit-tag.wear-again{background:#EAF3DE;color:#27500A;font-weight:600;}
 .badge-wear{background:#EAF3DE;color:#27500A;}
-.lookbook-empty{text-align:center;padding:30px 16px;color:var(--muted);font-size:13px;}
-.lookbook-empty i{font-size:36px;display:block;margin-bottom:10px;opacity:0.4;}
+/* ── OUTFIT CALENDAR GRID ─────────────────────────── */
+.outfit-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px;}
+.cal-day-header{font-size:9px;color:var(--muted);text-align:center;padding:2px 0;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+.cal-cell{aspect-ratio:3/4;border-radius:4px;overflow:hidden;background:var(--warm);border:0.5px solid var(--border);cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;}
+.cal-cell.empty{background:transparent;border-color:transparent;cursor:default;}
+.cal-cell img{width:100%;height:100%;object-fit:cover;}
+.cal-cell .cal-no-photo{font-size:16px;opacity:0.5;}
+.cal-cell .cal-date{position:absolute;top:2px;left:3px;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);line-height:1;}
+.cal-cell .cal-color-bar{position:absolute;bottom:0;left:0;right:0;height:5px;display:flex;}
+.cal-cell .cal-color-bar span{flex:1;}
+.cal-cell.has-outfit{border-color:var(--accent);}
+.cal-month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cal-month-nav button{background:none;border:0.5px solid var(--border);border-radius:8px;padding:5px 12px;font-size:13px;color:var(--accent);cursor:pointer;}
+.cal-month-title{font-size:15px;font-weight:600;color:var(--text);}
+/* ── OUTFIT LIGHTBOX ──────────────────────────────── */
+.outfit-lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+.outfit-lightbox.open{display:flex;}
+.lightbox-photo{width:100%;max-width:340px;max-height:55vh;object-fit:contain;border-radius:14px;}
+.lightbox-no-photo{font-size:60px;margin-bottom:12px;}
+.lightbox-info{background:rgba(255,255,255,.95);border-radius:14px;padding:14px 16px;width:100%;max-width:340px;margin-top:12px;}
+.lightbox-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.lightbox-meta{font-size:12px;color:var(--muted);margin-bottom:8px;}
+.lightbox-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;}
+.lightbox-close{position:absolute;top:16px;right:20px;font-size:28px;color:#fff;cursor:pointer;line-height:1;background:none;border:none;}
+.cal-summary-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.cal-summary-chip{font-size:11px;padding:3px 9px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);color:var(--text);}
+.cal-summary-chip.accent{background:#EAF3DE;color:#27500A;border-color:#B8D9A0;}
 
 /* HAIR PROGRESSION */
 .progression-strip{display:flex;gap:9px;overflow-x:auto;padding-bottom:6px;margin:9px 0;scrollbar-width:none;}
@@ -511,6 +536,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
 <!-- ═══════════════ STYLE ═══════════════ -->
 <div id="s-style" class="sec">
+  <!-- Style-specific Inspo tab button — shown only when on Style pillar -->
+  <div id="style-inspo-bar" style="display:none;padding:0 16px 10px;"><button id="style-inspo-btn" class="btn-secondary" style="width:100%;font-size:13px;" onclick="toggleInspoView()">✨ View Inspo Board</button></div>
+
   <div class="view-content on" id="vc-style-daily">
     <div class="section-label">Style & Wardrobe</div>
     <div class="card">
@@ -535,7 +563,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div class="fl">Vibe</div>
       <div class="tags" id="outfit-vibe-tags">
-        <button class="tag" onclick="tog(this)">Polished</button><button class="tag" onclick="tog(this)">Cozy</button><button class="tag" onclick="tog(this)">Chic</button><button class="tag" onclick="tog(this)">Feminine</button><button class="tag" onclick="tog(this)">Sporty</button><button class="tag" onclick="tog(this)">Boho</button><button class="tag" onclick="tog(this)">Bold</button>
+        <button class="tag" onclick="tog(this)">Polished</button><button class="tag" onclick="tog(this)">Cozy</button><button class="tag" onclick="tog(this)">Relaxed</button><button class="tag" onclick="tog(this)">Chic</button><button class="tag" onclick="tog(this)">Feminine</button><button class="tag" onclick="tog(this)">Sporty</button><button class="tag" onclick="tog(this)">Boho</button><button class="tag" onclick="tog(this)">Bold</button>
       </div>
       <div class="fl">Season</div>
       <div class="tags" id="season-tags">
@@ -543,7 +571,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div class="fl">Color palette</div>
       <div class="tags" id="color-tags">
-        <button class="tag" onclick="tog(this)">Neutral</button><button class="tag" onclick="tog(this)">Black</button><button class="tag" onclick="tog(this)">White</button><button class="tag" onclick="tog(this)">Navy</button><button class="tag" onclick="tog(this)">Camel</button><button class="tag" onclick="tog(this)">Olive</button><button class="tag" onclick="tog(this)">Blush</button><button class="tag" onclick="tog(this)">Red</button><button class="tag" onclick="tog(this)">Denim</button><button class="tag" onclick="tog(this)">Multi</button><button class="tag" onclick="tog(this)">Pattern</button>
+        <button class="tag" onclick="tog(this)">Neutral</button><button class="tag" onclick="tog(this)">Black</button><button class="tag" onclick="tog(this)">White</button><button class="tag" onclick="tog(this)">Navy</button><button class="tag" onclick="tog(this)">Camel</button><button class="tag" onclick="tog(this)">Olive</button><button class="tag" onclick="tog(this)">Blush</button><button class="tag" onclick="tog(this)">Red</button><button class="tag" onclick="tog(this)">Light Blue</button><button class="tag" onclick="tog(this)">Denim</button><button class="tag" onclick="tog(this)">Multi</button><button class="tag" onclick="tog(this)">Pattern</button>
       </div>
       <div class="fl">Keep or return?</div>
       <div class="tags" id="keep-tags">
@@ -590,9 +618,36 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card"><div class="card-title">Wardrobe planning notes</div><div id="wardrobe-plan-log"><div class="log-empty">No wardrobe plans yet.</div></div></div>
   </div>
   <div class="view-content" id="vc-style-monthly">
-    <div class="section-label">May 2026 · DailyLook box</div>
+    <div class="section-label" id="style-month-label">Style · Monthly</div>
+
+    <!-- Month navigator + calendar -->
     <div class="card">
-      <div class="card-title">This month's box</div>
+      <div class="cal-month-nav">
+        <button onclick="changeStyleMonth(-1)">‹ Prev</button>
+        <div class="cal-month-title" id="cal-month-title">June 2026</div>
+        <button onclick="changeStyleMonth(1)">Next ›</button>
+      </div>
+      <!-- Summary chips -->
+      <div class="cal-summary-row" id="cal-summary-row"><div style="font-size:12px;color:var(--muted);">Log outfits to see your monthly style summary</div></div>
+      <!-- Day headers -->
+      <div class="outfit-cal-grid" id="outfit-cal-headers">
+        <div class="cal-day-header">Sun</div><div class="cal-day-header">Mon</div><div class="cal-day-header">Tue</div><div class="cal-day-header">Wed</div><div class="cal-day-header">Thu</div><div class="cal-day-header">Fri</div><div class="cal-day-header">Sat</div>
+      </div>
+      <!-- Calendar cells -->
+      <div class="outfit-cal-grid" id="outfit-cal-grid" style="margin-top:2px;"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Tap any outfit to expand · color bar = palette tags</div>
+    </div>
+
+    <!-- Highlights -->
+    <div class="card" id="month-highlights-card" style="display:none;">
+      <div class="card-title">This month's highlights</div>
+      <div id="month-wear-again" style="margin-bottom:10px;"></div>
+      <div id="month-top-rated"></div>
+    </div>
+
+    <!-- DailyLook box -->
+    <div class="card">
+      <div class="card-title">DailyLook box</div>
       <div class="fl">What arrived</div>
       <textarea id="box-arrived" rows="3" placeholder="List the pieces that arrived this month..."></textarea>
       <div class="fl">Keep vs return summary</div>
@@ -615,6 +670,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="stat-tile"><div class="stat-val" id="total-kept">0</div><div class="stat-lbl">Items kept</div></div>
         <div class="stat-tile"><div class="stat-val" id="total-returned">0</div><div class="stat-lbl">Returned</div></div>
       </div>
+    </div>
+  </div>
+  <div class="view-content" id="vc-style-inspo">
+    <div class="section-label">Inspo Board</div>
+    <div class="card">
+      <div class="card-title">Saved looks</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Outfits logged as "Inspo only" · tap a look to plan it</div>
+      <div id="inspo-grid"><div class="lookbook-empty"><i class="ti ti-sparkles" aria-hidden="true"></i>Log outfits tagged "Inspo only" to build your board</div></div>
     </div>
   </div>
 </div>
@@ -1660,67 +1723,84 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="card-title">🎯 Goal photos · tap to upload</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Upload your AI-generated goal photos for each milestone. Add notes to track expected growth rate and style details.</div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="hair-goals-strip">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;" id="hair-goals-strip">
 
         <!-- Aug 2026 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--accent);" onclick="uploadHairGoal('aug-2026')" id="goal-aug-2026"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
-          <div style="font-size:11px;color:var(--accent);margin-top:4px;font-weight:600;">Aug 2026</div>
-          <textarea id="goal-note-aug-2026" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('aug-2026',this.value)"></textarea>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('aug-2026')" id="goal-aug-2026"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--accent);margin-top:3px;font-weight:600;">Aug 2026</div>
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('aug-2026','Aug 2026')">Compare</button>
         </div>
 
         <!-- Nov 2026 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--accent);" onclick="uploadHairGoal('nov-2026')" id="goal-nov-2026"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
-          <div style="font-size:11px;color:var(--accent);margin-top:4px;font-weight:600;">Nov 2026</div>
-          <textarea id="goal-note-nov-2026" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('nov-2026',this.value)"></textarea>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('nov-2026')" id="goal-nov-2026"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--accent);margin-top:3px;font-weight:600;">Nov 2026</div>
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('nov-2026','Nov 2026')">Compare</button>
         </div>
 
         <!-- Feb 2027 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--accent);" onclick="uploadHairGoal('feb-2027')" id="goal-feb-2027"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
-          <div style="font-size:11px;color:var(--accent);margin-top:4px;font-weight:600;">Feb 2027</div>
-          <textarea id="goal-note-feb-2027" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('feb-2027',this.value)"></textarea>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('feb-2027')" id="goal-feb-2027"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--accent);margin-top:3px;font-weight:600;">Feb 2027</div>
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('feb-2027','Feb 2027')">Compare</button>
         </div>
 
         <!-- May 2027 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--accent);" onclick="uploadHairGoal('may-2027')" id="goal-may-2027"><i class="ti ti-sparkles" style="color:var(--accent);" aria-hidden="true"></i></div>
-          <div style="font-size:11px;color:var(--accent);margin-top:4px;font-weight:600;">May 2027</div>
-          <textarea id="goal-note-may-2027" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('may-2027',this.value)"></textarea>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('may-2027')" id="goal-may-2027"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--accent);margin-top:3px;font-weight:600;">May 2027</div>
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('may-2027','May 2027')">Compare</button>
         </div>
 
         <!-- Aug 2027 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--border);" onclick="uploadHairGoal('aug-2027')" id="goal-aug-2027"><i class="ti ti-sparkles" style="color:var(--muted);" aria-hidden="true"></i></div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;">Aug 2027</div>
-          <textarea id="goal-note-aug-2027" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('aug-2027',this.value)"></textarea>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('aug-2027')" id="goal-aug-2027"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;">Aug 2027</div>
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('aug-2027','Aug 2027')">Compare</button>
         </div>
 
         <!-- Nov 2027 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--border);" onclick="uploadHairGoal('nov-2027')" id="goal-nov-2027"><i class="ti ti-sparkles" style="color:var(--muted);" aria-hidden="true"></i></div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;">Nov 2027</div>
-          <textarea id="goal-note-nov-2027" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('nov-2027',this.value)"></textarea>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('nov-2027')" id="goal-nov-2027"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;">Nov 2027</div>
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('nov-2027','Nov 2027')">Compare</button>
         </div>
 
         <!-- Feb 2028 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--border);" onclick="uploadHairGoal('feb-2028')" id="goal-feb-2028"><i class="ti ti-sparkles" style="color:var(--muted);" aria-hidden="true"></i></div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;">Feb 2028</div>
-          <textarea id="goal-note-feb-2028" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('feb-2028',this.value)"></textarea>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('feb-2028')" id="goal-feb-2028"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;">Feb 2028</div>
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('feb-2028','Feb 2028')">Compare</button>
         </div>
 
         <!-- May 2028 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:120px;border:2px dashed var(--border);" onclick="uploadHairGoal('may-2028')" id="goal-may-2028"><i class="ti ti-sparkles" style="color:var(--muted);" aria-hidden="true"></i></div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;">May 2028</div>
-          <textarea id="goal-note-may-2028" rows="2" placeholder="Growth rate, style notes..." style="margin-top:5px;font-size:11px;" oninput="saveGoalNote('may-2028',this.value)"></textarea>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('may-2028')" id="goal-may-2028"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;">May 2028</div>
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('may-2028','May 2028')">Compare</button>
         </div>
 
       </div>
       <input type="file" id="hair-goal-input" accept="image/*" style="display:none" onchange="saveHairGoalPhoto(this)">
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;">✨ = AI goal photo · green border = uploaded · first 4 slots used in monthly comparisons</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">✨ = AI goal photo · green border = uploaded · tap Compare to see current vs goal</div>
+      <!-- Hair compare panel -->
+      <div id="hair-compare-panel" style="display:none;margin-top:14px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;" id="hair-compare-title">Comparing current vs goal</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="skin-compare-col">
+            <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:6px;">Now · <span id="hair-compare-current-date">—</span></div>
+            <div id="hair-compare-current-img" class="skin-compare-photo" style="display:flex;align-items:center;justify-content:center;background:var(--border);font-size:32px;">💇</div>
+            <div style="font-size:11px;color:var(--muted);text-align:center;">Current scan photo</div>
+          </div>
+          <div class="skin-compare-col">
+            <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:6px;">Goal · <span id="hair-compare-goal-label">—</span></div>
+            <div id="hair-compare-goal-img" class="skin-compare-photo" style="display:flex;align-items:center;justify-content:center;background:var(--border);font-size:32px;">✨</div>
+            <div style="font-size:11px;color:var(--muted);text-align:center;">AI goal photo</div>
+          </div>
+        </div>
+        <button class="btn-secondary" style="margin-top:10px;width:100%;font-size:12px;" onclick="document.getElementById('hair-compare-panel').style.display='none'">Close comparison</button>
+      </div>
     </div>
 
     <!-- Weekly quick log -->
@@ -2027,6 +2107,20 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <button class="vtab" onclick="setView('yearly',this)">Yearly</button>
 </div>
 
+<div class="outfit-lightbox" id="outfit-lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img class="lightbox-photo" id="lightbox-photo" src="" alt="" style="display:none;">
+  <div class="lightbox-no-photo" id="lightbox-no-photo" style="display:none;">👗</div>
+  <div class="lightbox-info">
+    <div class="lightbox-title" id="lightbox-title"></div>
+    <div class="lightbox-meta" id="lightbox-meta"></div>
+    <div class="lightbox-tags" id="lightbox-tags"></div>
+    <div id="lightbox-notes" style="font-size:12px;color:var(--muted);font-style:italic;"></div>
+    <div id="lightbox-stars" style="font-size:16px;color:#D4A96A;letter-spacing:2px;margin-top:4px;"></div>
+    <button id="lightbox-delete-btn" onclick="deleteOutfitFromLightbox()" style="margin-top:12px;width:100%;padding:9px;border-radius:10px;border:1px solid #E57373;background:transparent;color:#C0392B;font-size:13px;cursor:pointer;">🗑 Delete this outfit</button>
+  </div>
+</div>
+
 </div><!-- shell -->
 
 <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handlePhoto(event)">
@@ -2068,6 +2162,7 @@ req.onsuccess=e=>{db=e.target.result;boot();};
 
 function dbAdd(store,data){return new Promise(r=>{const t=db.transaction(store,'readwrite');t.objectStore(store).add({...data,ts:Date.now()});t.oncomplete=r;});}
 function dbAll(store){return new Promise(r=>{const t=db.transaction(store,'readonly');const rq=t.objectStore(store).getAll();rq.onsuccess=()=>r(rq.result);});}
+function dbDelete(store,key){return new Promise(r=>{const t=db.transaction(store,'readwrite');t.objectStore(store).delete(key);t.oncomplete=r;});}
 function dbPutPhoto(key,dataUrl){return new Promise(r=>{const t=db.transaction('photos','readwrite');t.objectStore('photos').put({id:key,data:dataUrl});t.oncomplete=r;});}
 function dbGetPhoto(key){return new Promise(r=>{const t=db.transaction('photos','readonly');const rq=t.objectStore('photos').get(key);rq.onsuccess=()=>r(rq.result?.data||null);});}
 function dbDelPhoto(key){return new Promise(r=>{const t=db.transaction('photos','readwrite');t.objectStore('photos').delete(key);t.oncomplete=r;});}
@@ -2110,7 +2205,7 @@ async function boot(){
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
-let curTab='today',curView='daily';
+let curTab='today',curView='daily',inspoViewOpen=false;
 function tab(id){
   curTab=id;
   curView='daily';
@@ -2137,7 +2232,8 @@ function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
-  if(id==='style') { renderLookbook(); }
+  if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; }
+  else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} }
   if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); }
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); updateBPBanners(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
@@ -2145,6 +2241,7 @@ function tab(id){
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
+  if(curTab==='style'){ renderLookbook(); if(v==='monthly') renderStyleCalendar(); }
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();}}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); }
   if(curTab==='hair'&&v!=='daily') buildHairCharts();
@@ -2366,7 +2463,14 @@ async function saveOutfit(){
   setStars('outfit-stars',0);
   if(photoSlot){photoSlot.innerHTML='<i class="ti ti-camera" aria-hidden="true"></i>';}
   await renderLookbook();
+  const isInspo=outfitEntry.keep==='Inspo only';
+  if(isInspo){
+    // Switch to inspo view so they can see it landed there
+    const btn=document.getElementById('style-inspo-btn');
+    if(btn&&!inspoViewOpen){toggleInspoView();}
+  }
   toast('st');
+  document.getElementById('st').textContent=isInspo?'Saved to Inspo Board! ✨':'Logged!';
 }
 
 function outfitCardHTML(e, slotId){
@@ -2393,27 +2497,108 @@ async function renderLookbook(){
   const outfits=await dbAll('outfits');
   const grid=document.getElementById('lookbook-grid');
   const card=document.getElementById('lookbook-card');
-  if(!grid)return;
-  if(!outfits||outfits.length===0){
-    if(card)card.style.display='none';
-    return;
-  }
-  if(card)card.style.display='';
-  // Show most recent 12
-  const recent=[...outfits].reverse().slice(0,12);
-  grid.innerHTML=recent.map((e,i)=>outfitCardHTML(e,i)).join('');
 
-  // Weekly grid
+  const worn=(outfits||[]).filter(e=>e.keep!=='Inspo only');
+  const inspo=(outfits||[]).filter(e=>e.keep==='Inspo only');
+
+  // Your Looks — worn only
+  if(grid){
+    if(worn.length===0){
+      if(card)card.style.display='none';
+    } else {
+      if(card)card.style.display='';
+      grid.innerHTML=[...worn].reverse().slice(0,12).map((e,i)=>outfitCardHTML(e,i)).join('');
+    }
+  }
+
+  // Weekly grid — worn only
   const weeklyGrid=document.getElementById('weekly-outfits-grid');
   if(weeklyGrid){
     const today=new Date();const weekStart=new Date(today);weekStart.setDate(today.getDate()-today.getDay());
     const weekStr=weekStart.toISOString().slice(0,10);
-    const thisWeek=outfits.filter(e=>e.date>=weekStr);
+    const thisWeek=worn.filter(e=>e.date>=weekStr);
     if(thisWeek.length===0){
       weeklyGrid.innerHTML='<div class="lookbook-empty" style="grid-column:1/-1;"><i class="ti ti-shirt" aria-hidden="true"></i>No outfits logged this week yet</div>';
     } else {
       weeklyGrid.innerHTML=[...thisWeek].reverse().map((e,i)=>outfitCardHTML(e,i)).join('');
     }
+  }
+
+  // Inspo board
+  const inspoGrid=document.getElementById('inspo-grid');
+  if(inspoGrid){
+    if(inspo.length===0){
+      inspoGrid.innerHTML='<div class="lookbook-empty"><i class="ti ti-sparkles" aria-hidden="true"></i>Log outfits tagged "Inspo only" to build your board</div>';
+    } else {
+      inspoGrid.innerHTML=[...inspo].reverse().map((e,idx)=>inspoCardHTML(e,idx)).join('');
+    }
+  }
+
+  // Show/hide the inspo bar button when on style tab
+  const inspoBar=document.getElementById('style-inspo-bar');
+  if(inspoBar&&curTab==='style') inspoBar.style.display=inspo.length>0?'block':'none';
+}
+
+function inspoCardHTML(e, idx){
+  const imgContent=e.photo?`<img src="${e.photo}" alt="${e.desc}" style="width:100%;height:100%;object-fit:cover;border-radius:10px 10px 0 0;">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;border-radius:10px 10px 0 0;background:var(--warm);">✨</div>`;
+  const allTags=[...(e.occ||[]),...(e.vibe||[]),...(e.colors||[]),...(Array.isArray(e.season)?e.season:(e.season?[e.season]:[]))].filter(Boolean);
+  const tagsHTML=allTags.length?`<div class="outfit-tags" style="padding:0 10px 6px;">${allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('')}</div>`:'';
+  const starsHTML=e.stars?`<span style="font-size:11px;color:#D4A96A;letter-spacing:1px;">${'★'.repeat(e.stars)}</span> `:'';
+  const hasBuyNotes=e.buyNotes&&e.buyNotes.trim();
+  const buyPreview=hasBuyNotes?`<div style="font-size:11px;color:var(--accent);padding:0 10px 6px;font-style:italic;">🛍 ${e.buyNotes}</div>`:'';
+  return `<div class="outfit-card" style="grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;border-radius:12px;border:0.5px solid var(--border);overflow:hidden;background:var(--card);">
+    <div style="aspect-ratio:3/4;overflow:hidden;">${imgContent}</div>
+    <div style="padding:10px;display:flex;flex-direction:column;gap:4px;">
+      <div style="font-size:13px;font-weight:500;color:var(--text);">${e.desc}</div>
+      <div style="font-size:11px;color:var(--muted);">${e.date}${e.src?' · '+e.src:''} ${starsHTML}</div>
+      ${allTags.length?`<div class="outfit-tags">${allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('')}</div>`:''}
+      ${e.notes?`<div style="font-size:11px;color:var(--muted);font-style:italic;">"${e.notes}"</div>`:''}
+      ${hasBuyNotes?`<div style="font-size:11px;color:var(--accent);font-style:italic;">🛍 ${e.buyNotes}</div>`:''}
+      <button class="btn-secondary" style="font-size:11px;padding:5px 8px;margin-top:auto;" onclick="toggleBuyNotes(this, ${idx})">🛍 Plan this look</button>
+    </div>
+  </div>
+  <div id="buy-notes-${idx}" style="display:none;grid-column:span 2;padding:10px;border-top:0.5px solid var(--border);background:var(--warm);">
+    <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">What do I need to buy?</div>
+    <textarea id="buy-notes-input-${idx}" rows="2" placeholder="e.g. White linen blazer, tan block heel sandals, gold hoop earrings..." style="font-size:12px;">${e.buyNotes||''}</textarea>
+    <button class="btn-primary" style="font-size:12px;margin-top:6px;" onclick="saveBuyNotes(${idx}, '${e.date}', '${(e.desc||'').replace(/'/g,"\\'")}')">Save</button>
+  </div>`;
+}
+
+function toggleBuyNotes(btn, idx){
+  const panel=document.getElementById(`buy-notes-${idx}`);
+  if(!panel)return;
+  const isOpen=panel.style.display!=='none';
+  panel.style.display=isOpen?'none':'block';
+  btn.textContent=isOpen?'🛍 Plan this look':'✕ Close';
+  if(!isOpen)panel.querySelector('textarea').focus();
+}
+
+async function saveBuyNotes(idx, date, desc){
+  // Find the entry and update it
+  const outfits=await dbAll('outfits');
+  const entry=outfits.find(e=>e.date===date&&e.desc===desc);
+  if(!entry)return;
+  entry.buyNotes=document.getElementById(`buy-notes-input-${idx}`).value.trim();
+  await dbAdd('outfits',entry); // re-save (dbAdd upserts by key if same record)
+  syncToBlob('outfits');
+  document.getElementById(`buy-notes-${idx}`).style.display='none';
+  await renderLookbook();
+}
+
+function toggleInspoView(){
+  const btn=document.getElementById('style-inspo-btn');
+  if(inspoViewOpen){
+    // Return to previous view
+    inspoViewOpen=false;
+    document.getElementById('vc-style-inspo').classList.remove('on');
+    applyView();
+    btn.textContent='✨ View Inspo Board';
+  } else {
+    inspoViewOpen=true;
+    document.querySelectorAll('#s-style .view-content').forEach(el=>el.classList.remove('on'));
+    document.getElementById('vc-style-inspo').classList.add('on');
+    btn.textContent='← Back';
+    renderLookbook();
   }
 }
 async function saveWardrobePlan(){
@@ -2428,6 +2613,190 @@ async function saveWardrobePlan(){
   document.getElementById('dailylook-wishlist').value='';
   toast('wt');
 }
+// ── STYLE CALENDAR & LIGHTBOX ─────────────────────────────────────────
+
+const COLOR_MAP = {
+  'Neutral':'#C8B99A','Black':'#2D2D2D','White':'#F5F5F0','Navy':'#1B2F5E',
+  'Camel':'#C19A6B','Olive':'#6B7C3D','Blush':'#F2C4C4','Red':'#C0392B',
+  'Light Blue':'#87CEEB','Denim':'#6E8FAB','Multi':'linear-gradient(90deg,#F2C4C4,#87CEEB,#6B7C3D)',
+  'Pattern':'repeating-linear-gradient(45deg,#C8B99A,#C8B99A 3px,#fff 3px,#fff 6px)'
+};
+
+let styleCalMonth = new Date();
+styleCalMonth.setDate(1);
+
+function changeStyleMonth(dir){
+  styleCalMonth.setMonth(styleCalMonth.getMonth()+dir);
+  renderStyleCalendar();
+}
+
+async function renderStyleCalendar(){
+  const grid=document.getElementById('outfit-cal-grid');
+  const titleEl=document.getElementById('cal-month-title');
+  const summaryEl=document.getElementById('cal-summary-row');
+  const highlightsCard=document.getElementById('month-highlights-card');
+  if(!grid)return;
+
+  const year=styleCalMonth.getFullYear();
+  const month=styleCalMonth.getMonth();
+  const monthStr=String(month+1).padStart(2,'0');
+  const prefix=`${year}-${monthStr}`;
+
+  titleEl.textContent=styleCalMonth.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  const allOutfits=await dbAll('outfits');
+  const worn=(allOutfits||[]).filter(e=>e.keep!=='Inspo only'&&e.date&&e.date.startsWith(prefix));
+
+  // Index by date string
+  const byDate={};
+  worn.forEach(e=>{ if(!byDate[e.date]) byDate[e.date]=e; });
+
+  // Build calendar
+  const firstDay=new Date(year,month,1).getDay(); // 0=Sun
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const today=new Date().toISOString().slice(0,10);
+
+  let cells='';
+  // Leading empty cells
+  for(let i=0;i<firstDay;i++) cells+=`<div class="cal-cell empty"></div>`;
+
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=`${prefix}-${String(d).padStart(2,'0')}`;
+    const e=byDate[dateStr];
+    const isToday=dateStr===today;
+    const todayRing=isToday?'box-shadow:0 0 0 2px var(--accent);':'';
+
+    if(e){
+      // Color bar from palette tags
+      const colors=(e.colors||[]).slice(0,4);
+      const colorBar=colors.length?`<div class="cal-color-bar">${colors.map(c=>{
+        const bg=COLOR_MAP[c]||'#C8B99A';
+        const isGrad=bg.includes('gradient');
+        return `<span style="${isGrad?'background:'+bg:'background:'+bg};"></span>`;
+      }).join('')}</div>`:'';
+
+      const imgContent=e.photo
+        ?`<img src="${e.photo}" alt="${e.desc}" loading="lazy">`
+        :`<span class="cal-no-photo">👗</span>`;
+
+      cells+=`<div class="cal-cell has-outfit" style="${todayRing}" onclick="openLightbox(${JSON.stringify(e).replace(/"/g,'&quot;')})">
+        ${imgContent}
+        <div class="cal-date">${d}</div>
+        ${colorBar}
+      </div>`;
+    } else {
+      cells+=`<div class="cal-cell${isToday?' has-outfit':''}${!e?' empty-day':''}" style="background:var(--warm);${todayRing};cursor:default;">
+        <div class="cal-date" style="color:var(--muted);text-shadow:none;">${d}</div>
+      </div>`;
+    }
+  }
+  grid.innerHTML=cells;
+
+  // Summary chips
+  if(worn.length===0){
+    summaryEl.innerHTML='<div style="font-size:12px;color:var(--muted);">No outfits logged this month yet</div>';
+    if(highlightsCard) highlightsCard.style.display='none';
+    return;
+  }
+
+  const vibeCount={},colorCount={},occCount={};
+  worn.forEach(e=>{
+    (e.vibe||[]).forEach(v=>vibeCount[v]=(vibeCount[v]||0)+1);
+    (e.colors||[]).forEach(c=>colorCount[c]=(colorCount[c]||0)+1);
+    (e.occ||[]).forEach(o=>occCount[o]=(occCount[o]||0)+1);
+  });
+  const topVibe=Object.entries(vibeCount).sort((a,b)=>b[1]-a[1])[0];
+  const topColor=Object.entries(colorCount).sort((a,b)=>b[1]-a[1])[0];
+  const topOcc=Object.entries(occCount).sort((a,b)=>b[1]-a[1])[0];
+  const wearAgainCount=worn.filter(e=>e.wearAgain).length;
+
+  summaryEl.innerHTML=`
+    <div class="cal-summary-chip accent">${worn.length} outfits</div>
+    ${topVibe?`<div class="cal-summary-chip">✨ ${topVibe[0]}</div>`:''}
+    ${topColor?`<div class="cal-summary-chip" style="border-left:3px solid ${COLOR_MAP[topColor[0]]||'var(--accent)'};">${topColor[0]}</div>`:''}
+    ${topOcc?`<div class="cal-summary-chip">📍 ${topOcc[0]}</div>`:''}
+    ${wearAgainCount?`<div class="cal-summary-chip accent">↩ ${wearAgainCount} wear-again</div>`:''}
+  `;
+
+  // Highlights card
+  if(highlightsCard){
+    const wearAgain=worn.filter(e=>e.wearAgain).reverse().slice(0,4);
+    const topRated=worn.filter(e=>e.stars>=4).sort((a,b)=>b.stars-a.stars).slice(0,4);
+
+    const wearAgainEl=document.getElementById('month-wear-again');
+    const topRatedEl=document.getElementById('month-top-rated');
+
+    if(wearAgain.length){
+      wearAgainEl.innerHTML=`<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">↩ Wear again</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;">
+          ${wearAgain.map(e=>miniThumb(e)).join('')}
+        </div>`;
+    } else { wearAgainEl.innerHTML=''; }
+
+    if(topRated.length){
+      topRatedEl.innerHTML=`<div style="font-size:12px;font-weight:600;color:var(--text);margin:10px 0 6px;">⭐ Top rated</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;">
+          ${topRated.map(e=>miniThumb(e)).join('')}
+        </div>`;
+    } else { topRatedEl.innerHTML=''; }
+
+    highlightsCard.style.display=(wearAgain.length||topRated.length)?'':'none';
+  }
+}
+
+function miniThumb(e){
+  const img=e.photo?`<img src="${e.photo}" style="width:100%;height:100%;object-fit:cover;">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;">👗</div>`;
+  return `<div style="aspect-ratio:3/4;border-radius:6px;overflow:hidden;background:var(--warm);border:0.5px solid var(--border);cursor:pointer;" onclick="openLightbox(${JSON.stringify(e).replace(/"/g,'&quot;')})">${img}</div>`;
+}
+
+let lightboxEntryTs=null;
+
+function openLightbox(e){
+  if(typeof e==='string') e=JSON.parse(e);
+  lightboxEntryTs=e.id||null;
+  const lb=document.getElementById('outfit-lightbox');
+  const photo=document.getElementById('lightbox-photo');
+  const noPhoto=document.getElementById('lightbox-no-photo');
+  const title=document.getElementById('lightbox-title');
+  const meta=document.getElementById('lightbox-meta');
+  const tagsEl=document.getElementById('lightbox-tags');
+  const notesEl=document.getElementById('lightbox-notes');
+  const starsEl=document.getElementById('lightbox-stars');
+
+  if(e.photo){photo.src=e.photo;photo.style.display='block';noPhoto.style.display='none';}
+  else{photo.style.display='none';noPhoto.style.display='block';}
+
+  const dow=e.date?new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}):'';
+  title.textContent=e.desc||'Outfit';
+  meta.textContent=`${dow}${e.src?' · '+e.src:''}`;
+
+  const allTags=[...(e.occ||[]),...(e.vibe||[]),...(e.colors||[]),...(Array.isArray(e.season)?e.season:(e.season?[e.season]:[])),e.keep||''].filter(Boolean);
+  tagsEl.innerHTML=allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('');
+  if(e.wearAgain) tagsEl.innerHTML+=`<span class="outfit-tag wear-again">↩ Wear again</span>`;
+
+  notesEl.textContent=e.notes?`"${e.notes}"`:'';
+  starsEl.textContent=e.stars?'★'.repeat(e.stars):'';
+
+  lb.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeLightbox(ev){
+  if(ev&&ev.target!==document.getElementById('outfit-lightbox')&&!ev.target.classList.contains('lightbox-close'))return;
+  document.getElementById('outfit-lightbox').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+async function deleteOutfitFromLightbox(){
+  if(!lightboxEntryTs){closeLightbox();return;}
+  if(!confirm('Delete this outfit? This cannot be undone.'))return;
+  await dbDelete('outfits',lightboxEntryTs);
+  syncToBlob('outfits');
+  closeLightbox();
+  await renderLookbook();
+  if(curView==='monthly') renderStyleCalendar();
+}
+
 async function saveBoxSummary(){
   const arrived=document.getElementById('box-arrived').value.trim();
   await dbAdd('boxsummaries',{arrived,kept:document.getElementById('box-kept').value,returned:document.getElementById('box-returned').value,fav:document.getElementById('box-fav').value,date:nowStr()});
@@ -4020,6 +4389,52 @@ async function loadHairGoalPhotos(){
       }
     });
   } catch(e){}
+}
+
+async function showHairCompare(slot, label){
+  const panel=document.getElementById('hair-compare-panel');
+  const titleEl=document.getElementById('hair-compare-title');
+  const goalImgEl=document.getElementById('hair-compare-goal-img');
+  const currentImgEl=document.getElementById('hair-compare-current-img');
+  const goalLabelEl=document.getElementById('hair-compare-goal-label');
+  const currentDateEl=document.getElementById('hair-compare-current-date');
+
+  // Get goal photo from slot
+  const goalSlot=document.getElementById(`goal-${slot}`);
+  const goalImg=goalSlot?goalSlot.querySelector('img'):null;
+  if(goalImg){
+    goalImgEl.innerHTML='';
+    goalImgEl.style.background='none';
+    const gi=document.createElement('img');gi.src=goalImg.src;gi.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:10px;';
+    goalImgEl.appendChild(gi);
+  } else {
+    goalImgEl.innerHTML='<span style="font-size:28px;">✨</span><div style="font-size:11px;color:var(--muted);margin-top:4px;">No goal photo yet</div>';
+  }
+  goalLabelEl.textContent=label;
+
+  // Get latest hair scan photo
+  try {
+    const res=await fetch(`${BACKEND}/api/sync?pillar=hairs`);
+    if(res.ok){
+      const {data}=await res.json();
+      const scans=Array.isArray(data)?data:[];
+      const latest=scans.filter(s=>s.photo).sort((a,b)=>b.date.localeCompare(a.date))[0];
+      if(latest){
+        currentImgEl.innerHTML='';
+        currentImgEl.style.background='none';
+        const ci=document.createElement('img');ci.src=latest.photo;ci.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:10px;';
+        currentImgEl.appendChild(ci);
+        currentDateEl.textContent=latest.date;
+      } else {
+        currentImgEl.innerHTML='<span style="font-size:28px;">💇</span><div style="font-size:11px;color:var(--muted);margin-top:4px;">No scan yet</div>';
+        currentDateEl.textContent='No scan';
+      }
+    }
+  } catch(e){}
+
+  titleEl.textContent=`Now vs ${label} goal`;
+  panel.style.display='block';
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 async function getNearestHairGoal(){
