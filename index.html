@@ -65,7 +65,17 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 /* CARDS */
 .card{background:#fff;border:0.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
 .card-title{font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:16px;}
-.section-label{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;}
+.section-label{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;display:flex;align-items:center;justify-content:space-between;}
+.guide-btn{font-size:12px;font-family:var(--sans);font-weight:600;color:var(--accent);background:var(--warm);border:0.5px solid var(--accent);border-radius:50%;width:22px;height:22px;cursor:pointer;letter-spacing:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.85;}
+.guide-sheet{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:997;align-items:flex-end;justify-content:center;}
+.guide-sheet.open{display:flex;}
+.guide-content{background:var(--cream);border-radius:20px 20px 0 0;padding:20px 20px max(24px,env(safe-area-inset-bottom));width:100%;max-width:430px;max-height:80vh;overflow-y:auto;}
+.guide-title{font-family:var(--serif);font-size:20px;font-weight:300;color:var(--text);margin-bottom:16px;}
+.guide-section{margin-bottom:14px;}
+.guide-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:6px;}
+.guide-item{font-size:13px;color:var(--text);padding:5px 0;border-bottom:0.5px solid var(--border);line-height:1.5;}
+.guide-item:last-child{border-bottom:none;}
+.guide-item span{color:var(--muted);font-size:12px;display:block;margin-top:2px;}
 
 /* TAGS */
 .tags{display:flex;flex-wrap:wrap;gap:7px;margin:7px 0;}
@@ -421,9 +431,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ TODAY ═══════════════ -->
 <div id="s-today" class="sec on">
   <div class="view-content on" id="vc-today-daily">
-    <div id="upload-status-banner" style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:6px;font-size:11px;color:var(--muted);">
-      <div id="upload-status-text">⏳ Checking last upload...</div>
-      <div id="upload-status-date" style="color:var(--accent);font-weight:500;"></div>
+    <div id="upload-status-banner" style="display:none;align-items:center;gap:8px;margin-bottom:6px;">
+      <div style="flex:1;display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);font-size:11px;color:var(--muted);">
+        <div id="upload-status-text">⏳ Checking last upload...</div>
+        <div id="upload-status-date" style="color:var(--accent);font-weight:500;"></div>
+      </div>
+      <button class="guide-btn" onclick="openGuide('today')">?</button>
     </div>
     <!-- BP quick view -->
     <div id="today-bp-banner" style="display:none;padding:5px 12px;border-radius:8px;background:transparent;border:0.5px solid var(--border);margin-bottom:6px;align-items:center;justify-content:space-between;">
@@ -472,6 +485,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="tag" onclick="tog(this)">Grateful</button>
         <button class="tag" onclick="tog(this)">Energized</button>
         <button class="tag" onclick="tog(this)">Focused</button>
+        <button class="tag" onclick="tog(this)">Motivated</button>
         <button class="tag" onclick="tog(this)">Confident</button>
         <button class="tag" onclick="tog(this)">Strong</button>
         <button class="tag" onclick="tog(this)">Fierce</button>
@@ -545,7 +559,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div id="style-inspo-bar" style="display:none;padding:0 16px 10px;"><button id="style-inspo-btn" class="btn-secondary" style="width:100%;font-size:13px;" onclick="toggleInspoView()">✨ View Inspo Board</button></div>
 
   <div class="view-content on" id="vc-style-daily">
-    <div class="section-label">Style & Wardrobe</div>
+    <div class="section-label">Style & Wardrobe <button class="guide-btn" onclick="openGuide('style')">?</button></div>
     <div class="card">
       <div class="card-title">Log an outfit</div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -697,7 +711,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ SLEEP ═══════════════ -->
 <div id="s-sleep" class="sec">
   <div class="view-content on" id="vc-sleep-daily">
-    <div class="section-label">Sleep & Energy</div>
+    <div class="section-label">Sleep & Energy <button class="guide-btn" onclick="openGuide('sleep')">?</button></div>
     <div class="card">
       <div class="card-title">Apple Health · sleep data</div>
       <!-- Last night's hours — prominently shown -->
@@ -919,7 +933,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ BODY ═══════════════ -->
 <div id="s-body" class="sec">
   <div class="view-content on" id="vc-body-daily">
-    <div class="section-label">Body & Zepbound Journey</div>
+    <div class="section-label">Body & Zepbound Journey <button class="guide-btn" onclick="openGuide('body')">?</button></div>
     <div class="success-banner"><strong>Zepbound started Oct 25, 2025</strong><br>201.4 → 170.7 lbs · <strong>30.7 lbs lost</strong> · 7 months · All-time low 168.7 (May 19)</div>
     <div class="stat-strip" style="grid-template-columns:1fr 1fr;">
       <div class="stat-tile"><div class="stat-val" style="font-size:24px;">170.7</div><div class="stat-lbl">Current · Withings</div></div>
@@ -1100,7 +1114,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
   <!-- ── DAILY ── -->
   <div class="view-content on" id="vc-health-daily">
-    <div class="section-label">Health · Today</div>
+    <div class="section-label">Health · Today <button class="guide-btn" onclick="openGuide('health')">?</button></div>
 
     <!-- BP reminder banner -->
     <div id="bp-reminder-banner" style="display:none;padding:8px 12px;border-radius:10px;background:#FEF3C7;border:0.5px solid #E8A87C;margin-bottom:10px;align-items:center;justify-content:space-between;">
@@ -1568,7 +1582,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ SKIN ═══════════════ -->
 <div id="s-skin" class="sec">
   <div class="view-content on" id="vc-skin-daily">
-    <div class="section-label">Skin & Derm</div>
+    <div class="section-label">Skin & Derm <button class="guide-btn" onclick="openGuide('skin')">?</button></div>
 
     <!-- AI Skin Scan -->
     <div class="card skin-scan-card">
@@ -1728,7 +1742,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ HAIR ═══════════════ -->
 <div id="s-hair" class="sec">
   <div class="view-content on" id="vc-hair-daily">
-    <div class="section-label">Hair Growth Journey</div>
+    <div class="section-label">Hair Growth Journey <button class="guide-btn" onclick="openGuide('hair')">?</button></div>
 
     <!-- Goal photos -->
     <div class="card">
@@ -1952,7 +1966,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ MIND ═══════════════ -->
 <div id="s-mind" class="sec">
   <div class="view-content on" id="vc-mind-daily">
-    <div class="section-label">Mind & Mood</div>
+    <div class="section-label">Mind & Mood <button class="guide-btn" onclick="openGuide('mind')">?</button></div>
 
     <!-- Daily Affirmation -->
     <div class="card" style="background:linear-gradient(135deg,rgba(155,142,196,0.15),rgba(232,168,124,0.1));">
@@ -2119,6 +2133,16 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <button class="vtab" onclick="setView('yearly',this)">Yearly</button>
 </div>
 
+<div class="guide-sheet" id="guide-sheet" onclick="closeGuide(event)">
+  <div class="guide-content" id="guide-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div class="guide-title" id="guide-title"></div>
+      <button onclick="closeGuide()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">×</button>
+    </div>
+    <div id="guide-body"></div>
+  </div>
+</div>
+
 <div id="quick-log-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:998;align-items:flex-end;justify-content:center;">
   <div style="background:var(--cream);border-radius:20px 20px 0 0;padding:20px 20px max(20px,env(safe-area-inset-bottom));width:100%;max-width:430px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -2241,12 +2265,12 @@ async function boot(){
   loadTodaySleepFromCSV();
   updateUploadStatusBanner();
   initZepboundDefaults();
-  updateBPBanners();
+  await updateBPBanners();
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
 let curTab='today',curView='daily',inspoViewOpen=false;
-function tab(id){
+async function tab(id){
   curTab=id;
   curView='daily';
   const scroll=document.getElementById('main-scroll');
@@ -2275,7 +2299,7 @@ function tab(id){
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} }
   if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); }
-  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); updateBPBanners(); updateOutfitNudge(); }
+  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); }
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners(); }
@@ -2680,7 +2704,198 @@ async function saveWardrobePlan(){
   document.getElementById('dailylook-wishlist').value='';
   toast('wt');
 }
-// ── OUTFIT NUDGE & QUICK LOG ──────────────────────────────────────────
+// ── PILLAR GUIDES ─────────────────────────────────────────────────────
+const GUIDES = {
+  today: {
+    title: '☀️ Today · Daily Guide',
+    sections: [
+      { title: 'Morning routine (5 min)', items: [
+        { text: '📸 Log your outfit', note: 'Tap the outfit nudge or go to Style → Quick Log' },
+        { text: '❤️ Log your BP reading', note: 'iHealth syncs automatically · log additional readings manually' },
+        { text: '💧 Log your water intake', note: 'Track as you go throughout the day' },
+        { text: '✅ Complete your daily check-in', note: 'Skincare, meds, Zepbound, sleep, mood' },
+      ]},
+      { title: 'Weekly', items: [
+        { text: '📊 Review your Glow Score', note: 'Tap "Recalculate" to update based on latest data' },
+        { text: '📤 Upload Apple Health CSV', note: 'Export from iPhone Health app → run glowupload on Mac' },
+      ]},
+      { title: 'Tips', items: [
+        { text: 'Best time to weigh: first thing in the morning, after using the bathroom', note: '' },
+        { text: 'BP is most accurate after 5 min of rest, same time each day', note: '' },
+        { text: 'The Today tab is your 30-second daily snapshot — keep it quick', note: '' },
+      ]},
+    ]
+  },
+  style: {
+    title: '👗 Style · Daily Guide',
+    sections: [
+      { title: 'Daily habit', items: [
+        { text: '📸 Snap your outfit photo', note: 'Before you leave the house · use Quick Log for speed' },
+        { text: '🏷️ Add tags when you have a moment', note: 'Vibe, occasion, colors · builds your style profile over time' },
+        { text: '⭐ Rate your outfit', note: 'Helps surface your best looks in Monthly highlights' },
+      ]},
+      { title: 'Weekly', items: [
+        { text: '📅 Check Weekly view', note: 'See what you wore · spot patterns in your choices' },
+        { text: '✨ Browse Inspo Board', note: 'Plan upcoming outfits · add "what to buy" notes to looks you want to recreate' },
+      ]},
+      { title: 'Monthly', items: [
+        { text: '🗓️ Review Monthly calendar', note: 'Tap any day to see that outfit · spot empty days to fill in' },
+        { text: '📦 Log your DailyLook box', note: 'Record what arrived, what you kept vs returned' },
+      ]},
+      { title: 'Tips', items: [
+        { text: 'Tag DailyLook items as "DailyLook" type — Keep/Return appears automatically', note: '' },
+        { text: 'Inspo photos (Dressly, Pinterest) go in as "Inspo" type → straight to Inspo Board', note: '' },
+        { text: 'Use the date picker to backlog outfits you forgot to log', note: '' },
+      ]},
+    ]
+  },
+  sleep: {
+    title: '🌙 Sleep · Daily Guide',
+    sections: [
+      { title: 'Daily', items: [
+        { text: '😴 Log last night\'s sleep', note: 'Hours, quality, CPAP usage, how you feel' },
+        { text: '💊 Check CPAP compliance', note: 'Log your MyAir score if available' },
+      ]},
+      { title: 'Weekly', items: [
+        { text: '📈 Review sleep trends', note: 'Look for patterns — late nights, early wake-ups, quality dips' },
+        { text: '🔗 Check CPAP data', note: 'MyAir weekly summary helps spot apnea events' },
+      ]},
+      { title: 'Tips', items: [
+        { text: 'Zepbound can improve sleep quality — note changes in your log', note: '' },
+        { text: 'Consistent bedtime matters more than total hours', note: '' },
+        { text: 'Flag anything unusual to discuss at your next sleep doctor visit', note: '' },
+      ]},
+    ]
+  },
+  body: {
+    title: '⚖️ Body · Daily Guide',
+    sections: [
+      { title: 'Daily', items: [
+        { text: '⚖️ Weight logs automatically via Withings', note: 'Step on scale first thing each morning' },
+        { text: '🏃 Log exercise', note: 'Type, duration, intensity · builds your activity history' },
+      ]},
+      { title: 'Weekly', items: [
+        { text: '📉 Review weight trend', note: 'Focus on the trend line, not daily fluctuations' },
+        { text: '💉 Log Zepbound injection', note: 'Day, dose, site · tracks your 7-day cycle' },
+        { text: '📏 Log measurements', note: 'Waist, hips, chest — monthly is ideal' },
+      ]},
+      { title: 'Tips', items: [
+        { text: 'Weight can fluctuate 2-3 lbs daily — weekly average is more meaningful', note: '' },
+        { text: 'Preserving lean mass while losing fat is the goal on Zepbound', note: '' },
+        { text: 'You started Oct 25, 2025 · current loss: −30.7 lbs in 7 months', note: '' },
+      ]},
+    ]
+  },
+  health: {
+    title: '❤️ Health · Daily Guide',
+    sections: [
+      { title: 'Daily', items: [
+        { text: '❤️ Log blood pressure', note: 'Morning reading after 5 min rest · iHealth syncs automatically' },
+        { text: '💊 Check off medications', note: 'Irbesartan HCTZ · log any side effects noticed' },
+        { text: '💧 Log water intake', note: 'Target 8+ glasses · especially important on Zepbound' },
+      ]},
+      { title: 'Weekly', items: [
+        { text: '📊 Review BP trend', note: 'Weekly average shows true trend vs daily noise' },
+        { text: '🩺 Note anything for your doctor', note: 'Use the Health Insights card to capture observations' },
+      ]},
+      { title: 'Labs & Clinical', items: [
+        { text: '🧪 Update labs after each blood draw', note: 'Enter results manually · app tracks trends over time' },
+        { text: '📋 Review lab trends before appointments', note: 'Yearly view shows full clinical picture' },
+      ]},
+      { title: 'Tips', items: [
+        { text: 'Irbesartan HCTZ is a diuretic — stay well hydrated', note: '' },
+        { text: 'BP target on Zepbound: watch for improvement as weight drops', note: '' },
+        { text: 'Best BP time: morning before meds, evening before bed', note: '' },
+      ]},
+    ]
+  },
+  skin: {
+    title: '✨ Skin · Daily Guide',
+    sections: [
+      { title: 'Daily check-in', items: [
+        { text: '🧴 Complete skincare routine', note: 'Log in Today check-in · morning and evening' },
+        { text: '💧 Hydration affects skin', note: 'Log water intake in Health · Zepbound + diuretic = extra hydration need' },
+      ]},
+      { title: 'Weekly scan', items: [
+        { text: '📸 Take weekly skin scan photo', note: 'Clean face, no makeup, good natural light · same conditions each time' },
+        { text: '🔍 Review AI analysis', note: 'Check scores for hydration, firmness, texture, spots' },
+        { text: '📊 Compare to previous scan', note: 'Use the Before/After compare view' },
+      ]},
+      { title: 'Routine reminders', items: [
+        { text: 'AM: Olay Cleanser → Olay Super Serum → Olay Vitamin C Moisturizer → Olay SPF', note: '' },
+        { text: 'PM (alternating): Musely Anti-Aging OR Musely Spot Treatment → Olay Regenerist Ultra Rich', note: '' },
+        { text: 'Facial every 8 weeks · log date after each appointment', note: '' },
+      ]},
+      { title: 'Tips', items: [
+        { text: 'Musely works best with consistent nightly use — don\'t skip', note: '' },
+        { text: 'Hyperpigmentation improves slowly — monthly compare view shows real progress', note: '' },
+        { text: 'Zepbound can affect skin hydration — watch your hydration score trend', note: '' },
+      ]},
+    ]
+  },
+  hair: {
+    title: '✂️ Hair · Daily Guide',
+    sections: [
+      { title: 'Weekly', items: [
+        { text: '📸 Take a hair photo', note: 'Same lighting, same angle · tracks growth and health over time' },
+        { text: '📝 Log wash day', note: 'Products used, how hair felt, any concerns' },
+      ]},
+      { title: 'Quarterly', items: [
+        { text: '📏 Measure hair length', note: 'Log in inches · tracks growth rate' },
+        { text: '🤖 Run AI hair scan', note: 'Analyzes health, density, moisture, breakage' },
+        { text: '🎯 Update goal photos', note: 'Add new milestone photos to the growth timeline' },
+      ]},
+      { title: 'Tips', items: [
+        { text: 'Hair typically grows ~0.5 inches/month — use milestone slots to track', note: '' },
+        { text: 'Zepbound can cause temporary hair shedding — log if you notice changes', note: '' },
+        { text: 'Use Compare view to see current hair vs AI goal photo side by side', note: '' },
+      ]},
+    ]
+  },
+  mind: {
+    title: '🧠 Mind · Daily Guide',
+    sections: [
+      { title: 'Daily', items: [
+        { text: '😊 Log your mood', note: 'Quick check-in on Today tab · takes 5 seconds' },
+        { text: '📝 Journal entry', note: 'Even one sentence counts · captures your mental state' },
+        { text: '🙏 Gratitude note', note: 'One thing you\'re grateful for · shifts perspective' },
+      ]},
+      { title: 'Weekly', items: [
+        { text: '🧘 Review mood trends', note: 'Weekly view shows patterns — stress days, energy peaks' },
+        { text: '💭 Reflection prompt', note: 'Answer the weekly prompt on Today tab' },
+        { text: '🎯 Set weekly intention', note: 'One focus for the week · keeps you aligned' },
+      ]},
+      { title: 'Tips', items: [
+        { text: 'Zepbound can affect mood and energy — note any changes in your log', note: '' },
+        { text: 'Sleep quality directly impacts mood — check Sleep pillar if mood dips', note: '' },
+        { text: 'Your daily affirmation changes every day — let it set your tone', note: '' },
+      ]},
+    ]
+  }
+};
+
+function openGuide(pillar){
+  const guide = GUIDES[pillar];
+  if(!guide) return;
+  document.getElementById('guide-title').textContent = guide.title;
+  document.getElementById('guide-body').innerHTML = guide.sections.map(s=>`
+    <div class="guide-section">
+      <div class="guide-section-title">${s.title}</div>
+      ${s.items.map(item=>`
+        <div class="guide-item">${item.text}${item.note?`<span>${item.note}</span>`:''}</div>
+      `).join('')}
+    </div>
+  `).join('');
+  const sheet = document.getElementById('guide-sheet');
+  sheet.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeGuide(ev){
+  if(ev&&ev.target!==document.getElementById('guide-sheet')) return;
+  document.getElementById('guide-sheet').classList.remove('open');
+  document.body.style.overflow='';
+}
 async function updateOutfitNudge(){
   const nudge=document.getElementById('today-outfit-nudge');
   if(!nudge)return;
@@ -5841,19 +6056,20 @@ async function updateUploadStatusBanner(){
       }}
     } catch(e){}
 
+    const innerBanner = bannerEl ? bannerEl.querySelector('div') : null;
     const dateStr = uploadDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     if(diffDays === 0){
       textEl.textContent = '✅ Apple Health data is current';
       if(dateEl) dateEl.textContent = uploadedAtStr ? `Updated ${uploadedAtStr}` : `Updated today · ${dateStr}`;
-      if(bannerEl){ bannerEl.style.background='rgba(107,158,120,0.08)'; bannerEl.style.borderColor='rgba(107,158,120,0.3)'; }
+      if(innerBanner){ innerBanner.style.background='rgba(107,158,120,0.08)'; innerBanner.style.borderColor='rgba(107,158,120,0.3)'; }
     } else if(diffDays === 1){
       textEl.textContent = '🕐 Last upload: yesterday';
       if(dateEl) dateEl.textContent = uploadedAtStr || dateStr;
-      if(bannerEl){ bannerEl.style.background=''; bannerEl.style.borderColor=''; }
+      if(innerBanner){ innerBanner.style.background=''; innerBanner.style.borderColor=''; }
     } else {
       textEl.textContent = `⚠️ Last upload: ${diffDays} days ago`;
       if(dateEl) dateEl.textContent = uploadedAtStr || dateStr;
-      if(bannerEl){ bannerEl.style.background=''; bannerEl.style.borderColor='#E8A87C'; }
+      if(innerBanner){ innerBanner.style.background=''; innerBanner.style.borderColor='#E8A87C'; }
     }
   } catch(e){
     if(bannerEl) bannerEl.style.display='none';
@@ -5896,10 +6112,11 @@ async function loadTodaySleepFromCSV(){
     const todaySteps = rows.find(r=>r.date===todayStr&&parseInt(r.steps)>0);
     const latestSteps = todaySteps || rows.find(r=>parseInt(r.steps)>0);
     if(latestSteps){
-      const d = safeDate(latestSteps.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
       const isToday = latestSteps.date===todayStr;
+      const isYesterday = latestSteps.date===(() => { const d=new Date(); d.setDate(d.getDate()-1); const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; })();
+      const d = safeDate(latestSteps.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
       if(stepsEl) stepsEl.textContent = parseInt(latestSteps.steps).toLocaleString();
-      if(stepsSrcEl) stepsSrcEl.textContent = isToday ? 'Apple Health · today' : `Apple Health · ${d}`;
+      if(stepsSrcEl) stepsSrcEl.textContent = isToday ? 'Apple Health · today' : isYesterday ? `Apple Health · yesterday` : `Apple Health · ${d}`;
     }
 
     // Sleep from CSV — only if no manual entry today
@@ -6688,7 +6905,7 @@ function mergeBPReadings(csvBPs, manualBPs){
 
 async function getCSVBPData() {
   try {
-    const res = await fetch(`${BACKEND}/api/health-data`);
+    const res = await fetch(`${BACKEND}/api/health-data?t=${Date.now()}`);
     if (!res.ok) return [];
     const { csv } = await res.json();
     if (!csv) return [];
