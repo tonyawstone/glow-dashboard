@@ -443,7 +443,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <span style="font-size:16px;">📷</span>
     </div>
     <div class="stat-strip">
-      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl" id="s-weight-date" style="font-size:10px;color:var(--accent);"></div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div></div>
+      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div></div>
       <div class="stat-tile"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src" id="s-steps-src">Apple Health</div></div>
       <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src" id="s-sleep-src">log below</div></div>
       <div class="stat-tile"><div class="stat-val" id="zep-day-count">—</div><div class="stat-lbl" id="zep-tile-lbl">loading...</div><div class="stat-src">since Oct 25, 2025</div></div>
@@ -4053,14 +4053,19 @@ async function checkLastUpload(){
   try {
     const res = await fetch(`${BACKEND}/api/health-data`);
     if(!res.ok){ el.textContent='Last upload: none yet'; return; }
-    const { csv } = await res.json();
+    const { csv, uploadedAt } = await res.json();
     if(!csv){ el.textContent='Last upload: none yet'; return; }
     const rows = parseCSVToRows(csv);
     const dates = rows.map(r=>r.date).filter(Boolean).sort();
     const latest = dates[dates.length-1];
     const earliest = dates[0];
-    const uploadDate = localStorage.getItem('glowCSVUploadDate');
-    const uploadStr = uploadDate ? `Uploaded ${uploadDate} · ` : '';
+    let uploadStr = '';
+    if(uploadedAt){
+      const ua = new Date(uploadedAt);
+      const uaDate = ua.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      const uaTime = ua.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+      uploadStr = `Uploaded ${uaDate} at ${uaTime} · `;
+    }
     el.textContent = `${uploadStr}Data: ${earliest} → ${latest} (${rows.length} days)`;
     el.style.color = 'var(--muted)';
   } catch(e){
@@ -4086,17 +4091,21 @@ async function uploadHealthCSV(input) {
     const res = await fetch(`${BACKEND}/api/health-data`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ csv })
+      body: JSON.stringify({ csv, uploadedAt: new Date().toISOString() })
     });
 
     if (!res.ok) throw new Error('Upload failed');
 
-    const uploadDate = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const uploadNow = new Date();
+    const uploadDate = uploadNow.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const uploadTime = uploadNow.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+    const uploadTimestamp = `${uploadDate} at ${uploadTime}`;
     status.style.background = '#EAF3DE';
     status.style.color = '#27500A';
-    status.textContent = `✅ ${rowCount} days of health data uploaded · ${uploadDate}`;
-    // Store upload date in localStorage for display
+    status.textContent = `✅ ${rowCount} days of health data uploaded · ${uploadTimestamp}`;
+    // Store full timestamp for banner display
     localStorage.setItem('glowCSVUploadDate', uploadDate);
+    localStorage.setItem('glowCSVUploadTimestamp', uploadTimestamp);
     checkLastUpload();
     // Rebuild charts with new data
     if (curTab === 'health') { buildBPChart(); buildAppleHealthMetrics(); }
@@ -5819,18 +5828,31 @@ async function updateUploadStatusBanner(){
     const uploadDate = safeDate(latest.date);
     const today = new Date();
     const diffDays = Math.floor((today - uploadDate)/(1000*60*60*24));
+
+    // Get uploadedAt from Blob
+    let uploadedAtStr = '';
+    try {
+      const r = await fetch(`${BACKEND}/api/health-data`);
+      if(r.ok){ const {uploadedAt} = await r.json(); if(uploadedAt){
+        const ua = new Date(uploadedAt);
+        const uaDate = ua.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        const uaTime = ua.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+        uploadedAtStr = `${uaDate} at ${uaTime}`;
+      }}
+    } catch(e){}
+
     const dateStr = uploadDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     if(diffDays === 0){
       textEl.textContent = '✅ Apple Health data is current';
-      if(dateEl) dateEl.textContent = `Updated today · ${dateStr}`;
+      if(dateEl) dateEl.textContent = uploadedAtStr ? `Updated ${uploadedAtStr}` : `Updated today · ${dateStr}`;
       if(bannerEl){ bannerEl.style.background='rgba(107,158,120,0.08)'; bannerEl.style.borderColor='rgba(107,158,120,0.3)'; }
     } else if(diffDays === 1){
       textEl.textContent = '🕐 Last upload: yesterday';
-      if(dateEl) dateEl.textContent = dateStr;
+      if(dateEl) dateEl.textContent = uploadedAtStr || dateStr;
       if(bannerEl){ bannerEl.style.background=''; bannerEl.style.borderColor=''; }
     } else {
-      textEl.textContent = `⚠️ Last upload: ${diffDays} days ago — upload before 7:30 AM`;
-      if(dateEl) dateEl.textContent = dateStr;
+      textEl.textContent = `⚠️ Last upload: ${diffDays} days ago`;
+      if(dateEl) dateEl.textContent = uploadedAtStr || dateStr;
       if(bannerEl){ bannerEl.style.background=''; bannerEl.style.borderColor='#E8A87C'; }
     }
   } catch(e){
@@ -5867,16 +5889,17 @@ async function loadTodaySleepFromCSV(){
       const d = safeDate(latestWeight.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
       if(weightEl) weightEl.textContent = parseFloat(latestWeight.weight_lbs).toFixed(1);
       if(weightSrcEl) weightSrcEl.textContent = `Withings · ${d}`;
-      const weightDateEl = document.getElementById('s-weight-date');
-      if(weightDateEl) weightDateEl.textContent = d;
     }
 
-    // Steps — most recent entry with value
-    const latestSteps = rows.find(r=>parseInt(r.steps)>0);
+    // Steps — prefer today, fall back to most recent
+    const todayStr = nowStr();
+    const todaySteps = rows.find(r=>r.date===todayStr&&parseInt(r.steps)>0);
+    const latestSteps = todaySteps || rows.find(r=>parseInt(r.steps)>0);
     if(latestSteps){
       const d = safeDate(latestSteps.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      const isToday = latestSteps.date===todayStr;
       if(stepsEl) stepsEl.textContent = parseInt(latestSteps.steps).toLocaleString();
-      if(stepsSrcEl) stepsSrcEl.textContent = `Apple Health · ${d}`;
+      if(stepsSrcEl) stepsSrcEl.textContent = isToday ? 'Apple Health · today' : `Apple Health · ${d}`;
     }
 
     // Sleep from CSV — only if no manual entry today
