@@ -426,7 +426,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="upload-status-date" style="color:var(--accent);font-weight:500;"></div>
     </div>
     <!-- BP quick view -->
-    <div id="today-bp-banner" onclick="switchTab('health')" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+    <div id="today-bp-banner" onclick="tab('health')" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;cursor:pointer;align-items:center;justify-content:space-between;">
       <div style="font-size:12px;color:var(--muted);">❤️ Last BP reading</div>
       <div>
         <span id="today-bp-value" style="font-size:15px;font-weight:600;color:var(--text);"></span>
@@ -434,8 +434,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
     <!-- BP reminder if not logged today -->
-    <div id="today-bp-reminder" style="display:none;padding:7px 12px;border-radius:8px;background:#FEF3C7;border:0.5px solid #E8A87C;margin-bottom:10px;cursor:pointer;font-size:12px;color:#92400E;" onclick="switchTab('health')">
+    <div id="today-bp-reminder" style="display:none;padding:7px 12px;border-radius:8px;background:#FEF3C7;border:0.5px solid #E8A87C;margin-bottom:10px;cursor:pointer;font-size:12px;color:#92400E;" onclick="tab('health')">
       ❤️ No BP reading today — tap to log
+    </div>
+    <!-- Outfit nudge -->
+    <div id="today-outfit-nudge" style="display:none;padding:7px 12px;border-radius:8px;background:#F3EEF8;border:0.5px solid #C4A8E0;margin-bottom:10px;cursor:pointer;font-size:12px;color:#6B3FA0;align-items:center;justify-content:space-between;" onclick="openQuickLog()">
+      <span>👗 No outfit logged today — tap to snap &amp; log</span>
+      <span style="font-size:16px;">📷</span>
     </div>
     <div class="stat-strip">
       <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl" id="s-weight-date" style="font-size:10px;color:var(--accent);"></div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div></div>
@@ -543,17 +548,21 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="section-label">Style & Wardrobe</div>
     <div class="card">
       <div class="card-title">Log an outfit</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div class="fl" style="margin:0;">Date</div>
+        <input type="date" id="outfit-date" style="font-size:13px;padding:5px 8px;border-radius:8px;border:1px solid var(--border);color:var(--text);background:var(--warm);">
+      </div>
       <div style="display:flex;gap:10px;align-items:flex-start;margin:7px 0;">
         <div class="photo-slot" style="width:84px;height:105px;flex-shrink:0;" onclick="pickPhoto('outfit-new')" id="outfit-new">
           <i class="ti ti-camera" aria-hidden="true"></i>
         </div>
         <div style="flex:1;">
-          <input type="text" id="outfit-desc" placeholder="DailyLook #15, Dressly screenshot, own outfit...">
-          <div class="fl" style="margin-top:8px;">Source</div>
+          <input type="text" id="outfit-desc" placeholder="Describe the outfit...">
+          <div class="fl" style="margin-top:8px;">Type</div>
           <div class="tags" id="src-tags" style="margin:5px 0;">
-            <button class="tag" onclick="solo('src-tags',this)">DailyLook</button>
-            <button class="tag" onclick="solo('src-tags',this)">Dressly</button>
-            <button class="tag" onclick="solo('src-tags',this)">Own photo</button>
+            <button class="tag" onclick="selectOutfitType(this,'My outfit')">My outfit</button>
+            <button class="tag" onclick="selectOutfitType(this,'Inspo')">Inspo</button>
+            <button class="tag" onclick="selectOutfitType(this,'DailyLook')">DailyLook</button>
           </div>
         </div>
       </div>
@@ -563,7 +572,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div class="fl">Vibe</div>
       <div class="tags" id="outfit-vibe-tags">
-        <button class="tag" onclick="tog(this)">Polished</button><button class="tag" onclick="tog(this)">Cozy</button><button class="tag" onclick="tog(this)">Relaxed</button><button class="tag" onclick="tog(this)">Chic</button><button class="tag" onclick="tog(this)">Feminine</button><button class="tag" onclick="tog(this)">Sporty</button><button class="tag" onclick="tog(this)">Boho</button><button class="tag" onclick="tog(this)">Bold</button>
+        <button class="tag" onclick="tog(this)">Polished</button><button class="tag" onclick="tog(this)">Cozy</button><button class="tag" onclick="tog(this)">Relaxed</button><button class="tag" onclick="tog(this)">Chic</button><button class="tag" onclick="tog(this)">Stylish</button><button class="tag" onclick="tog(this)">Preppy</button><button class="tag" onclick="tog(this)">Feminine</button><button class="tag" onclick="tog(this)">Sporty</button><button class="tag" onclick="tog(this)">Boho</button><button class="tag" onclick="tog(this)">Bold</button>
       </div>
       <div class="fl">Season</div>
       <div class="tags" id="season-tags">
@@ -573,9 +582,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="tags" id="color-tags">
         <button class="tag" onclick="tog(this)">Neutral</button><button class="tag" onclick="tog(this)">Black</button><button class="tag" onclick="tog(this)">White</button><button class="tag" onclick="tog(this)">Navy</button><button class="tag" onclick="tog(this)">Camel</button><button class="tag" onclick="tog(this)">Olive</button><button class="tag" onclick="tog(this)">Blush</button><button class="tag" onclick="tog(this)">Red</button><button class="tag" onclick="tog(this)">Light Blue</button><button class="tag" onclick="tog(this)">Denim</button><button class="tag" onclick="tog(this)">Multi</button><button class="tag" onclick="tog(this)">Pattern</button>
       </div>
-      <div class="fl">Keep or return?</div>
-      <div class="tags" id="keep-tags">
-        <button class="tag" onclick="solo('keep-tags',this)">Keeping</button><button class="tag" onclick="solo('keep-tags',this)">Returned</button><button class="tag" onclick="solo('keep-tags',this)">Inspo only</button>
+      <!-- Keep or return — only shown for DailyLook -->
+      <div id="keep-return-section" style="display:none;">
+        <div class="fl">Keep or return?</div>
+        <div class="tags" id="keep-tags">
+          <button class="tag" onclick="solo('keep-tags',this)">Keeping</button><button class="tag" onclick="solo('keep-tags',this)">Returned</button>
+        </div>
       </div>
       <div class="fl" style="display:flex;align-items:center;justify-content:space-between;">
         <span>Wear again?</span>
@@ -2107,6 +2119,32 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <button class="vtab" onclick="setView('yearly',this)">Yearly</button>
 </div>
 
+<div id="quick-log-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:998;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--cream);border-radius:20px 20px 0 0;padding:20px 20px max(20px,env(safe-area-inset-bottom));width:100%;max-width:430px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:16px;font-weight:600;color:var(--text);">👗 Quick outfit log</div>
+      <button onclick="closeQuickLog()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">×</button>
+    </div>
+    <!-- Photo slot -->
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+      <div class="photo-slot" style="width:80px;height:100px;flex-shrink:0;" onclick="pickPhoto('ql-photo')" id="ql-photo">
+        <i class="ti ti-camera" aria-hidden="true"></i>
+      </div>
+      <div style="flex:1;">
+        <input type="text" id="ql-desc" placeholder="What are you wearing?" style="margin-bottom:8px;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Type</div>
+        <div class="tags" id="ql-type-tags">
+          <button class="tag on" onclick="solo('ql-type-tags',this)">My outfit</button>
+          <button class="tag" onclick="solo('ql-type-tags',this)">Inspo</button>
+          <button class="tag" onclick="solo('ql-type-tags',this)">DailyLook</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" style="width:100%;" onclick="saveQuickLog()">Save outfit</button>
+    <button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="closeQuickLog();tab('style')">Add more details →</button>
+  </div>
+</div>
+
 <div class="outfit-lightbox" id="outfit-lightbox" onclick="closeLightbox(event)">
   <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
   <img class="lightbox-photo" id="lightbox-photo" src="" alt="" style="display:none;">
@@ -2192,6 +2230,8 @@ async function boot(){
   await loadAllPhotos();
   await loadLogs();
   renderLookbook();
+  const od=document.getElementById('outfit-date');if(od)od.value=nowStr();
+  updateOutfitNudge();
   buildBodyChart();
   // Sync from Blob in background — loads any data from other devices
   syncAllFromBlob();
@@ -2235,7 +2275,7 @@ function tab(id){
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} }
   if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); }
-  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); updateBPBanners(); }
+  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); updateBPBanners(); updateOutfitNudge(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); }
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners(); }
@@ -2257,6 +2297,15 @@ function applyView(){
 
 // ── UI HELPERS ────────────────────────────────────────────────────────
 function tog(b){b.classList.toggle('on');}
+function selectOutfitType(btn, type){
+  solo('src-tags', btn);
+  // Show keep/return only for DailyLook
+  const kr=document.getElementById('keep-return-section');
+  if(kr) kr.style.display=(type==='DailyLook')?'':'none';
+  // Hide date field for Inspo (date not relevant)
+  const df=document.getElementById('outfit-date');
+  if(df) df.closest('div').style.display=(type==='Inspo')?'none':'';
+}
 function solo(gid,btn){document.getElementById(gid).querySelectorAll('.tag').forEach(t=>t.classList.remove('on'));btn.classList.add('on');}
 function soloQ(btn){document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function ts(id){document.getElementById(id).classList.toggle('on');}
@@ -2435,6 +2484,8 @@ function loadCheckinState(){
 
 async function saveOutfit(){
   const desc=document.getElementById('outfit-desc').value.trim();if(!desc)return;
+  const dateInput=document.getElementById('outfit-date');
+  const outfitDate=dateInput.value||nowStr();
   // Grab photo if one was selected into 'outfit-new' slot
   let photo='';
   const photoSlot=document.getElementById('outfit-new');
@@ -2451,19 +2502,23 @@ async function saveOutfit(){
     notes:document.getElementById('outfit-notes').value.trim(),
     stars:getStars('outfit-stars'),
     photo,
-    date:nowStr()
+    date:outfitDate
   };
   await dbAdd('outfits',outfitEntry);
   syncToBlob('outfits');
   // Reset form
+  document.getElementById('outfit-date').value=nowStr();
   document.getElementById('outfit-desc').value='';
   document.getElementById('outfit-notes').value='';
   document.getElementById('wear-again-toggle').checked=false;
-  ['occ-tags','outfit-vibe-tags','season-tags','color-tags','keep-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
+  ['occ-tags','outfit-vibe-tags','season-tags','color-tags','keep-tags','src-tags'].forEach(id=>{const el=document.getElementById(id);if(el)el.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));});
+  const kr=document.getElementById('keep-return-section');if(kr)kr.style.display='none';
+  const df=document.getElementById('outfit-date');if(df)df.closest('div').style.display='';
   setStars('outfit-stars',0);
   if(photoSlot){photoSlot.innerHTML='<i class="ti ti-camera" aria-hidden="true"></i>';}
   await renderLookbook();
-  const isInspo=outfitEntry.keep==='Inspo only';
+  await updateOutfitNudge();
+  const isInspo=outfitEntry.src==='Inspo'||outfitEntry.src==='DailyLook';
   if(isInspo){
     // Switch to inspo view so they can see it landed there
     const btn=document.getElementById('style-inspo-btn');
@@ -2498,8 +2553,8 @@ async function renderLookbook(){
   const grid=document.getElementById('lookbook-grid');
   const card=document.getElementById('lookbook-card');
 
-  const worn=(outfits||[]).filter(e=>e.keep!=='Inspo only');
-  const inspo=(outfits||[]).filter(e=>e.keep==='Inspo only');
+  const worn=(outfits||[]).filter(e=>e.src==='My outfit'||(!e.src&&e.keep!=='Inspo only'));
+  const inspo=(outfits||[]).filter(e=>e.src==='Inspo'||e.src==='DailyLook'||(e.src!=='My outfit'&&e.keep==='Inspo only'));
 
   // Your Looks — worn only
   if(grid){
@@ -2613,7 +2668,51 @@ async function saveWardrobePlan(){
   document.getElementById('dailylook-wishlist').value='';
   toast('wt');
 }
-// ── STYLE CALENDAR & LIGHTBOX ─────────────────────────────────────────
+// ── OUTFIT NUDGE & QUICK LOG ──────────────────────────────────────────
+async function updateOutfitNudge(){
+  const nudge=document.getElementById('today-outfit-nudge');
+  if(!nudge)return;
+  const hr=new Date().getHours();
+  if(hr<8){nudge.style.display='none';return;} // too early
+  const outfits=await dbAll('outfits');
+  const todayWorn=(outfits||[]).filter(e=>e.date===nowStr()&&e.src==='My outfit');
+  nudge.style.display=todayWorn.length>0?'none':'flex';
+}
+
+function openQuickLog(){
+  const ol=document.getElementById('quick-log-overlay');
+  ol.style.display='flex';
+  document.body.style.overflow='hidden';
+  // Reset
+  document.getElementById('ql-desc').value='';
+  const qlPhoto=document.getElementById('ql-photo');
+  qlPhoto.innerHTML='<i class="ti ti-camera" aria-hidden="true"></i>';
+  document.getElementById('ql-type-tags').querySelectorAll('.tag').forEach((t,i)=>{t.classList.toggle('on',i===0);});
+}
+
+function closeQuickLog(){
+  document.getElementById('quick-log-overlay').style.display='none';
+  document.body.style.overflow='';
+}
+
+async function saveQuickLog(){
+  const desc=document.getElementById('ql-desc').value.trim()||'Today\'s outfit';
+  const srcBtn=document.getElementById('ql-type-tags').querySelector('.on');
+  const src=srcBtn?srcBtn.textContent.trim():'My outfit';
+  let photo='';
+  const slot=document.getElementById('ql-photo');
+  const img=slot?slot.querySelector('img'):null;
+  if(img)photo=img.src;
+  const entry={desc,src,photo,date:nowStr(),occ:[],vibe:[],season:[],colors:[],keep:'',wearAgain:false,notes:'',stars:0};
+  await dbAdd('outfits',entry);
+  syncToBlob('outfits');
+  closeQuickLog();
+  await renderLookbook();
+  await updateOutfitNudge();
+  if(curView==='monthly'&&curTab==='style') renderStyleCalendar();
+  toast('st');
+  document.getElementById('st').textContent='Outfit logged! 👗';
+}
 
 const COLOR_MAP = {
   'Neutral':'#C8B99A','Black':'#2D2D2D','White':'#F5F5F0','Navy':'#1B2F5E',
@@ -3178,9 +3277,12 @@ async function handlePhoto(event){
   const file=event.target.files[0];if(!file)return;
   try{
     const compressed=await compressImage(file,curPhotoTarget==='hero'?220:800,0.75);
-    await dbPutPhoto(curPhotoTarget,compressed);
     displayPhoto(curPhotoTarget,compressed);
-    uploadPhotoToBlob(curPhotoTarget,compressed);
+    // Don't persist quick-log slot to IndexedDB — saveQuickLog handles it
+    if(curPhotoTarget!=='ql-photo'){
+      await dbPutPhoto(curPhotoTarget,compressed);
+      uploadPhotoToBlob(curPhotoTarget,compressed);
+    }
   }catch(err){alert('Could not save photo: '+err.message);}
   event.target.value='';
 }
