@@ -426,11 +426,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="upload-status-date" style="color:var(--accent);font-weight:500;"></div>
     </div>
     <!-- BP quick view -->
-    <div id="today-bp-banner" onclick="tab('health');setTimeout(()=>document.getElementById('bp-entry-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;cursor:pointer;align-items:center;justify-content:space-between;">
-      <div style="font-size:12px;color:var(--muted);">❤️ Last BP reading</div>
+    <div id="today-bp-banner" style="display:none;padding:5px 12px;border-radius:8px;background:transparent;border:0.5px solid var(--border);margin-bottom:6px;align-items:center;justify-content:space-between;">
+      <div style="font-size:11px;color:var(--muted);">❤️ Last BP reading</div>
       <div>
-        <span id="today-bp-value" style="font-size:15px;font-weight:600;color:var(--text);"></span>
-        <span id="today-bp-date" style="font-size:11px;color:var(--muted);margin-left:6px;"></span>
+        <span id="today-bp-value" style="font-size:13px;font-weight:500;color:var(--muted);"></span>
+        <span id="today-bp-date" style="font-size:11px;color:var(--muted);margin-left:6px;opacity:0.7;"></span>
       </div>
     </div>
     <!-- BP reminder if not logged today -->
@@ -3958,7 +3958,7 @@ async function buildAppleHealthMetrics(){
 async function buildHealthSnapshot(){
   const bps = await dbAll('bps');
   const csvBPs = await getCSVBPData();
-  const allBPs = [...csvBPs, ...bps.map(b=>({date:b.date,sys:Number(b.sys),dia:Number(b.dia)}))].filter(b=>b.sys&&b.dia);
+  const allBPs = mergeBPReadings(csvBPs, bps).filter(b=>b.sys&&b.dia);
 
   const el = document.getElementById('health-snapshot-content');
   if(!el) return;
@@ -5107,7 +5107,7 @@ async function buildHealthInsights(){
   const recentEx = exercises.slice(-7);
   const csvSleep = csvRows.slice(0,7).map(r=>parseFloat(r.sleep_hrs)||0).filter(v=>v>0);
   const avgSleepVal = csvSleep.length ? csvSleep.reduce((a,b)=>a+b,0)/csvSleep.length : 0;
-  const allBPs = [...(await getCSVBPData()), ...bps.map(b=>({sys:Number(b.sys),dia:Number(b.dia),date:b.date}))].filter(b=>b.sys&&b.dia);
+  const allBPs = mergeBPReadings(await getCSVBPData(), bps).filter(b=>b.sys&&b.dia);
   const recentBPs = allBPs.sort((a,b)=>parseBPDate(b.date)-parseBPDate(a.date)).slice(0,7);
   const avgSys = recentBPs.length ? recentBPs.reduce((a,b)=>a+b.sys,0)/recentBPs.length : null;
   const latestBMIRow = csvRows.find(r=>parseFloat(r.bmi)>0);
@@ -5323,7 +5323,7 @@ async function calculateGlowScore(save=false) {
 
   // ── CARDIOVASCULAR (0–20) ──
   let cardioScore = 10;
-  const allBPs = [...(await getCSVBPData()), ...bps.map(b=>({sys:Number(b.sys),dia:Number(b.dia),date:b.date}))].filter(b=>b.sys&&b.dia);
+  const allBPs = mergeBPReadings(await getCSVBPData(), bps).filter(b=>b.sys&&b.dia);
   const recentBPs = allBPs.sort((a,b)=>parseBPDate(b.date)-parseBPDate(a.date)).slice(0,7);
   if(recentBPs.length){
     const avgSys=recentBPs.reduce((a,b)=>a+b.sys,0)/recentBPs.length;
@@ -5909,23 +5909,25 @@ async function updateBPBanners(){
     const todayDate = document.getElementById('today-bp-date');
 
     if(todayBP && todayBP.sys){
-      // Show last reading
+      // Today's reading logged — show banner, hide reminder
       if(todayBanner) todayBanner.style.display='flex';
       if(todayReminder) todayReminder.style.display='none';
       if(todayVal) todayVal.textContent = `${todayBP.sys}/${todayBP.dia}`;
       if(todayDate) todayDate.textContent = `Today${todayBP.time?' · '+todayBP.time:''}`;
-      // Color code
       const sys = parseInt(todayBP.sys);
       if(todayVal) todayVal.style.color = sys>=140?'#7F1D1D':sys>=130?'#92400E':sys>=120?'#6B9E78':'#27500A';
     } else if(lastBP){
+      // No reading today but have a previous one — show last reading quietly + reminder
       if(todayBanner) todayBanner.style.display='flex';
       if(todayReminder) todayReminder.style.display='block';
       if(todayVal) todayVal.textContent = `${lastBP.sys}/${lastBP.dia}`;
-      if(todayDate) todayDate.textContent = lastBP.date;
+      if(todayDate) todayDate.textContent = fmtOutfitDate(lastBP.date)||lastBP.date;
       if(todayVal) todayVal.style.color='var(--muted)';
     } else {
+      // No readings at all
       if(todayBanner) todayBanner.style.display='none';
       if(todayReminder) todayReminder.style.display='block';
+      todayReminder.innerHTML = `❤️ No BP reading today — tap to log`;
     }
 
     // Health pillar reminder banner
@@ -6629,6 +6631,32 @@ function parseCSVToRows(csv) {
   });
 }
 
+function mergeBPReadings(csvBPs, manualBPs){
+  // Convert manual entries to comparable format
+  const manual = manualBPs.filter(b=>b.sys&&b.dia).map(b=>({
+    date: b.date, time: b.time||'', sys: Number(b.sys), dia: Number(b.dia), source:'Manual'
+  }));
+
+  // For each iHealth reading, check if a manual entry exists within 30 min on same date
+  const filtered = csvBPs.filter(csv=>{
+    return !manual.some(m=>{
+      if(m.date !== csv.date) return false;
+      if(!m.time || !csv.time) return m.date === csv.date; // same day, no time — assume duplicate
+      // Parse times and check within 30 minutes
+      const [mh,mm] = m.time.split(':').map(Number);
+      const [ch,cm] = csv.time.split(':').map(Number);
+      return Math.abs((mh*60+mm)-(ch*60+cm)) <= 30;
+    });
+  });
+
+  // Combine: manual first (higher priority), then non-duplicate iHealth
+  return [...manual, ...filtered].sort((a,b)=>{
+    const da = parseBPDate(a.date+' '+(a.time||'00:00'))||new Date(0);
+    const db = parseBPDate(b.date+' '+(b.time||'00:00'))||new Date(0);
+    return db-da;
+  });
+}
+
 async function getCSVBPData() {
   try {
     const res = await fetch(`${BACKEND}/api/health-data`);
@@ -6636,8 +6664,14 @@ async function getCSVBPData() {
     const { csv } = await res.json();
     if (!csv) return [];
     return parseCSVToRows(csv)
-      .filter(r => r.bp_systolic && r.bp_diastolic)
-      .map(r => ({ date: r.date, sys: parseFloat(r.bp_systolic), dia: parseFloat(r.bp_diastolic) }));
+      .filter(r => (r.bp_systolic||r.bp_sys) && (r.bp_diastolic||r.bp_dia))
+      .map(r => ({
+        date: r.date,
+        time: r.time||'',
+        sys: parseFloat(r.bp_systolic||r.bp_sys),
+        dia: parseFloat(r.bp_diastolic||r.bp_dia),
+        source: r.source||'iHealth'
+      }));
   } catch (e) { return []; }
 }
 
@@ -6656,10 +6690,8 @@ async function buildBPChart(){
   const manualBPs = await dbAll('bps');
   const csvBPs = await getCSVBPData();
 
-  // Merge: manual entries take priority over CSV for same day
-  const allBPs = [...csvBPs, ...manualBPs.map(b => ({
-    date: b.date, sys: Number(b.sys), dia: Number(b.dia)
-  }))].filter(b => b.sys && b.dia);
+  // Merge: manual entries take priority, deduplicate iHealth within 30 min
+  const allBPs = mergeBPReadings(csvBPs, manualBPs).filter(b=>b.sys&&b.dia);
 
   if(curView==='weekly'){
     const now=new Date();
