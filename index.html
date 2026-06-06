@@ -456,10 +456,22 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <span style="font-size:16px;">📷</span>
     </div>
     <div class="stat-strip">
-      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div></div>
+      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date" style="font-size:9px;opacity:0.7;"></div></div>
       <div class="stat-tile"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src" id="s-steps-src">Apple Health</div></div>
       <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src" id="s-sleep-src">log below</div></div>
-      <div class="stat-tile"><div class="stat-val" id="zep-day-count">—</div><div class="stat-lbl" id="zep-tile-lbl">loading...</div><div class="stat-src">since Oct 25, 2025</div></div>
+      <div class="stat-tile"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses today</div><div class="stat-src">💧 Hydration</div></div>
+    </div>
+    <div class="stat-strip" style="margin-top:6px;">
+      <div class="stat-tile" style="grid-column:span 2;">
+        <div class="stat-val" style="font-size:20px;">168.7</div>
+        <div class="stat-lbl">lbs · All-time low</div>
+        <div class="stat-src">May 19, 2026 🎉</div>
+      </div>
+      <div class="stat-tile" style="grid-column:span 2;">
+        <div class="stat-val" id="today-loss-val" style="font-size:20px;">−30.7</div>
+        <div class="stat-lbl">lbs lost · <span id="zep-day-count">Day 224</span></div>
+        <div class="stat-src"><span id="zep-tile-lbl">Month 7 · since Oct 25, 2025</span> · Zepbound</div>
+      </div>
     </div>
     <div class="affirmation-card">
       <div class="affirmation-text" id="daily-affirmation"></div>
@@ -1264,6 +1276,27 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <div id="injection-site-status" style="text-align:center;font-size:13px;color:var(--muted);margin-top:6px;">Tap a zone above to log this week's site</div>
         <div id="injection-site-history" style="margin-top:10px;font-size:12px;color:var(--muted);"></div>
+        <!-- Injection experience notes -->
+        <div class="fl" style="margin-top:12px;">Pain level</div>
+        <div class="tags" id="injection-pain-tags">
+          <button class="tag" onclick="solo('injection-pain-tags',this)">😊 None</button>
+          <button class="tag" onclick="solo('injection-pain-tags',this)">😐 Mild</button>
+          <button class="tag" onclick="solo('injection-pain-tags',this)">😬 Moderate</button>
+          <button class="tag" onclick="solo('injection-pain-tags',this)">😣 Ouch</button>
+        </div>
+        <div class="fl">Sensation</div>
+        <div class="tags" id="injection-sensation-tags">
+          <button class="tag" onclick="tog(this)">Felt nothing</button>
+          <button class="tag" onclick="tog(this)">Slight sting</button>
+          <button class="tag" onclick="tog(this)">Burning</button>
+          <button class="tag" onclick="tog(this)">Bruising after</button>
+          <button class="tag" onclick="tog(this)">Itchy after</button>
+          <button class="tag" onclick="tog(this)">Lump/bump</button>
+        </div>
+        <div class="fl">Injection notes</div>
+        <textarea id="injection-notes" rows="2" placeholder="e.g. Left thigh felt different today · less hunger this week · tried slower injection"></textarea>
+        <button class="btn-secondary" style="margin-top:8px;" onclick="saveInjectionNotes()">Save injection notes</button>
+        <div class="toast-msg" id="inj-toast">Saved!</div>
       </div>
     </div>
 
@@ -2240,7 +2273,7 @@ async function boot(){
   const zepStart=new Date('2025-10-25');
   const days=Math.floor((now-zepStart)/864e5);
   document.getElementById('zep-day-count').textContent='Day '+days;
-  document.getElementById('zep-tile-lbl').textContent='Month '+Math.floor(days/30.44)+' · −30.7 lbs';
+  document.getElementById('zep-tile-lbl').textContent='Month '+Math.floor(days/30.44)+' · since Oct 25, 2025';
   const heroData=await dbGetPhoto('hero');
   if(heroData){document.getElementById('hero-img').src=heroData;document.getElementById('hero-img').style.display='block';document.getElementById('hero-fallback').style.display='none';}
   buildProductTags();
@@ -5281,6 +5314,15 @@ function updateWaterDisplay(){
   if(entriesEl && todayWaterEntries.length){
     entriesEl.innerHTML = todayWaterEntries.map(e=>`<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;background:rgba(91,158,201,0.12);border-radius:8px;font-size:11px;color:#5B9EC9;">${e.oz} oz${e.time?' · '+e.time:''}</span>`).join('');
   } else if(entriesEl){ entriesEl.innerHTML=''; }
+
+  // Update Today tile
+  const glasses = Math.round(todayWaterOz/8);
+  const goalGlasses = Math.round(WATER_GOAL_OZ/8);
+  const tileEl = document.getElementById('today-water-tile');
+  if(tileEl){
+    tileEl.textContent = `${glasses}/${goalGlasses}`;
+    tileEl.style.color = glasses>=goalGlasses?'#27500A':glasses>=Math.floor(goalGlasses/2)?'#6B9E78':'var(--text)';
+  }
 }
 
 function adjustWater(delta){ // legacy — keep for any old references
@@ -6104,7 +6146,9 @@ async function loadTodaySleepFromCSV(){
     if(latestWeight){
       const d = safeDate(latestWeight.date).toLocaleDateString('en-US',{month:'short',day:'numeric'});
       if(weightEl) weightEl.textContent = parseFloat(latestWeight.weight_lbs).toFixed(1);
-      if(weightSrcEl) weightSrcEl.textContent = `Withings · ${d}`;
+      if(weightSrcEl) weightSrcEl.textContent = 'Withings';
+      const weightDateEl = document.getElementById('s-weight-date');
+      if(weightDateEl) weightDateEl.textContent = d;
     }
 
     // Steps — prefer today, fall back to most recent
@@ -6565,6 +6609,29 @@ const SITE_LABELS = {
   'right-hip': 'Right Hip',
 };
 
+async function saveInjectionNotes(){
+  const pain = gT('injection-pain-tags')[0]||'';
+  const sensation = gT('injection-sensation-tags');
+  const notes = document.getElementById('injection-notes').value.trim();
+  const history = JSON.parse(localStorage.getItem('glowInjectionSites')||'[]');
+  if(history.length){
+    history[history.length-1].pain = pain;
+    history[history.length-1].sensation = sensation;
+    history[history.length-1].notes = notes;
+    localStorage.setItem('glowInjectionSites', JSON.stringify(history));
+  }
+  // Also save to Blob alongside zep data
+  const zepData = await dbAll('zep');
+  if(zepData && zepData.length){
+    const last = zepData[zepData.length-1];
+    last.injectionPain = pain;
+    last.injectionSensation = sensation;
+    last.injectionNotes = notes;
+    syncToBlob('zep');
+  }
+  toast('inj-toast');
+}
+
 async function selectInjectionSite(site){
   // Save with current Zepbound entry
   const history = JSON.parse(localStorage.getItem('glowInjectionSites')||'[]');
@@ -6641,6 +6708,12 @@ function loadInjectionSiteHistory(){
   if(!history.length) return;
   const last = history[history.length-1];
   updateInjectionSiteDiagram(last.site, history);
+  // Restore notes if same day
+  if(last.date === nowStr()){
+    if(last.pain) document.querySelectorAll('#injection-pain-tags .tag').forEach(t=>{ if(t.textContent.includes(last.pain.replace(/😊|😐|😬|😣 /g,''))) t.classList.add('on'); });
+    if(last.sensation) last.sensation.forEach(s=>{ document.querySelectorAll('#injection-sensation-tags .tag').forEach(t=>{ if(t.textContent===s) t.classList.add('on'); }); });
+    if(last.notes) { const el=document.getElementById('injection-notes'); if(el) el.value=last.notes; }
+  }
 }
 
 
