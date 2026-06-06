@@ -1297,6 +1297,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <textarea id="injection-notes" rows="2" placeholder="e.g. Left thigh felt different today · less hunger this week · tried slower injection"></textarea>
         <button class="btn-secondary" style="margin-top:8px;" onclick="saveInjectionNotes()">Save injection notes</button>
         <div class="toast-msg" id="inj-toast">Saved!</div>
+        <div id="injection-notes-log" style="margin-top:10px;"><div class="log-empty">No injection notes yet.</div></div>
       </div>
     </div>
 
@@ -2339,6 +2340,7 @@ async function tab(id){
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
   if(curTab==='style'){ renderLookbook(); if(v==='monthly') renderStyleCalendar(); }
+  if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();}}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); }
   if(curTab==='hair'&&v!=='daily') buildHairCharts();
@@ -2353,7 +2355,28 @@ function applyView(){
 }
 
 // ── UI HELPERS ────────────────────────────────────────────────────────
-function tog(b){b.classList.toggle('on');}
+function tog(b){b.classList.toggle('on'); autoSaveCheckinState();}
+
+function autoSaveCheckinState(){
+  // Only auto-save if we're on the check-in form
+  const moodEl = document.getElementById('mood-tags');
+  if(!moodEl) return;
+  try {
+    const state = {
+      date: nowStr(),
+      mood: gT('mood-tags'),
+      note: document.getElementById('today-note')?.value.trim()||'',
+      cpap: document.getElementById('t-cpap')?.classList.contains('on')||false,
+      meds: document.getElementById('t-meds')?.classList.contains('on')||false,
+      exercise: document.getElementById('t-exercise')?.classList.contains('on')||false,
+      melatonin: document.getElementById('t-melatonin')?.classList.contains('on')||false,
+      sleepGummies: document.getElementById('t-sleep-gummies')?.classList.contains('on')||false,
+      skinAM: document.getElementById('t-skin-am')?.classList.contains('on')||false,
+      skinPM: document.getElementById('t-skin-pm')?.classList.contains('on')||false,
+    };
+    localStorage.setItem('glowCheckinState', JSON.stringify({...state, savedAt: new Date().toISOString()}));
+  } catch(e){}
+}
 function fmtOutfitDate(d){
   if(!d)return '';
   // Handle both YYYY-MM-DD (new) and legacy friendly formats
@@ -2374,7 +2397,7 @@ function selectOutfitType(btn, type){
 }
 function solo(gid,btn){document.getElementById(gid).querySelectorAll('.tag').forEach(t=>t.classList.remove('on'));btn.classList.add('on');}
 function soloQ(btn){document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
-function ts(id){document.getElementById(id).classList.toggle('on');}
+function ts(id){document.getElementById(id).classList.toggle('on'); autoSaveCheckinState();}
 function setStars(id,n){document.getElementById(id).querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n));}
 function getStars(id){return document.getElementById(id).querySelectorAll('.on').length;}
 function gT(id){return Array.from(document.getElementById(id).querySelectorAll('.on')).map(b=>b.textContent.trim());}
@@ -2747,7 +2770,89 @@ async function saveWardrobePlan(){
   document.getElementById('dailylook-wishlist').value='';
   toast('wt');
 }
-// ── PILLAR GUIDES ─────────────────────────────────────────────────────
+// ── TODAY WEEKLY VIEW ─────────────────────────────────────────────────
+async function buildWeeklyTodayView(){
+  const checkins = await dbAll('checkins');
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const weekStartStr = `${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,'0')}-${String(weekStart.getDate()).padStart(2,'0')}`;
+
+  const thisWeek = checkins.filter(c=>c.date>=weekStartStr).sort((a,b)=>a.date.localeCompare(b.date));
+
+  const treatEl = document.getElementById('weekly-treatments');
+  if(!treatEl) return;
+
+  if(!thisWeek.length){
+    treatEl.innerHTML='<div class="log-empty">No check-ins this week yet.</div>';
+    return;
+  }
+
+  // Calculate streaks
+  const streaks = {
+    meds:    { label:'💊 Meds',     icon:'💊', days:[] },
+    cpap:    { label:'😴 CPAP',     icon:'😴', days:[] },
+    zep:     { label:'💉 Zepbound', icon:'💉', days:[] },
+    exercise:{ label:'🏃 Exercise', icon:'🏃', days:[] },
+    skincare:{ label:'🧴 Skincare', icon:'🧴', days:[] },
+  };
+
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  thisWeek.forEach(c=>{
+    const d = new Date(c.date+'T12:00:00');
+    const dayLabel = days[d.getDay()];
+    if(c.meds) streaks.meds.days.push(dayLabel);
+    if(c.cpap) streaks.cpap.days.push(dayLabel);
+    if(c.zep)  streaks.zep.days.push(dayLabel);
+    if(c.exercise) streaks.exercise.days.push(dayLabel);
+    if(c.skincare||c.musely||c.moisturizer||c.spf) streaks.skincare.days.push(dayLabel);
+  });
+
+  // Build streak rows
+  const streakHTML = Object.values(streaks).map(s=>{
+    if(!s.days.length) return '';
+    const pct = Math.round((s.days.length/7)*100);
+    const color = pct===100?'#27500A':pct>=70?'#6B9E78':pct>=40?'#E8A87C':'var(--muted)';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border);">
+      <div style="font-size:13px;">${s.label}</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="display:flex;gap:3px;">${days.map(d=>`<div style="width:22px;height:22px;border-radius:50%;background:${s.days.includes(d)?color:'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:9px;color:${s.days.includes(d)?'#fff':'var(--muted)'};">${d[0]}</div>`).join('')}</div>
+        <div style="font-size:12px;font-weight:600;color:${color};min-width:28px;text-align:right;">${s.days.length}/7</div>
+      </div>
+    </div>`;
+  }).filter(Boolean).join('');
+
+  treatEl.innerHTML = streakHTML || '<div class="log-empty">Log treatments in your daily check-in to see streaks.</div>';
+
+  // Mood summary
+  const allMoods = thisWeek.flatMap(c=>c.mood||[]);
+  const moodCount = {};
+  allMoods.forEach(m=>moodCount[m]=(moodCount[m]||0)+1);
+  const topMoods = Object.entries(moodCount).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([m])=>m);
+
+  // Weekly stats
+  const bps = await dbAll('bps');
+  const weekBPs = bps.filter(b=>b.date>=weekStartStr&&b.sys&&b.dia);
+  const avgSys = weekBPs.length ? Math.round(weekBPs.reduce((a,b)=>a+Number(b.sys),0)/weekBPs.length) : null;
+  const avgDia = weekBPs.length ? Math.round(weekBPs.reduce((a,b)=>a+Number(b.dia),0)/weekBPs.length) : null;
+
+  // Build summary card
+  const summaryEl = document.getElementById('weekly-summary');
+  if(summaryEl && summaryEl.querySelector('.log-empty')){
+    summaryEl.innerHTML = `
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);width:100%;margin-bottom:2px;">This week's mood</div>
+        ${topMoods.map(m=>`<span class="chip">${m}</span>`).join('')}
+      </div>
+      ${avgSys?`<div style="font-size:13px;color:var(--text);margin-bottom:6px;">❤️ Avg BP this week: <strong>${avgSys}/${avgDia}</strong></div>`:''}
+      <div style="font-size:13px;color:var(--text);">📋 <strong>${thisWeek.length}</strong> check-in${thisWeek.length!==1?'s':''} logged this week</div>
+      <button class="btn-ai" style="margin-top:12px;" onclick="weeklyInsight()">Generate AI weekly insight ↗</button>
+    `;
+  }
+}
+
+
 const GUIDES = {
   today: {
     title: '☀️ Today · Daily Guide',
@@ -6230,12 +6335,16 @@ async function updateBPBanners(){
     const hLast = document.getElementById('bp-last-reading');
     const bpStatus = document.getElementById('bp-today-status');
 
-    if(todayBP && todayBP.sys){
-      if(hBanner) hBanner.style.display='none';      if(bpStatus){
-        const sys=parseInt(todayBP.sys), dia=parseInt(todayBP.dia);
+    if(todayReading && todayReading.sys){
+      if(hBanner) hBanner.style.display='none';
+      if(bpStatus){
+        const sys=parseInt(todayReading.sys), dia=parseInt(todayReading.dia);
         const color = sys>=140?'#7F1D1D':sys>=130?'#92400E':sys>=120?'#E8A87C':'#27500A';
         const label = sys>=140?'Stage 2 High':sys>=130||dia>=80?'Stage 1 High':sys>=120?'Elevated':'Normal';
-        bpStatus.innerHTML=`<div style="padding:8px 12px;border-radius:10px;background:var(--warm);display:flex;justify-content:space-between;align-items:center;"><div><span style="font-size:20px;font-weight:700;color:${color};">${todayBP.sys}/${todayBP.dia}</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">${todayBP.pulse?'Pulse '+todayBP.pulse:''}</span></div><div style="text-align:right;"><div style="font-size:12px;font-weight:600;color:${color};">${label}</div><div style="font-size:11px;color:var(--muted);">Today${todayBP.time?' · '+todayBP.time:''}</div></div></div>`;
+        const pulse = todayReading.pulse ? 'Pulse '+todayReading.pulse : '';
+        const time = todayReading.time ? ' · '+todayReading.time : '';
+        const src = todayReading.source ? ` · ${todayReading.source}` : '';
+        bpStatus.innerHTML=`<div style="padding:8px 12px;border-radius:10px;background:var(--warm);display:flex;justify-content:space-between;align-items:center;"><div><span style="font-size:20px;font-weight:700;color:${color};">${sys}/${dia}</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">${pulse}</span></div><div style="text-align:right;"><div style="font-size:12px;font-weight:600;color:${color};">${label}</div><div style="font-size:11px;color:var(--muted);">Today${time}${src}</div></div></div>`;
       }
     } else {
       if(hBanner){ hBanner.style.display='flex'; }      if(hLast && lastBP) hLast.textContent = `Last: ${lastBP.sys}/${lastBP.dia} · ${lastBP.date}`;
@@ -6618,23 +6727,56 @@ async function saveInjectionNotes(){
   const pain = gT('injection-pain-tags')[0]||'';
   const sensation = gT('injection-sensation-tags');
   const notes = document.getElementById('injection-notes').value.trim();
+  const date = nowStr();
+
+  // Save to injection site history in localStorage
   const history = JSON.parse(localStorage.getItem('glowInjectionSites')||'[]');
-  if(history.length){
+  if(history.length && history[history.length-1].date===date){
     history[history.length-1].pain = pain;
     history[history.length-1].sensation = sensation;
     history[history.length-1].notes = notes;
-    localStorage.setItem('glowInjectionSites', JSON.stringify(history));
+  } else {
+    history.push({ date, pain, sensation, notes, site: '', label: '' });
   }
-  // Also save to Blob alongside zep data
-  const zepData = await dbAll('zep');
-  if(zepData && zepData.length){
-    const last = zepData[zepData.length-1];
-    last.injectionPain = pain;
-    last.injectionSensation = sensation;
-    last.injectionNotes = notes;
-    syncToBlob('zep');
-  }
+  localStorage.setItem('glowInjectionSites', JSON.stringify(history));
+
+  // Also save to Blob alongside zepbound data
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=zepbound`);
+    if(res.ok){
+      const {data} = await res.json();
+      const zepData = Array.isArray(data) ? data : [];
+      // Find today's entry or add new
+      const idx = zepData.findIndex(e=>e.date===date);
+      if(idx>=0){
+        zepData[idx].injectionPain = pain;
+        zepData[idx].injectionSensation = sensation;
+        zepData[idx].injectionNotes = notes;
+      } else {
+        zepData.push({ date, injectionPain:pain, injectionSensation:sensation, injectionNotes:notes });
+      }
+      fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({pillar:'zepbound',data:zepData})}).catch(()=>{});
+    }
+  } catch(e){}
+
   toast('inj-toast');
+  renderInjectionNotesLog();
+}
+
+function renderInjectionNotesLog(){
+  const el = document.getElementById('injection-notes-log');
+  if(!el) return;
+  const history = JSON.parse(localStorage.getItem('glowInjectionSites')||'[]');
+  const withNotes = history.filter(e=>e.notes||e.pain||e.sensation?.length).reverse().slice(0,5);
+  if(!withNotes.length){ el.innerHTML='<div class="log-empty">No injection notes yet.</div>'; return; }
+  el.innerHTML = withNotes.map(e=>`
+    <div class="log-item">
+      <div class="log-date">${fmtOutfitDate(e.date)||e.date}${e.label?' · '+e.label:''}</div>
+      ${e.pain?`<div style="font-size:12px;color:var(--text);">Pain: ${e.pain}</div>`:''}
+      ${e.sensation?.length?`<div style="font-size:12px;color:var(--muted);">${e.sensation.join(' · ')}</div>`:''}
+      ${e.notes?`<div style="font-size:12px;color:var(--muted);font-style:italic;">"${e.notes}"</div>`:''}
+    </div>`).join('');
 }
 
 async function selectInjectionSite(site){
@@ -6713,6 +6855,7 @@ function loadInjectionSiteHistory(){
   if(!history.length) return;
   const last = history[history.length-1];
   updateInjectionSiteDiagram(last.site, history);
+  renderInjectionNotesLog();
   // Restore notes if same day
   if(last.date === nowStr()){
     if(last.pain) document.querySelectorAll('#injection-pain-tags .tag').forEach(t=>{ if(t.textContent.includes(last.pain.replace(/😊|😐|😬|😣 /g,''))) t.classList.add('on'); });
