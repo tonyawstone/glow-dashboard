@@ -434,7 +434,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div id="upload-status-banner" style="display:none;align-items:center;gap:8px;margin-bottom:6px;">
       <div style="flex:1;display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);font-size:11px;color:var(--muted);">
         <div id="upload-status-text">⏳ Checking last upload...</div>
-        <div id="upload-status-date" style="color:var(--accent);font-weight:500;"></div>
+        <div id="upload-status-date" style="color:var(--muted);font-weight:500;font-size:11px;opacity:0.85;"></div>
       </div>
       <button class="guide-btn" onclick="openGuide('today')">?</button>
     </div>
@@ -4320,9 +4320,9 @@ async function checkLastUpload(){
     let uploadStr = '';
     if(uploadedAt){
       const ua = new Date(uploadedAt);
-      const uaDateStr = ua.toISOString().slice(0,10);
+      const y=ua.getFullYear(),m=String(ua.getMonth()+1).padStart(2,'0'),d=String(ua.getDate()).padStart(2,'0');
       const uaTime = ua.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
-      uploadStr = `Uploaded ${smartDate(uaDateStr)} at ${uaTime} · `;
+      uploadStr = `Uploaded ${smartDate(`${y}-${m}-${d}`)} · ${uaTime} · `;
     }
     el.textContent = `${uploadStr}Data: ${earliest} → ${latest} (${rows.length} days)`;
     el.style.color = 'var(--muted)';
@@ -6102,10 +6102,11 @@ async function updateUploadStatusBanner(){
       const r = await fetch(`${BACKEND}/api/health-data`);
       if(r.ok){ const {uploadedAt} = await r.json(); if(uploadedAt){
         const ua = new Date(uploadedAt);
-        const uaDateStr = ua.toISOString().slice(0,10);
-        const uaDateLabel = smartDate(uaDateStr);
+        // Use local date to avoid UTC timezone shift
+        const y=ua.getFullYear(),m=String(ua.getMonth()+1).padStart(2,'0'),d=String(ua.getDate()).padStart(2,'0');
+        const uaDateLabel = smartDate(`${y}-${m}-${d}`);
         const uaTime = ua.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
-        uploadedAtStr = `${uaDateLabel} at ${uaTime}`;
+        uploadedAtStr = `${uaDateLabel} · ${uaTime}`;
       }}
     } catch(e){}
 
