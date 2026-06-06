@@ -547,22 +547,70 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
   </div>
   <div class="view-content" id="vc-today-monthly">
-    <div class="section-label">May 2026</div>
+    <div class="section-label" id="today-monthly-label">This month</div>
+
+    <!-- Month at a glance -->
+    <div class="card">
+      <div class="card-title">Month at a glance</div>
+      <div id="today-month-stats"><div class="log-empty">Loading...</div></div>
+    </div>
+
+    <!-- Treatment compliance -->
+    <div class="card">
+      <div class="card-title">Treatment compliance</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Days completed this month</div>
+      <div id="today-month-compliance"><div class="log-empty">Log daily check-ins to see compliance.</div></div>
+    </div>
+
+    <!-- Mood breakdown -->
+    <div class="card">
+      <div class="card-title">Mood this month</div>
+      <div id="today-month-moods"><div class="log-empty">Log moods in your daily check-in.</div></div>
+    </div>
+
+    <!-- Monthly reflection -->
     <div class="card">
       <div class="card-title">Monthly reflection</div>
       <textarea id="monthly-reflection" rows="4" placeholder="How did this month go? Key wins, challenges, what to focus on next month..."></textarea>
       <button class="btn-primary" onclick="saveReflection()">Save reflection</button>
+      <button class="btn-ai" style="margin-top:8px;" onclick="callCoach('Monthly','Summarize my wellness progress this month based on my check-ins, mood, and treatment compliance. Be encouraging and specific.','today-month-ai')">AI monthly summary ↗</button>
+      <div id="today-month-ai" class="coach-response" style="display:none;"></div>
       <div class="toast-msg" id="ref-t">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Past reflections</div><div id="reflection-log"><div class="log-empty">No reflections yet.</div></div></div>
   </div>
+
   <div class="view-content" id="vc-today-yearly">
     <div class="section-label">2026 journey</div>
+
+    <!-- Year in numbers -->
+    <div class="card">
+      <div class="card-title">2026 · Year in numbers</div>
+      <div id="today-year-stats"><div class="log-empty">Loading...</div></div>
+    </div>
+
+    <!-- Key milestones -->
     <div class="card">
       <div class="card-title">Key milestones</div>
       <div class="log-item"><div class="log-date">Oct 25, 2025</div><div style="font-size:14px;">Started Zepbound · 201.4 lbs</div></div>
       <div class="log-item"><div class="log-date">May 19, 2026</div><div style="font-size:14px;">All-time low · 168.7 lbs 🎉</div></div>
       <div class="log-item"><div class="log-date">May 26, 2026</div><div style="font-size:14px;">Glow Dashboard launched · Hair journey begins</div></div>
+      <div id="today-year-milestones"></div>
+    </div>
+
+    <!-- Month by month mood -->
+    <div class="card">
+      <div class="card-title">Mood by month · 2026</div>
+      <div id="today-year-moods"><div class="log-empty">Loading mood history...</div></div>
+    </div>
+
+    <!-- Letter to yourself -->
+    <div class="card">
+      <div class="card-title">Letter to yourself · 2026</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Zoom out. Celebrate how far you've come. What do you want to remember about this year?</div>
+      <textarea id="yearly-letter" rows="6" placeholder="Dear Tonya, this year I..."></textarea>
+      <button class="btn-primary" onclick="saveYearlyLetter()">Save letter</button>
+      <div class="toast-msg" id="yr-toast">Saved!</div>
     </div>
   </div>
 </div>
@@ -1549,6 +1597,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
     <div class="card">
+      <div class="card-title">💉 Zepbound · monthly log</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Once weekly · every Saturday · tracking dose & schedule compliance</div>
+      <div id="zep-monthly-tracker"><div class="log-empty">Loading Zepbound history...</div></div>
+    </div>
+
+    <div class="card">
       <div class="card-title">Lab trends · Oct 2025 → Feb 2026</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tracking improvement since starting Zepbound. Next labs expected Aug–Nov 2026.</div>
       <div class="chart-tabs" id="lab-chart-tabs-monthly">
@@ -2365,7 +2419,9 @@ async function tab(id){
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
   if(curTab==='style'){ renderLookbook(); if(v==='monthly') renderStyleCalendar(); }
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
-  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();}}
+  if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
+  if(curTab==='today' && v==='yearly') buildYearlyTodayView();
+  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();}if(v==='monthly')buildZepMonthlyTracker();}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); }
   if(curTab==='hair'&&v!=='daily') buildHairCharts();
   if(curTab==='sleep'&&(v==='weekly'||v==='monthly')) { buildMyAirCharts(); buildSleepWeeklyAvg(); }
@@ -2794,7 +2850,151 @@ async function saveWardrobePlan(){
   document.getElementById('dailylook-wishlist').value='';
   toast('wt');
 }
-// ── TODAY WEEKLY VIEW ─────────────────────────────────────────────────
+async function buildMonthlyTodayView(){
+  const now = new Date();
+  const monthStr = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const label = document.getElementById('today-monthly-label');
+  if(label) label.textContent = monthStr;
+
+  const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const checkins = await dbAll('checkins');
+  const thisMonth = checkins.filter(c=>c.date&&c.date.startsWith(prefix));
+  const daysInMonth = new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const daysSoFar = now.getDate();
+
+  // Stats
+  const statsEl = document.getElementById('today-month-stats');
+  if(statsEl){
+    const bps = await dbAll('bps');
+    const monthBPs = bps.filter(b=>b.date&&b.date.startsWith(prefix)&&b.sys&&b.dia);
+    const avgSys = monthBPs.length?Math.round(monthBPs.reduce((a,b)=>a+Number(b.sys),0)/monthBPs.length):null;
+    const avgDia = monthBPs.length?Math.round(monthBPs.reduce((a,b)=>a+Number(b.dia),0)/monthBPs.length):null;
+    const exerciseDays = thisMonth.filter(c=>c.exercise).length;
+    const csvRows = await getCSVRows();
+    const monthWeight = csvRows.filter(r=>r.date&&r.date.startsWith(prefix)&&parseFloat(r.weight_lbs)>0);
+    const startW = monthWeight.length?parseFloat(monthWeight[monthWeight.length-1].weight_lbs):null;
+    const endW = monthWeight.length?parseFloat(monthWeight[0].weight_lbs):null;
+    const weightChange = startW&&endW?Math.round((endW-startW)*10)/10:null;
+
+    statsEl.innerHTML=`
+      <div class="stat-strip" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-tile"><div class="stat-val" style="font-size:20px;">${thisMonth.length}</div><div class="stat-lbl">check-ins</div><div class="stat-src">of ${daysSoFar} days</div></div>
+        <div class="stat-tile"><div class="stat-val" style="font-size:20px;">${exerciseDays}</div><div class="stat-lbl">exercise days</div><div class="stat-src">this month</div></div>
+        <div class="stat-tile"><div class="stat-val" style="font-size:20px;">${weightChange!==null?(weightChange>0?'+':'')+weightChange:'—'}</div><div class="stat-lbl">lbs ${weightChange!==null&&weightChange<0?'lost':'change'}</div><div class="stat-src">this month</div></div>
+      </div>
+      ${avgSys?`<div style="font-size:13px;color:var(--text);margin-top:10px;">❤️ Avg BP: <strong>${avgSys}/${avgDia}</strong> mmHg</div>`:''}
+    `;
+  }
+
+  // Compliance
+  const compEl = document.getElementById('today-month-compliance');
+  if(compEl && thisMonth.length){
+    const treatments = [
+      {label:'💊 Meds', key:'meds'},
+      {label:'😴 CPAP', key:'cpap'},
+      {label:'🏃 Exercise', key:'exercise'},
+      {label:'🧴 Skincare', key:null, check:c=>c.skinAM||c.skinPM},
+    ];
+    compEl.innerHTML = treatments.map(t=>{
+      const count = thisMonth.filter(c=>t.check?t.check(c):c[t.key]).length;
+      const pct = Math.round((count/daysSoFar)*100);
+      const color = pct>=90?'#27500A':pct>=70?'#6B9E78':pct>=50?'#E8A87C':'var(--muted)';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border);">
+        <div style="font-size:13px;">${t.label}</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:100px;height:6px;border-radius:3px;background:var(--border);overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:${color};border-radius:3px;"></div>
+          </div>
+          <div style="font-size:12px;font-weight:600;color:${color};min-width:40px;text-align:right;">${count}/${daysSoFar}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Moods
+  const moodEl = document.getElementById('today-month-moods');
+  if(moodEl && thisMonth.length){
+    const moodCount = {};
+    thisMonth.flatMap(c=>c.mood||[]).forEach(m=>moodCount[m]=(moodCount[m]||0)+1);
+    const sorted = Object.entries(moodCount).sort((a,b)=>b[1]-a[1]);
+    if(sorted.length){
+      moodEl.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${sorted.map(([m,n])=>`<span class="chip" style="position:relative;">${m} <span style="font-size:10px;opacity:0.6;">×${n}</span></span>`).join('')}
+      </div>`;
+    } else {
+      moodEl.innerHTML='<div class="log-empty">No moods logged yet.</div>';
+    }
+  }
+
+  // Restore saved letter
+  const saved = localStorage.getItem('glowYearlyLetter');
+  if(saved){ const el=document.getElementById('yearly-letter'); if(el) el.value=saved; }
+}
+
+async function buildYearlyTodayView(){
+  const checkins = await dbAll('checkins');
+  const year = new Date().getFullYear();
+
+  // Year in numbers
+  const statsEl = document.getElementById('today-year-stats');
+  if(statsEl){
+    const yearCheckins = checkins.filter(c=>c.date&&c.date.startsWith(String(year)));
+    const exerciseDays = yearCheckins.filter(c=>c.exercise).length;
+    const medsDays = yearCheckins.filter(c=>c.meds).length;
+    const csvRows = await getCSVRows();
+    const yearRows = csvRows.filter(r=>r.date&&r.date.startsWith(String(year)));
+    const totalSteps = yearRows.reduce((a,r)=>a+(parseInt(r.steps)||0),0);
+
+    statsEl.innerHTML=`
+      <div class="stat-strip" style="grid-template-columns:repeat(2,1fr);gap:8px;">
+        <div class="stat-tile"><div class="stat-val" style="font-size:20px;">${yearCheckins.length}</div><div class="stat-lbl">check-ins logged</div></div>
+        <div class="stat-tile"><div class="stat-val" style="font-size:20px;">${exerciseDays}</div><div class="stat-lbl">exercise days</div></div>
+        <div class="stat-tile"><div class="stat-val" style="font-size:20px;">${medsDays}</div><div class="stat-lbl">days on meds</div></div>
+        <div class="stat-tile"><div class="stat-val" style="font-size:20px;">${totalSteps>0?(totalSteps/1000).toFixed(0)+'k':'—'}</div><div class="stat-lbl">steps walked</div></div>
+      </div>
+    `;
+  }
+
+  // Month by month moods
+  const moodEl = document.getElementById('today-year-moods');
+  if(moodEl){
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const byMonth = {};
+    checkins.filter(c=>c.date&&c.date.startsWith(String(year))).forEach(c=>{
+      const m = parseInt(c.date.split('-')[1])-1;
+      if(!byMonth[m]) byMonth[m]=[];
+      (c.mood||[]).forEach(mood=>byMonth[m].push(mood));
+    });
+
+    const rows = Object.entries(byMonth).sort((a,b)=>Number(b[0])-Number(a[0])).map(([m,moods])=>{
+      const count = {};
+      moods.forEach(mood=>count[mood]=(count[mood]||0)+1);
+      const top = Object.entries(count).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([mood])=>mood);
+      return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);min-width:30px;">${months[Number(m)]}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">${top.map(t=>`<span class="chip" style="font-size:11px;">${t}</span>`).join('')}</div>
+      </div>`;
+    }).join('');
+
+    moodEl.innerHTML = rows || '<div class="log-empty">No mood data yet for 2026.</div>';
+  }
+
+  // Restore yearly letter
+  const saved = localStorage.getItem('glowYearlyLetter');
+  if(saved){ const el=document.getElementById('yearly-letter'); if(el) el.value=saved; }
+}
+
+async function saveYearlyLetter(){
+  const text = document.getElementById('yearly-letter')?.value.trim();
+  if(!text) return;
+  localStorage.setItem('glowYearlyLetter', text);
+  // Also save to Blob
+  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'yearly_letter',data:{text,date:nowStr(),year:new Date().getFullYear()}})}).catch(()=>{});
+  toast('yr-toast');
+}
+
+
 async function buildWeeklyTodayView(){
   const checkins = await dbAll('checkins');
   const today = new Date();
@@ -2802,7 +3002,17 @@ async function buildWeeklyTodayView(){
   weekStart.setDate(today.getDate() - today.getDay());
   const weekStartStr = `${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,'0')}-${String(weekStart.getDate()).padStart(2,'0')}`;
 
-  const thisWeek = checkins.filter(c=>c.date>=weekStartStr).sort((a,b)=>a.date.localeCompare(b.date));
+  const thisWeek = checkins.filter(c=>{
+    if(!c.date) return false;
+    let dateStr = c.date;
+    // Convert legacy friendly format to YYYY-MM-DD for comparison
+    if(!dateStr.match(/^\d{4}-\d{2}-\d{2}$/)){
+      const d = new Date(dateStr+' 2026');
+      if(isNaN(d.getTime())) return false;
+      dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    return dateStr >= weekStartStr;
+  }).sort((a,b)=>a.date.localeCompare(b.date));
 
   const treatEl = document.getElementById('weekly-treatments');
   if(!treatEl) return;
@@ -2814,23 +3024,30 @@ async function buildWeeklyTodayView(){
 
   // Calculate streaks
   const streaks = {
-    meds:    { label:'💊 Meds',     icon:'💊', days:[] },
-    cpap:    { label:'😴 CPAP',     icon:'😴', days:[] },
-    zep:     { label:'💉 Zepbound', icon:'💉', days:[] },
-    exercise:{ label:'🏃 Exercise', icon:'🏃', days:[] },
-    skincare:{ label:'🧴 Skincare', icon:'🧴', days:[] },
+    meds:     { label:'💊 Meds',      days:[] },
+    cpap:     { label:'😴 CPAP',      days:[] },
+    exercise: { label:'🏃 Exercise',  days:[] },
+    skincare: { label:'🧴 Skincare',  days:[] },
+    melatonin:{ label:'🌙 Melatonin', days:[] },
   };
 
   const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
   thisWeek.forEach(c=>{
-    const d = new Date(c.date+'T12:00:00');
+    // Handle both YYYY-MM-DD and legacy friendly date formats
+    let d;
+    if(c.date && c.date.match(/^\d{4}-\d{2}-\d{2}$/)){
+      d = new Date(c.date+'T12:00:00');
+    } else if(c.date){
+      d = new Date(c.date+' 2026'); // legacy format like "Fri, Jun 5"
+    }
+    if(!d || isNaN(d.getTime())) return;
     const dayLabel = days[d.getDay()];
     if(c.meds) streaks.meds.days.push(dayLabel);
     if(c.cpap) streaks.cpap.days.push(dayLabel);
-    if(c.zep)  streaks.zep.days.push(dayLabel);
     if(c.exercise) streaks.exercise.days.push(dayLabel);
-    if(c.skincare||c.musely||c.moisturizer||c.spf) streaks.skincare.days.push(dayLabel);
+    if(c.skinAM||c.skinPM||c.skincare||c.musely) streaks.skincare.days.push(dayLabel);
+    if(c.melatonin||c.sleepGummies) streaks.melatonin.days.push(dayLabel);
   });
 
   // Build streak rows
@@ -6432,6 +6649,72 @@ async function updateBPBanners(){
       if(bpStatus) bpStatus.innerHTML='';
     }
   } catch(e){}
+}
+
+async function buildZepMonthlyTracker(){
+  const el = document.getElementById('zep-monthly-tracker');
+  if(!el) return;
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=zepbound`);
+    if(!res.ok){ el.innerHTML='<div class="log-empty">No Zepbound data yet.</div>'; return; }
+    const {data} = await res.json();
+    const doses = (Array.isArray(data)?data:[]).filter(d=>d.mg&&d.isoDate).sort((a,b)=>b.isoDate.localeCompare(a.isoDate));
+
+    if(!doses.length){ el.innerHTML='<div class="log-empty">No injections logged yet.</div>'; return; }
+
+    // Group by month
+    const byMonth = {};
+    doses.forEach(d=>{
+      const dt = new Date(d.isoDate);
+      const key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+      const label = dt.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+      if(!byMonth[key]) byMonth[key] = {label, doses:[]};
+      byMonth[key].doses.push(d);
+    });
+
+    // Calculate consecutive weeks streak
+    const sortedDoses = [...doses].sort((a,b)=>a.isoDate.localeCompare(b.isoDate));
+    let streak = 0;
+    for(let i=sortedDoses.length-1;i>=0;i--){
+      if(i===sortedDoses.length-1){ streak=1; continue; }
+      const curr = new Date(sortedDoses[i].isoDate);
+      const next = new Date(sortedDoses[i+1].isoDate);
+      const diffDays = Math.round((next-curr)/(1000*60*60*24));
+      if(diffDays>=5&&diffDays<=9) streak++;
+      else break;
+    }
+
+    el.innerHTML = `
+      <div style="display:flex;gap:12px;margin-bottom:14px;">
+        <div class="stat-tile" style="flex:1;"><div class="stat-val" style="font-size:22px;">${doses.length}</div><div class="stat-lbl">Total doses</div></div>
+        <div class="stat-tile" style="flex:1;"><div class="stat-val" style="font-size:22px;">${streak}</div><div class="stat-lbl">Week streak</div></div>
+        <div class="stat-tile" style="flex:1;"><div class="stat-val" style="font-size:22px;">${doses[0]?.mg||'—'}</div><div class="stat-lbl">Current mg</div></div>
+      </div>
+      ${Object.entries(byMonth).sort((a,b)=>b[0].localeCompare(a[0])).map(([,m])=>`
+        <div style="margin-bottom:12px;">
+          <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">${m.label}</div>
+          ${m.doses.map(d=>{
+            const dt = new Date(d.isoDate);
+            const dayStr = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+            const pain = d.injectionPain||'';
+            const notes = d.injectionNotes||'';
+            const site = d.injectionSiteLabel||d.injectionSite||'';
+            return `<div style="padding:8px 0;border-bottom:0.5px solid var(--border);">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-size:13px;color:var(--text);">${dayStr}</div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  ${site?`<span style="font-size:11px;color:var(--muted);">${site}</span>`:''}
+                  <span style="font-size:13px;font-weight:600;color:var(--accent);">${d.mg} mg</span>
+                </div>
+              </div>
+              ${pain?`<div style="font-size:11px;color:var(--muted);margin-top:2px;">Pain: ${pain}${d.injectionSensation?.length?' · '+d.injectionSensation.join(', '):''}</div>`:''}
+              ${notes?`<div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;">"${notes}"</div>`:''}
+            </div>`;
+          }).join('')}
+        </div>
+      `).join('')}
+    `;
+  } catch(e){ el.innerHTML='<div class="log-empty">Could not load Zepbound data.</div>'; }
 }
 
 async function buildMedsWeeklyCompliance(){
