@@ -531,7 +531,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div class="fl">Occasion</div>
       <div class="tags" id="occ-tags">
-        <button class="tag" onclick="tog(this)">Work</button><button class="tag" onclick="tog(this)">Weekend</button><button class="tag" onclick="tog(this)">Event</button><button class="tag" onclick="tog(this)">Date night</button><button class="tag" onclick="tog(this)">School run</button><button class="tag" onclick="tog(this)">Casual</button>
+        <button class="tag" onclick="tog(this)">Work</button><button class="tag" onclick="tog(this)">Weekend</button><button class="tag" onclick="tog(this)">Casual</button><button class="tag" onclick="tog(this)">Event</button><button class="tag" onclick="tog(this)">Date night</button><button class="tag" onclick="tog(this)">Church</button><button class="tag" onclick="tog(this)">Semi-formal</button><button class="tag" onclick="tog(this)">Dressy</button><button class="tag" onclick="tog(this)">School run</button>
       </div>
       <div class="fl">Vibe</div>
       <div class="tags" id="outfit-vibe-tags">
@@ -539,11 +539,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div class="fl">Season</div>
       <div class="tags" id="season-tags">
-        <button class="tag" onclick="solo('season-tags',this)">Spring</button><button class="tag" onclick="solo('season-tags',this)">Summer</button><button class="tag" onclick="solo('season-tags',this)">Fall</button><button class="tag" onclick="solo('season-tags',this)">Winter</button>
+        <button class="tag" onclick="tog(this)">Spring</button><button class="tag" onclick="tog(this)">Summer</button><button class="tag" onclick="tog(this)">Fall</button><button class="tag" onclick="tog(this)">Winter</button>
       </div>
       <div class="fl">Color palette</div>
       <div class="tags" id="color-tags">
-        <button class="tag" onclick="tog(this)">Neutral</button><button class="tag" onclick="tog(this)">Black</button><button class="tag" onclick="tog(this)">White</button><button class="tag" onclick="tog(this)">Navy</button><button class="tag" onclick="tog(this)">Camel</button><button class="tag" onclick="tog(this)">Olive</button><button class="tag" onclick="tog(this)">Blush</button><button class="tag" onclick="tog(this)">Pattern</button>
+        <button class="tag" onclick="tog(this)">Neutral</button><button class="tag" onclick="tog(this)">Black</button><button class="tag" onclick="tog(this)">White</button><button class="tag" onclick="tog(this)">Navy</button><button class="tag" onclick="tog(this)">Camel</button><button class="tag" onclick="tog(this)">Olive</button><button class="tag" onclick="tog(this)">Blush</button><button class="tag" onclick="tog(this)">Red</button><button class="tag" onclick="tog(this)">Denim</button><button class="tag" onclick="tog(this)">Multi</button><button class="tag" onclick="tog(this)">Pattern</button>
       </div>
       <div class="fl">Keep or return?</div>
       <div class="tags" id="keep-tags">
@@ -2347,7 +2347,7 @@ async function saveOutfit(){
     occ:gT('occ-tags'),
     src:gT('src-tags')[0]||'',
     vibe:gT('outfit-vibe-tags'),
-    season:gT('season-tags')[0]||'',
+    season:gT('season-tags'),
     colors:gT('color-tags'),
     keep:gT('keep-tags')[0]||'',
     wearAgain:document.getElementById('wear-again-toggle').checked,
@@ -2375,7 +2375,7 @@ function outfitCardHTML(e, slotId){
   const imgContent=e.photo?`<img src="${e.photo}" alt="${e.desc}">`:`<i class="ti ti-shirt" aria-hidden="true"></i>`;
   const wearBadge=e.wearAgain?`<span class="outfit-badge badge-wear" style="bottom:7px;right:7px;top:auto;">↩ Wear again</span>`:'';
   const keepBadge=e.keep?`<span class="outfit-badge ${keepClass}" style="top:7px;right:7px;">${keepLabel}</span>`:'';
-  const allTags=[...(e.occ||[]),...(e.vibe||[]),...(e.colors||[]),...(e.season?[e.season]:[])].filter(Boolean);
+  const allTags=[...(e.occ||[]),...(e.vibe||[]),...(e.colors||[]),...(Array.isArray(e.season)?e.season:(e.season?[e.season]:[]))].filter(Boolean);
   const tagsHTML=allTags.length?`<div class="outfit-tags">${allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('')}</div>`:'';
   const starsHTML=e.stars?`<span style="font-size:11px;color:#D4A96A;letter-spacing:1px;">${'★'.repeat(e.stars)}</span>`:'';
   return `<div class="outfit-card">
