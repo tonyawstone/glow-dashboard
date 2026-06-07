@@ -959,10 +959,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="card-title">Sleep · 7-day average</div>
       <div id="sleep-weekly-avg"><div class="log-empty">Loading...</div></div>
     </div>
+    <!-- Combined sleep quality + myAir chart -->
     <div class="card">
-      <div class="card-title">myAir total score</div>
-      <div id="myair-weekly-summary"></div>
-      <div class="chart-wrap" style="height:150px;margin-top:10px;"><canvas id="myair-score-chart"></canvas></div>
+      <div class="card-title">Sleep quality vs CPAP · this week</div>
+      <div style="display:flex;gap:16px;margin-bottom:8px;font-size:11px;color:var(--muted);">
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:3px;background:#6B9E78;border-radius:2px;"></div> Sleep score</div>
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:3px;background:#5B8DD9;border-radius:2px;"></div> MyAir score</div>
+      </div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="sleep-myair-combined-chart"></canvas></div>
     </div>
     <div class="card">
       <div class="card-title">AHI · events/hr <span style="font-size:11px;color:var(--muted);">Target: &lt;5 · dotted line = threshold</span></div>
@@ -980,25 +984,25 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
   <div class="view-content" id="vc-sleep-monthly">
     <div class="section-label">Sleep · Monthly</div>
-    <!-- Sleep calendar -->
+    <!-- Combined Sleep + MyAir calendar -->
     <div class="card">
-      <div class="card-title">Sleep quality calendar</div>
+      <div class="card-title">Sleep quality · monthly</div>
       <div class="cal-month-nav">
         <button onclick="changeSleepMonth(-1)">‹ Prev</button>
         <div class="cal-month-title" id="sleep-cal-month-title">June 2026</div>
         <button onclick="changeSleepMonth(1)">Next ›</button>
       </div>
-      <!-- Day headers Mon-Sun -->
+      <!-- Legend -->
+      <div style="display:flex;gap:16px;margin:8px 0;font-size:11px;color:var(--muted);">
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:50%;background:#6B9E78;"></div> Sleep score</div>
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:2px;background:#5B8DD9;"></div> MyAir score</div>
+      </div>
       <div class="outfit-cal-grid">
         <div class="cal-day-header">Mon</div><div class="cal-day-header">Tue</div><div class="cal-day-header">Wed</div><div class="cal-day-header">Thu</div><div class="cal-day-header">Fri</div><div class="cal-day-header">Sat</div><div class="cal-day-header">Sun</div>
       </div>
       <div id="sleep-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:2px;"></div>
       <div id="sleep-month-stats" style="margin-top:14px;"></div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">🟢 80+ · 🟡 60-79 · 🔴 below 60</div>
-    </div>
-    <div class="card">
-      <div class="card-title">myAir score trend</div>
-      <div class="chart-wrap" style="height:180px;"><canvas id="myair-score-monthly-chart"></canvas></div>
     </div>
     <div class="card">
       <div class="card-title">AHI trend · lower is better</div>
@@ -2474,7 +2478,7 @@ function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildGaitWeekCharts();}if(v==='monthly')buildZepMonthlyTracker();}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); }
   if(curTab==='hair'&&v!=='daily') buildHairCharts();
-  if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); }
+  if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); buildSleepMyAirCombinedChart(); }
   if(curTab==='sleep'&&v==='monthly') { buildMyAirCharts(); buildSleepMonthlyCalendar(); }
 }
 function applyView(){
@@ -3683,7 +3687,30 @@ async function saveExercise(){
   ['ex-walk','ex-pilates','ex-strength','ex-abs','ex-yoga','ex-other','ex-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['ex-time-tags','ex-intensity'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   toast('ext');
-  renderLog('exercise-log',await dbAll('exercises'),e=>logItem(e.date,[...(e.summary||[]),e.time,e.intensity],e.note));
+  // Exercise log — merge manual entries with Apple Health CSV workouts
+  const exercises = await dbAll('exercises');
+  const csvRows = await getCSVRows();
+  const csvExercises = csvRows
+    .filter(r=>r.exercise_types&&r.exercise_count)
+    .map(r=>({
+      date: r.date,
+      isCSV: true,
+      summary: r.exercise_types.split('|'),
+      duration: r.exercise_minutes ? r.exercise_minutes+'min' : '',
+      calories: r.exercise_calories ? r.exercise_calories+' cal' : '',
+    }));
+
+  // Merge — prefer manual if same date
+  const manualDates = new Set(exercises.map(e=>e.date));
+  const merged = [
+    ...exercises,
+    ...csvExercises.filter(e=>!manualDates.has(e.date))
+  ].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);
+
+  renderLog('exercise-log', merged, e=>e.isCSV
+    ? logItem(fmtOutfitDate(e.date), [...e.summary, e.duration, e.calories].filter(Boolean), '')
+    : logItem(fmtOutfitDate(e.date), [...(e.summary||[]), e.time, e.intensity].filter(Boolean), e.note)
+  );
 }
 async function saveBP(){
   const sys=document.getElementById('bp-sys').value,dia=document.getElementById('bp-dia').value,pulse=document.getElementById('bp-pulse').value;
@@ -4345,6 +4372,51 @@ function changeSleepMonth(dir){
 function sleepScoreColor(s){ return s>=80?'#27500A':s>=60?'#E8A87C':'#C0392B'; }
 function sleepScoreBg(s){ return s>=80?'#EAF3DE':s>=60?'#FEF3C7':'#FAECE7'; }
 
+async function buildSleepMyAirCombinedChart(){
+  const canvas = document.getElementById('sleep-myair-combined-chart');
+  if(!canvas) return;
+  if(chartInstances['sleep-myair-combined-chart']) chartInstances['sleep-myair-combined-chart'].destroy();
+
+  const rows = await getCSVRows();
+  const today = new Date();
+  const labels=[], sleepScores=[], myairScores=[];
+
+  // Get last 14 days for more context
+  let myairByDate={};
+  try {
+    const res=await fetch(`${BACKEND}/api/sync?pillar=myair`);
+    if(res.ok){ const {data}=await res.json(); (data||[]).forEach(e=>{ const iso=(e.isoDate||'').slice(0,10); if(iso) myairByDate[iso]=e.score||null; }); }
+  } catch(e){}
+
+  for(let i=13;i>=0;i--){
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const row=rows.find(r=>r.date===ds);
+    labels.push(d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}));
+    sleepScores.push(row&&row.sleep_score?parseFloat(row.sleep_score):null);
+    myairScores.push(myairByDate[ds]||null);
+  }
+
+  chartInstances['sleep-myair-combined-chart'] = new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels, datasets:[
+      {label:'Sleep score', data:sleepScores, borderColor:'#6B9E78', backgroundColor:'rgba(107,158,120,0.1)',
+       borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#6B9E78', tension:0.3, fill:true, spanGaps:true},
+      {label:'MyAir score', data:myairScores, borderColor:'#5B8DD9', backgroundColor:'rgba(91,141,217,0.1)',
+       borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#5B8DD9', tension:0.3, fill:false, spanGaps:true},
+    ]},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw||'—'}`}}},
+      scales:{
+        y:{min:0,max:100,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'},
+          afterDataLimits:scale=>{scale.min=40;}},
+        x:{ticks:{font:{size:9},maxRotation:45},grid:{display:false}}
+      }
+    }
+  });
+}
+
 async function buildSleepWeeklyQuality(){
   const el = document.getElementById('sleep-week-quality');
   if(!el) return;
@@ -4411,45 +4483,76 @@ async function buildSleepMonthlyCalendar(){
   const year=sleepCalMonth.getFullYear(), month=sleepCalMonth.getMonth();
   const prefix=`${year}-${String(month+1).padStart(2,'0')}`;
   if(titleEl)titleEl.textContent=sleepCalMonth.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
   const rows=await getCSVRows();
   const byDate={};
   rows.filter(r=>r.date&&r.date.startsWith(prefix)&&parseFloat(r.sleep_hrs)>0).forEach(r=>byDate[r.date]=r);
+
+  // Fetch MyAir data
+  let myairByDate={};
+  try {
+    const res=await fetch(`${BACKEND}/api/sync?pillar=myair`);
+    if(res.ok){ const {data}=await res.json(); (data||[]).forEach(e=>{ const iso=(e.isoDate||'').slice(0,10); if(iso) myairByDate[iso]=e; }); }
+  } catch(e){}
+
   const daysInMonth=new Date(year,month+1,0).getDate();
   const today=nowStr();
   const firstDay=new Date(year,month,1).getDay();
-  const startOffset=(firstDay+6)%7; // Mon=0
+  const startOffset=(firstDay+6)%7;
+
   let cells='';
   for(let i=0;i<startOffset;i++) cells+=`<div></div>`;
   for(let d=1;d<=daysInMonth;d++){
     const ds=`${prefix}-${String(d).padStart(2,'0')}`;
     const row=byDate[ds];
+    const myair=myairByDate[ds];
     const score=row?Math.round(parseFloat(row.sleep_score)||0):0;
-    const hrs=row?parseFloat(row.sleep_hrs).toFixed(1):null;
+    const myairScore=myair?Math.round(myair.score||0):0;
     const isToday=ds===today;
     const c=row?sleepScoreColor(score):'var(--muted)';
-    const bg=row?sleepScoreBg(score):'transparent';
-    const border=isToday?'2px solid var(--accent)':row?`2px solid ${c}`:'1px solid var(--border)';
-    cells+=`<div style="aspect-ratio:1;border-radius:50%;background:${bg};border:${border};display:flex;flex-direction:column;align-items:center;justify-content:center;">
-      <div style="font-size:10px;font-weight:700;color:${c};line-height:1.2;">${d}</div>
-      ${score?`<div style="font-size:8px;color:${c};line-height:1;">${score}</div>`:''}
+    const border=isToday?'2px solid var(--accent)':row?`1.5px solid ${c}`:'1px solid var(--border)';
+
+    // MyAir color (blue scale)
+    const mColor=myairScore>=90?'#27500A':myairScore>=70?'#5B8DD9':myairScore>0?'#C4735A':'var(--border)';
+
+    cells+=`<div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 0;">
+      <div style="width:28px;height:28px;border-radius:50%;background:${row?sleepScoreBg(score):'transparent'};border:${border};display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <div style="font-size:9px;font-weight:700;color:${c};line-height:1.1;">${d}</div>
+        ${score?`<div style="font-size:7px;color:${c};line-height:1;">${score}</div>`:''}
+      </div>
+      <div style="width:22px;height:14px;border-radius:3px;background:${myairScore?'rgba(91,141,217,0.15)':'transparent'};border:${myairScore?`1px solid ${mColor}`:'none'};display:flex;align-items:center;justify-content:center;">
+        ${myairScore?`<div style="font-size:7px;font-weight:700;color:${mColor};">${myairScore}</div>`:''}
+      </div>
     </div>`;
   }
   grid.innerHTML=cells;
+
+  // Stats
   if(statsEl){
     const monthRows=Object.values(byDate);
-    if(!monthRows.length){statsEl.innerHTML='';return;}
+    const myairRows=Object.entries(myairByDate).filter(([k])=>k.startsWith(prefix)).map(([,v])=>v);
+    if(!monthRows.length&&!myairRows.length){statsEl.innerHTML='';return;}
     const scores=monthRows.map(r=>parseFloat(r.sleep_score)||0).filter(s=>s>0);
     const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+    const avgMyAir=myairRows.length?Math.round(myairRows.reduce((a,e)=>a+(e.score||0),0)/myairRows.length):0;
     const wd=monthRows.filter(r=>{const d=new Date(r.date+'T12:00:00');return d.getDay()>=1&&d.getDay()<=5;});
     const we=monthRows.filter(r=>{const d=new Date(r.date+'T12:00:00');return d.getDay()===0||d.getDay()===6;});
     const avgWD=wd.length?(wd.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/wd.length).toFixed(1)+'h':'—';
     const avgWE=we.length?(we.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/we.length).toFixed(1)+'h':'—';
     statsEl.innerHTML=`
-      <div style="text-align:center;margin-bottom:12px;">
-        <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;border:3px solid ${sleepScoreColor(avg)};background:${sleepScoreBg(avg)};">
-          <span style="font-size:18px;font-weight:700;color:${sleepScoreColor(avg)};">${avg}</span>
+      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:12px;">
+        <div style="text-align:center;">
+          <div style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;border:3px solid ${sleepScoreColor(avg)};background:${sleepScoreBg(avg)};">
+            <span style="font-size:16px;font-weight:700;color:${sleepScoreColor(avg)};">${avg||'—'}</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Avg sleep</div>
         </div>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Average score</div>
+        ${avgMyAir?`<div style="text-align:center;">
+          <div style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;border:3px solid #5B8DD9;background:rgba(91,141,217,0.1);">
+            <span style="font-size:16px;font-weight:700;color:#5B8DD9;">${avgMyAir}</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Avg MyAir</div>
+        </div>`:''}
       </div>
       <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:0.5px solid var(--border);">
         <span style="font-size:13px;color:var(--muted);">Average weekday</span>
@@ -7154,22 +7257,43 @@ async function loadMyAirLastLogged(){
     const {data} = await res.json();
     if(!data||!data.length){ el.innerHTML='<div style="font-size:12px;color:var(--muted);">No myAir data logged yet.</div>'; return; }
 
-    const recent = data.slice(-5).reverse();
+    const recent = [...data].reverse().slice(0,6);
     el.innerHTML = `
       <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Recent entries</div>
-      ${recent.map(e=>{
+      ${recent.map((e,i)=>{
+        // Always use isoDate for consistent formatting
+        const iso = (e.isoDate||'').slice(0,10);
+        const dateLabel = iso ? 'Night of '+new Date(iso+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) : e.date||'Unknown date';
         const scoreColor = e.score>=90?'#27500A':e.score>=70?'#92400E':'#7F1D1D';
+        const realIdx = data.length - 1 - i;
         return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);">
-          <div>
-            <div style="font-size:12px;font-weight:600;">${e.date}</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:600;">${dateLabel}</div>
             <div style="font-size:11px;color:var(--muted);">
-              ${e.hours?`${e.hours} hrs`:''}${e.ahi?` · AHI ${e.ahi}`:''}${e.seal?` · Seal ${e.seal}/20`:''}${e.onoff!=null?` · On/off ${e.onoff}`:''}
+              ${e.hours?`${e.hours} hrs`:''}${e.ahi!=null?` · AHI ${e.ahi}`:''}${e.sealLmin!=null?` · Seal ${e.sealLmin} L/min`:''}${e.onoff!=null?` · On/off ${e.onoff}`:''}
             </div>
           </div>
-          ${e.score?`<div style="font-size:20px;font-weight:700;color:${scoreColor};">${e.score}</div>`:''}
+          <div style="display:flex;align-items:center;gap:10px;">
+            ${e.score?`<div style="font-size:20px;font-weight:700;color:${scoreColor};">${e.score}</div>`:''}
+            <button onclick="deleteMyAirEntry(${realIdx})" style="background:none;border:none;font-size:16px;color:var(--muted);cursor:pointer;padding:2px 6px;" title="Delete">✕</button>
+          </div>
         </div>`;
       }).join('')}
     `;
+  } catch(e){}
+}
+
+async function deleteMyAirEntry(idx){
+  if(!confirm('Delete this myAir entry?')) return;
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=myair`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!data||idx<0||idx>=data.length) return;
+    data.splice(idx, 1);
+    await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pillar:'myair',data})});
+    setTimeout(loadMyAirLastLogged, 600);
   } catch(e){}
 }
 
