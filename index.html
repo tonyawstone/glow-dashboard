@@ -785,7 +785,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="sleep-times-from-csv" style="display:flex;justify-content:center;gap:24px;padding:10px 12px;border-radius:10px;background:var(--warm);margin:8px 0 4px;">
         <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Bedtime</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-bedtime">—</div></div>
         <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Wake time</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-waketime">—</div></div>
-        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Total</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-sleephrs">—</div></div>
+        <div style="display:none;" id="csv-sleephrs"></div>
       </div>
       <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:10px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
       <!-- Sleep stages & additional metrics -->
@@ -4385,7 +4385,16 @@ async function buildSleepMyAirCombinedChart(){
   let myairByDate={};
   try {
     const res=await fetch(`${BACKEND}/api/sync?pillar=myair`);
-    if(res.ok){ const {data}=await res.json(); (data||[]).forEach(e=>{ const iso=(e.isoDate||'').slice(0,10); if(iso) myairByDate[iso]=e.score||null; }); }
+    if(res.ok){ const {data}=await res.json(); (data||[]).forEach(e=>{
+      const iso=(e.isoDate||'').slice(0,10);
+      if(!iso) return;
+      // Store under the night date — MyAir data entered Sunday morning is for Saturday night
+      // So store under isoDate AND the day before (to catch both conventions)
+      myairByDate[iso]=e.score||null;
+      const prev=new Date(iso+'T12:00:00'); prev.setDate(prev.getDate()-1);
+      const prevStr=`${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}-${String(prev.getDate()).padStart(2,'0')}`;
+      if(!myairByDate[prevStr]) myairByDate[prevStr]=e.score||null;
+    }); }
   } catch(e){}
 
   for(let i=13;i>=0;i--){
@@ -4488,11 +4497,18 @@ async function buildSleepMonthlyCalendar(){
   const byDate={};
   rows.filter(r=>r.date&&r.date.startsWith(prefix)&&parseFloat(r.sleep_hrs)>0).forEach(r=>byDate[r.date]=r);
 
-  // Fetch MyAir data
+  // Fetch MyAir data — store under night date (entered morning after)
   let myairByDate={};
   try {
     const res=await fetch(`${BACKEND}/api/sync?pillar=myair`);
-    if(res.ok){ const {data}=await res.json(); (data||[]).forEach(e=>{ const iso=(e.isoDate||'').slice(0,10); if(iso) myairByDate[iso]=e; }); }
+    if(res.ok){ const {data}=await res.json(); (data||[]).forEach(e=>{
+      const iso=(e.isoDate||'').slice(0,10);
+      if(!iso) return;
+      myairByDate[iso]=e;
+      const prev=new Date(iso+'T12:00:00'); prev.setDate(prev.getDate()-1);
+      const prevStr=`${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}-${String(prev.getDate()).padStart(2,'0')}`;
+      if(!myairByDate[prevStr]) myairByDate[prevStr]=e;
+    }); }
   } catch(e){}
 
   const daysInMonth=new Date(year,month+1,0).getDate();
@@ -4647,17 +4663,12 @@ async function buildSleepAppleMetrics(){
   const oHR = parseFloat(latest.overnight_hr)||null;
   const oHRV = parseFloat(latest.overnight_hrv)||null;
   const scoreHTML = score ? `
-    <div style="padding:10px 12px;background:var(--warm);border-radius:12px;margin-bottom:10px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Sleep Score</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">${parseFloat(latest.sleep_hrs).toFixed(1)}h · Withings</div>
-        </div>
-        <div style="font-size:32px;font-weight:700;color:${score>=80?'#27500A':score>=60?'#6B9E78':score>=40?'#E8A87C':'#C0392B'};">${score}</div>
-      </div>
-      ${(oHR||oHRV)?`<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border);">
-        ${oHR?`<div style="text-align:center;flex:1;"><div style="font-size:16px;font-weight:600;color:var(--text);">${oHR}</div><div style="font-size:10px;color:var(--muted);">avg HR bpm</div></div>`:''}
-        ${oHRV?`<div style="text-align:center;flex:1;"><div style="font-size:16px;font-weight:600;color:var(--text);">${oHRV}</div><div style="font-size:10px;color:var(--muted);">HRV ms</div></div>`:''}
+    <div style="padding:12px;background:var(--warm);border-radius:12px;margin-bottom:10px;text-align:center;">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Sleep Score</div>
+      <div style="font-size:40px;font-weight:700;color:${score>=80?'#27500A':score>=60?'#6B9E78':score>=40?'#E8A87C':'#C0392B'};">${score}</div>
+      ${(oHR||oHRV)?`<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border);justify-content:center;">
+        ${oHR?`<div style="text-align:center;"><div style="font-size:15px;font-weight:600;color:var(--text);">${oHR}</div><div style="font-size:10px;color:var(--muted);">avg HR bpm</div></div>`:''}
+        ${oHRV?`<div style="text-align:center;"><div style="font-size:15px;font-weight:600;color:var(--text);">${oHRV}</div><div style="font-size:10px;color:var(--muted);">HRV ms</div></div>`:''}
       </div>`:''}
     </div>` : '';
   el.innerHTML = `${scoreHTML}${buildSleepStagesDisplay(latest)}`;
