@@ -2132,7 +2132,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <!-- App links -->
       <div style="display:flex;gap:8px;margin-top:12px;">
-        <a href="dayone://journal" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">📖 Open Day One</a>
+        <a href="javascript:void(0)" onclick="openDayOne()" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">📖 Open Day One</a>
         <a href="https://www.wellspoken.me" target="_blank" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">🗣 Wellspoken</a>
       </div>
     </div>
@@ -2142,40 +2142,47 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="card-title">🌟 7 pillars of self-care · this week</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Tap each pillar you've nurtured today — builds your weekly self-care picture</div>
       <div id="pillars-checklist">
-        <div class="pillar-row" onclick="togglePillar('p-physical')">
-          <div class="pillar-icon">💪</div>
-          <div><div class="pillar-name">Physical</div><div class="pillar-example">Movement, sleep, nutrition, hydration</div></div>
-          <div class="tog" id="p-physical"><div class="tok"></div></div>
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-physical')">💪</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-physical')"><div class="pillar-name">Physical</div><div class="pillar-example">Movement, sleep, nutrition, hydration</div></div>
+          <button onclick="openPillarInfo('physical')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-physical" onclick="togglePillar('p-physical')"><div class="tok"></div></div>
         </div>
-        <div class="pillar-row" onclick="togglePillar('p-emotional')">
-          <div class="pillar-icon">💛</div>
-          <div><div class="pillar-name">Emotional</div><div class="pillar-example">Feelings acknowledged, boundaries set</div></div>
-          <div class="tog" id="p-emotional"><div class="tok"></div></div>
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-emotional')">💛</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-emotional')"><div class="pillar-name">Emotional</div><div class="pillar-example">Feelings acknowledged, boundaries set</div></div>
+          <button onclick="openPillarInfo('emotional')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-emotional" onclick="togglePillar('p-emotional')"><div class="tok"></div></div>
         </div>
-        <div class="pillar-row" onclick="togglePillar('p-mental')">
-          <div class="pillar-icon">🧠</div>
-          <div><div class="pillar-name">Mental</div><div class="pillar-example">Learning, creativity, reflection, journaling</div></div>
-          <div class="tog" id="p-mental"><div class="tok"></div></div>
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-mental')">🧠</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-mental')"><div class="pillar-name">Mental</div><div class="pillar-example">Learning, creativity, reflection, journaling</div></div>
+          <button onclick="openPillarInfo('mental')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-mental" onclick="togglePillar('p-mental')"><div class="tok"></div></div>
         </div>
-        <div class="pillar-row" onclick="togglePillar('p-social')">
-          <div class="pillar-icon">🤝</div>
-          <div><div class="pillar-name">Social</div><div class="pillar-example">Connection, conversation, community</div></div>
-          <div class="tog" id="p-social"><div class="tok"></div></div>
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-social')">🤝</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-social')"><div class="pillar-name">Social</div><div class="pillar-example">Connection, conversation, community</div></div>
+          <button onclick="openPillarInfo('social')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-social" onclick="togglePillar('p-social')"><div class="tok"></div></div>
         </div>
-        <div class="pillar-row" onclick="togglePillar('p-spiritual')">
-          <div class="pillar-icon">🙏</div>
-          <div><div class="pillar-name">Spiritual</div><div class="pillar-example">Gratitude, prayer, purpose, breathing</div></div>
-          <div class="tog" id="p-spiritual"><div class="tok"></div></div>
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-spiritual')">🙏</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-spiritual')"><div class="pillar-name">Spiritual</div><div class="pillar-example">Gratitude, prayer, purpose, breathing</div></div>
+          <button onclick="openPillarInfo('spiritual')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-spiritual" onclick="togglePillar('p-spiritual')"><div class="tok"></div></div>
         </div>
-        <div class="pillar-row" onclick="togglePillar('p-environmental')">
-          <div class="pillar-icon">🏡</div>
-          <div><div class="pillar-name">Environmental</div><div class="pillar-example">Tidy space, fresh air, nature, calm home</div></div>
-          <div class="tog" id="p-environmental"><div class="tok"></div></div>
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-environmental')">🏡</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-environmental')"><div class="pillar-name">Environmental</div><div class="pillar-example">Tidy space, fresh air, nature, calm home</div></div>
+          <button onclick="openPillarInfo('environmental')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-environmental" onclick="togglePillar('p-environmental')"><div class="tok"></div></div>
         </div>
-        <div class="pillar-row" onclick="togglePillar('p-financial')">
-          <div class="pillar-icon">💚</div>
-          <div><div class="pillar-name">Financial</div><div class="pillar-example">Budget check-in, saving, stress reduction</div></div>
-          <div class="tog" id="p-financial"><div class="tok"></div></div>
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-financial')">💚</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-financial')"><div class="pillar-name">Financial</div><div class="pillar-example">Budget check-in, saving, stress reduction</div></div>
+          <button onclick="openPillarInfo('financial')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-financial" onclick="togglePillar('p-financial')"><div class="tok"></div></div>
         </div>
       </div>
       <div id="pillars-status" style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--warm);">Tap pillars above when you've nurtured them today</div>
@@ -3060,9 +3067,19 @@ async function buildWeeklyTodayView(){
   const normalizeDate = (dateStr) => {
     if(!dateStr) return null;
     if(dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
-    const d = new Date(dateStr) || new Date(dateStr+' 2026');
-    if(isNaN(d.getTime())) return null;
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    // Try with current year appended for formats like "Sat, Jun 6" or "Thu, Jun 4"
+    const year = new Date().getFullYear();
+    const attempts = [
+      new Date(dateStr),
+      new Date(dateStr + ' ' + year),
+      new Date(dateStr.replace(/(\w+),\s*(\w+)\s+(\d+)/, `$2 $3, ${year}`)),
+    ];
+    for(const d of attempts){
+      if(d && !isNaN(d.getTime()) && d.getFullYear() >= 2025){
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      }
+    }
+    return null;
   };
 
   const thisWeek = checkins.filter(c=>{
@@ -3181,6 +3198,15 @@ const CHANGELOG = [
     'Glow Dashboard PWA — installable on iPhone, iPad, Mac',
   ]},
 ];
+
+function openDayOne(){
+  // Use iframe trick to open URL scheme without App Store fallback
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.src = 'dayone://';
+  document.body.appendChild(iframe);
+  setTimeout(()=>{ document.body.removeChild(iframe); }, 500);
+}
 
 function openAbout(){
   // Populate changelog
@@ -6607,6 +6633,85 @@ function stopBreathing(){
   const phase=document.getElementById('breath-phase'); if(phase) phase.textContent='Great work 🌿';
   const count=document.getElementById('breath-count'); if(count) count.textContent='';
 }
+// ── 7 PILLARS INFO ────────────────────────────────────────────────────
+const PILLAR_INFO = {
+  physical: {
+    icon: '💪', title: 'Physical Self-Care',
+    why: 'Your body is the foundation of everything. Physical care directly impacts energy, mood, weight loss, and longevity.',
+    activities: ['Any movement — walk, stretch, workout, yoga','Getting 7-9 hours of sleep','Staying hydrated (10+ glasses)','Eating nourishing meals, not skipping','Taking your medications on time','CPAP compliance for sleep apnea','Zepbound injection on schedule'],
+    inGlow: 'Tracked via steps, sleep hours, weight, hydration, and treatment compliance.',
+    tip: 'On Zepbound, your appetite cues change — eat intentionally even when not hungry.'
+  },
+  emotional: {
+    icon: '💛', title: 'Emotional Self-Care',
+    why: 'Emotional wellbeing affects every decision you make. Unprocessed feelings show up in stress eating, poor sleep, and low energy.',
+    activities: ['Naming how you actually feel (not just "fine")','Setting a boundary you\'ve been avoiding','Crying when you need to — it\'s healthy','Saying no without guilt','Talking to someone you trust','Sitting with discomfort instead of numbing it','Doing something just because it brings joy'],
+    inGlow: 'Tracked through your daily mood tags and weekly check-in patterns.',
+    tip: 'Emotional eating and cravings often soften on Zepbound — notice the shift.'
+  },
+  mental: {
+    icon: '🧠', title: 'Mental Self-Care',
+    why: 'Keeping your mind stimulated and clear reduces anxiety, sharpens focus, and builds resilience.',
+    activities: ['Journaling in Day One — even just a few lines','Reading something that interests you','Learning something new','Reflection or meditation','Using Wellspoken to sharpen your communication','Limiting doom-scrolling or news overload','Writing your weekly intention word'],
+    inGlow: 'Tracked via journaling habit in daily check-in and Mind pillar entries.',
+    tip: 'Mental clarity often improves with weight loss — document the shift in your journal.'
+  },
+  social: {
+    icon: '🤝', title: 'Social Self-Care',
+    why: 'Meaningful connection is a fundamental human need. Isolation amplifies stress and anxiety.',
+    activities: ['A real conversation (not just texting)','Quality time with family or a friend','Reaching out to someone you\'ve been thinking of','Sharing a meal with someone','Saying something kind to a stranger','Being fully present — phone down'],
+    inGlow: 'Log it in your daily check-in notes or mood — social joy shows up in your mood trends.',
+    tip: 'As you feel better in your body, you may find yourself more socially engaged — notice it.'
+  },
+  spiritual: {
+    icon: '🙏', title: 'Spiritual Self-Care',
+    why: 'Connecting to something larger than yourself — whether faith, gratitude, or purpose — anchors you in hard moments.',
+    activities: ['Prayer or quiet reflection','Gratitude practice — 3 things, no matter how small','Deep breathing or breath work','Reading scripture, poetry, or something meaningful','Being in nature intentionally','Attending church or a spiritual community','Sitting in stillness without a phone'],
+    inGlow: 'Reflected in your gratitude entries and mood trends in the Mind pillar.',
+    tip: '"Glow from the inside out" — this pillar is the inside.'
+  },
+  environmental: {
+    icon: '🏡', title: 'Environmental Self-Care',
+    why: 'Your surroundings directly affect your mood, focus, and stress levels. A calm environment supports calm thinking.',
+    activities: ['Tidying one space — even just the counter','Opening a window for fresh air','Going outside for 10+ minutes','Decluttering something that\'s been bothering you','Making your bedroom a sleep sanctuary','Lighting a candle, playing soft music','Organizing your wardrobe or closet'],
+    inGlow: 'Your Style pillar tracks your space — outfit logging and lookbook both reflect your environment.',
+    tip: 'A clean space first thing in the morning can set the tone for the whole day.'
+  },
+  financial: {
+    icon: '💚', title: 'Financial Self-Care',
+    why: 'Financial stress is one of the most common causes of anxiety and sleeplessness. Small steps forward reduce that mental load.',
+    activities: ['Checking your accounts (just looking reduces anxiety)','Paying one bill or setting up auto-pay','Tracking a recent purchase intentionally','Reviewing a subscription you might not need','Saving even a small amount','Having a "money date" with yourself','Celebrating a financial win, however small'],
+    inGlow: 'Financial peace reduces stress which shows in your sleep score and mood trends.',
+    tip: 'Zepbound is an investment in your health — track the ROI in how you feel.'
+  },
+};
+
+function openPillarInfo(pillar){
+  const info = PILLAR_INFO[pillar];
+  if(!info) return;
+  document.getElementById('guide-title').innerHTML = `${info.icon} ${info.title}`;
+  document.getElementById('guide-body').innerHTML = `
+    <div class="guide-section">
+      <div class="guide-section-title">Why it matters</div>
+      <div class="guide-item">${info.why}</div>
+    </div>
+    <div class="guide-section">
+      <div class="guide-section-title">What counts today</div>
+      ${info.activities.map(a=>`<div class="guide-item">· ${a}</div>`).join('')}
+    </div>
+    <div class="guide-section">
+      <div class="guide-section-title">In your Glow Dashboard</div>
+      <div class="guide-item">${info.inGlow}</div>
+    </div>
+    <div class="guide-section">
+      <div class="guide-section-title">💡 Tip for you</div>
+      <div class="guide-item" style="font-style:italic;color:var(--accent);">${info.tip}</div>
+    </div>
+  `;
+  document.getElementById('guide-sheet').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
 function togglePillar(id){
   document.getElementById(id)?.classList.toggle('on');
   updatePillarsStatus(); savePillarsToday();
