@@ -462,8 +462,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="stat-strip">
       <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
       <div class="stat-tile"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-steps-src"></div></div>
-      <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-sleep-src"></div></div>
-      <div class="stat-tile"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses today</div><div class="stat-src">💧 Hydration</div></div>
+      <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-sleep-src">Last night</div></div>
+      <div class="stat-tile"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses today</div><div class="stat-src">Hydration</div><div class="stat-src">💧 Today</div></div>
     </div>
     <div class="stat-strip" style="margin-top:6px;">
       <div class="stat-tile" style="grid-column:span 2;">
@@ -4700,7 +4700,13 @@ async function buildSleepAppleMetrics(){
   const withSleep = rows.filter(r=>parseFloat(r.sleep_hrs)>0);
   if(!withSleep.length){ el.innerHTML='<div class="log-empty">No sleep data in CSV yet.</div>'; return; }
 
-  const latest = withSleep[0];
+  // Withings/Apple record sleep under the wake date (today), not the night before
+  const todayStr = nowStr();
+  const yest = new Date(); yest.setDate(yest.getDate()-1);
+  const yesterdayStr = `${yest.getFullYear()}-${String(yest.getMonth()+1).padStart(2,'0')}-${String(yest.getDate()).padStart(2,'0')}`;
+  const latest = withSleep.find(r=>r.date===todayStr)
+              || withSleep.find(r=>r.date===yesterdayStr)
+              || withSleep[0];
   const recent7 = withSleep.slice(0,7);
   const avgSleep = recent7.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/recent7.length;
   const fmt = d => safeDate(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
@@ -7112,15 +7118,19 @@ async function loadTodaySleepFromCSV(){
     }
 
     // Sleep from CSV — only if no manual entry today
-    const withSleep = rows.filter(r=>parseFloat(r.sleep_hrs)>0);
+    const withSleep = rows.filter(r=>r.date&&parseFloat(r.sleep_hrs)>0);
     if(withSleep.length){
-      const latest = withSleep[0];
+      // Withings & Apple record last night's sleep under today's date (wake date)
+      const todayStr = nowStr();
+      const yest = new Date(); yest.setDate(yest.getDate()-1);
+      const yesterdayStr = `${yest.getFullYear()}-${String(yest.getMonth()+1).padStart(2,'0')}-${String(yest.getDate()).padStart(2,'0')}`;
+      const latest = withSleep.find(r=>r.date===todayStr)
+                  || withSleep.find(r=>r.date===yesterdayStr)
+                  || withSleep[0];
       if(sleepEl && (sleepEl.textContent==='—'||sleepEl.textContent==='')){
         sleepEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
-        if(sleepSrcEl) sleepSrcEl.textContent = smartDate(latest.date);
-      } else if(sleepSrcEl && (sleepSrcEl.textContent===''||sleepSrcEl.textContent==='log below')){
-        if(sleepSrcEl) sleepSrcEl.textContent = smartDate(latest.date);
       }
+      if(sleepSrcEl) sleepSrcEl.textContent = 'Last night';
     }
   } catch(e){ console.warn('loadTodaySleepFromCSV error:', e); }
 }
