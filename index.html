@@ -1598,6 +1598,18 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="chart-wrap" style="height:200px;" id="wrap-bodywater-week-chart"></div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">Healthy range for women: 45–60% · Estimated from Withings scale data</div>
     </div>
+
+    <div class="card">
+      <div class="card-title">🚶 Walk asymmetry · this week</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Post hip replacement recovery · target &lt;5% · lower is better</div>
+      <div class="chart-wrap" style="height:180px;" id="wrap-asymmetry-week-chart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🦶 Double support % · this week</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Time with both feet on ground · normal &lt;25% · higher may indicate caution in gait</div>
+      <div class="chart-wrap" style="height:180px;" id="wrap-doublesupport-week-chart"></div>
+    </div>
   </div>
 
   <!-- ── MONTHLY ── -->
@@ -2459,7 +2471,7 @@ function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
-  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();}if(v==='monthly')buildZepMonthlyTracker();}
+  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildGaitWeekCharts();}if(v==='monthly')buildZepMonthlyTracker();}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); }
   if(curTab==='hair'&&v!=='daily') buildHairCharts();
   if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); }
@@ -2917,7 +2929,7 @@ async function buildMonthlyTodayView(){
 
     statsEl.innerHTML=`
       <div class="stat-strip" style="grid-template-columns:repeat(3,1fr);">
-        <div class="stat-tile"><div class="stat-val" style="font-size:20px;">${thisMonth.length}</div><div class="stat-lbl">check-ins</div><div class="stat-src">of ${daysSoFar} days</div></div>
+        <div class="stat-tile"><div class="stat-val" style="font-size:20px;">${thisMonth.length}</div><div class="stat-lbl">check-ins</div><div class="stat-src">this month</div></div>
         <div class="stat-tile"><div class="stat-val" style="font-size:20px;">${exerciseDays}</div><div class="stat-lbl">exercise days</div><div class="stat-src">this month</div></div>
         <div class="stat-tile"><div class="stat-val" style="font-size:20px;">${weightChange!==null?(weightChange>0?'+':'')+weightChange:'—'}</div><div class="stat-lbl">lbs ${weightChange!==null&&weightChange<0?'lost':'change'}</div><div class="stat-src">this month</div></div>
       </div>
@@ -2936,7 +2948,7 @@ async function buildMonthlyTodayView(){
     ];
     compEl.innerHTML = treatments.map(t=>{
       const count = thisMonth.filter(c=>t.check?t.check(c):c[t.key]).length;
-      const pct = Math.round((count/daysSoFar)*100);
+      const pct = Math.round((count/daysInMonth)*100);
       const color = pct>=90?'#27500A':pct>=70?'#6B9E78':pct>=50?'#E8A87C':'var(--muted)';
       return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border);">
         <div style="font-size:13px;">${t.label}</div>
@@ -2944,7 +2956,7 @@ async function buildMonthlyTodayView(){
           <div style="width:100px;height:6px;border-radius:3px;background:var(--border);overflow:hidden;">
             <div style="width:${pct}%;height:100%;background:${color};border-radius:3px;"></div>
           </div>
-          <div style="font-size:12px;font-weight:600;color:${color};min-width:40px;text-align:right;">${count}/${daysSoFar}</div>
+          <div style="font-size:12px;font-weight:600;color:${color};min-width:40px;text-align:right;">${count}/${daysInMonth}</div>
         </div>
       </div>`;
     }).join('');
@@ -3041,17 +3053,18 @@ async function buildWeeklyTodayView(){
   weekStart.setDate(today.getDate() - today.getDay());
   const weekStartStr = `${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,'0')}-${String(weekStart.getDate()).padStart(2,'0')}`;
 
+  const normalizeDate = (dateStr) => {
+    if(!dateStr) return null;
+    if(dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
+    const d = new Date(dateStr) || new Date(dateStr+' 2026');
+    if(isNaN(d.getTime())) return null;
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  };
+
   const thisWeek = checkins.filter(c=>{
-    if(!c.date) return false;
-    let dateStr = c.date;
-    // Convert legacy friendly format to YYYY-MM-DD for comparison
-    if(!dateStr.match(/^\d{4}-\d{2}-\d{2}$/)){
-      const d = new Date(dateStr+' 2026');
-      if(isNaN(d.getTime())) return false;
-      dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    }
-    return dateStr >= weekStartStr;
-  }).sort((a,b)=>a.date.localeCompare(b.date));
+    const norm = normalizeDate(c.date);
+    return norm && norm >= weekStartStr;
+  }).sort((a,b)=>(normalizeDate(a.date)||'').localeCompare(normalizeDate(b.date)||''));
 
   const treatEl = document.getElementById('weekly-treatments');
   if(!treatEl) return;
@@ -3073,15 +3086,11 @@ async function buildWeeklyTodayView(){
   const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
   thisWeek.forEach(c=>{
-    // Handle both YYYY-MM-DD and legacy friendly date formats
-    let d;
-    if(c.date && c.date.match(/^\d{4}-\d{2}-\d{2}$/)){
-      d = new Date(c.date+'T12:00:00');
-    } else if(c.date){
-      d = new Date(c.date+' 2026'); // legacy format like "Fri, Jun 5"
-    }
-    if(!d || isNaN(d.getTime())) return;
+    const norm = normalizeDate(c.date);
+    if(!norm) return;
+    const d = new Date(norm+'T12:00:00');
     const dayLabel = days[d.getDay()];
+    if(!dayLabel) return;
     if(c.meds) streaks.meds.days.push(dayLabel);
     if(c.cpap) streaks.cpap.days.push(dayLabel);
     if(c.exercise) streaks.exercise.days.push(dayLabel);
@@ -6133,6 +6142,41 @@ async function buildWaterWeekChart(){
   });
 }
 
+async function buildGaitWeekCharts(){
+  const rows = await getCSVRows();
+  const recent = rows.slice(0,7).reverse();
+  const labels = recent.map(r=>fmtOutfitDate(r.date));
+
+  const buildChart = (canvasId, data, label, color, targetLine) => {
+    const wrap = document.getElementById(canvasId.replace('wrap-','').replace('-chart',''));
+    const canvas = document.createElement('canvas');
+    const wrapEl = document.getElementById(canvasId);
+    if(!wrapEl) return;
+    wrapEl.innerHTML='';
+    wrapEl.appendChild(canvas);
+    const vals = data.map(r=>parseFloat(r)||null);
+    if(vals.every(v=>v===null)){ wrapEl.innerHTML='<div class="log-empty">No data yet — run glowupload</div>'; return; }
+    new Chart(canvas.getContext('2d'),{
+      type:'line',
+      data:{labels, datasets:[
+        {label, data:vals, borderColor:color, backgroundColor:color+'20', borderWidth:2.5, pointRadius:4, tension:0.3, fill:true},
+        ...(targetLine?[{label:'Target', data:labels.map(()=>targetLine), borderColor:'rgba(107,158,120,0.5)', borderWidth:1.5, borderDash:[4,4], pointRadius:0}]:[])
+      ]},
+      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales:{y:{beginAtZero:false, ticks:{font:{size:10}}, grid:{color:'rgba(0,0,0,0.05)'}},
+                x:{ticks:{font:{size:9}}, grid:{display:false}}}}
+    });
+  };
+
+  buildChart('wrap-asymmetry-week-chart',
+    recent.map(r=>r.walking_asymmetry),
+    'Walk Asymmetry %', '#C4735A', 5);
+
+  buildChart('wrap-doublesupport-week-chart',
+    recent.map(r=>r.double_support),
+    'Double Support %', '#5B8DD9', 25);
+}
+
 async function buildBodyWaterWeekChart(){
   const wrap = document.getElementById('wrap-bodywater-week-chart');
   if(!wrap) return;
@@ -7432,14 +7476,14 @@ async function saveZepSideEffects(){
   const existing = await fetch(`${BACKEND}/api/sync?pillar=zep_side_effects`)
     .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
   existing.push(entry);
-  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'zep_side_effects',data:existing})}).catch(()=>{});
+  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'zep_side_effects',data:existing})})
+    .then(()=>setTimeout(loadZepSideHistory, 800))
+    .catch(()=>setTimeout(loadZepSideHistory, 800));
   toast('zep-side-toast');
   document.getElementById('zep-side-note').value='';
   document.getElementById('zep-miralax-today')?.classList.remove('on');
   ['zep-gi-tags','zep-other-tags','zep-severity-tags'].forEach(id=>
-    document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'))
-  );
-  loadZepSideHistory();
+    document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
 }
 
 async function loadZepSideHistory(){
