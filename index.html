@@ -790,6 +790,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:10px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
       <!-- Sleep stages & additional metrics -->
       <div id="sleep-apple-metrics"></div>
+      <a href="withings://" class="ext-link" style="margin-top:10px;"><i class="ti ti-external-link" aria-hidden="true"></i>Open Withings · see your Sleep Score</a>
     </div>
     <div class="card">
       <div class="card-title">😴 ResMed myAir · nightly log & CPAP compliance</div>
@@ -807,9 +808,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:14px;">Medicare requires 4+ hrs/night · 70% of nights for compliance</div>
 
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-        <div style="font-size:12px;color:var(--muted);">Date:</div>
-        <input type="date" id="myair-date" style="padding:6px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);">
-        <div style="font-size:11px;color:var(--muted);">(leave blank for today)</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);">Last night's data <span id="myair-date-label" style="color:var(--muted);font-weight:400;"></span></div>
+        <input type="date" id="myair-date" style="padding:6px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--muted);" onchange="const l=document.getElementById('myair-date-label');if(l&&this.value){const d=new Date(this.value+'T12:00:00');l.textContent='('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')';}"">
       </div>
 
       <!-- Usage hours -->
@@ -950,6 +950,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
   <div class="view-content" id="vc-sleep-weekly">
     <div class="section-label">Sleep this week</div>
+    <!-- Sleep quality chart — bedtime/wake bars + score bubbles -->
+    <div class="card">
+      <div class="card-title">Sleep quality this week</div>
+      <div id="sleep-week-quality"><div class="log-empty">Loading...</div></div>
+    </div>
     <div class="card">
       <div class="card-title">Sleep · 7-day average</div>
       <div id="sleep-weekly-avg"><div class="log-empty">Loading...</div></div>
@@ -975,6 +980,22 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
   <div class="view-content" id="vc-sleep-monthly">
     <div class="section-label">Sleep · Monthly</div>
+    <!-- Sleep calendar -->
+    <div class="card">
+      <div class="card-title">Sleep quality calendar</div>
+      <div class="cal-month-nav">
+        <button onclick="changeSleepMonth(-1)">‹ Prev</button>
+        <div class="cal-month-title" id="sleep-cal-month-title">June 2026</div>
+        <button onclick="changeSleepMonth(1)">Next ›</button>
+      </div>
+      <!-- Day headers Mon-Sun -->
+      <div class="outfit-cal-grid">
+        <div class="cal-day-header">Mon</div><div class="cal-day-header">Tue</div><div class="cal-day-header">Wed</div><div class="cal-day-header">Thu</div><div class="cal-day-header">Fri</div><div class="cal-day-header">Sat</div><div class="cal-day-header">Sun</div>
+      </div>
+      <div id="sleep-cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:2px;"></div>
+      <div id="sleep-month-stats" style="margin-top:14px;"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">🟢 80+ · 🟡 60-79 · 🔴 below 60</div>
+    </div>
     <div class="card">
       <div class="card-title">myAir score trend</div>
       <div class="chart-wrap" style="height:180px;"><canvas id="myair-score-monthly-chart"></canvas></div>
@@ -2416,7 +2437,18 @@ async function tab(id){
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} }
-  if(id==='sleep') { buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); }
+  if(id==='sleep') { 
+    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState();
+    // Default myAir date to yesterday — CPAP data is always for last night
+    const myairDate = document.getElementById('myair-date');
+    const myairLabel = document.getElementById('myair-date-label');
+    if(myairDate && !myairDate.value){
+      const yest = new Date(); yest.setDate(yest.getDate()-1);
+      const y=yest.getFullYear(),m=String(yest.getMonth()+1).padStart(2,'0'),d=String(yest.getDate()).padStart(2,'0');
+      myairDate.value = `${y}-${m}-${d}`;
+      if(myairLabel) myairLabel.textContent = `(${yest.toLocaleDateString('en-US',{month:'long',day:'numeric'})})`;
+    }
+  }
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); }
@@ -2430,7 +2462,8 @@ function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();}if(v==='monthly')buildZepMonthlyTracker();}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); }
   if(curTab==='hair'&&v!=='daily') buildHairCharts();
-  if(curTab==='sleep'&&(v==='weekly'||v==='monthly')) { buildMyAirCharts(); buildSleepWeeklyAvg(); }
+  if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); }
+  if(curTab==='sleep'&&v==='monthly') { buildMyAirCharts(); buildSleepMonthlyCalendar(); }
 }
 function applyView(){
   const c=document.getElementById('s-'+curTab);if(!c)return;
@@ -4292,6 +4325,134 @@ function buildSleepStagesDisplay(row){
     </div>`;
 }
 
+// ── SLEEP WEEKLY QUALITY & MONTHLY CALENDAR ───────────────────────────
+
+let sleepCalMonth = new Date(); sleepCalMonth.setDate(1);
+
+function changeSleepMonth(dir){
+  sleepCalMonth.setMonth(sleepCalMonth.getMonth()+dir);
+  buildSleepMonthlyCalendar();
+}
+function sleepScoreColor(s){ return s>=80?'#27500A':s>=60?'#E8A87C':'#C0392B'; }
+function sleepScoreBg(s){ return s>=80?'#EAF3DE':s>=60?'#FEF3C7':'#FAECE7'; }
+
+async function buildSleepWeeklyQuality(){
+  const el = document.getElementById('sleep-week-quality');
+  if(!el) return;
+  const rows = await getCSVRows();
+  const today = new Date();
+  const dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const days = [];
+  for(let i=6;i>=0;i--){
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const row=rows.find(r=>r.date===ds&&parseFloat(r.sleep_hrs)>0);
+    days.push({d, ds, row, label:dayLabels[(d.getDay()+6)%7]});
+  }
+  const withData=days.filter(d=>d.row);
+  if(!withData.length){el.innerHTML='<div class="log-empty">Run glowupload to see sleep quality.</div>';return;}
+
+  const scores=withData.map(d=>parseFloat(d.row.sleep_score)||0).filter(s=>s>0);
+  const avgScore=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):null;
+
+  // Normalize time to 0-14 range (8pm=0 ... 10am=14)
+  const norm=(h,m)=>{ const t=h+m/60; return h>=20?t-20:t+4; };
+  const maxRange=14;
+
+  const barsHTML=days.map(({row,label})=>{
+    const score=row?Math.round(parseFloat(row.sleep_score)||0):0;
+    const c=score?sleepScoreColor(score):'var(--border)';
+    const bg=score?sleepScoreBg(score):'var(--warm)';
+    let barDiv='<div style="width:16px;background:var(--border);border-radius:4px;height:3px;margin:auto;"></div>';
+    if(row&&row.bedtime&&row.waketime){
+      const [bh,bm]=row.bedtime.split(':').map(Number);
+      const [wh,wm]=row.waketime.split(':').map(Number);
+      const topPct=(norm(bh,bm)/maxRange*100).toFixed(1);
+      const htPct=(Math.max(0.5,norm(wh,wm)-norm(bh,bm))/maxRange*100).toFixed(1);
+      barDiv=`<div style="position:relative;width:16px;height:100%;"><div style="position:absolute;top:${topPct}%;height:${htPct}%;width:100%;background:${c};border-radius:4px;min-height:4px;"></div></div>`;
+    }
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="flex:1;min-height:110px;width:16px;display:flex;align-items:stretch;">${barDiv}</div>
+      <div style="font-size:9px;color:var(--muted);">${label}</div>
+      <div style="width:26px;height:26px;border-radius:50%;background:${bg};border:2px solid ${c};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:${c};">${score||'—'}</div>
+    </div>`;
+  }).join('');
+
+  const timeLabels=['8PM','12AM','4AM','8AM'].map((t,i)=>`<div style="position:absolute;right:2px;font-size:8px;color:var(--muted);top:${i*33}%;line-height:1;">${t}</div>`).join('');
+
+  el.innerHTML=`
+    ${avgScore?`<div style="text-align:center;margin-bottom:14px;">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;border:3px solid ${sleepScoreColor(avgScore)};background:${sleepScoreBg(avgScore)};">
+        <span style="font-size:18px;font-weight:700;color:${sleepScoreColor(avgScore)};">${avgScore}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">Average score</div>
+    </div>`:''}
+    <div style="display:flex;gap:4px;">
+      <div style="position:relative;width:28px;flex-shrink:0;min-height:110px;">${timeLabels}</div>
+      <div style="flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">${barsHTML}</div>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:6px;text-align:center;">Bedtime → Wake · colored by sleep score</div>`;
+}
+
+async function buildSleepMonthlyCalendar(){
+  const grid=document.getElementById('sleep-cal-grid');
+  const titleEl=document.getElementById('sleep-cal-month-title');
+  const statsEl=document.getElementById('sleep-month-stats');
+  if(!grid)return;
+  const year=sleepCalMonth.getFullYear(), month=sleepCalMonth.getMonth();
+  const prefix=`${year}-${String(month+1).padStart(2,'0')}`;
+  if(titleEl)titleEl.textContent=sleepCalMonth.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const rows=await getCSVRows();
+  const byDate={};
+  rows.filter(r=>r.date&&r.date.startsWith(prefix)&&parseFloat(r.sleep_hrs)>0).forEach(r=>byDate[r.date]=r);
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const today=nowStr();
+  const firstDay=new Date(year,month,1).getDay();
+  const startOffset=(firstDay+6)%7; // Mon=0
+  let cells='';
+  for(let i=0;i<startOffset;i++) cells+=`<div></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${prefix}-${String(d).padStart(2,'0')}`;
+    const row=byDate[ds];
+    const score=row?Math.round(parseFloat(row.sleep_score)||0):0;
+    const hrs=row?parseFloat(row.sleep_hrs).toFixed(1):null;
+    const isToday=ds===today;
+    const c=row?sleepScoreColor(score):'var(--muted)';
+    const bg=row?sleepScoreBg(score):'transparent';
+    const border=isToday?'2px solid var(--accent)':row?`2px solid ${c}`:'1px solid var(--border)';
+    cells+=`<div style="aspect-ratio:1;border-radius:50%;background:${bg};border:${border};display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div style="font-size:10px;font-weight:700;color:${c};line-height:1.2;">${d}</div>
+      ${score?`<div style="font-size:8px;color:${c};line-height:1;">${score}</div>`:''}
+    </div>`;
+  }
+  grid.innerHTML=cells;
+  if(statsEl){
+    const monthRows=Object.values(byDate);
+    if(!monthRows.length){statsEl.innerHTML='';return;}
+    const scores=monthRows.map(r=>parseFloat(r.sleep_score)||0).filter(s=>s>0);
+    const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+    const wd=monthRows.filter(r=>{const d=new Date(r.date+'T12:00:00');return d.getDay()>=1&&d.getDay()<=5;});
+    const we=monthRows.filter(r=>{const d=new Date(r.date+'T12:00:00');return d.getDay()===0||d.getDay()===6;});
+    const avgWD=wd.length?(wd.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/wd.length).toFixed(1)+'h':'—';
+    const avgWE=we.length?(we.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/we.length).toFixed(1)+'h':'—';
+    statsEl.innerHTML=`
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;border:3px solid ${sleepScoreColor(avg)};background:${sleepScoreBg(avg)};">
+          <span style="font-size:18px;font-weight:700;color:${sleepScoreColor(avg)};">${avg}</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">Average score</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:0.5px solid var(--border);">
+        <span style="font-size:13px;color:var(--muted);">Average weekday</span>
+        <span style="font-size:13px;font-weight:600;">${avgWD}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:0.5px solid var(--border);">
+        <span style="font-size:13px;color:var(--muted);">Average weekend</span>
+        <span style="font-size:13px;font-weight:600;">${avgWE}</span>
+      </div>`;
+  }
+}
+
 async function buildSleepWeeklyAvg(){
   const el = document.getElementById('sleep-weekly-avg');
   if(!el) return;
@@ -4340,17 +4501,17 @@ async function buildSleepAppleMetrics(){
   const dataDate = fmt(latest.date);
 
   // Populate bedtime/wake display from CSV
-  const withTimes = withSleep.find(r=>r.bedtime||r.wake_time);
+  const withTimes = withSleep.find(r=>r.bedtime||r.waketime);
   const bedtimeEl = document.getElementById('csv-bedtime');
   const wakeEl = document.getElementById('csv-waketime');
   const hrsEl = document.getElementById('csv-sleephrs');
   const dateLabelEl = document.getElementById('csv-sleep-date-label');
   if(withTimes){
     if(bedtimeEl) bedtimeEl.textContent = formatTime12h(withTimes.bedtime)||'—';
-    if(wakeEl) wakeEl.textContent = formatTime12h(withTimes.wake_time)||'—';
+    if(wakeEl) wakeEl.textContent = formatTime12h(withTimes.waketime)||'—';
     if(hrsEl) hrsEl.textContent = parseFloat(withTimes.sleep_hrs||0).toFixed(1)+'h';
     const d = safeDate(withTimes.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    if(dateLabelEl) dateLabelEl.textContent = `Apple Health · ${d} · upload CSV to update`;
+    if(dateLabelEl) dateLabelEl.textContent = `Withings · ${d} · upload CSV to update`;
   } else {
     if(hrsEl) hrsEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
     if(dateLabelEl) dateLabelEl.textContent = 'Re-run Python script to add bedtime/wake times · last known shown';
@@ -4369,8 +4530,25 @@ async function buildSleepAppleMetrics(){
     if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${safeDate(latest.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
   }
 
-  // Daily view — just sleep stages, no 7-day avg (that goes on weekly)
-  el.innerHTML = `${buildSleepStagesDisplay(latest)}`;
+  // Daily view — sleep score + stages
+  const score = parseFloat(latest.sleep_score)||null;
+  const oHR = parseFloat(latest.overnight_hr)||null;
+  const oHRV = parseFloat(latest.overnight_hrv)||null;
+  const scoreHTML = score ? `
+    <div style="padding:10px 12px;background:var(--warm);border-radius:12px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Sleep Score</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">${parseFloat(latest.sleep_hrs).toFixed(1)}h · Withings</div>
+        </div>
+        <div style="font-size:32px;font-weight:700;color:${score>=80?'#27500A':score>=60?'#6B9E78':score>=40?'#E8A87C':'#C0392B'};">${score}</div>
+      </div>
+      ${(oHR||oHRV)?`<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border);">
+        ${oHR?`<div style="text-align:center;flex:1;"><div style="font-size:16px;font-weight:600;color:var(--text);">${oHR}</div><div style="font-size:10px;color:var(--muted);">avg HR bpm</div></div>`:''}
+        ${oHRV?`<div style="text-align:center;flex:1;"><div style="font-size:16px;font-weight:600;color:var(--text);">${oHRV}</div><div style="font-size:10px;color:var(--muted);">HRV ms</div></div>`:''}
+      </div>`:''}
+    </div>` : '';
+  el.innerHTML = `${scoreHTML}${buildSleepStagesDisplay(latest)}`;
 }
 
 // Body composition chart
@@ -6053,6 +6231,11 @@ async function calculateGlowScore(save=false) {
 
   // ── SLEEP (0–20) — prefer manual logs over CSV ──
   let sleepScore=10;
+  const csvSleepScore = csvRows.length ? parseFloat(csvRows[0].sleep_score)||null : null;
+  if(csvSleepScore){
+    // Map 0-100 sleep score to 0-20 pillar score
+    sleepScore = Math.round(csvSleepScore * 0.20);
+  } else {
   const recentSleeps=recent7(sleeps);
   const manualSleepHrs = recentSleeps.map(s=>parseFloat(s.hrs)||0).filter(v=>v>0);
   const csvSleepHrs = csvRows.slice(0,7).map(r=>parseFloat(r.sleep_hrs)||0).filter(v=>v>0);
@@ -6064,6 +6247,7 @@ async function calculateGlowScore(save=false) {
   }
   const cpapOk=recentSleeps.filter(s=>s.cpap==='Full night').length;
   if(cpapOk>=5) sleepScore=Math.min(20,sleepScore+2);
+  } // end else (no CSV sleep score)
 
   // ── MIND (0–20) ──
   let mindScore=12;
@@ -6428,8 +6612,9 @@ async function saveMyAirLog(){
   const score = (usageScore||0) + (ahiScore||0) + (sealScore||0) + (onoffScore||0);
 
   const datePickerEl = document.getElementById('myair-date');
-  const isoStr = datePickerEl?.value || new Date().toISOString().slice(0,10);
-  const logDate = safeDate(isoStr);
+  // Use local date string, not UTC
+  const isoStr = datePickerEl?.value || nowStr();
+  const logDate = new Date(isoStr+'T12:00:00');
   const dateStr = logDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
 
   const entry = {
