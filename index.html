@@ -66,7 +66,11 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .card{background:#fff;border:0.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
 .card-title{font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:16px;}
 .section-label{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;display:flex;align-items:center;justify-content:space-between;}
-.guide-btn{font-size:12px;font-family:var(--sans);font-weight:600;color:var(--accent);background:var(--warm);border:0.5px solid var(--accent);border-radius:50%;width:22px;height:22px;cursor:pointer;letter-spacing:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.85;}
+.pillar-detail{display:none;padding:8px 12px 10px;background:rgba(160,120,80,0.05);border-radius:10px;margin:-4px 0 6px;border:0.5px solid var(--border);}
+.pillar-detail .tags{margin-bottom:8px;gap:4px;}
+.pillar-detail .tag.sm{font-size:11px;padding:3px 8px;}
+.pillar-note{font-size:12px;padding:6px 10px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);width:100%;box-sizing:border-box;font-family:var(--sans);color:var(--text);}
+.pillar-detail.open{display:block;}
 .guide-sheet{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:997;align-items:flex-end;justify-content:center;}
 .guide-sheet.open{display:flex;}
 .guide-content{background:var(--cream);border-radius:20px 20px 0 0;padding:20px 20px max(24px,env(safe-area-inset-bottom));width:100%;max-width:430px;max-height:80vh;overflow-y:auto;}
@@ -2148,41 +2152,89 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <button onclick="openPillarInfo('physical')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
           <div class="tog" id="p-physical" onclick="togglePillar('p-physical')"><div class="tok"></div></div>
         </div>
+        <div class="pillar-detail" id="pd-physical">
+          <div class="tags" id="pdt-physical">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">🚶 Walk</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🏃 Workout</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🧘 Stretch/Yoga</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💧 Hydrated</button><button class="tag sm" onclick="tog(this);savePillarsToday()">😴 Good sleep</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🥗 Ate well</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💊 Meds taken</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-physical" placeholder="Anything else...">
+        </div>
+
         <div class="pillar-row">
           <div class="pillar-icon" onclick="togglePillar('p-emotional')">💛</div>
           <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-emotional')"><div class="pillar-name">Emotional</div><div class="pillar-example">Feelings acknowledged, boundaries set</div></div>
           <button onclick="openPillarInfo('emotional')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
           <div class="tog" id="p-emotional" onclick="togglePillar('p-emotional')"><div class="tok"></div></div>
         </div>
+        <div class="pillar-detail" id="pd-emotional">
+          <div class="tags" id="pdt-emotional">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">💬 Talked it out</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🚫 Set a boundary</button><button class="tag sm" onclick="tog(this);savePillarsToday()">😢 Let myself feel it</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🙅 Said no</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🎉 Did something joyful</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-emotional" placeholder="Anything else...">
+        </div>
+
         <div class="pillar-row">
           <div class="pillar-icon" onclick="togglePillar('p-mental')">🧠</div>
           <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-mental')"><div class="pillar-name">Mental</div><div class="pillar-example">Learning, creativity, reflection, journaling</div></div>
           <button onclick="openPillarInfo('mental')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
           <div class="tog" id="p-mental" onclick="togglePillar('p-mental')"><div class="tok"></div></div>
         </div>
+        <div class="pillar-detail" id="pd-mental">
+          <div class="tags" id="pdt-mental">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">📖 Journaled</button><button class="tag sm" onclick="tog(this);savePillarsToday()">📚 Read</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🧩 Learned something</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🎨 Created</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🧘 Meditated</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🗣 Wellspoken</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-mental" placeholder="Anything else...">
+        </div>
+
         <div class="pillar-row">
           <div class="pillar-icon" onclick="togglePillar('p-social')">🤝</div>
           <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-social')"><div class="pillar-name">Social</div><div class="pillar-example">Connection, conversation, community</div></div>
           <button onclick="openPillarInfo('social')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
           <div class="tog" id="p-social" onclick="togglePillar('p-social')"><div class="tok"></div></div>
         </div>
+        <div class="pillar-detail" id="pd-social">
+          <div class="tags" id="pdt-social">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">📞 Called someone</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🍽 Shared a meal</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💌 Reached out</button><button class="tag sm" onclick="tog(this);savePillarsToday()">👨‍👩‍👧 Family time</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🤗 Real conversation</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-social" placeholder="Anything else...">
+        </div>
+
         <div class="pillar-row">
           <div class="pillar-icon" onclick="togglePillar('p-spiritual')">🙏</div>
           <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-spiritual')"><div class="pillar-name">Spiritual</div><div class="pillar-example">Gratitude, prayer, purpose, breathing</div></div>
           <button onclick="openPillarInfo('spiritual')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
           <div class="tog" id="p-spiritual" onclick="togglePillar('p-spiritual')"><div class="tok"></div></div>
         </div>
+        <div class="pillar-detail" id="pd-spiritual">
+          <div class="tags" id="pdt-spiritual">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">🙏 Prayed</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🙌 Gratitude practice</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌿 Time in nature</button><button class="tag sm" onclick="tog(this);savePillarsToday()">📖 Scripture/reading</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌬 Deep breathing</button><button class="tag sm" onclick="tog(this);savePillarsToday()">⛪ Church</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-spiritual" placeholder="Anything else...">
+        </div>
+
         <div class="pillar-row">
           <div class="pillar-icon" onclick="togglePillar('p-environmental')">🏡</div>
           <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-environmental')"><div class="pillar-name">Environmental</div><div class="pillar-example">Tidy space, fresh air, nature, calm home</div></div>
           <button onclick="openPillarInfo('environmental')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
           <div class="tog" id="p-environmental" onclick="togglePillar('p-environmental')"><div class="tok"></div></div>
         </div>
+        <div class="pillar-detail" id="pd-environmental">
+          <div class="tags" id="pdt-environmental">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">🧹 Tidied up</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌬 Fresh air</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌳 Outside time</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🕯 Calm atmosphere</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🗂 Decluttered</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-environmental" placeholder="Anything else...">
+        </div>
+
         <div class="pillar-row">
           <div class="pillar-icon" onclick="togglePillar('p-financial')">💚</div>
           <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-financial')"><div class="pillar-name">Financial</div><div class="pillar-example">Budget check-in, saving, stress reduction</div></div>
           <button onclick="openPillarInfo('financial')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
           <div class="tog" id="p-financial" onclick="togglePillar('p-financial')"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-detail" id="pd-financial">
+          <div class="tags" id="pdt-financial">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">💳 Checked accounts</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💰 Saved something</button><button class="tag sm" onclick="tog(this);savePillarsToday()">📋 Paid a bill</button><button class="tag sm" onclick="tog(this);savePillarsToday()">✂️ Cut a cost</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🎉 Financial win</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-financial" placeholder="Anything else...">
         </div>
       </div>
       <div id="pillars-status" style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--warm);">Tap pillars above when you've nurtured them today</div>
@@ -6712,8 +6764,19 @@ function openPillarInfo(pillar){
   document.body.style.overflow='hidden';
 }
 
+const PILLAR_KEYS = ['physical','emotional','mental','social','spiritual','environmental','financial'];
+
 function togglePillar(id){
-  document.getElementById(id)?.classList.toggle('on');
+  const tog = document.getElementById(id);
+  if(!tog) return;
+  tog.classList.toggle('on');
+  // Show/hide detail area
+  const key = id.replace('p-','');
+  const detail = document.getElementById('pd-'+key);
+  if(detail){
+    if(tog.classList.contains('on')) detail.classList.add('open');
+    else detail.classList.remove('open');
+  }
   updatePillarsStatus(); savePillarsToday();
 }
 function updatePillarsStatus(){
@@ -6726,14 +6789,34 @@ function updatePillarsStatus(){
 }
 function savePillarsToday(){
   const ids=['p-physical','p-emotional','p-mental','p-social','p-spiritual','p-environmental','p-financial'];
-  const state={}; ids.forEach(p=>{state[p]=document.getElementById(p)?.classList.contains('on')||false;});
-  state.date=nowStr(); localStorage.setItem('glowPillarsToday',JSON.stringify(state));
+  const state={date:nowStr()};
+  ids.forEach(p=>{
+    state[p]=document.getElementById(p)?.classList.contains('on')||false;
+    const key=p.replace('p-','');
+    state['tags_'+key]=gT('pdt-'+key);
+    state['note_'+key]=document.getElementById('pdn-'+key)?.value||'';
+  });
+  localStorage.setItem('glowPillarsToday',JSON.stringify(state));
 }
+
 function loadPillarsToday(){
   const saved=localStorage.getItem('glowPillarsToday'); if(!saved) return;
   try{
     const state=JSON.parse(saved); if(state.date!==nowStr()) return;
-    Object.keys(state).forEach(k=>{if(k==='date')return;if(state[k])document.getElementById(k)?.classList.add('on');});
+    PILLAR_KEYS.forEach(key=>{
+      const tog=document.getElementById('p-'+key);
+      if(state['p-'+key]&&tog){
+        tog.classList.add('on');
+        const detail=document.getElementById('pd-'+key);
+        if(detail) detail.classList.add('open');
+      }
+      // Restore tags
+      const tags=state['tags_'+key]||[];
+      document.querySelectorAll(`#pdt-${key} .tag`).forEach(t=>{ if(tags.includes(t.textContent.trim())) t.classList.add('on'); });
+      // Restore note
+      const noteEl=document.getElementById('pdn-'+key);
+      if(noteEl&&state['note_'+key]) noteEl.value=state['note_'+key];
+    });
     updatePillarsStatus();
   }catch(e){}
 }
