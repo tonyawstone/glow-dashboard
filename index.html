@@ -438,7 +438,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <button class="guide-btn" onclick="openGuide('today')">?</button>
     </div>
-    <!-- BP quick view -->
+    <!-- Mind habits nudge banner -->
+    <div id="mind-habits-banner" style="display:none;padding:8px 12px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">💭 Mind · today's practices</div>
+      <div style="display:flex;gap:8px;">
+        <button id="mind-journal-btn" onclick="mindHabitTap('journal')" style="flex:1;padding:7px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">📖 Journal</button>
+        <button id="mind-wellspoken-btn" onclick="mindHabitTap('wellspoken')" style="flex:1;padding:7px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">🗣 Wellspoken</button>
+      </div>
+    </div>
     <div id="today-bp-banner" style="display:none;padding:5px 12px;border-radius:8px;background:transparent;border:0.5px solid var(--border);margin-bottom:6px;align-items:center;justify-content:space-between;">
       <div style="font-size:11px;color:var(--muted);">❤️ Last BP reading</div>
       <div>
@@ -456,7 +463,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <span style="font-size:16px;">📷</span>
     </div>
     <div class="stat-strip">
-      <div class="stat-tile" style="cursor:pointer;" onclick="tab('health')"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('body')"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
       <div class="stat-tile" style="cursor:pointer;" onclick="tab('health')"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-steps-src"></div></div>
       <div class="stat-tile" style="cursor:pointer;" onclick="tab('sleep')"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-sleep-src">Last night</div></div>
       <div class="stat-tile" style="cursor:pointer;" onclick="tab('health');setTimeout(()=>{const el=document.getElementById('hydration-card');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},300)"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses today</div><div class="stat-src">Hydration</div><div class="stat-src">💧 Today</div></div>
@@ -2141,9 +2148,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <textarea id="reflection-answer" rows="3" placeholder="Write your thoughts here..."></textarea>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
         <button onclick="newReflectionPrompt()" style="padding:6px 12px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--sans);">Different prompt</button>
-        <div class="toggle-row" style="border:none;padding:0;margin:0;" onclick="ts('journaled-today')">
-          <div style="font-size:12px;color:var(--muted);margin-right:8px;">Journaled today</div>
-          <div class="tog" id="journaled-today"><div class="tok"></div></div>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div class="toggle-row" style="border:none;padding:0;margin:0;" onclick="toggleMindHabit('journaled-today')">
+            <div style="font-size:12px;color:var(--muted);margin-right:8px;">📖 Journaled</div>
+            <div class="tog" id="journaled-today"><div class="tok"></div></div>
+          </div>
+          <div class="toggle-row" style="border:none;padding:0;margin:0;" onclick="toggleMindHabit('wellspoken-today')">
+            <div style="font-size:12px;color:var(--muted);margin-right:8px;">🗣 Wellspoken</div>
+            <div class="tog" id="wellspoken-today"><div class="tok"></div></div>
+          </div>
         </div>
       </div>
       <!-- App links -->
@@ -2536,8 +2549,8 @@ async function tab(id){
       if(myairLabel) myairLabel.textContent = `(${yest.toLocaleDateString('en-US',{month:'long',day:'numeric'})})`;
     }
   }
-  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); }
-  if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
+  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); }
+  if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); loadHairMilestones(); }
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners(); }
 }
@@ -8389,6 +8402,71 @@ function renderInjectionNotesLog(){
       ${e.sensation?.length?`<div style="font-size:12px;color:var(--muted);">${e.sensation.join(' · ')}</div>`:''}
       ${e.notes?`<div style="font-size:12px;color:var(--muted);font-style:italic;">"${e.notes}"</div>`:''}
     </div>`).join('');
+}
+
+// ── MIND HABITS BANNER ────────────────────────────────────────────────
+function toggleMindHabit(id){
+  const tog = document.getElementById(id);
+  if(tog) tog.classList.toggle('on');
+  saveMindHabits();
+  updateMindHabitsBanner();
+}
+
+function mindHabitTap(habit){
+  if(habit === 'journal'){
+    const tog = document.getElementById('journaled-today');
+    if(tog && !tog.classList.contains('on')) tog.classList.add('on');
+    saveMindHabits();
+    updateMindHabitsBanner();
+    setTimeout(()=>openDayOne(), 100);
+  } else {
+    const tog = document.getElementById('wellspoken-today');
+    if(tog && !tog.classList.contains('on')) tog.classList.add('on');
+    saveMindHabits();
+    updateMindHabitsBanner();
+    setTimeout(()=>{ window.location.href='shortcuts://run-shortcut?name=OpenWellspoken'; }, 100);
+  }
+}
+
+function saveMindHabits(){
+  const journaled = document.getElementById('journaled-today')?.classList.contains('on')||false;
+  const wellspoken = document.getElementById('wellspoken-today')?.classList.contains('on')||false;
+  localStorage.setItem('glowMindHabits', JSON.stringify({date:nowStr(), journaled, wellspoken}));
+}
+
+function loadMindHabits(){
+  const saved = localStorage.getItem('glowMindHabits');
+  if(!saved){ updateMindHabitsBanner(); return; }
+  try {
+    const {date, journaled, wellspoken} = JSON.parse(saved);
+    if(date !== nowStr()){ updateMindHabitsBanner(); return; }
+    if(journaled) document.getElementById('journaled-today')?.classList.add('on');
+    if(wellspoken) document.getElementById('wellspoken-today')?.classList.add('on');
+  } catch(e){}
+  updateMindHabitsBanner();
+}
+
+function updateMindHabitsBanner(){
+  const banner = document.getElementById('mind-habits-banner');
+  const journalBtn = document.getElementById('mind-journal-btn');
+  const wellspokenBtn = document.getElementById('mind-wellspoken-btn');
+  if(!banner) return;
+  const journaled = document.getElementById('journaled-today')?.classList.contains('on')||false;
+  const wellspoken = document.getElementById('wellspoken-today')?.classList.contains('on')||false;
+  if(journaled && wellspoken){ banner.style.display='none'; return; }
+  banner.style.display='block';
+  if(journalBtn){
+    journalBtn.style.background = journaled?'rgba(107,158,120,0.15)':'transparent';
+    journalBtn.style.color = journaled?'#27500A':'var(--muted)';
+    journalBtn.style.borderColor = journaled?'#6B9E78':'var(--border)';
+    journalBtn.textContent = journaled?'📖 Journaled ✓':'📖 Journal';
+  }
+  if(wellspokenBtn){
+    wellspokenBtn.style.background = wellspoken?'rgba(107,158,120,0.15)':'transparent';
+    wellspokenBtn.style.color = wellspoken?'#27500A':'var(--muted)';
+    wellspokenBtn.style.borderColor = wellspoken?'#6B9E78':'var(--border)';
+    wellspokenBtn.textContent = wellspoken?'🗣 Wellspoken ✓':'🗣 Wellspoken';
+  }
 }
 
 async function selectInjectionSite(site){
