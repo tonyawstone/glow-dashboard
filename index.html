@@ -7458,30 +7458,11 @@ async function scanMyAirScreenshot(input){
       reader.readAsDataURL(file);
     })));
 
-    // Build content array — all images + prompt
-    const content = [
-      ...images.map(img=>({ type:'image', source:{ type:'base64', media_type:img.type, data:img.data }})),
-      { type:'text', text:`These are screenshots from the ResMed myAir CPAP app. There may be 1 or 2 images:
-- Image 1 is usually the daily summary showing score, usage hours, events/hr, mask off count, and sometimes mask seal status ("Good", "Adjust" etc.)
-- Image 2 (if present) is usually the seal/leak detail showing the actual leak rate in L/min
-
-Extract all available values and respond ONLY with valid JSON, no other text:
-{
-  "date": "YYYY-MM-DD or null",
-  "hours": "usage in H:MM format e.g. 6:08",
-  "ahi": number or null (events per hour),
-  "seal": number or null (leak rate in L/min — look for a number like 51.6),
-  "seal_status": "Good" or "Adjust" or null (qualitative rating from summary),
-  "onoff": number or null (mask off/on events count),
-  "score": number or null (total score out of 100)
-}` }
-    ];
-
     const response = await fetch(`${BACKEND}/api/skin-analysis`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        images: images.map(img=>({ type:'base64', media_type:img.type, data:img.data })),
+        images: images.map(img=>({ media_type: img.type, data: img.data })),
         prompt: `These are screenshots from the ResMed myAir CPAP app. There may be 1 or 2 images:
 - Image 1 is usually the daily summary showing score, usage hours, events/hr, mask off count, and sometimes mask seal status ("Good", "Adjust" etc.)
 - Image 2 (if present) is usually the seal/leak detail showing the actual leak rate in L/min
@@ -7543,7 +7524,7 @@ Extract all available values and respond ONLY with valid JSON, no other text:
 
   } catch(e){
     console.error('myAir scan error:', e);
-    statusEl.textContent = '❌ Could not read screenshot — please enter values manually';
+    statusEl.textContent = `❌ ${e.message||'Could not read screenshot'} — please enter values manually`;
     statusEl.style.color = '#C0392B';
   }
   input.value = '';
