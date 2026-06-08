@@ -6725,11 +6725,22 @@ async function buildHydrationStatus(){
   const el = document.getElementById('hydration-status');
   if(!el) return;
 
-  // Get latest body water % from CSV — try both column name variants
+  // Get manually entered body water % (from Withings app)
+  const saved = JSON.parse(localStorage.getItem('glowBodyWater')||'{}');
+  const waterPct = saved.pct ? parseFloat(saved.pct) : null;
+  const waterDate = saved.date ? safeDate(saved.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+
+  // Get latest weight from CSV (use last known if today missing)
   const rows = await getCSVRows();
-  const latestWater = rows.find(r=>parseFloat(r.body_water_pct)>0 || parseFloat(r['body_water_pct '])>0);
-  const waterPct = latestWater ? parseFloat(latestWater.body_water_pct||latestWater['body_water_pct ']||0)||null : null;
-  const waterDate = latestWater ? safeDate(latestWater.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+  const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
+  const weightLbs = latestWeight ? parseFloat(latestWeight.weight_lbs) : null;
+  const weightKg = weightLbs ? weightLbs / 2.20462 : null;
+
+  // Watson formula for women (height 157.48 cm)
+  const HEIGHT_CM = 157.48; // 62 inches
+  const watsonGoalPct = weightKg
+    ? Math.round(((-2.097 + (0.1069 * HEIGHT_CM) + (0.2466 * weightKg)) / weightKg) * 1000) / 10
+    : null;
 
   // Get today's water intake
   const water = await dbAll('water');
@@ -6740,13 +6751,15 @@ async function buildHydrationStatus(){
   // Determine status
   let statusIcon, statusTitle, statusColor, statusBg, statusMsg;
   if(waterPct!==null){
+    const diff = watsonGoalPct ? (waterPct - watsonGoalPct).toFixed(1) : null;
+    const diffStr = diff ? ` · ${diff>0?'+':''}${diff}% vs goal` : '';
     if(waterPct>=50){ statusIcon='💧'; statusTitle='Well hydrated'; statusColor='#27500A'; statusBg='#EAF3DE'; }
     else if(waterPct>=45){ statusIcon='💧'; statusTitle='Mildly low'; statusColor='#92400E'; statusBg='#FEF3C7'; }
     else { statusIcon='⚠️'; statusTitle='Dehydrated'; statusColor='#7F1D1D'; statusBg='#FEE2E2'; }
-    statusMsg = `Body water ${waterPct}% (as of ${waterDate}) · Healthy range 45–60%`;
+    statusMsg = `Body water ${waterPct}% · ${waterDate}${diffStr} · Healthy range for women: 45–60%`;
   } else {
-    statusIcon='💧'; statusTitle='Upload CSV to track'; statusColor='var(--muted)'; statusBg='var(--warm)';
-    statusMsg = 'Upload your weekly Apple Health CSV to see body water % from your Withings scale';
+    statusIcon='💧'; statusTitle='Enter from Withings app'; statusColor='var(--muted)'; statusBg='var(--warm)';
+    statusMsg = 'Step on your Withings scale and enter the body water % shown in the app below';
   }
 
   el.innerHTML = `
@@ -6757,6 +6770,24 @@ async function buildHydrationStatus(){
         <div class="hydration-status-sub">${statusMsg}</div>
       </div>
     </div>
+    ${watsonGoalPct?`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;margin-top:6px;background:var(--warm);border-radius:10px;font-size:12px;">
+      <span style="font-size:16px;">🎯</span>
+      <div>
+        <div style="font-weight:600;color:var(--text);">Your goal: ${watsonGoalPct}%</div>
+        <div style="color:var(--muted);">Watson formula · based on ${weightLbs?.toFixed(1)} lbs · ${latestWeight?.date===today?'today':smartDate(latestWeight?.date)}</div>
+      </div>
+    </div>`:''}
+    <!-- Manual body water entry -->
+    <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;background:var(--warm);border-radius:10px;">
+      <div style="font-size:13px;color:var(--text);flex:1;">💧 Body water % <span style="font-size:11px;color:var(--muted);">from Withings app</span></div>
+      <input type="number" id="body-water-input" placeholder="e.g. 52.3" step="0.1" min="30" max="75"
+        value="${waterPct||''}"
+        style="width:80px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;">
+      <span style="font-size:13px;color:var(--muted);">%</span>
+      <button onclick="saveBodyWater()" style="padding:6px 12px;border-radius:8px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);">Save</button>
+    </div>
+    <div class="toast-msg" id="bw-toast">Saved!</div>
     <div class="hydration-status-bar" style="background:var(--warm);margin-top:6px;">
       <div class="hydration-status-icon">🫙</div>
       <div class="hydration-status-text">
@@ -6868,6 +6899,18 @@ async function buildBodyWaterWeekChart(){
       }
     }
   });
+}
+
+function saveBodyWater(){
+  const pct = parseFloat(document.getElementById('body-water-input')?.value);
+  if(!pct||pct<30||pct>75){ alert('Please enter a valid body water % (30–75)'); return; }
+  const data = { pct, date: nowStr() };
+  localStorage.setItem('glowBodyWater', JSON.stringify(data));
+  // Also save history to Blob
+  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'body_water',data})}).catch(()=>{});
+  toast('bw-toast');
+  buildHydrationStatus(); // refresh the status card
 }
 
 function hydrationCoach(){ callCoach('Health','I take Zepbound (GLP-1) and Irbesartan HCTZ (diuretic). My Withings scale frequently flags dehydration. Give me specific hydration advice for my situation including how much water to drink, timing, and signs to watch for.','hydration-coach-output'); }
