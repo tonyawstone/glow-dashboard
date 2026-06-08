@@ -785,16 +785,23 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="font-size:42px;font-weight:700;color:var(--accent);" id="sleep-display">—</div>
         <div style="font-size:13px;color:var(--muted);">hours last night</div>
       </div>
-      <!-- Bedtime & Wake — directly below hours -->
-      <div id="sleep-times-from-csv" style="display:flex;justify-content:center;gap:24px;padding:10px 12px;border-radius:10px;background:var(--warm);margin:8px 0 4px;">
+      <!-- Bedtime, Wake & Time in Bed -->
+      <div id="sleep-times-from-csv" style="display:flex;justify-content:center;gap:16px;padding:10px 12px;border-radius:10px;background:var(--warm);margin:8px 0 4px;">
         <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Bedtime</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-bedtime">—</div></div>
         <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Wake time</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-waketime">—</div></div>
+        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Time in bed</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-timeinbed">—</div></div>
         <div style="display:none;" id="csv-sleephrs"></div>
       </div>
       <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:10px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
-      <!-- Sleep stages & additional metrics -->
-      <div id="sleep-apple-metrics"></div>
-      <a href="withings://" class="ext-link" style="margin-top:10px;"><i class="ti ti-external-link" aria-hidden="true"></i>Open Withings · see your Sleep Score</a>
+      <!-- Sleep timeline placeholder -->
+      <div id="sleep-timeline-wrap" style="margin-top:10px;">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Sleep timeline</div>
+        <div id="sleep-timeline-canvas-wrap" style="position:relative;height:80px;background:var(--warm);border-radius:10px;overflow:hidden;">
+          <canvas id="sleep-timeline-chart"></canvas>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:3px;" id="sleep-timeline-labels"></div>
+      </div>
+      <a href="javascript:void(0)" onclick="openWithings()" class="ext-link" style="margin-top:10px;"><i class="ti ti-external-link" aria-hidden="true"></i>Open Withings · see your Sleep Score</a>
     </div>
     <div class="card">
       <div class="card-title">😴 ResMed myAir · nightly log & CPAP compliance</div>
@@ -814,6 +821,19 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div style="font-size:13px;font-weight:500;color:var(--text);">Last night's data <span id="myair-date-label" style="color:var(--muted);font-weight:400;"></span></div>
         <input type="date" id="myair-date" style="padding:6px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--muted);" onchange="const l=document.getElementById('myair-date-label');if(l&&this.value){const d=new Date(this.value+'T12:00:00');l.textContent='('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')';}"">
+      </div>
+
+      <!-- Scan screenshot -->
+      <div style="margin-bottom:14px;">
+        <label style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:10px;border:1.5px dashed var(--accent);cursor:pointer;background:rgba(160,120,80,0.05);">
+          <input type="file" id="myair-screenshot" accept="image/*" multiple style="display:none;" onchange="scanMyAirScreenshot(this)">
+          <span style="font-size:18px;">📷</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--accent);">Scan myAir screenshot(s)</div>
+            <div style="font-size:11px;color:var(--muted);">Select 1–2 images · summary + seal detail</div>
+          </div>
+        </label>
+        <div id="myair-scan-status" style="font-size:12px;color:var(--muted);text-align:center;margin-top:6px;display:none;"></div>
       </div>
 
       <!-- Usage hours -->
@@ -958,6 +978,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
       <div class="card-title">Sleep quality this week</div>
       <div id="sleep-week-quality"><div class="log-empty">Loading...</div></div>
+    </div>
+    <!-- Sleep stages stacked chart -->
+    <div class="card">
+      <div class="card-title">Sleep stages · nightly breakdown</div>
+      <div style="display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:var(--muted);">
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:2px;background:#1a237e;"></div> Deep</div>
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:2px;background:#5B8DD9;"></div> Core</div>
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:2px;background:#90CAF9;"></div> REM</div>
+      </div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="sleep-stages-weekly-chart"></canvas></div>
+      <div id="sleep-stages-weekly-empty" class="log-empty" style="display:none;">Run glowupload to see sleep stages · needs updated Python script</div>
     </div>
     <div class="card">
       <div class="card-title">Sleep · 7-day average</div>
@@ -1875,6 +1906,31 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-hair-daily">
     <div class="section-label">Hair Growth Journey <button class="guide-btn" onclick="openGuide('hair')">?</button></div>
 
+    <!-- Current hair photo -->
+    <div class="card" style="padding:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="card-title" style="margin:0;">📸 Current hair</div>
+        <div style="font-size:11px;color:var(--muted);" id="hair-current-date"></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <!-- Square photo -->
+        <div style="flex-shrink:0;width:130px;height:130px;border-radius:12px;background:var(--warm);border:2px dashed var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;" id="hair-current-photo" onclick="uploadCurrentHair()">
+          <i class="ti ti-camera" style="font-size:28px;color:var(--accent);" aria-hidden="true"></i>
+          <div style="font-size:10px;color:var(--accent);margin-top:4px;text-align:center;padding:0 6px;">Tap to upload</div>
+        </div>
+        <!-- Notes beside -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+          <textarea id="hair-current-notes" rows="4" placeholder="How does your hair feel today? Length, texture, growth notes, products working well..." style="font-size:12px;resize:none;height:86px;"></textarea>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-primary" style="flex:1;font-size:11px;padding:7px 4px;" onclick="saveCurrentHairEntry()">Save</button>
+            <button class="btn-secondary" style="flex:1;font-size:11px;padding:7px 4px;" onclick="showHairCurrentCompare()">↔ Compare</button>
+          </div>
+          <div class="toast-msg" id="hair-current-toast">Saved!</div>
+        </div>
+      </div>
+      <input type="file" id="hair-current-input" accept="image/*" style="display:none;" onchange="saveCurrentHairPhoto(this)">
+    </div>
+
     <!-- Goal photos -->
     <div class="card">
       <div class="card-title">🎯 Goal photos · tap to upload</div>
@@ -2526,7 +2582,7 @@ async function tab(id){
   }
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
-  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); }
+  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadCurrentHairPhoto(); }
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
@@ -2537,7 +2593,7 @@ function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildGaitWeekCharts();}if(v==='monthly')buildZepMonthlyTracker();}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); }
   if(curTab==='hair'&&v!=='daily') buildHairCharts();
-  if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); buildSleepMyAirCombinedChart(); }
+  if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); buildSleepMyAirCombinedChart(); buildSleepStagesWeeklyChart(); }
   if(curTab==='sleep'&&v==='monthly') { buildMyAirCharts(); buildSleepMonthlyCalendar(); }
 }
 function applyView(){
@@ -3251,13 +3307,45 @@ const CHANGELOG = [
   ]},
 ];
 
+function openWithings(){
+  window.location.href = 'com.withings.wiscale2://';
+}
+
 function openDayOne(){
-  // Use iframe trick to open URL scheme without App Store fallback
-  const iframe = document.createElement('iframe');
-  iframe.style.display = 'none';
-  iframe.src = 'dayone://';
-  document.body.appendChild(iframe);
-  setTimeout(()=>{ document.body.removeChild(iframe); }, 500);
+  window.location.href = 'dayone2://';
+}
+
+function openSleepScoreInfo(){
+  document.getElementById('guide-title').innerHTML = '🌙 Sleep Score · How it works';
+  document.getElementById('guide-body').innerHTML = `
+    <div class="guide-section">
+      <div class="guide-section-title">Score scale</div>
+      <div class="guide-item" style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#27500A;display:inline-block;"></span> 80–100 · <strong>Optimal</strong><span style="color:var(--muted);font-size:12px;display:block;">Restorative sleep across all measures</span></div>
+      <div class="guide-item" style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#6B9E78;display:inline-block;"></span> 60–79 · <strong>Good</strong><span style="color:var(--muted);font-size:12px;display:block;">Adequate — check which areas are lower</span></div>
+      <div class="guide-item" style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#E8A87C;display:inline-block;"></span> 40–59 · <strong>Fair</strong><span style="color:var(--muted);font-size:12px;display:block;">One or more areas need attention</span></div>
+      <div class="guide-item" style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#C0392B;display:inline-block;"></span> 0–39 · <strong>Poor</strong><span style="color:var(--muted);font-size:12px;display:block;">Significant disruption to recovery</span></div>
+    </div>
+    <div class="guide-section">
+      <div class="guide-section-title">How it's calculated</div>
+      <div class="guide-item">⏱ <strong>Duration (40%)</strong> — 7–9 hrs = perfect · under 6 hrs scores low</div>
+      <div class="guide-item">🌊 <strong>Deep sleep (20%)</strong> — target 15–20% of total · supports physical recovery</div>
+      <div class="guide-item">💭 <strong>REM sleep (20%)</strong> — target 20–25% of total · essential for memory & mood</div>
+      <div class="guide-item">❤️ <strong>Overnight HR (10%)</strong> — lower resting HR = better cardiovascular recovery</div>
+      <div class="guide-item">📈 <strong>HRV (10%)</strong> — higher variability = better nervous system recovery · very individual</div>
+    </div>
+    <div class="guide-section">
+      <div class="guide-section-title">Data source</div>
+      <div class="guide-item">Calculated from Withings sleep mat data via Apple Health CSV export. Sleeptracker excluded. Sleep window: 8pm–10am only. For Withings' own score (which also factors in interruptions and regularity), tap "Open Withings" below.</div>
+    </div>
+    <div class="guide-section">
+      <div class="guide-section-title">💡 Tips for you</div>
+      <div class="guide-item">Zepbound can improve sleep quality — watch your score trend as you progress</div>
+      <div class="guide-item">CPAP compliance directly affects overnight HR and HRV — check your MyAir score alongside</div>
+      <div class="guide-item">Consistent bedtimes improve regularity even if the score doesn't capture it yet</div>
+    </div>
+  `;
+  document.getElementById('guide-sheet').classList.add('open');
+  document.body.style.overflow='hidden';
 }
 
 function openAbout(){
@@ -4439,6 +4527,88 @@ function buildSleepStagesDisplay(row){
     </div>`;
 }
 
+async function buildSleepTimeline(dateStr){
+  const canvas = document.getElementById('sleep-timeline-chart');
+  const wrap = document.getElementById('sleep-timeline-canvas-wrap');
+  const labelsEl = document.getElementById('sleep-timeline-labels');
+  if(!canvas||!wrap) return;
+  if(chartInstances['sleep-timeline']) chartInstances['sleep-timeline'].destroy();
+
+  // Fetch segments CSV
+  let segments = [];
+  try {
+    const res = await fetch(`${BACKEND}/api/health-data?file=glow_sleep_segments.csv&t=${Date.now()}`);
+    if(res.ok){
+      const text = await res.text();
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',');
+      segments = lines.slice(1).map(line=>{
+        const vals = line.split(',');
+        return Object.fromEntries(headers.map((h,i)=>[h.trim(), vals[i]?.trim()]));
+      }).filter(s=>s.date===dateStr);
+    }
+  } catch(e){}
+
+  if(!segments.length){
+    wrap.innerHTML='<div style="font-size:11px;color:var(--muted);padding:12px;text-align:center;">Run glowupload with updated script to see timeline</div>';
+    return;
+  }
+
+  // Find time window
+  const toMins = (str)=>{ const [d,t]=str.split(' '); const [h,m]=t.split(':').map(Number); return h<12?h*60+m+1440:h*60+m; };
+  const allStarts = segments.map(s=>toMins(s.start));
+  const allEnds = segments.map(s=>toMins(s.end));
+  const minTime = Math.min(...allStarts)-15;
+  const maxTime = Math.max(...allEnds)+15;
+  const totalMins = maxTime-minTime;
+
+  const stageColors = { deep:'#1a237e', core:'#5B8DD9', rem:'#90CAF9' };
+  const stageY = { deep:0.6, core:0.3, rem:0.05 }; // position in 0-1 range
+  const stageH = 0.25;
+
+  const w = wrap.clientWidth||300;
+  canvas.width = w; canvas.height = 80;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--warm')||'#F5EFE6';
+  ctx.fillRect(0,0,w,80);
+
+  // Draw segments
+  segments.forEach(s=>{
+    const x = ((toMins(s.start)-minTime)/totalMins)*w;
+    const segW = ((parseInt(s.duration_min)||0)/totalMins)*w;
+    const color = stageColors[s.stage]||'#ccc';
+    const y = stageY[s.stage]*80||20;
+    const h = stageH*80;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(x, y, Math.max(2,segW), h, 3);
+    ctx.fill();
+  });
+
+  // Time labels
+  const labelTimes = [];
+  const startH = Math.floor(minTime/60)%24;
+  for(let h=startH;h<=Math.floor(maxTime/60)%24+1;h++){
+    const hMod = h%24;
+    const mins = (h<12?h*60+1440:h*60);
+    if(mins>=minTime&&mins<=maxTime) labelTimes.push({h:hMod, mins});
+  }
+  if(labelsEl) labelsEl.innerHTML = labelTimes.map(({h,mins})=>{
+    const pct = ((mins-minTime)/totalMins*100).toFixed(1);
+    const label = h===0?'12 AM':h<12?`${h} AM`:h===12?'12 PM':`${h-12} PM`;
+    return `<span style="position:absolute;left:${pct}%;transform:translateX(-50%);font-size:9px;color:var(--muted);">${label}</span>`;
+  }).join('');
+  if(labelsEl) labelsEl.style.position='relative';
+
+  // Stage labels on left
+  ctx.font = '8px sans-serif'; ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  [['Deep',stageY.deep],['Core',stageY.core],['REM',stageY.rem]].forEach(([l,y])=>{
+    ctx.fillText(l, 3, y*80+stageH*80/2+3);
+  });
+}
+
 // ── SLEEP WEEKLY QUALITY & MONTHLY CALENDAR ───────────────────────────
 
 let sleepCalMonth = new Date(); sleepCalMonth.setDate(1);
@@ -4449,6 +4619,57 @@ function changeSleepMonth(dir){
 }
 function sleepScoreColor(s){ return s>=80?'#27500A':s>=60?'#E8A87C':'#C0392B'; }
 function sleepScoreBg(s){ return s>=80?'#EAF3DE':s>=60?'#FEF3C7':'#FAECE7'; }
+
+async function buildSleepStagesWeeklyChart(){
+  const canvas = document.getElementById('sleep-stages-weekly-chart');
+  const emptyEl = document.getElementById('sleep-stages-weekly-empty');
+  if(!canvas) return;
+  if(chartInstances['sleep-stages-weekly']) chartInstances['sleep-stages-weekly'].destroy();
+
+  const rows = await getCSVRows();
+  const today = new Date();
+  const labels=[], deep=[], core=[], rem=[];
+
+  for(let i=13;i>=0;i--){
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const row=rows.find(r=>r.date===ds&&parseFloat(r.sleep_hrs)>0);
+    labels.push(d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}));
+    deep.push(row&&row.sleep_deep ? Math.round(parseFloat(row.sleep_deep)*60) : null); // convert to minutes
+    core.push(row&&row.sleep_core ? Math.round(parseFloat(row.sleep_core)*60) : null);
+    rem.push(row&&row.sleep_rem ? Math.round(parseFloat(row.sleep_rem)*60) : null);
+  }
+
+  const hasData = deep.some(v=>v!==null)||core.some(v=>v!==null)||rem.some(v=>v!==null);
+  if(!hasData){
+    canvas.style.display='none';
+    if(emptyEl) emptyEl.style.display='block';
+    return;
+  }
+  canvas.style.display='block';
+  if(emptyEl) emptyEl.style.display='none';
+
+  chartInstances['sleep-stages-weekly'] = new Chart(canvas.getContext('2d'),{
+    type:'bar',
+    data:{labels, datasets:[
+      {label:'Deep', data:deep, backgroundColor:'#1a237e', borderRadius:2, spanGaps:true},
+      {label:'Core', data:core, backgroundColor:'#5B8DD9', borderRadius:2, spanGaps:true},
+      {label:'REM',  data:rem,  backgroundColor:'#90CAF9', borderRadius:2, spanGaps:true},
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>{
+          const mins=ctx.raw||0;
+          return `${ctx.dataset.label}: ${Math.floor(mins/60)}h ${mins%60}m`;
+        }}}},
+      scales:{
+        x:{stacked:true, ticks:{font:{size:9},maxRotation:45}, grid:{display:false}},
+        y:{stacked:true, ticks:{font:{size:10},callback:v=>`${Math.floor(v/60)}h`}, grid:{color:'rgba(0,0,0,0.05)'}}
+      }
+    }
+  });
+}
 
 async function buildSleepMyAirCombinedChart(){
   const canvas = document.getElementById('sleep-myair-combined-chart');
@@ -4466,12 +4687,12 @@ async function buildSleepMyAirCombinedChart(){
     if(res.ok){ const {data}=await res.json(); (data||[]).forEach(e=>{
       const iso=(e.isoDate||'').slice(0,10);
       if(!iso) return;
-      // Store under the night date — MyAir data entered Sunday morning is for Saturday night
-      // So store under isoDate AND the day before (to catch both conventions)
+      // ResMed uses bedtime date (Saturday), Apple/Withings use wake date (Sunday)
+      // Store under BOTH so charts/calendar always find a match
       myairByDate[iso]=e.score||null;
-      const prev=new Date(iso+'T12:00:00'); prev.setDate(prev.getDate()-1);
-      const prevStr=`${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}-${String(prev.getDate()).padStart(2,'0')}`;
-      if(!myairByDate[prevStr]) myairByDate[prevStr]=e.score||null;
+      const next=new Date(iso+'T12:00:00'); next.setDate(next.getDate()+1);
+      const nextStr=`${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
+      if(!myairByDate[nextStr]) myairByDate[nextStr]=e.score||null;
     }); }
   } catch(e){}
 
@@ -4575,7 +4796,7 @@ async function buildSleepMonthlyCalendar(){
   const byDate={};
   rows.filter(r=>r.date&&r.date.startsWith(prefix)&&parseFloat(r.sleep_hrs)>0).forEach(r=>byDate[r.date]=r);
 
-  // Fetch MyAir data — store under night date (entered morning after)
+  // Fetch MyAir — ResMed uses bedtime date, Apple/Withings use wake date — store under both
   let myairByDate={};
   try {
     const res=await fetch(`${BACKEND}/api/sync?pillar=myair`);
@@ -4583,9 +4804,9 @@ async function buildSleepMonthlyCalendar(){
       const iso=(e.isoDate||'').slice(0,10);
       if(!iso) return;
       myairByDate[iso]=e;
-      const prev=new Date(iso+'T12:00:00'); prev.setDate(prev.getDate()-1);
-      const prevStr=`${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}-${String(prev.getDate()).padStart(2,'0')}`;
-      if(!myairByDate[prevStr]) myairByDate[prevStr]=e;
+      const next=new Date(iso+'T12:00:00'); next.setDate(next.getDate()+1);
+      const nextStr=`${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
+      if(!myairByDate[nextStr]) myairByDate[nextStr]=e;
     }); }
   } catch(e){}
 
@@ -4722,6 +4943,18 @@ async function buildSleepAppleMetrics(){
     if(bedtimeEl) bedtimeEl.textContent = formatTime12h(withTimes.bedtime)||'—';
     if(wakeEl) wakeEl.textContent = formatTime12h(withTimes.waketime)||'—';
     if(hrsEl) hrsEl.textContent = parseFloat(withTimes.sleep_hrs||0).toFixed(1)+'h';
+    // Calculate time in bed from bedtime → waketime
+    const tibEl = document.getElementById('csv-timeinbed');
+    if(tibEl && withTimes.bedtime && withTimes.waketime){
+      const [bh,bm] = withTimes.bedtime.split(':').map(Number);
+      const [wh,wm] = withTimes.waketime.split(':').map(Number);
+      const bedMins = bh*60+bm;
+      const wakeMins = wh >= bh ? wh*60+wm : wh*60+wm+1440; // handle midnight crossover
+      const tibMins = Math.max(0, wakeMins - bedMins);
+      const tibH = Math.floor(tibMins/60);
+      const tibM = tibMins%60;
+      tibEl.textContent = `${tibH}h ${tibM}m`;
+    }
     const d = safeDate(withTimes.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     if(dateLabelEl) dateLabelEl.textContent = `Withings · ${d} · upload CSV to update`;
   } else {
@@ -4747,15 +4980,31 @@ async function buildSleepAppleMetrics(){
   const oHR = parseFloat(latest.overnight_hr)||null;
   const oHRV = parseFloat(latest.overnight_hrv)||null;
   const scoreHTML = score ? `
-    <div style="padding:12px;background:var(--warm);border-radius:12px;margin-bottom:10px;text-align:center;">
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Sleep Score</div>
-      <div style="font-size:40px;font-weight:700;color:${score>=80?'#27500A':score>=60?'#6B9E78':score>=40?'#E8A87C':'#C0392B'};">${score}</div>
-      ${(oHR||oHRV)?`<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border);justify-content:center;">
+    <div style="padding:12px;background:var(--warm);border-radius:12px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px;">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Sleep Score</div>
+        <button onclick="openSleepScoreInfo()" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:0;opacity:0.7;">ⓘ</button>
+      </div>
+      <div style="font-size:40px;font-weight:700;text-align:center;color:${score>=80?'#27500A':score>=60?'#6B9E78':score>=40?'#E8A87C':'#C0392B'};">${score}</div>
+      <div style="text-align:center;font-size:12px;font-weight:600;color:${score>=80?'#27500A':score>=60?'#6B9E78':score>=40?'#E8A87C':'#C0392B'};margin-top:2px;">${score>=80?'Optimal':score>=60?'Good':score>=40?'Fair':'Needs attention'}</div>
+      <!-- Color scale -->
+      <div style="display:flex;gap:3px;margin:10px 0 4px;border-radius:6px;overflow:hidden;height:6px;">
+        <div style="flex:1;background:#C0392B;"></div>
+        <div style="flex:1;background:#E8A87C;"></div>
+        <div style="flex:1;background:#6B9E78;"></div>
+        <div style="flex:1;background:#27500A;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:8px;">
+        <span>0 · Poor</span><span>40 · Fair</span><span>60 · Good</span><span>80+ · Optimal</span>
+      </div>
+      ${(oHR||oHRV)?`<div style="display:flex;gap:12px;padding-top:8px;border-top:0.5px solid var(--border);justify-content:center;">
         ${oHR?`<div style="text-align:center;"><div style="font-size:15px;font-weight:600;color:var(--text);">${oHR}</div><div style="font-size:10px;color:var(--muted);">avg HR bpm</div></div>`:''}
         ${oHRV?`<div style="text-align:center;"><div style="font-size:15px;font-weight:600;color:var(--text);">${oHRV}</div><div style="font-size:10px;color:var(--muted);">HRV ms</div></div>`:''}
       </div>`:''}
     </div>` : '';
   el.innerHTML = `${scoreHTML}${buildSleepStagesDisplay(latest)}`;
+  // Build timeline for latest date
+  buildSleepTimeline(latest.date);
 }
 
 // Body composition chart
@@ -5521,6 +5770,100 @@ const WATER_GOAL = 10; // legacy alias
 
 // ── HAIR ANALYSIS ─────────────────────────────────────────────────────
 let _currentHairGoalSlot = null;
+
+// ── CURRENT HAIR PHOTO ────────────────────────────────────────────────
+function uploadCurrentHair(){
+  document.getElementById('hair-current-input').click();
+}
+
+async function saveCurrentHairPhoto(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e)=>{
+    const dataUrl = e.target.result;
+    const date = nowStr();
+
+    // Move current photo to history before replacing
+    const current = localStorage.getItem('glowHairCurrentPhoto');
+    if(current){
+      try {
+        const cur = JSON.parse(current);
+        const history = JSON.parse(localStorage.getItem('glowHairPhotoHistory')||'[]');
+        history.push({ dataUrl:cur.dataUrl, date:cur.date, notes:cur.notes||'' });
+        localStorage.setItem('glowHairPhotoHistory', JSON.stringify(history));
+      } catch(e){}
+    }
+
+    // Save new current
+    const notes = document.getElementById('hair-current-notes')?.value||'';
+    localStorage.setItem('glowHairCurrentPhoto', JSON.stringify({dataUrl, date, notes}));
+
+    // Upload to Blob
+    try {
+      const blob = await fetch(dataUrl).then(r=>r.blob());
+      const form = new FormData();
+      form.append('file', blob, `hair-${date}.jpg`);
+      form.append('key', `hair-current-${date}`);
+      await fetch(`${BACKEND}/api/photos`, {method:'POST', body:form});
+    } catch(err){}
+
+    loadCurrentHairPhoto();
+    toast('hair-current-toast');
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+
+async function saveCurrentHairEntry(){
+  const notes = document.getElementById('hair-current-notes')?.value||'';
+  const saved = localStorage.getItem('glowHairCurrentPhoto');
+  if(saved){
+    try {
+      const cur = JSON.parse(saved);
+      cur.notes = notes;
+      localStorage.setItem('glowHairCurrentPhoto', JSON.stringify(cur));
+    } catch(e){}
+  }
+  // Also sync to Blob
+  try {
+    const history = JSON.parse(localStorage.getItem('glowHairPhotoHistory')||'[]');
+    await fetch(`${BACKEND}/api/sync`, {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({pillar:'hair_current', data:{notes, date:nowStr()}})});
+  } catch(e){}
+  toast('hair-current-toast');
+}
+
+function loadCurrentHairPhoto(){
+  const saved = localStorage.getItem('glowHairCurrentPhoto');
+  const photoEl = document.getElementById('hair-current-photo');
+  const dateEl = document.getElementById('hair-current-date');
+  const notesEl = document.getElementById('hair-current-notes');
+  if(!saved||!photoEl) return;
+  try {
+    const {dataUrl, date, notes} = JSON.parse(saved);
+    if(dataUrl){
+      photoEl.style.border='none';
+      photoEl.style.background='transparent';
+      photoEl.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onclick="uploadCurrentHair()">`;
+    }
+    if(dateEl && date){
+      const d = safeDate(date);
+      dateEl.textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    }
+    if(notesEl && notes) notesEl.value = notes;
+  } catch(e){}
+}
+
+function showHairCurrentCompare(){
+  // Opens compare overlay using current photo vs nearest next goal
+  const saved = localStorage.getItem('glowHairCurrentPhoto');
+  if(!saved){ alert('Upload a current hair photo first'); return; }
+  // Find first goal with a photo
+  const goals = ['aug-2026','nov-2026','feb-2027','may-2027','aug-2027','nov-2027','feb-2028','may-2028'];
+  const nextGoal = goals.find(g=>localStorage.getItem('glowHairGoal_'+g));
+  if(nextGoal) showHairCompare(nextGoal, nextGoal.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase()));
+  else alert('Upload a goal photo to compare against');
+}
 
 function uploadHairGoal(slot){
   _currentHairGoalSlot = slot;
@@ -6949,6 +7292,98 @@ async function saveCPAPCleaning(){
   ['cpap-clean-mask','cpap-clean-tube','cpap-clean-chamber'].forEach(id=>document.getElementById(id)?.classList.remove('on'));
 }
 
+
+async function scanMyAirScreenshot(input){
+  const files = Array.from(input.files);
+  if(!files.length) return;
+  const statusEl = document.getElementById('myair-scan-status');
+  statusEl.style.display='block';
+  statusEl.style.color='var(--muted)';
+  statusEl.textContent = `🔍 Reading ${files.length > 1 ? files.length+' screenshots' : 'screenshot'}...`;
+
+  try {
+    // Convert all images to base64
+    const images = await Promise.all(files.map(file=>new Promise((res,rej)=>{
+      const reader = new FileReader();
+      reader.onload = ()=>res({ data:reader.result.split(',')[1], type:file.type||'image/jpeg' });
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    })));
+
+    // Build content array — all images + prompt
+    const content = [
+      ...images.map(img=>({ type:'image', source:{ type:'base64', media_type:img.type, data:img.data }})),
+      { type:'text', text:`These are screenshots from the ResMed myAir CPAP app. There may be 1 or 2 images:
+- Image 1 is usually the daily summary showing score, usage hours, events/hr, mask off count, and sometimes mask seal status ("Good", "Adjust" etc.)
+- Image 2 (if present) is usually the seal/leak detail showing the actual leak rate in L/min
+
+Extract all available values and respond ONLY with valid JSON, no other text:
+{
+  "date": "YYYY-MM-DD or null",
+  "hours": "usage in H:MM format e.g. 6:08",
+  "ahi": number or null (events per hour),
+  "seal": number or null (leak rate in L/min — look for a number like 51.6),
+  "seal_status": "Good" or "Adjust" or null (qualitative rating from summary),
+  "onoff": number or null (mask off/on events count),
+  "score": number or null (total score out of 100)
+}` }
+    ];
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:500,
+        messages:[{ role:'user', content }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.find(b=>b.type==='text')?.text||'';
+    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+
+    // Auto-fill form
+    if(parsed.hours) document.getElementById('myair-hours').value = parsed.hours;
+    if(parsed.ahi!=null) document.getElementById('myair-ahi').value = parsed.ahi;
+    if(parsed.seal!=null) document.getElementById('myair-seal-lmin').value = parsed.seal;
+    if(parsed.onoff!=null) document.getElementById('myair-onoff').value = parsed.onoff;
+
+    // Set date
+    if(parsed.date && parsed.date!=='null'){
+      const dateEl = document.getElementById('myair-date');
+      const labelEl = document.getElementById('myair-date-label');
+      if(dateEl) dateEl.value = parsed.date;
+      if(labelEl){
+        const d = new Date(parsed.date+'T12:00:00');
+        labelEl.textContent = '('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')';
+      }
+    }
+
+    calcMyAirScores();
+
+    const found = [
+      parsed.hours && `${parsed.hours} hrs`,
+      parsed.ahi!=null && `AHI ${parsed.ahi}`,
+      parsed.seal!=null ? `Seal ${parsed.seal} L/min` : parsed.seal_status && `Seal: ${parsed.seal_status}`,
+      parsed.onoff!=null && `On/off ${parsed.onoff}`,
+      parsed.score!=null && `Score ${parsed.score}`,
+    ].filter(Boolean).join(' · ');
+
+    // Warn if seal not found
+    const sealNote = parsed.seal==null && parsed.seal_status==='Adjust'
+      ? ' · ⚠️ Seal: Adjust — scan seal detail for L/min value' : '';
+
+    statusEl.textContent = `✅ ${found}${sealNote} — review and save!`;
+    statusEl.style.color = '#27500A';
+
+  } catch(e){
+    console.error('myAir scan error:', e);
+    statusEl.textContent = '❌ Could not read screenshot — please enter values manually';
+    statusEl.style.color = '#C0392B';
+  }
+  input.value = '';
+}
 
 async function saveMyAirLog(){
   const hours = document.getElementById('myair-hours').value.trim();
