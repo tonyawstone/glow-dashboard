@@ -4635,6 +4635,63 @@ async function buildSleepStagesWeeklyChart(){
   });
 }
 
+function buildSleepSourceComparison(row){
+  const src1 = row.sleep_source;
+  const hrs1 = parseFloat(row.sleep_hrs)||0;
+  const src2 = row.sleep_source_2;
+  const hrs2 = parseFloat(row.sleep_hrs_2)||0;
+  if(!src2 || !hrs2) return ''; // only show when 2 sources available
+
+  const fmt = h => h>0 ? `${Math.floor(h)}h ${Math.round((h%1)*60)}m` : '—';
+  const fmtSrc = s => s.replace('®','').trim();
+  const maxHrs = Math.max(hrs1, hrs2);
+
+  const row1deep = parseFloat(row.sleep_deep)||0;
+  const row1rem = parseFloat(row.sleep_rem)||0;
+  const row2deep = parseFloat(row.sleep_deep_2)||0;
+  const row2rem = parseFloat(row.sleep_rem_2)||0;
+
+  const sourceBar = (hrs, color) => `
+    <div style="flex:1;background:rgba(0,0,0,0.06);border-radius:4px;height:6px;overflow:hidden;">
+      <div style="width:${maxHrs>0?Math.round((hrs/maxHrs)*100):0}%;height:100%;background:${color};border-radius:4px;transition:width 0.4s;"></div>
+    </div>`;
+
+  return `
+    <details style="margin-top:12px;">
+      <summary style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;">
+        <span>⚡ Compare sources</span>
+        <span style="font-size:9px;color:var(--muted);font-weight:400;font-style:italic;text-transform:none;">${fmtSrc(src1)} vs ${fmtSrc(src2)}</span>
+      </summary>
+      <div style="margin-top:10px;padding:10px 12px;background:var(--warm);border-radius:10px;">
+
+        <!-- Source 1 -->
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+            <div style="font-size:12px;font-weight:600;color:var(--text);">${fmtSrc(src1)}</div>
+            <div style="font-size:14px;font-weight:700;color:#5B8DD9;">${fmt(hrs1)}</div>
+          </div>
+          ${sourceBar(hrs1, '#5B8DD9')}
+          ${(row1deep||row1rem)?`<div style="font-size:10px;color:var(--muted);margin-top:3px;">Deep ${fmt(row1deep)} · REM ${fmt(row1rem)}</div>`:''}
+        </div>
+
+        <!-- Source 2 -->
+        <div style="margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+            <div style="font-size:12px;font-weight:600;color:var(--text);">${fmtSrc(src2)}</div>
+            <div style="font-size:14px;font-weight:700;color:#9B8EC4;">${fmt(hrs2)}</div>
+          </div>
+          ${sourceBar(hrs2, '#9B8EC4')}
+          ${(row2deep||row2rem)?`<div style="font-size:10px;color:var(--muted);margin-top:3px;">Deep ${fmt(row2deep)} · REM ${fmt(row2rem)}</div>`:''}
+        </div>
+
+        <!-- Difference -->
+        <div style="padding-top:8px;border-top:0.5px solid var(--border);font-size:11px;color:var(--muted);text-align:center;">
+          Difference: ${fmt(Math.abs(hrs1-hrs2))} · ${fmtSrc(hrs1>hrs2?src1:src2)} reads higher
+        </div>
+      </div>
+    </details>`;
+}
+
 async function buildSleepMyAirCombinedChart(){
   const canvas = document.getElementById('sleep-myair-combined-chart');
   if(!canvas) return;
@@ -4931,13 +4988,19 @@ async function buildSleepAppleMetrics(){
   const latestHrs = parseFloat(latest.sleep_hrs).toFixed(1);
   if(sleepDisplayEl) sleepDisplayEl.textContent = latestHrs + 'h';
 
+  // Show stale warning if data isn't from today or yesterday
+  const isStale = latest.date !== todayStr && latest.date !== yesterdayStr;
+  const staleLabel = isStale
+    ? `⚠️ ${safeDate(latest.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · run glowupload for last night`
+    : 'Last night';
+
   // Also update s-sleep-h on Today strip
   const sleepStripEl = document.getElementById('s-sleep-h');
   const sleepSrcEl = document.getElementById('s-sleep-src');
   if(sleepStripEl && sleepStripEl.textContent === '—'){
     sleepStripEl.textContent = latestHrs + 'h';
-    if(sleepSrcEl) sleepSrcEl.textContent = `Apple Health · ${safeDate(latest.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
   }
+  if(sleepSrcEl) sleepSrcEl.textContent = staleLabel;
 
   // Daily view — sleep score + stages
   const score = parseFloat(latest.sleep_score)||null;
@@ -4966,7 +5029,7 @@ async function buildSleepAppleMetrics(){
         ${oHRV?`<div style="text-align:center;"><div style="font-size:15px;font-weight:600;color:var(--text);">${oHRV}</div><div style="font-size:10px;color:var(--muted);">HRV ms</div></div>`:''}
       </div>`:''}
     </div>` : '';
-  el.innerHTML = `${scoreHTML}${buildSleepStagesDisplay(latest)}`;
+  el.innerHTML = `${scoreHTML}${buildSleepStagesDisplay(latest)}${buildSleepSourceComparison(latest)}`;
   // Build timeline for latest date
   buildSleepTimeline(latest.date);
 }
@@ -5939,24 +6002,40 @@ function uploadHairGoal(slot){
 
 async function saveHairGoalPhoto(input){
   const file = input.files[0]; if(!file) return;
+  if(!_currentHairGoalSlot){ console.error('No slot selected'); return; }
 
-  // Compress image before saving to stay under Blob size limits
-  const dataUrl = await compressImage(file, 600, 0.75);
-  const base64 = dataUrl.split(',')[1];
-  const mimeType = 'image/jpeg';
+  const statusEl = document.getElementById(`goal-${_currentHairGoalSlot}`);
+  if(statusEl) statusEl.innerHTML = '<div style="font-size:10px;color:var(--muted);padding:4px;">Saving...</div>';
 
-  // Load existing goals first (preserves other slots)
-  const goals = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`)
-    .then(r=>r.json())
-    .then(d=>d.data&&!Array.isArray(d.data)?d.data:{})
-    .catch(()=>({}));
+  try {
+    // Compress image
+    const dataUrl = await compressImage(file, 500, 0.70);
 
-  goals[_currentHairGoalSlot] = { dataUrl, mimeType, base64, slot: _currentHairGoalSlot, uploadedDate: nowStr() };
+    // Save to individual Blob key per slot
+    await fetch(`${BACKEND}/api/sync`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        pillar: `hairgoal_${_currentHairGoalSlot}`,
+        data: { dataUrl, slot: _currentHairGoalSlot, uploadedDate: nowStr() }
+      })
+    });
 
-  await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'hairgoals',data:goals})});
+    // Update UI
+    const el = document.getElementById(`goal-${_currentHairGoalSlot}`);
+    if(el){
+      el.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+      el.style.border='2px solid var(--accent)';
+    }
+    // Save to localStorage as cache
+    const cache = JSON.parse(localStorage.getItem('glowHairGoals')||'{}');
+    cache[_currentHairGoalSlot] = dataUrl;
+    localStorage.setItem('glowHairGoals', JSON.stringify(cache));
 
-  const el = document.getElementById(`goal-${_currentHairGoalSlot}`);
-  if(el){ el.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`; el.style.border='2px solid var(--accent)'; }
+  } catch(e){
+    console.error('saveHairGoalPhoto error:', e);
+    alert('Could not save photo — please try again');
+  }
   input.value='';
 }
 
@@ -5992,27 +6071,39 @@ function loadGoalNotes(){
 }
 
 async function loadHairGoalPhotos(){
-  try {
-    const res = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`);
-    if(!res.ok) return;
-    const {data} = await res.json();
-    if(!data || Array.isArray(data)) return;
-    Object.entries(data).forEach(([slot, goal])=>{
+  const slots = ['goal-1','goal-2','goal-3','goal-4','goal-5','goal-6','goal-7','goal-8'];
+
+  // Restore from localStorage cache instantly
+  const cache = JSON.parse(localStorage.getItem('glowHairGoals')||'{}');
+  slots.forEach(slot=>{
+    if(cache[slot]){
       const el = document.getElementById(`goal-${slot}`);
-      if(el && goal.dataUrl){
-        el.innerHTML=`<img src="${goal.dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+      if(el){
+        el.innerHTML=`<img src="${cache[slot]}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
         el.style.border='2px solid var(--accent)';
       }
-      // Show upload date below slot
-      const dateEl = document.getElementById(`goal-date-${slot}`);
-      if(dateEl && goal.uploadedDate){
-        const d = safeDate(goal.uploadedDate);
-        dateEl.textContent = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-        dateEl.style.color = 'var(--muted)';
+    }
+  });
+
+  // Fetch fresh from individual Blob keys
+  for(const slot of slots){
+    try {
+      const res = await fetch(`${BACKEND}/api/sync?pillar=hairgoal_${slot}`);
+      if(!res.ok) continue;
+      const {data} = await res.json();
+      if(!data||!data.dataUrl) continue;
+      const el = document.getElementById(`goal-${slot}`);
+      if(el){
+        el.innerHTML=`<img src="${data.dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+        el.style.border='2px solid var(--accent)';
       }
-    });
-    loadGoalNotes();
-  } catch(e){ console.error('loadHairGoalPhotos error:', e); }
+      // Update localStorage cache
+      const c = JSON.parse(localStorage.getItem('glowHairGoals')||'{}');
+      c[slot] = data.dataUrl;
+      localStorage.setItem('glowHairGoals', JSON.stringify(c));
+    } catch(e){}
+  }
+  loadGoalNotes();
 }
 
 async function showHairCompare(slot, label){
