@@ -66,6 +66,8 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .card{background:#fff;border:0.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
 .card-title{font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:16px;}
 .section-label{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;display:flex;align-items:center;justify-content:space-between;}
+.goal-label-input{font-size:10px;font-weight:600;color:var(--accent);background:transparent;border:none;border-bottom:0.5px solid transparent;text-align:center;width:100%;margin-top:3px;font-family:var(--sans);cursor:text;padding:1px 2px;border-radius:0;}
+.goal-label-input:focus{outline:none;border-bottom-color:var(--accent);background:var(--warm);}
 .pillar-detail{display:none;padding:8px 12px 10px;background:rgba(160,120,80,0.05);border-radius:10px;margin:-4px 0 6px;border:0.5px solid var(--border);}
 .pillar-detail .tags{margin-bottom:8px;gap:4px;}
 .pillar-detail .tag.sm{font-size:11px;padding:3px 8px;}
@@ -463,7 +465,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
       <div class="stat-tile"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-steps-src"></div></div>
       <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-sleep-src">Last night</div></div>
-      <div class="stat-tile"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses today</div><div class="stat-src">Hydration</div><div class="stat-src">💧 Today</div></div>
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('health');setTimeout(()=>{const el=document.getElementById('hydration-card');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},300)"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses today</div><div class="stat-src">Hydration</div><div class="stat-src">💧 Today</div></div>
     </div>
     <div class="stat-strip" style="margin-top:6px;">
       <div class="stat-tile" style="grid-column:span 2;">
@@ -793,6 +795,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="display:none;" id="csv-sleephrs"></div>
       </div>
       <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:10px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
+      <!-- Sleep score + stages rendered here -->
+      <div id="sleep-apple-metrics"></div>
       <!-- Sleep timeline placeholder -->
       <div id="sleep-timeline-wrap" style="margin-top:10px;">
         <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Sleep timeline</div>
@@ -1300,6 +1304,40 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="bpt">Saved!</div>
     </div>
 
+    <!-- Hydration -->
+    <div class="card" id="hydration-card">
+      <div class="card-title">💧 Hydration tracker</div>
+      <div id="hydration-status"><div class="log-empty">Loading...</div></div>
+      <div style="text-align:center;padding:14px 0 6px;">
+        <div style="font-size:42px;font-weight:700;color:#5B9EC9;" id="water-oz-total">0</div>
+        <div style="font-size:13px;color:var(--muted);">oz today</div>
+        <div style="margin-top:10px;background:rgba(0,0,0,0.06);border-radius:20px;height:10px;overflow:hidden;">
+          <div id="water-goal-bar" style="height:10px;border-radius:20px;background:#5B9EC9;transition:width 0.4s ease;width:0%;"></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:5px;" id="water-goal-label">Goal: 80 oz · recommended on Zepbound + diuretics</div>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin:12px 0 8px;">Tap to add a drink:</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="water-container-buttons">
+        <button class="water-container-btn" onclick="addWater(8)"><div style="font-size:22px;">🥛</div><div class="water-btn-label">Glass</div><div class="water-btn-oz">8 oz</div></button>
+        <button class="water-container-btn" onclick="addWater(12)"><div style="font-size:22px;">☕</div><div class="water-btn-label">Mug</div><div class="water-btn-oz">12 oz</div></button>
+        <button class="water-container-btn" onclick="addWater(16)"><div style="font-size:22px;">🍶</div><div class="water-btn-label">Bottle (sm)</div><div class="water-btn-oz">16 oz</div></button>
+        <button class="water-container-btn" onclick="addWater(20)"><div style="font-size:22px;">💧</div><div class="water-btn-label">Tumbler</div><div class="water-btn-oz">20 oz</div></button>
+        <button class="water-container-btn" onclick="addWater(24)"><div style="font-size:22px;">🧴</div><div class="water-btn-label">Bottle (lg)</div><div class="water-btn-oz">24 oz</div></button>
+        <button class="water-container-btn" onclick="addWater(32)"><div style="font-size:22px;">🫙</div><div class="water-btn-label">Quart</div><div class="water-btn-oz">32 oz</div></button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+        <input type="number" id="water-custom-oz" placeholder="Custom oz" min="1" max="64" style="flex:1;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;">
+        <button onclick="addWaterCustom()" style="padding:8px 14px;border-radius:8px;border:0.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);">Add</button>
+        <button onclick="undoWater()" style="padding:8px 14px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);">Undo</button>
+      </div>
+      <div id="water-entries-today" style="margin-top:12px;font-size:12px;color:var(--muted);min-height:20px;"></div>
+      <button class="btn-primary" style="margin-top:10px;" onclick="saveWaterIntake()">💾 Sync to cloud & save daily total</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Your progress auto-saves as you tap · tap Sync to save to charts & cross-device</div>
+      <div class="toast-msg" id="wt">Saved!</div>
+      <button class="btn-ai" style="margin-top:8px;" onclick="hydrationCoach()">Hydration coaching ↗</button>
+      <div id="hydration-coach-output" class="coach-response" style="display:none"></div>
+    </div>
+
     <!-- Zepbound -->
     <div class="card">
       <div class="card-title">💉 Zepbound · weekly dose</div>
@@ -1460,73 +1498,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="health-snapshot-content">
         <div class="log-empty">Loading your health data...</div>
       </div>
-    </div>
-
-    <!-- Hydration -->
-    <div class="card">
-      <div class="card-title">💧 Hydration tracker</div>
-      <div id="hydration-status"><div class="log-empty">Loading...</div></div>
-
-      <!-- Live total display -->
-      <div style="text-align:center;padding:14px 0 6px;">
-        <div style="font-size:42px;font-weight:700;color:#5B9EC9;" id="water-oz-total">0</div>
-        <div style="font-size:13px;color:var(--muted);">oz today</div>
-        <div style="margin-top:10px;background:rgba(0,0,0,0.06);border-radius:20px;height:10px;overflow:hidden;">
-          <div id="water-goal-bar" style="height:10px;border-radius:20px;background:#5B9EC9;transition:width 0.4s ease;width:0%;"></div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:5px;" id="water-goal-label">Goal: 80 oz · recommended on Zepbound + diuretics</div>
-      </div>
-
-      <!-- Container buttons -->
-      <div style="font-size:12px;font-weight:600;color:var(--text);margin:12px 0 8px;">Tap to add a drink:</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="water-container-buttons">
-        <button class="water-container-btn" onclick="addWater(8)">
-          <div style="font-size:22px;">🥛</div>
-          <div class="water-btn-label">Glass</div>
-          <div class="water-btn-oz">8 oz</div>
-        </button>
-        <button class="water-container-btn" onclick="addWater(12)">
-          <div style="font-size:22px;">☕</div>
-          <div class="water-btn-label">Mug</div>
-          <div class="water-btn-oz">12 oz</div>
-        </button>
-        <button class="water-container-btn" onclick="addWater(16)">
-          <div style="font-size:22px;">🍶</div>
-          <div class="water-btn-label">Bottle (sm)</div>
-          <div class="water-btn-oz">16 oz</div>
-        </button>
-        <button class="water-container-btn" onclick="addWater(20)">
-          <div style="font-size:22px;">💧</div>
-          <div class="water-btn-label">Tumbler</div>
-          <div class="water-btn-oz">20 oz</div>
-        </button>
-        <button class="water-container-btn" onclick="addWater(24)">
-          <div style="font-size:22px;">🧴</div>
-          <div class="water-btn-label">Bottle (lg)</div>
-          <div class="water-btn-oz">24 oz</div>
-        </button>
-        <button class="water-container-btn" onclick="addWater(32)">
-          <div style="font-size:22px;">🫙</div>
-          <div class="water-btn-label">Quart</div>
-          <div class="water-btn-oz">32 oz</div>
-        </button>
-      </div>
-
-      <!-- Custom amount -->
-      <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
-        <input type="number" id="water-custom-oz" placeholder="Custom oz" min="1" max="64" style="flex:1;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;">
-        <button onclick="addWaterCustom()" style="padding:8px 14px;border-radius:8px;border:0.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);">Add</button>
-        <button onclick="undoWater()" style="padding:8px 14px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);">Undo</button>
-      </div>
-
-      <!-- Today's log -->
-      <div id="water-entries-today" style="margin-top:12px;font-size:12px;color:var(--muted);min-height:20px;"></div>
-
-      <button class="btn-primary" style="margin-top:10px;" onclick="saveWaterIntake()">💾 Sync to cloud & save daily total</button>
-      <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Your progress auto-saves as you tap · tap Sync to save to charts & cross-device</div>
-      <div class="toast-msg" id="wt">Saved!</div>
-      <button class="btn-ai" style="margin-top:8px;" onclick="hydrationCoach()">Hydration coaching ↗</button>
-      <div id="hydration-coach-output" class="coach-response" style="display:none"></div>
     </div>
 
     <!-- Apple Health clinical metrics -->
@@ -1931,72 +1902,79 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <input type="file" id="hair-current-input" accept="image/*" style="display:none;" onchange="saveCurrentHairPhoto(this)">
     </div>
 
+    <!-- Milestone photos — real dated photos -->
+    <div class="card">
+      <div class="card-title">📍 My hair journey · milestones</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Real photos of your actual hair over time. Tap + to add today's milestone.</div>
+      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;" id="hair-milestone-strip">
+        <div style="flex-shrink:0;text-align:center;width:72px;">
+          <div style="width:72px;height:72px;border-radius:10px;border:2px dashed var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--warm);" onclick="addHairMilestone()">
+            <span style="font-size:24px;color:var(--accent);">+</span>
+          </div>
+          <div style="font-size:10px;color:var(--accent);margin-top:3px;font-weight:600;">Add now</div>
+        </div>
+      </div>
+      <input type="file" id="hair-milestone-input" accept="image/*" style="display:none;" onchange="saveHairMilestone(this)">
+    </div>
+
     <!-- Goal photos -->
     <div class="card">
-      <div class="card-title">🎯 Goal photos · tap to upload</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Upload your AI-generated goal photos for each milestone. Add notes to track expected growth rate and style details.</div>
+      <div class="card-title">🎯 Goal photos · AI vision</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Upload your AI-generated goal photos. Tap the date label to edit it.</div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;" id="hair-goals-strip">
 
-        <!-- Aug 2026 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('aug-2026')" id="goal-aug-2026"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--accent);margin-top:3px;font-weight:600;">Aug 2026</div>
-          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('aug-2026','Aug 2026')">Compare</button>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('goal-1')" id="goal-goal-1"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
+          <input class="goal-label-input" id="goal-label-goal-1" value="May 2026" onchange="saveGoalLabel('goal-1',this.value)" onclick="event.stopPropagation()">
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-1',document.getElementById('goal-label-goal-1').value)">Compare</button>
         </div>
 
-        <!-- Nov 2026 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('nov-2026')" id="goal-nov-2026"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--accent);margin-top:3px;font-weight:600;">Nov 2026</div>
-          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('nov-2026','Nov 2026')">Compare</button>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('goal-2')" id="goal-goal-2"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
+          <input class="goal-label-input" id="goal-label-goal-2" value="Aug 2026" onchange="saveGoalLabel('goal-2',this.value)" onclick="event.stopPropagation()">
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-2',document.getElementById('goal-label-goal-2').value)">Compare</button>
         </div>
 
-        <!-- Feb 2027 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('feb-2027')" id="goal-feb-2027"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--accent);margin-top:3px;font-weight:600;">Feb 2027</div>
-          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('feb-2027','Feb 2027')">Compare</button>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('goal-3')" id="goal-goal-3"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
+          <input class="goal-label-input" id="goal-label-goal-3" value="Nov 2026" onchange="saveGoalLabel('goal-3',this.value)" onclick="event.stopPropagation()">
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-3',document.getElementById('goal-label-goal-3').value)">Compare</button>
         </div>
 
-        <!-- May 2027 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('may-2027')" id="goal-may-2027"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--accent);margin-top:3px;font-weight:600;">May 2027</div>
-          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('may-2027','May 2027')">Compare</button>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('goal-4')" id="goal-goal-4"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
+          <input class="goal-label-input" id="goal-label-goal-4" value="Feb 2027" onchange="saveGoalLabel('goal-4',this.value)" onclick="event.stopPropagation()">
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-4',document.getElementById('goal-label-goal-4').value)">Compare</button>
         </div>
 
-        <!-- Aug 2027 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('aug-2027')" id="goal-aug-2027"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;">Aug 2027</div>
-          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('aug-2027','Aug 2027')">Compare</button>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('goal-5')" id="goal-goal-5"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
+          <input class="goal-label-input" id="goal-label-goal-5" value="May 2027" onchange="saveGoalLabel('goal-5',this.value)" onclick="event.stopPropagation()">
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-5',document.getElementById('goal-label-goal-5').value)">Compare</button>
         </div>
 
-        <!-- Nov 2027 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('nov-2027')" id="goal-nov-2027"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;">Nov 2027</div>
-          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('nov-2027','Nov 2027')">Compare</button>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('goal-6')" id="goal-goal-6"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
+          <input class="goal-label-input" id="goal-label-goal-6" value="Aug 2027" onchange="saveGoalLabel('goal-6',this.value)" onclick="event.stopPropagation()">
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-6',document.getElementById('goal-label-goal-6').value)">Compare</button>
         </div>
 
-        <!-- Feb 2028 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('feb-2028')" id="goal-feb-2028"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;">Feb 2028</div>
-          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('feb-2028','Feb 2028')">Compare</button>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('goal-7')" id="goal-goal-7"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
+          <input class="goal-label-input" id="goal-label-goal-7" value="Nov 2027" onchange="saveGoalLabel('goal-7',this.value)" onclick="event.stopPropagation()">
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-7',document.getElementById('goal-label-goal-7').value)">Compare</button>
         </div>
 
-        <!-- May 2028 -->
         <div style="text-align:center;">
-          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('may-2028')" id="goal-may-2028"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;">May 2028</div>
-          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('may-2028','May 2028')">Compare</button>
+          <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('goal-8')" id="goal-goal-8"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
+          <input class="goal-label-input" id="goal-label-goal-8" value="Feb 2028" onchange="saveGoalLabel('goal-8',this.value)" onclick="event.stopPropagation()">
+          <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-8',document.getElementById('goal-label-goal-8').value)">Compare</button>
         </div>
 
       </div>
       <input type="file" id="hair-goal-input" accept="image/*" style="display:none" onchange="saveHairGoalPhoto(this)">
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;">✨ = AI goal photo · green border = uploaded · tap Compare to see current vs goal</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">✨ = AI goal photo · tap date label to rename · tap Compare to see current vs goal</div>
       <!-- Hair compare panel -->
       <div id="hair-compare-panel" style="display:none;margin-top:14px;">
         <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;" id="hair-compare-title">Comparing current vs goal</div>
@@ -2582,7 +2560,7 @@ async function tab(id){
   }
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); }
-  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadCurrentHairPhoto(); }
+  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); loadHairMilestones(); }
   if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners(); }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
@@ -5771,7 +5749,102 @@ const WATER_GOAL = 10; // legacy alias
 // ── HAIR ANALYSIS ─────────────────────────────────────────────────────
 let _currentHairGoalSlot = null;
 
-// ── CURRENT HAIR PHOTO ────────────────────────────────────────────────
+// ── HAIR MILESTONES ───────────────────────────────────────────────────
+function addHairMilestone(){
+  document.getElementById('hair-milestone-input').click();
+}
+
+async function saveHairMilestone(input){
+  const file = input.files[0]; if(!file) return;
+  const dataUrl = await compressImage(file, 600, 0.75);
+  const date = nowStr();
+  const label = new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'});
+
+  // Load existing milestones
+  const res = await fetch(`${BACKEND}/api/sync?pillar=hair_milestones`).catch(()=>null);
+  const milestones = res&&res.ok ? (await res.json().catch(()=>({data:[]}))).data||[] : [];
+
+  // Add new milestone (newest first)
+  milestones.unshift({ date, label, dataUrl });
+
+  // Save to Blob
+  await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'hair_milestones',data:milestones})}).catch(()=>{});
+
+  loadHairMilestones();
+  input.value='';
+}
+
+async function loadHairMilestones(){
+  const strip = document.getElementById('hair-milestone-strip');
+  if(!strip) return;
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=hair_milestones`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    const milestones = Array.isArray(data) ? data : [];
+    if(!milestones.length) return;
+
+    // Render milestone photos (keep + button at start)
+    const addBtn = strip.children[0];
+    strip.innerHTML='';
+    strip.appendChild(addBtn);
+
+    milestones.forEach((m,i)=>{
+      const div = document.createElement('div');
+      div.style.cssText='flex-shrink:0;text-align:center;width:72px;';
+      div.innerHTML=`
+        <div style="position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;cursor:pointer;" onclick="showMilestoneCompare(${i})">
+          <img src="${m.dataUrl}" style="width:100%;height:100%;object-fit:cover;">
+          <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.45);font-size:8px;color:#fff;padding:2px 0;text-align:center;">${m.label}</div>
+        </div>
+        <div style="font-size:9px;color:var(--muted);margin-top:3px;">${m.date}</div>
+        <button onclick="deleteMilestone(${i})" style="background:none;border:none;font-size:10px;color:var(--muted);cursor:pointer;padding:1px 4px;">✕</button>
+      `;
+      strip.appendChild(div);
+    });
+  } catch(e){}
+}
+
+async function showMilestoneCompare(idx){
+  // Compare this milestone against the current photo
+  const res = await fetch(`${BACKEND}/api/sync?pillar=hair_milestones`).catch(()=>null);
+  const milestones = res&&res.ok ? (await res.json().catch(()=>({data:[]}))).data||[] : [];
+  const milestone = milestones[idx]; if(!milestone) return;
+
+  const panel=document.getElementById('hair-compare-panel');
+  const titleEl=document.getElementById('hair-compare-title');
+  const goalImgEl=document.getElementById('hair-compare-goal-img');
+  const currentImgEl=document.getElementById('hair-compare-current-img');
+  const goalLabelEl=document.getElementById('hair-compare-goal-label');
+  const currentDateEl=document.getElementById('hair-compare-current-date');
+
+  // Left = current hair photo
+  const saved = localStorage.getItem('glowHairCurrentPhoto');
+  if(saved){
+    const {dataUrl, date} = JSON.parse(saved);
+    currentImgEl.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+    currentImgEl.style.background='none';
+    currentDateEl.textContent = date ? safeDate(date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Now';
+  }
+
+  // Right = milestone photo
+  goalImgEl.innerHTML=`<img src="${milestone.dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+  goalImgEl.style.background='none';
+  goalLabelEl.textContent = milestone.label;
+  titleEl.textContent = `Now vs ${milestone.label}`;
+  panel.style.display='block';
+}
+
+async function deleteMilestone(idx){
+  if(!confirm('Delete this milestone photo?')) return;
+  const res = await fetch(`${BACKEND}/api/sync?pillar=hair_milestones`).catch(()=>null);
+  const milestones = res&&res.ok ? (await res.json().catch(()=>({data:[]}))).data||[] : [];
+  milestones.splice(idx,1);
+  await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'hair_milestones',data:milestones})}).catch(()=>{});
+  loadHairMilestones();
+}
 function uploadCurrentHair(){
   document.getElementById('hair-current-input').click();
 }
@@ -5855,14 +5928,22 @@ function loadCurrentHairPhoto(){
 }
 
 function showHairCurrentCompare(){
-  // Opens compare overlay using current photo vs nearest next goal
   const saved = localStorage.getItem('glowHairCurrentPhoto');
-  if(!saved){ alert('Upload a current hair photo first'); return; }
-  // Find first goal with a photo
-  const goals = ['aug-2026','nov-2026','feb-2027','may-2027','aug-2027','nov-2027','feb-2028','may-2028'];
-  const nextGoal = goals.find(g=>localStorage.getItem('glowHairGoal_'+g));
-  if(nextGoal) showHairCompare(nextGoal, nextGoal.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase()));
-  else alert('Upload a goal photo to compare against');
+  if(!saved){ 
+    alert('Upload a current hair photo first by tapping the photo area above'); 
+    return; 
+  }
+  // Find next upcoming goal slot chronologically
+  const goalOrder = ['aug-2026','nov-2026','feb-2027','may-2027','aug-2027','nov-2027','feb-2028','may-2028'];
+  const goalLabels = {'aug-2026':'Aug 2026','nov-2026':'Nov 2026','feb-2027':'Feb 2027','may-2027':'May 2027','aug-2027':'Aug 2027','nov-2027':'Nov 2027','feb-2028':'Feb 2028','may-2028':'May 2028'};
+  // Find first goal that has a photo uploaded
+  const nextGoal = goalOrder.find(g=>document.getElementById(`goal-${g}`)?.querySelector('img'));
+  if(nextGoal){
+    showHairCompare(nextGoal, goalLabels[nextGoal]);
+  } else {
+    // No goal photos yet — show empty compare panel
+    showHairCompare('aug-2026', 'Aug 2026');
+  }
 }
 
 function uploadHairGoal(slot){
@@ -5884,7 +5965,7 @@ async function saveHairGoalPhoto(input){
     .then(d=>d.data&&!Array.isArray(d.data)?d.data:{})
     .catch(()=>({}));
 
-  goals[_currentHairGoalSlot] = { dataUrl, mimeType, base64, slot: _currentHairGoalSlot };
+  goals[_currentHairGoalSlot] = { dataUrl, mimeType, base64, slot: _currentHairGoalSlot, uploadedDate: nowStr() };
 
   await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'hairgoals',data:goals})});
 
@@ -5895,6 +5976,20 @@ async function saveHairGoalPhoto(input){
 
 // Compress image to max width/height and quality
 /* compressImage — second definition removed; consolidated into the one at line ~2842 */
+
+function saveGoalLabel(slot, label){
+  const labels = JSON.parse(localStorage.getItem('glowHairGoalLabels')||'{}');
+  labels[slot] = label;
+  localStorage.setItem('glowHairGoalLabels', JSON.stringify(labels));
+}
+
+function loadGoalLabels(){
+  const labels = JSON.parse(localStorage.getItem('glowHairGoalLabels')||'{}');
+  Object.entries(labels).forEach(([slot, label])=>{
+    const el = document.getElementById(`goal-label-${slot}`);
+    if(el) el.value = label;
+  });
+}
 
 function saveGoalNote(slot, text){
   const notes = JSON.parse(localStorage.getItem('glowHairGoalNotes')||'{}');
@@ -5912,17 +6007,26 @@ function loadGoalNotes(){
 
 async function loadHairGoalPhotos(){
   try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=hairgoals`);
     if(!res.ok) return;
     const {data} = await res.json();
-    if(!data || Array.isArray(data)) return; // null or array = no goals saved yet
+    if(!data || Array.isArray(data)) return;
     Object.entries(data).forEach(([slot, goal])=>{
       const el = document.getElementById(`goal-${slot}`);
       if(el && goal.dataUrl){
         el.innerHTML=`<img src="${goal.dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
         el.style.border='2px solid var(--accent)';
       }
+      // Show upload date below slot
+      const dateEl = document.getElementById(`goal-date-${slot}`);
+      if(dateEl && goal.uploadedDate){
+        const d = safeDate(goal.uploadedDate);
+        dateEl.textContent = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        dateEl.style.color = 'var(--muted)';
+      }
     });
-  } catch(e){}
+    loadGoalNotes();
+  } catch(e){ console.error('loadHairGoalPhotos error:', e); }
 }
 
 async function showHairCompare(slot, label){
@@ -5933,7 +6037,7 @@ async function showHairCompare(slot, label){
   const goalLabelEl=document.getElementById('hair-compare-goal-label');
   const currentDateEl=document.getElementById('hair-compare-current-date');
 
-  // Get goal photo from slot
+  // Get goal photo
   const goalSlot=document.getElementById(`goal-${slot}`);
   const goalImg=goalSlot?goalSlot.querySelector('img'):null;
   if(goalImg){
@@ -5942,29 +6046,44 @@ async function showHairCompare(slot, label){
     const gi=document.createElement('img');gi.src=goalImg.src;gi.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:10px;';
     goalImgEl.appendChild(gi);
   } else {
-    goalImgEl.innerHTML='<span style="font-size:28px;">✨</span><div style="font-size:11px;color:var(--muted);margin-top:4px;">No goal photo yet</div>';
+    goalImgEl.innerHTML='<span style="font-size:28px;">✨</span><div style="font-size:11px;color:var(--muted);margin-top:4px;">No goal photo yet — tap slot to upload</div>';
   }
-  goalLabelEl.textContent=label;
+  goalLabelEl.textContent=label+' goal';
 
-  // Get latest hair scan photo
-  try {
-    const res=await fetch(`${BACKEND}/api/sync?pillar=hairs`);
-    if(res.ok){
-      const {data}=await res.json();
-      const scans=Array.isArray(data)?data:[];
-      const latest=scans.filter(s=>s.photo).sort((a,b)=>b.date.localeCompare(a.date))[0];
-      if(latest){
+  // Use current hair card photo as "Now"
+  const saved = localStorage.getItem('glowHairCurrentPhoto');
+  if(saved){
+    try {
+      const {dataUrl, date} = JSON.parse(saved);
+      if(dataUrl){
         currentImgEl.innerHTML='';
         currentImgEl.style.background='none';
-        const ci=document.createElement('img');ci.src=latest.photo;ci.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:10px;';
+        const ci=document.createElement('img');ci.src=dataUrl;ci.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:10px;';
         currentImgEl.appendChild(ci);
-        currentDateEl.textContent=latest.date;
-      } else {
-        currentImgEl.innerHTML='<span style="font-size:28px;">💇</span><div style="font-size:11px;color:var(--muted);margin-top:4px;">No scan yet</div>';
-        currentDateEl.textContent='No scan';
+        currentDateEl.textContent = date ? safeDate(date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Current';
       }
-    }
-  } catch(e){}
+    } catch(e){}
+  } else {
+    // Fall back to latest hair scan
+    try {
+      const res=await fetch(`${BACKEND}/api/sync?pillar=hairs`);
+      if(res.ok){
+        const {data}=await res.json();
+        const scans=Array.isArray(data)?data:[];
+        const latest=scans.filter(s=>s.photo).sort((a,b)=>b.date.localeCompare(a.date))[0];
+        if(latest){
+          currentImgEl.innerHTML='';
+          currentImgEl.style.background='none';
+          const ci=document.createElement('img');ci.src=latest.photo;ci.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:10px;';
+          currentImgEl.appendChild(ci);
+          currentDateEl.textContent=latest.date;
+        } else {
+          currentImgEl.innerHTML='<span style="font-size:28px;">💇</span><div style="font-size:11px;color:var(--muted);margin-top:4px;">Upload a current photo first</div>';
+          currentDateEl.textContent='No photo';
+        }
+      }
+    } catch(e){}
+  }
 
   titleEl.textContent=`Now vs ${label} goal`;
   panel.style.display='block';
@@ -6606,11 +6725,11 @@ async function buildHydrationStatus(){
   const el = document.getElementById('hydration-status');
   if(!el) return;
 
-  // Get latest body water % from CSV
+  // Get latest body water % from CSV — try both column name variants
   const rows = await getCSVRows();
-  const latestWater = rows.find(r=>parseFloat(r.body_water_pct)>0);
-  const waterPct = latestWater ? parseFloat(latestWater.body_water_pct) : null;
-  const waterDate = latestWater ? new Date(latestWater.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+  const latestWater = rows.find(r=>parseFloat(r.body_water_pct)>0 || parseFloat(r['body_water_pct '])>0);
+  const waterPct = latestWater ? parseFloat(latestWater.body_water_pct||latestWater['body_water_pct ']||0)||null : null;
+  const waterDate = latestWater ? safeDate(latestWater.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
 
   // Get today's water intake
   const water = await dbAll('water');
@@ -7341,7 +7460,10 @@ Extract all available values and respond ONLY with valid JSON, no other text:
 
     const data = await response.json();
     const text = data.content?.find(b=>b.type==='text')?.text||'';
-    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+    // Extract JSON from response — handle markdown code blocks
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('No JSON found in response');
+    const parsed = JSON.parse(jsonMatch[0]);
 
     // Auto-fill form
     if(parsed.hours) document.getElementById('myair-hours').value = parsed.hours;
