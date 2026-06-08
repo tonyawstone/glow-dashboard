@@ -66,6 +66,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .card{background:#fff;border:0.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
 .card-title{font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:16px;}
 .section-label{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;display:flex;align-items:center;justify-content:space-between;}
+.guide-btn{font-size:12px;font-family:var(--sans);font-weight:600;color:var(--accent);background:var(--warm);border:1.5px solid var(--accent);border-radius:50%;width:24px;height:24px;cursor:pointer;letter-spacing:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.9;}
 .goal-label-input{font-size:10px;font-weight:600;color:var(--accent);background:transparent;border:none;border-bottom:0.5px solid transparent;text-align:center;width:100%;margin-top:3px;font-family:var(--sans);cursor:text;padding:1px 2px;border-radius:0;}
 .goal-label-input:focus{outline:none;border-bottom-color:var(--accent);background:var(--warm);}
 .pillar-detail{display:none;padding:8px 12px 10px;background:rgba(160,120,80,0.05);border-radius:10px;margin:-4px 0 6px;border:0.5px solid var(--border);}
@@ -2653,8 +2654,8 @@ function updateDateUI(){
   document.getElementById('hero-quote').style.display=isT?'block':'none';
 }
 
-function nowStr(){
-  const d=viewingDate;
+function nowStr(d){
+  if(!d) d=viewingDate;
   const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
 }
@@ -7719,10 +7720,8 @@ async function updateUploadStatusBanner(){
       const r = await fetch(`${BACKEND}/api/health-data`);
       if(r.ok){ const {uploadedAt} = await r.json(); if(uploadedAt){
         const ua = new Date(uploadedAt);
-        // Use local date to avoid UTC timezone shift
-        const y=ua.getFullYear(),m=String(ua.getMonth()+1).padStart(2,'0'),d=String(ua.getDate()).padStart(2,'0');
-        const uaDateLabel = smartDate(`${y}-${m}-${d}`);
-        const uaTime = ua.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+        const uaDateLabel = smartDate(nowStr(ua));
+        const uaTime = ua.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});
         uploadedAtStr = `${uaDateLabel} · ${uaTime}`;
       }}
     } catch(e){}
@@ -7731,11 +7730,11 @@ async function updateUploadStatusBanner(){
     const dateStr = uploadDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     if(diffDays === 0){
       textEl.textContent = '✅ Apple Health data is current';
-      if(dateEl) dateEl.textContent = uploadedAtStr ? uploadedAtStr : dateStr;
+      if(dateEl) dateEl.textContent = uploadedAtStr ? `Uploaded ${uploadedAtStr}` : dateStr;
       if(innerBanner){ innerBanner.style.background='rgba(107,158,120,0.08)'; innerBanner.style.borderColor='rgba(107,158,120,0.3)'; }
     } else if(diffDays === 1){
-      textEl.textContent = '🕐 Last upload: yesterday';
-      if(dateEl) dateEl.textContent = uploadedAtStr || dateStr;
+      textEl.textContent = '🕐 Data through yesterday · upload for today';
+      if(dateEl) dateEl.textContent = uploadedAtStr ? `Uploaded ${uploadedAtStr}` : dateStr;
       if(innerBanner){ innerBanner.style.background=''; innerBanner.style.borderColor=''; }
     } else {
       textEl.textContent = `⚠️ Last upload: ${diffDays} days ago`;
