@@ -1250,7 +1250,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Medications & Vitamins -->
     <div class="card">
-      <div class="card-title">💊 Medications & supplements · daily</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleMedsForm()">
+        <div class="card-title" style="margin:0;">💊 Medications & supplements · daily</div>
+        <button id="meds-form-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+      </div>
+      <div id="meds-progress" style="margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--warm);font-size:12px;color:var(--muted);">Tap to log today's medications</div>
+      <!-- Collapsible checklist -->
+      <div id="meds-form-body" style="display:none;margin-top:12px;">
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Tap each item when taken · resets at midnight</div>
 
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;">☀️ Morning</div>
@@ -1278,9 +1284,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="med-row" id="med-sleep-gummies-eve" onclick="toggleMed('med-sleep-gummies-eve')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Sleep gummies</div><div class="med-note">As needed</div></div></div>
       </div>
 
-      <div id="meds-progress" style="margin-top:12px;padding:8px 12px;border-radius:10px;background:var(--warm);font-size:12px;color:var(--muted);">Tap each item above when taken</div>
       <button id="meds-save-btn" class="btn-primary" style="margin-top:10px;display:none;" onclick="saveMedsChecklist()">✅ Log all Rx meds taken today</button>
       <div class="toast-msg" id="meds-toast">Logged!</div>
+      </div><!-- end meds-form-body -->
     </div>
 
     <!-- BP Log — after meds, before Zepbound -->
@@ -1340,119 +1346,87 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Zepbound -->
     <div class="card">
-      <div class="card-title">💉 Zepbound · weekly dose</div>
-      <div id="zep-dose-status" style="margin-bottom:14px;"></div>
-      <div class="fl">Log this week's injection</div>
-      <div style="display:flex;align-items:center;gap:10px;margin:8px 0 4px;">
-        <div style="font-size:12px;color:var(--muted);">Injection date:</div>
-        <input type="date" id="zep-injection-date" style="padding:6px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);">
-        <div style="font-size:11px;color:var(--muted);">(leave blank for today)</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;" onclick="toggleZepForm()" style="cursor:pointer;">
+        <div class="card-title" style="margin:0;">💉 Zepbound · weekly dose</div>
+        <button id="zep-form-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;" id="zep-dose-buttons">
-        <button class="zep-dose-btn" onclick="logZepDose(2.5)">2.5 mg</button>
-        <button class="zep-dose-btn" onclick="logZepDose(5)">5 mg</button>
-        <button class="zep-dose-btn" onclick="logZepDose(7.5)">7.5 mg</button>
-        <button class="zep-dose-btn" onclick="logZepDose(10)">10 mg</button>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:10px;">Tap your dose when you inject · date is automatically saved · stays selected until next week's dose</div>
-      <div class="toast-msg" id="zep-toast">💉 Dose logged!</div>
+      <div id="zep-dose-status" style="margin-top:10px;"></div>
+      <!-- Collapsible form -->
+      <div id="zep-form-body" style="display:none;margin-top:12px;">
+        <div class="fl">Log this week's injection</div>
+        <div style="display:flex;align-items:center;gap:10px;margin:8px 0 4px;">
+          <div style="font-size:12px;color:var(--muted);">Injection date:</div>
+          <input type="date" id="zep-injection-date" style="padding:6px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);">
+          <div style="font-size:11px;color:var(--muted);">(leave blank for today)</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;" id="zep-dose-buttons">
+          <button class="zep-dose-btn" onclick="logZepDose(2.5)">2.5 mg</button>
+          <button class="zep-dose-btn" onclick="logZepDose(5)">5 mg</button>
+          <button class="zep-dose-btn" onclick="logZepDose(7.5)">7.5 mg</button>
+          <button class="zep-dose-btn" onclick="logZepDose(10)">10 mg</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:10px;">Tap your dose when you inject · date saved automatically · stays selected until next week</div>
+        <div class="toast-msg" id="zep-toast">💉 Dose logged!</div>
 
-      <!-- Injection site tracker -->
-      <div style="margin-top:16px;">
-        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;">Injection site · tap to select</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Rotate sites each week to prevent buildup · last site shown in red</div>
-        <div id="injection-site-diagram" style="max-width:340px;margin:0 auto;">
-          <svg width="100%" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
-            <style>
-              .site-zone{cursor:pointer;}
-              .site-zone:hover ellipse{opacity:0.8;}
-              .szl{font-family:sans-serif;font-size:14px;font-weight:700;fill:white;pointer-events:none;}
-              .szs{font-family:sans-serif;font-size:11px;fill:rgba(255,255,255,0.9);pointer-events:none;}
-            </style>
-            <!-- Abdomen box -->
-            <rect x="230" y="10" width="220" height="220" rx="18" fill="#E8C99A"/>
-            <!-- Left leg -->
-            <rect x="230" y="200" width="96" height="148" rx="36" fill="#E8C99A"/>
-            <!-- Right leg -->
-            <rect x="354" y="200" width="96" height="148" rx="36" fill="#E8C99A"/>
-            <!-- Gap between legs -->
-            <rect x="326" y="212" width="28" height="140" fill="#fff"/>
-            <!-- Faint guides -->
-            <line x1="340" y1="28" x2="340" y2="330" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
-            <line x1="242" y1="120" x2="438" y2="120" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
-
-            <!-- Upper Left -->
-            <g class="site-zone" id="site-upper-left" onclick="selectInjectionSite('upper-left')">
-              <ellipse cx="283" cy="78" rx="50" ry="36" fill="#6B9E78"/>
-              <text x="283" y="74" text-anchor="middle" class="szl">Upper</text>
-              <text x="283" y="90" text-anchor="middle" class="szs">Left</text>
-            </g>
-            <!-- Upper Right -->
-            <g class="site-zone" id="site-upper-right" onclick="selectInjectionSite('upper-right')">
-              <ellipse cx="397" cy="78" rx="50" ry="36" fill="#6B9E78"/>
-              <text x="397" y="74" text-anchor="middle" class="szl">Upper</text>
-              <text x="397" y="90" text-anchor="middle" class="szs">Right</text>
-            </g>
-            <!-- Lower Left -->
-            <g class="site-zone" id="site-lower-left" onclick="selectInjectionSite('lower-left')">
-              <ellipse cx="283" cy="162" rx="50" ry="36" fill="#6B9E78"/>
-              <text x="283" y="158" text-anchor="middle" class="szl">Lower</text>
-              <text x="283" y="174" text-anchor="middle" class="szs">Left</text>
-            </g>
-            <!-- Lower Right -->
-            <g class="site-zone" id="site-lower-right" onclick="selectInjectionSite('lower-right')">
-              <ellipse cx="397" cy="162" rx="50" ry="36" fill="#6B9E78"/>
-              <text x="397" y="158" text-anchor="middle" class="szl">Lower</text>
-              <text x="397" y="174" text-anchor="middle" class="szs">Right</text>
-            </g>
-            <!-- Navel centered between 4 zones -->
-            <ellipse cx="340" cy="120" rx="7" ry="5" fill="#D4A870"/>
-            <ellipse cx="340" cy="120" rx="4" ry="3" fill="#C49060"/>
-            <!-- Left Hip -->
-            <g class="site-zone" id="site-left-hip" onclick="selectInjectionSite('left-hip')">
-              <ellipse cx="268" cy="286" rx="50" ry="38" fill="#6B9E78"/>
-              <text x="268" y="282" text-anchor="middle" class="szl">Left</text>
-              <text x="268" y="298" text-anchor="middle" class="szs">Hip</text>
-            </g>
-            <!-- Right Hip -->
-            <g class="site-zone" id="site-right-hip" onclick="selectInjectionSite('right-hip')">
-              <ellipse cx="412" cy="286" rx="50" ry="38" fill="#6B9E78"/>
-              <text x="412" y="282" text-anchor="middle" class="szl">Right</text>
-              <text x="412" y="298" text-anchor="middle" class="szs">Hip</text>
-            </g>
-          </svg>
+        <!-- Injection site tracker -->
+        <div style="margin-top:16px;">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;">Injection site · tap to select</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Rotate sites each week to prevent buildup · last site shown in red</div>
+          <div id="injection-site-diagram" style="max-width:340px;margin:0 auto;">
+            <svg width="100%" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
+              <style>.site-zone{cursor:pointer;}.site-zone:hover ellipse{opacity:0.8;}.szl{font-family:sans-serif;font-size:14px;font-weight:700;fill:white;pointer-events:none;}.szs{font-family:sans-serif;font-size:11px;fill:rgba(255,255,255,0.9);pointer-events:none;}</style>
+              <rect x="230" y="10" width="220" height="220" rx="18" fill="#E8C99A"/>
+              <rect x="230" y="200" width="96" height="148" rx="36" fill="#E8C99A"/>
+              <rect x="354" y="200" width="96" height="148" rx="36" fill="#E8C99A"/>
+              <rect x="326" y="212" width="28" height="140" fill="#fff"/>
+              <line x1="340" y1="28" x2="340" y2="330" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
+              <line x1="242" y1="120" x2="438" y2="120" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
+              <g class="site-zone" id="site-upper-left" onclick="selectInjectionSite('upper-left')"><ellipse cx="283" cy="78" rx="50" ry="36" fill="#6B9E78"/><text x="283" y="74" text-anchor="middle" class="szl">Upper</text><text x="283" y="90" text-anchor="middle" class="szs">Left</text></g>
+              <g class="site-zone" id="site-upper-right" onclick="selectInjectionSite('upper-right')"><ellipse cx="397" cy="78" rx="50" ry="36" fill="#6B9E78"/><text x="397" y="74" text-anchor="middle" class="szl">Upper</text><text x="397" y="90" text-anchor="middle" class="szs">Right</text></g>
+              <g class="site-zone" id="site-lower-left" onclick="selectInjectionSite('lower-left')"><ellipse cx="283" cy="162" rx="50" ry="36" fill="#6B9E78"/><text x="283" y="158" text-anchor="middle" class="szl">Lower</text><text x="283" y="174" text-anchor="middle" class="szs">Left</text></g>
+              <g class="site-zone" id="site-lower-right" onclick="selectInjectionSite('lower-right')"><ellipse cx="397" cy="162" rx="50" ry="36" fill="#6B9E78"/><text x="397" y="158" text-anchor="middle" class="szl">Lower</text><text x="397" y="174" text-anchor="middle" class="szs">Right</text></g>
+              <ellipse cx="340" cy="120" rx="7" ry="5" fill="#D4A870"/><ellipse cx="340" cy="120" rx="4" ry="3" fill="#C49060"/>
+              <g class="site-zone" id="site-left-hip" onclick="selectInjectionSite('left-hip')"><ellipse cx="268" cy="286" rx="50" ry="38" fill="#6B9E78"/><text x="268" y="282" text-anchor="middle" class="szl">Left</text><text x="268" y="298" text-anchor="middle" class="szs">Hip</text></g>
+              <g class="site-zone" id="site-right-hip" onclick="selectInjectionSite('right-hip')"><ellipse cx="412" cy="286" rx="50" ry="38" fill="#6B9E78"/><text x="412" y="282" text-anchor="middle" class="szl">Right</text><text x="412" y="298" text-anchor="middle" class="szs">Hip</text></g>
+            </svg>
+          </div>
+          <div id="injection-site-status" style="text-align:center;font-size:13px;color:var(--muted);margin-top:6px;">Tap a zone above to log this week's site</div>
+          <div id="injection-site-history" style="margin-top:10px;font-size:12px;color:var(--muted);"></div>
+          <div class="fl" style="margin-top:12px;">Pain level</div>
+          <div class="tags" id="injection-pain-tags">
+            <button class="tag" onclick="solo('injection-pain-tags',this)">😊 None</button>
+            <button class="tag" onclick="solo('injection-pain-tags',this)">😐 Mild</button>
+            <button class="tag" onclick="solo('injection-pain-tags',this)">😬 Moderate</button>
+            <button class="tag" onclick="solo('injection-pain-tags',this)">😣 Ouch</button>
+          </div>
+          <div class="fl">Sensation</div>
+          <div class="tags" id="injection-sensation-tags">
+            <button class="tag" onclick="tog(this)">Felt nothing</button>
+            <button class="tag" onclick="tog(this)">Slight sting</button>
+            <button class="tag" onclick="tog(this)">Burning</button>
+            <button class="tag" onclick="tog(this)">Bruising after</button>
+            <button class="tag" onclick="tog(this)">Itchy after</button>
+            <button class="tag" onclick="tog(this)">Lump/bump</button>
+          </div>
+          <div class="fl">Injection notes</div>
+          <textarea id="injection-notes" rows="2" placeholder="e.g. Left thigh felt different today · less hunger this week · tried slower injection"></textarea>
+          <button class="btn-secondary" style="margin-top:8px;" onclick="saveInjectionNotes()">Save injection notes</button>
+          <div class="toast-msg" id="inj-toast">Saved!</div>
+          <div id="injection-notes-log" style="margin-top:10px;"><div class="log-empty">No injection notes yet.</div></div>
         </div>
-        <div id="injection-site-status" style="text-align:center;font-size:13px;color:var(--muted);margin-top:6px;">Tap a zone above to log this week's site</div>
-        <div id="injection-site-history" style="margin-top:10px;font-size:12px;color:var(--muted);"></div>
-        <!-- Injection experience notes -->
-        <div class="fl" style="margin-top:12px;">Pain level</div>
-        <div class="tags" id="injection-pain-tags">
-          <button class="tag" onclick="solo('injection-pain-tags',this)">😊 None</button>
-          <button class="tag" onclick="solo('injection-pain-tags',this)">😐 Mild</button>
-          <button class="tag" onclick="solo('injection-pain-tags',this)">😬 Moderate</button>
-          <button class="tag" onclick="solo('injection-pain-tags',this)">😣 Ouch</button>
-        </div>
-        <div class="fl">Sensation</div>
-        <div class="tags" id="injection-sensation-tags">
-          <button class="tag" onclick="tog(this)">Felt nothing</button>
-          <button class="tag" onclick="tog(this)">Slight sting</button>
-          <button class="tag" onclick="tog(this)">Burning</button>
-          <button class="tag" onclick="tog(this)">Bruising after</button>
-          <button class="tag" onclick="tog(this)">Itchy after</button>
-          <button class="tag" onclick="tog(this)">Lump/bump</button>
-        </div>
-        <div class="fl">Injection notes</div>
-        <textarea id="injection-notes" rows="2" placeholder="e.g. Left thigh felt different today · less hunger this week · tried slower injection"></textarea>
-        <button class="btn-secondary" style="margin-top:8px;" onclick="saveInjectionNotes()">Save injection notes</button>
-        <div class="toast-msg" id="inj-toast">Saved!</div>
-        <div id="injection-notes-log" style="margin-top:10px;"><div class="log-empty">No injection notes yet.</div></div>
       </div>
     </div>
 
     <!-- Zepbound side effects -->
     <div class="card">
-      <div class="card-title">💊 Zepbound · side effects log</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Track GI and other symptoms · important for dose discussions with your doctor</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;" onclick="toggleSideEffectsForm()">
+        <div class="card-title" style="margin:0;">💊 Zepbound · side effects</div>
+        <button id="side-effects-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+      </div>
+      <div id="zep-side-history" style="margin-top:10px;"></div>
+      <!-- Collapsible form -->
+      <div id="side-effects-body" style="display:none;margin-top:12px;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Track GI and other symptoms · important for dose discussions with your doctor</div>
       <div class="fl">GI symptoms today</div>
       <div class="tags" id="zep-gi-tags">
         <button class="tag" onclick="tog(this)">Constipation</button>
@@ -1489,7 +1463,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <textarea id="zep-side-note" rows="2" placeholder="Any patterns, timing, what helped..."></textarea>
       <button class="btn-primary" onclick="saveZepSideEffects()">Log symptoms</button>
       <div class="toast-msg" id="zep-side-toast">Logged!</div>
-      <div style="margin-top:14px;" id="zep-side-history"></div>
+      </div><!-- end side-effects-body -->
+      <div style="margin-top:10px;" id="zep-side-history"></div>
     </div>
 
     <!-- Today's snapshot -->
@@ -4464,29 +4439,40 @@ function buildSleepStagesDisplay(row){
   const core = parseFloat(row.sleep_core)||0;
   const deep = parseFloat(row.sleep_deep)||0;
   const rem = parseFloat(row.sleep_rem)||0;
-  const awake = parseFloat(row.sleep_awake)||0;
-  const total = core + deep + rem + awake;
+  const total = core + deep + rem;
   if(!total && !parseFloat(row.sleep_hrs)) return '';
   if(!total) return '<div style="font-size:11px;color:var(--muted);margin-top:8px;">Re-run Python script to see sleep stages</div>';
 
-  const pct = (val) => total>0 ? Math.round((val/total)*100) : 0;
+  // Awake = time in bed - time asleep
+  let awake = 0;
+  if(row.bedtime && row.waketime){
+    const [bh,bm] = row.bedtime.split(':').map(Number);
+    const [wh,wm] = row.waketime.split(':').map(Number);
+    const bedMins = bh*60+bm;
+    const wakeMins = (wh < bh) ? wh*60+wm+1440 : wh*60+wm;
+    const tibHrs = Math.max(0, (wakeMins - bedMins)) / 60;
+    awake = Math.max(0, Math.round((tibHrs - total) * 60) / 60);
+  }
+
+  const grandTotal = total + awake;
+  const pct = (val) => grandTotal>0 ? Math.round((val/grandTotal)*100) : 0;
   const fmt = (h) => h>0 ? `${Math.floor(h)}h ${Math.round((h%1)*60)}m` : '—';
 
   // Stacked bar
   const barHtml = `
     <div style="display:flex;border-radius:8px;overflow:hidden;height:14px;margin:8px 0;">
-      ${deep>0?`<div style="width:${pct(deep)}%;background:#5B9EC9;" title="Deep ${fmt(deep)}"></div>`:''}
-      ${core>0?`<div style="width:${pct(core)}%;background:#9B8EC4;" title="Core ${fmt(core)}"></div>`:''}
-      ${rem>0?`<div style="width:${pct(rem)}%;background:#E8A87C;" title="REM ${fmt(rem)}"></div>`:''}
-      ${awake>0?`<div style="width:${pct(awake)}%;background:rgba(0,0,0,0.1);" title="Awake ${fmt(awake)}"></div>`:''}
+      ${deep>0?`<div style="width:${pct(deep)}%;background:#1a237e;" title="Deep ${fmt(deep)}"></div>`:''}
+      ${core>0?`<div style="width:${pct(core)}%;background:#5B8DD9;" title="Core ${fmt(core)}"></div>`:''}
+      ${rem>0?`<div style="width:${pct(rem)}%;background:#90CAF9;" title="REM ${fmt(rem)}"></div>`:''}
+      ${awake>0?`<div style="width:${pct(awake)}%;background:#F9A8A8;" title="Awake ${fmt(awake)}"></div>`:''}
     </div>`;
 
   const stages = [
-    {label:'Deep', val:deep, pct:pct(deep), color:'#5B9EC9', note:'Most restorative · target 15-20%'},
-    {label:'Core', val:core, pct:pct(core), color:'#9B8EC4', note:'Light sleep · largest portion'},
-    {label:'REM', val:rem, pct:pct(rem), color:'#E8A87C', note:'Memory & mood · target 20-25%'},
-    {label:'Awake', val:awake, pct:pct(awake), color:'rgba(0,0,0,0.15)', note:'Interruptions'},
-  ].filter(s=>s.val>0);
+    {label:'Deep', val:deep, pct:pct(deep), color:'#1a237e', note:'Physical recovery · target 15–20%'},
+    {label:'Core', val:core, pct:pct(core), color:'#5B8DD9', note:'Light sleep · largest portion'},
+    {label:'REM',  val:rem,  pct:pct(rem),  color:'#90CAF9', note:'Memory & mood · target 20–25%'},
+    {label:'Awake',val:awake,pct:pct(awake),color:'#F9A8A8', note:'Time awake in bed'},
+  ].filter(s=>s.val>0||s.label==='Awake');
 
   return `
     <div style="margin-top:12px;">
@@ -4934,7 +4920,7 @@ async function buildSleepAppleMetrics(){
       tibEl.textContent = `${tibH}h ${tibM}m`;
     }
     const d = safeDate(withTimes.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    if(dateLabelEl) dateLabelEl.textContent = `Withings · ${d} · upload CSV to update`;
+    if(dateLabelEl) dateLabelEl.textContent = `Withings · ${smartDate(withTimes.date)} · ${d}`;
   } else {
     if(hrsEl) hrsEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
     if(dateLabelEl) dateLabelEl.textContent = 'Re-run Python script to add bedtime/wake times · last known shown';
@@ -7491,21 +7477,34 @@ Extract all available values and respond ONLY with valid JSON, no other text:
 }` }
     ];
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+    const response = await fetch(`${BACKEND}/api/skin-analysis`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:500,
-        messages:[{ role:'user', content }]
+        images: images.map(img=>({ type:'base64', media_type:img.type, data:img.data })),
+        prompt: `These are screenshots from the ResMed myAir CPAP app. There may be 1 or 2 images:
+- Image 1 is usually the daily summary showing score, usage hours, events/hr, mask off count, and sometimes mask seal status ("Good", "Adjust" etc.)
+- Image 2 (if present) is usually the seal/leak detail showing the actual leak rate in L/min
+
+Extract all available values and respond ONLY with valid JSON, no other text:
+{
+  "date": "YYYY-MM-DD or null",
+  "hours": "usage in H:MM format e.g. 6:08",
+  "ahi": number or null,
+  "seal": number or null,
+  "seal_status": "Good" or "Adjust" or null,
+  "onoff": number or null,
+  "score": number or null
+}`,
+        mode: 'myair'
       })
     });
 
     const data = await response.json();
-    const text = data.content?.find(b=>b.type==='text')?.text||'';
-    // Extract JSON from response — handle markdown code blocks
+    // Backend may return {result:...} or direct content
+    const text = data.result || data.content?.find(b=>b.type==='text')?.text || JSON.stringify(data);
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if(!jsonMatch) throw new Error('No JSON found in response');
+    if(!jsonMatch) throw new Error('No JSON in response');
     const parsed = JSON.parse(jsonMatch[0]);
 
     // Auto-fill form
@@ -8245,7 +8244,32 @@ function loadMedsChecklist(){
 }
 
 
-// ── INJECTION SITE TRACKER ────────────────────────────────────────────
+function toggleMedsForm(){
+  const body = document.getElementById('meds-form-body');
+  const btn = document.getElementById('meds-form-toggle');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? '▴' : '▾';
+  if(open) loadMedsChecklist();
+}
+
+function toggleZepForm(){
+  const body = document.getElementById('zep-form-body');
+  const btn = document.getElementById('zep-form-toggle');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? '▴' : '▾';
+  // Load site history when opening
+  if(open) loadInjectionSiteHistory();
+}
+
+function toggleSideEffectsForm(){
+  const body = document.getElementById('side-effects-body');
+  const btn = document.getElementById('side-effects-toggle');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? '▴' : '▾';
+}
 const SITE_LABELS = {
   'upper-left': 'Upper Left Abdomen',
   'upper-right': 'Upper Right Abdomen',
