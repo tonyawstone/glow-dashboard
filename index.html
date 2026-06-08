@@ -32,9 +32,6 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .hero-name{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--text);white-space:nowrap;}
 .hero-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:3px;}
 .hero-quote{font-size:var(--fs-xs);color:var(--accent);margin-top:5px;font-style:italic;line-height:1.4;}
-.date-nav{display:flex;align-items:center;gap:6px;margin-top:5px;}
-.date-nav-btn{background:transparent;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0;line-height:1;flex-shrink:0;}
-.date-nav-btn:active{color:var(--accent);}
 .past-banner{display:none;background:#FFF7E6;border-radius:10px;padding:8px 12px;font-size:12px;color:#7A4F00;border:0.5px solid #F5CC7F;margin-bottom:10px;text-align:center;}.past-banner.visible{display:block;}
 
 /* 2-ROW PILLAR NAV */
@@ -406,11 +403,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div style="flex:1;min-width:0;">
       <div class="hero-name" id="hero-greeting">Good morning, Tonya.</div>
-      <div class="date-nav">
-        <button class="date-nav-btn" onclick="changeDate(-1)" title="Previous day">‹</button>
-        <div class="hero-sub" id="hero-sub" style="flex:1;"></div>
-        <button class="date-nav-btn" onclick="changeDate(1)" id="date-fwd-btn" title="Next day" style="visibility:hidden;">›</button>
-      </div>
+      <div class="hero-sub" id="hero-sub"></div>
       <div class="hero-quote" id="hero-quote"></div>
     </div>
   </div>
@@ -463,9 +456,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <span style="font-size:16px;">📷</span>
     </div>
     <div class="stat-strip">
-      <div class="stat-tile"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
-      <div class="stat-tile"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-steps-src"></div></div>
-      <div class="stat-tile"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-sleep-src">Last night</div></div>
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('health')"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('health')"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-steps-src"></div></div>
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('sleep')"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-sleep-src">Last night</div></div>
       <div class="stat-tile" style="cursor:pointer;" onclick="tab('health');setTimeout(()=>{const el=document.getElementById('hydration-card');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},300)"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses today</div><div class="stat-src">Hydration</div><div class="stat-src">💧 Today</div></div>
     </div>
     <div class="stat-strip" style="margin-top:6px;">
@@ -830,14 +823,20 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
       <!-- Scan screenshot -->
       <div style="margin-bottom:14px;">
-        <label style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:10px;border:1.5px dashed var(--accent);cursor:pointer;background:rgba(160,120,80,0.05);">
-          <input type="file" id="myair-screenshot" accept="image/*" multiple style="display:none;" onchange="scanMyAirScreenshot(this)">
-          <span style="font-size:18px;">📷</span>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:var(--accent);">Scan myAir screenshot(s)</div>
-            <div style="font-size:11px;color:var(--muted);">Select 1–2 images · summary + seal detail</div>
-          </div>
-        </label>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <label style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:10px;border:1.5px dashed var(--accent);cursor:pointer;background:rgba(160,120,80,0.05);flex:2;">
+            <input type="file" id="myair-screenshot" accept="image/*" multiple style="display:none;" onchange="scanMyAirScreenshot(this)">
+            <span style="font-size:18px;">📷</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--accent);">Scan myAir screenshot(s)</div>
+              <div style="font-size:11px;color:var(--muted);">Select 1–2 images · summary + seal detail</div>
+            </div>
+          </label>
+          <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenMyAir'" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--warm);cursor:pointer;font-family:var(--sans);font-size:12px;color:var(--muted);">
+            <div style="font-size:20px;margin-bottom:2px;">📱</div>
+            Open myAir
+          </button>
+        </div>
         <div id="myair-scan-status" style="font-size:12px;color:var(--muted);text-align:center;margin-top:6px;display:none;"></div>
       </div>
 
@@ -1691,7 +1690,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ SKIN ═══════════════ -->
 <div id="s-skin" class="sec">
   <div class="view-content on" id="vc-skin-daily">
-    <div class="section-label">Skin & Derm <button class="guide-btn" onclick="openGuide('skin')">?</button></div>
+    <div class="section-label">Skin · Face Care <button class="guide-btn" onclick="openGuide('skin')">?</button></div>
 
     <!-- AI Skin Scan -->
     <div class="card skin-scan-card">
@@ -1719,7 +1718,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toggle-row" onclick="ts('r-eye')"><div><div class="tl">Grace & Stella Under Eye Mask</div><div class="ts">Gold or blue — as needed</div></div><div class="tog" id="r-eye"><div class="tok"></div></div></div>
     </div>
     <div class="card">
-      <div class="card-title">Evening routine · Musely alternating tracker</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="card-title" style="margin:0;">Evening routine · Musely alternating tracker</div>
+        <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenMusely'" style="display:flex;align-items:center;gap:5px;background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:5px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">📱 Open Musely</button>
+      </div>
       <div class="musely-track">
         <div class="musely-day" id="musely-antiaging-card">
           <div class="musely-day-label">Anti-Aging Cream</div>
@@ -2147,7 +2149,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <!-- App links -->
       <div style="display:flex;gap:8px;margin-top:12px;">
         <a href="javascript:void(0)" onclick="openDayOne()" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">📖 Open Day One</a>
-        <a href="https://www.wellspoken.me" target="_blank" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">🗣 Wellspoken</a>
+        <a href="javascript:void(0)" onclick="window.location.href='shortcuts://run-shortcut?name=OpenWellspoken'" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">🗣 Wellspoken</a>
       </div>
     </div>
 
@@ -2625,33 +2627,15 @@ function smartDate(dateStr){
   return safeDate(dateStr).toLocaleDateString('en-US',{month:'short',day:'numeric'});
 }
 
-function changeDate(dir){
-  viewingDate.setDate(viewingDate.getDate()+dir);
-  updateDateUI();
-  loadLogs();
-}
-
 function updateDateUI(){
-  const today=new Date(); today.setHours(0,0,0,0);
-  const isT=isToday(viewingDate);
-  // Update date label
-  document.getElementById('hero-sub').textContent=viewingDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  // Update greeting
-  const hr=new Date().getHours();
-  const greet=isT?(hr<12?'Good morning,':hr<17?'Good afternoon,':'Good evening,'):'Logging for';
-  document.getElementById('hero-greeting').textContent=greet+' Tonya.';
-  // Forward arrow — hide if today
-  document.getElementById('date-fwd-btn').style.visibility=isT?'hidden':'visible';
-  // Past banner
-  const banner=document.getElementById('past-banner');
-  if(isT){banner.classList.remove('visible');}
-  else{
-    const diff=Math.round((today-viewingDate)/864e5);
-    banner.textContent=`Logging for ${diff===1?'yesterday':viewingDate.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})} — entries will be saved to this date`;
-    banner.classList.add('visible');
-  }
-  // Quote only shows for today
-  document.getElementById('hero-quote').style.display=isT?'block':'none';
+  const now = new Date();
+  const hr = now.getHours();
+  const greet = hr<12?'Good morning,':hr<17?'Good afternoon,':'Good evening,';
+  document.getElementById('hero-greeting').textContent = greet+' Tonya.';
+  document.getElementById('hero-sub').textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  // Hide past banner — no longer used
+  const banner = document.getElementById('past-banner');
+  if(banner) banner.classList.remove('visible');
 }
 
 function nowStr(d){
@@ -3262,7 +3246,7 @@ const CHANGELOG = [
 ];
 
 function openWithings(){
-  window.location.href = 'com.withings.wiscale2://';
+  window.location.href = 'shortcuts://run-shortcut?name=OpenWithings';
 }
 
 function openDayOne(){
