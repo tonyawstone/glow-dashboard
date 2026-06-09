@@ -1902,18 +1902,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="section-label">Hair Growth Journey <button class="guide-btn" onclick="openGuide('hair')">?</button></div>
 
     <!-- Current hair photo -->
+    <!-- Card 1: Current hair — DO NOT CHANGE -->
     <div class="card" style="padding:14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div class="card-title" style="margin:0;">📸 Current hair</div>
         <div style="font-size:11px;color:var(--muted);" id="hair-current-date"></div>
       </div>
       <div style="display:flex;gap:12px;align-items:flex-start;">
-        <!-- Square photo -->
         <div style="flex-shrink:0;width:130px;height:130px;border-radius:12px;background:var(--warm);border:2px dashed var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;" id="hair-current-photo" onclick="uploadCurrentHair()">
           <i class="ti ti-camera" style="font-size:28px;color:var(--accent);" aria-hidden="true"></i>
           <div style="font-size:10px;color:var(--accent);margin-top:4px;text-align:center;padding:0 6px;">Tap to upload</div>
         </div>
-        <!-- Notes beside -->
         <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
           <textarea id="hair-current-notes" rows="4" placeholder="How does your hair feel today? Length, texture, growth notes, products working well..." style="font-size:12px;resize:none;height:86px;"></textarea>
           <div style="display:flex;gap:6px;">
@@ -1923,98 +1922,58 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div class="toast-msg" id="hair-current-toast">Saved!</div>
         </div>
       </div>
-      <!-- Type selector + analyze — always visible, shown when photo exists -->
-      <div id="hair-analyze-section" style="display:none;margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border);">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-          <div style="flex:1;">
-            <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">What type of photo?</div>
-            <div style="display:flex;gap:6px;">
-              <button class="tag on" id="hair-type-full" onclick="selectHairType('full')" style="flex:1;font-size:11px;">🌿 Full shot</button>
-              <button class="tag" id="hair-type-curl" onclick="selectHairType('curl')" style="flex:1;font-size:11px;">🔍 Curl close-up</button>
-            </div>
-          </div>
-          <button id="hair-analyze-btn" class="btn-ai" style="font-size:11px;padding:8px 12px;white-space:nowrap;align-self:flex-end;" onclick="triggerHairAnalysis()">✨ Analyze ↗</button>
-          <input type="file" id="hair-analyze-input" accept="image/*" capture="user" style="display:none" onchange="analyzeCurrentHair(this)">
-          <input type="file" id="hair-analyze-historical-input" accept="image/*" style="display:none" onchange="analyzeCurrentHair(this)">
-        </div>
-      </div>
       <input type="file" id="hair-current-input" accept="image/*" style="display:none;" onchange="saveCurrentHairPhoto(this)">
     </div>
 
-    <!-- Milestone photos — real dated photos -->
-    <div class="card">
-      <div class="card-title">📍 My hair journey · milestones</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Real photos of your actual hair over time. Tap + to add today's milestone.</div>
-      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;" id="hair-milestone-strip">
-        <div style="flex-shrink:0;text-align:center;width:72px;">
-          <div style="width:72px;height:72px;border-radius:10px;border:2px dashed var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--warm);" onclick="addHairMilestone()">
-            <span style="font-size:24px;color:var(--accent);">+</span>
-          </div>
-          <div style="font-size:10px;color:var(--accent);margin-top:3px;font-weight:600;">Add now</div>
-        </div>
-      </div>
-      <input type="file" id="hair-milestone-input" accept="image/*" style="display:none;" onchange="saveHairMilestone(this)">
-    </div>
-
-    <!-- Goal photos -->
+    <!-- Card 2: Goal photos — DO NOT CHANGE -->
     <div class="card">
       <div class="card-title">🎯 Goal photos · AI vision</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Upload your AI-generated goal photos. Tap the date label to edit it.</div>
-
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;" id="hair-goals-strip">
-
         <div style="text-align:center;">
           <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('goal-1')" id="goal-goal-1"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
           <input class="goal-label-input" id="goal-label-goal-1" value="May 2026" onchange="saveGoalLabel('goal-1',this.value)" onclick="event.stopPropagation()">
           <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-1',document.getElementById('goal-label-goal-1').value)">Compare</button>
         </div>
-
         <div style="text-align:center;">
           <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('goal-2')" id="goal-goal-2"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
           <input class="goal-label-input" id="goal-label-goal-2" value="Aug 2026" onchange="saveGoalLabel('goal-2',this.value)" onclick="event.stopPropagation()">
           <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-2',document.getElementById('goal-label-goal-2').value)">Compare</button>
         </div>
-
         <div style="text-align:center;">
           <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('goal-3')" id="goal-goal-3"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
           <input class="goal-label-input" id="goal-label-goal-3" value="Nov 2026" onchange="saveGoalLabel('goal-3',this.value)" onclick="event.stopPropagation()">
           <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-3',document.getElementById('goal-label-goal-3').value)">Compare</button>
         </div>
-
         <div style="text-align:center;">
           <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--accent);font-size:11px;" onclick="uploadHairGoal('goal-4')" id="goal-goal-4"><i class="ti ti-sparkles" style="color:var(--accent);font-size:16px;" aria-hidden="true"></i></div>
           <input class="goal-label-input" id="goal-label-goal-4" value="Feb 2027" onchange="saveGoalLabel('goal-4',this.value)" onclick="event.stopPropagation()">
           <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-4',document.getElementById('goal-label-goal-4').value)">Compare</button>
         </div>
-
         <div style="text-align:center;">
           <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('goal-5')" id="goal-goal-5"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
           <input class="goal-label-input" id="goal-label-goal-5" value="May 2027" onchange="saveGoalLabel('goal-5',this.value)" onclick="event.stopPropagation()">
           <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-5',document.getElementById('goal-label-goal-5').value)">Compare</button>
         </div>
-
         <div style="text-align:center;">
           <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('goal-6')" id="goal-goal-6"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
           <input class="goal-label-input" id="goal-label-goal-6" value="Aug 2027" onchange="saveGoalLabel('goal-6',this.value)" onclick="event.stopPropagation()">
           <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-6',document.getElementById('goal-label-goal-6').value)">Compare</button>
         </div>
-
         <div style="text-align:center;">
           <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('goal-7')" id="goal-goal-7"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
           <input class="goal-label-input" id="goal-label-goal-7" value="Nov 2027" onchange="saveGoalLabel('goal-7',this.value)" onclick="event.stopPropagation()">
           <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-7',document.getElementById('goal-label-goal-7').value)">Compare</button>
         </div>
-
         <div style="text-align:center;">
           <div class="photo-slot" style="width:100%;height:72px;border:2px dashed var(--border);font-size:11px;" onclick="uploadHairGoal('goal-8')" id="goal-goal-8"><i class="ti ti-sparkles" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
           <input class="goal-label-input" id="goal-label-goal-8" value="Feb 2028" onchange="saveGoalLabel('goal-8',this.value)" onclick="event.stopPropagation()">
           <button class="btn-secondary" style="font-size:9px;padding:2px 5px;margin-top:3px;width:100%;" onclick="showHairCompare('goal-8',document.getElementById('goal-label-goal-8').value)">Compare</button>
         </div>
-
       </div>
       <input type="file" id="hair-goal-input" accept="image/*" style="display:none" onchange="saveHairGoalPhoto(this)">
       <div id="hair-goal-status" style="font-size:11px;color:var(--muted);margin-top:8px;">✨ = AI goal photo · tap date label to rename · tap Compare to see current vs goal</div>
-      <!-- Hair compare panel -->
+      <!-- Hair compare panel — DO NOT CHANGE -->
       <div id="hair-compare-panel" style="display:none;margin-top:14px;">
         <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;" id="hair-compare-title">Comparing current vs goal</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -2037,34 +1996,21 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <!-- Weekly quick log -->
+    <!-- Card 3: AI Hair Analysis (renamed from Monthly assessment, with type selector) -->
     <div class="card">
-      <div class="card-title">✂️ Weekly length log</div>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Length · front (inches)</div>
-          <input type="number" id="hair-length-front" placeholder="e.g. 7.5" step="0.25" style="width:90px;padding:8px;font-size:15px;font-weight:600;border-radius:10px;border:1px solid var(--border);">
+      <div class="card-title">✨ AI hair analysis</div>
+      <div id="hair-scan-latest"><div class="log-empty">No analysis yet — take or upload a photo below.</div></div>
+      <div style="margin-top:12px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">What type of photo?</div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;">
+          <button class="tag on" id="hair-type-full" onclick="selectHairType('full')" style="flex:1;font-size:12px;">🌿 Full shot</button>
+          <button class="tag" id="hair-type-curl" onclick="selectHairType('curl')" style="flex:1;font-size:12px;">🔍 Curl close-up</button>
         </div>
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Length · back (inches)</div>
-          <input type="number" id="hair-length-back" placeholder="e.g. 6.5" step="0.25" style="width:90px;padding:8px;font-size:15px;font-weight:600;border-radius:10px;border:1px solid var(--border);">
-        </div>
-      </div>
-      <div id="hair-length-status" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>
-      <button class="btn-primary" style="margin-top:0;" onclick="saveWeeklyHairLength()">📏 Save length measurement</button>
-      <div class="toast-msg" id="hair-length-toast">Length saved!</div>
-    </div>
-
-    <!-- Monthly AI assessment -->
-    <div class="card">
-      <div class="card-title">✨ Monthly hair assessment</div>
-      <div id="hair-scan-latest"><div class="log-empty">No assessment yet — tap below to analyze your hair.</div></div>
-      <div style="margin-top:14px;">
         <input type="file" id="hair-scan-input" accept="image/*" capture="user" style="display:none" onchange="runHairAnalysis(this, false)">
         <input type="file" id="hair-scan-historical-input" accept="image/*" style="display:none" onchange="runHairAnalysis(this, true)">
-        <button class="btn-primary" onclick="document.getElementById('hair-scan-input').click()">📷 Analyze my hair now</button>
-        <button class="btn-secondary" onclick="document.getElementById('hair-scan-historical-input').click()">📂 Upload historical photo</button>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Monthly assessments recommended · Upload goal photo first for comparison</div>
+        <button class="btn-ai" style="width:100%;" onclick="document.getElementById('hair-scan-input').click()">📷 Take photo &amp; analyze ↗</button>
+        <button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="document.getElementById('hair-scan-historical-input').click()">📂 Upload historical photo</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Upload goal photo first for best comparison results</div>
         <div id="hair-scan-status" style="display:none;margin-top:10px;padding:12px;border-radius:12px;font-size:13px;"></div>
       </div>
     </div>
@@ -2121,14 +2067,50 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
   <div class="view-content" id="vc-hair-weekly">
     <div class="section-label">Hair · this week</div>
+
+    <!-- Length log — moved from daily -->
+    <div class="card">
+      <div class="card-title">✂️ Length log</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Length · front (inches)</div>
+          <input type="number" id="hair-length-front" placeholder="e.g. 7.5" step="0.25" style="width:90px;padding:8px;font-size:15px;font-weight:600;border-radius:10px;border:1px solid var(--border);">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Length · back (inches)</div>
+          <input type="number" id="hair-length-back" placeholder="e.g. 6.5" step="0.25" style="width:90px;padding:8px;font-size:15px;font-weight:600;border-radius:10px;border:1px solid var(--border);">
+        </div>
+      </div>
+      <div id="hair-length-status" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>
+      <button class="btn-primary" style="margin-top:0;" onclick="saveWeeklyHairLength()">📏 Save length measurement</button>
+      <div class="toast-msg" id="hair-length-toast">Length saved!</div>
+    </div>
+
+    <!-- Length chart -->
     <div class="card">
       <div class="card-title">Length progress</div>
       <div id="hair-weekly-length"><div class="log-empty">Log length measurements weekly to track growth.</div></div>
     </div>
+
+    <!-- Milestones — moved from daily -->
+    <div class="card">
+      <div class="card-title">📍 My hair journey · milestones</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Real photos of your actual hair over time. Tap + to add today's milestone.</div>
+      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;" id="hair-milestone-strip">
+        <div style="flex-shrink:0;text-align:center;width:72px;">
+          <div style="width:72px;height:72px;border-radius:10px;border:2px dashed var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--warm);" onclick="addHairMilestone()">
+            <span style="font-size:24px;color:var(--accent);">+</span>
+          </div>
+          <div style="font-size:10px;color:var(--accent);margin-top:3px;font-weight:600;">Add now</div>
+        </div>
+      </div>
+      <input type="file" id="hair-milestone-input" accept="image/*" style="display:none;" onchange="saveHairMilestone(this)">
+    </div>
+
     <div class="card"><div class="card-title">Weekly hair care summary</div><div id="weekly-hair-summary"><div class="log-empty">Log daily to see weekly summary.</div></div></div>
     <div class="card">
       <div class="card-title">💇 Hair analyses</div>
-      <div id="hair-analyses-log"><div class="log-empty">No analyses yet — tap ✨ Analyze my hair on the daily view.</div></div>
+      <div id="hair-analyses-log"><div class="log-empty">No analyses yet — tap ✨ AI Hair Analysis on the daily view.</div></div>
     </div>
   </div>
 
@@ -2648,7 +2630,7 @@ async function tab(id){
   }
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); }
-  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); loadHairMilestones(); }
+  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); }
   if(id==='skin'){ loadLatestSkinScan(); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
     const today = nowStr();
@@ -2662,7 +2644,7 @@ function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildGaitWeekCharts();}if(v==='monthly')buildZepMonthlyTracker();}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); if(v==='monthly') setTimeout(()=>switchSkinMetricChart(activeSkinMetric, document.querySelector('#skin-metric-tabs .chart-tab.on')||document.querySelector('#skin-metric-tabs .chart-tab')),100); }
-  if(curTab==='hair'&&v!=='daily'){ buildHairCharts(); if(v==='weekly') loadHairAnalysesLog(); }
+  if(curTab==='hair'&&v!=='daily'){ buildHairCharts(); if(v==='weekly'){ loadHairAnalysesLog(); loadHairMilestones(); } }
   if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); buildSleepMyAirCombinedChart(); buildSleepStagesWeeklyChart(); }
   if(curTab==='sleep'&&v==='monthly') { buildMyAirCharts(); buildSleepMonthlyCalendar(); }
 }
@@ -6187,8 +6169,7 @@ async function loadCurrentHairPhoto(){
         photoEl.style.border='none'; photoEl.style.background='transparent';
         photoEl.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onclick="uploadCurrentHair()">`;
         const btn = document.getElementById('hair-analyze-section');
-        if(btn) btn.style.display='block';
-      }
+        if(btn) btn.style.display='block';      }
       if(dateEl && date) dateEl.textContent = safeDate(date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
       if(notesEl && notes) notesEl.value = notes;
       return; // found in localStorage, done
