@@ -441,9 +441,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- BP last reading / reminder -->
     <div id="today-bp-banner" style="display:none;padding:5px 12px;border-radius:8px;background:transparent;border:0.5px solid var(--border);margin-bottom:6px;align-items:center;justify-content:space-between;">
       <div style="font-size:11px;color:var(--muted);">❤️ Last BP reading</div>
-      <div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="bp-status-label" style="font-size:14px;"></span>
         <span id="today-bp-value" style="font-size:13px;font-weight:500;color:var(--muted);"></span>
-        <span id="today-bp-date" style="font-size:11px;color:var(--muted);margin-left:6px;opacity:0.7;"></span>
+        <span id="today-bp-date" style="font-size:11px;color:var(--muted);opacity:0.7;"></span>
       </div>
     </div>
     <div id="today-bp-reminder" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:6px;cursor:pointer;font-size:12px;color:var(--muted);" onclick="tab('health');setTimeout(()=>document.getElementById('bp-entry-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)">
@@ -7848,9 +7849,25 @@ async function updateBPBanners(){
       if(todayVal) todayVal.textContent = `${todayReading.sys}/${todayReading.dia}`;
       if(todayDate) todayDate.textContent = `Today${todayReading.time?' · '+todayReading.time:''}`;
       const sys = parseInt(todayReading.sys);
-      if(todayVal) todayVal.style.color = sys>=140?'#7F1D1D':sys>=130?'#92400E':sys>=120?'#6B9E78':'#27500A';
+      // Color code the reading and banner background
+      if(sys >= 140){
+        if(todayVal) todayVal.style.color='#7F1D1D';
+        if(todayBanner){ todayBanner.style.background='transparent'; todayBanner.style.borderColor='var(--border)'; }
+        const lbl = todayBanner?.querySelector('.bp-status-label');
+        if(lbl) lbl.textContent = '🔴';
+      } else if(sys >= 130){
+        if(todayVal) todayVal.style.color='#92400E';
+        if(todayBanner){ todayBanner.style.background='transparent'; todayBanner.style.borderColor='var(--border)'; }
+        const lbl = todayBanner?.querySelector('.bp-status-label');
+        if(lbl) lbl.textContent = '⚠️';
+      } else {
+        if(todayVal) todayVal.style.color='#27500A';
+        if(todayBanner){ todayBanner.style.background='rgba(107,158,120,0.08)'; todayBanner.style.borderColor='rgba(107,158,120,0.3)'; }
+        const lbl = todayBanner?.querySelector('.bp-status-label');
+        if(lbl) lbl.textContent = '';
+      }
     } else if(lastReading){
-      if(todayBanner) todayBanner.style.display='flex';
+      if(todayBanner){ todayBanner.style.display='flex'; todayBanner.style.background='transparent'; todayBanner.style.borderColor='var(--border)'; }
       if(todayReminder) todayReminder.style.display='block';
       if(todayVal) todayVal.textContent = `${lastReading.sys}/${lastReading.dia}`;
       if(todayDate) todayDate.textContent = fmtOutfitDate(lastReading.date)||lastReading.date;
