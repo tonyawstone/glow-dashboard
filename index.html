@@ -5737,10 +5737,7 @@ function renderSkinScanResults(scan, containerId, compact=false){
         </div>
       </div>
     </div>
-    ${scan.highlights?`<div class="skin-insight"><div class="skin-insight-label" style="color:#27500A;">✅ Looking good</div>${scan.highlights}</div>`:''}
-    ${scan.focus?`<div class="skin-insight"><div class="skin-insight-label" style="color:#92400E;">🎯 Focus area</div>${scan.focus}</div>`:''}
-    ${scan.tip?`<div class="skin-insight"><div class="skin-insight-label" style="color:var(--accent);">💡 Tip</div>${scan.tip}</div>`:''}
-    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border);" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.skin-toggle').textContent=this.nextElementSibling.style.display==='none'?'▾':'▴';">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--border);" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.skin-toggle').textContent=this.nextElementSibling.style.display==='none'?'▾':'▴';">
       <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Pillar breakdown</div>
       <span class="skin-toggle" style="font-size:16px;color:var(--muted);">▾</span>
     </div>
@@ -5757,6 +5754,9 @@ function renderSkinScanResults(scan, containerId, compact=false){
           </div>`).join('')}
       </div>
     </div>
+    ${scan.highlights?`<div class="skin-insight"><div class="skin-insight-label" style="color:#27500A;">✅ Looking good</div>${scan.highlights}</div>`:''}
+    ${scan.focus?`<div class="skin-insight"><div class="skin-insight-label" style="color:#92400E;">🎯 Focus area</div>${scan.focus}</div>`:''}
+    ${scan.tip?`<div class="skin-insight"><div class="skin-insight-label" style="color:var(--accent);">💡 Tip</div>${scan.tip}</div>`:''}
   `;
 }
 
