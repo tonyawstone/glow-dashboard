@@ -825,7 +825,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div style="font-size:13px;font-weight:500;color:var(--text);">Last night's data <span id="myair-date-label" style="color:var(--muted);font-weight:400;"></span></div>
-        <input type="date" id="myair-date" style="padding:6px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--muted);" onchange="const l=document.getElementById('myair-date-label');if(l&&this.value){const d=new Date(this.value+'T12:00:00');l.textContent='('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')';}"">
+        <input type="date" id="myair-date" style="padding:6px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--muted);" onchange="const l=document.getElementById('myair-date-label');if(l&&this.value){const d=new Date(this.value+'T12:00:00');l.textContent='('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')';}" >
       </div>
 
       <!-- Scan screenshot -->
@@ -1264,7 +1264,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="meds-progress" style="margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--warm);font-size:12px;color:var(--muted);">Tap to log today's medications</div>
       <!-- Collapsible checklist -->
       <div id="meds-form-body" style="display:none;margin-top:12px;">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Tap each item when taken · resets at midnight</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <div style="font-size:12px;color:var(--muted);">Logging for:</div>
+        <input type="date" id="meds-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
+        <div style="font-size:11px;color:var(--muted);">· resets at midnight</div>
+      </div>
 
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;">☀️ Morning</div>
       <div id="meds-morning">
@@ -1344,7 +1348,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button onclick="undoWater()" style="padding:8px 14px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);">Undo</button>
       </div>
       <div id="water-entries-today" style="margin-top:12px;font-size:12px;color:var(--muted);min-height:20px;"></div>
-      <button class="btn-primary" style="margin-top:10px;" onclick="saveWaterIntake()">💾 Sync to cloud & save daily total</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+        <div style="font-size:12px;color:var(--muted);">Logging for:</div>
+        <input type="date" id="water-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
+      </div>
+      <button class="btn-primary" style="margin-top:8px;" onclick="saveWaterIntake()">💾 Sync to cloud & save daily total</button>
       <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Your progress auto-saves as you tap · tap Sync to save to charts & cross-device</div>
       <div class="toast-msg" id="wt">Saved!</div>
       <button class="btn-ai" style="margin-top:8px;" onclick="hydrationCoach()">Hydration coaching ↗</button>
@@ -1780,6 +1788,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div class="fl">Derm notes</div>
       <textarea id="derm-note" rows="2" placeholder="Rx changes, appt notes..."></textarea>
+      <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
+        <div style="font-size:12px;color:var(--muted);">Logging for:</div>
+        <input type="date" id="skin-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
+      </div>
       <button class="btn-primary" onclick="saveSkin()">Log skin</button>
       <button class="btn-ai" onclick="dermCoach()">Derm prep questions ↗</button>
       <div id="derm-coach-output" class="coach-response" style="display:none"></div>
@@ -2552,7 +2564,10 @@ async function tab(id){
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); loadHairMilestones(); }
-  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners(); }
+  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
+    const today = nowStr();
+    ['skin-log-date','water-log-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=today; });
+  }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
   if(curTab==='style'){ renderLookbook(); if(v==='monthly') renderStyleCalendar(); }
@@ -3858,7 +3873,7 @@ async function saveSkin(){
   const skinT=gT('skin-tags'),concerns=gT('concern-tags'),derm=document.getElementById('derm-note').value.trim();
   const musely_aa=document.getElementById('r-musely-aa').classList.contains('on');
   const musely_spot=document.getElementById('r-musely-spot').classList.contains('on');
-  const skinEntry={type:'checkin',skinT,concerns,derm,musely_aa,musely_spot,date:nowStr()};
+  const skinEntry={type:'checkin',skinT,concerns,derm,musely_aa,musely_spot,date:document.getElementById('skin-log-date')?.value||nowStr()};
   await dbAdd('skins',skinEntry);
   syncToBlob('skins');
   document.getElementById('derm-note').value='';
@@ -6672,7 +6687,7 @@ function adjustWater(delta){ // legacy — keep for any old references
 }
 
 async function saveWaterIntake(){
-  const today = nowStr();
+  const today = document.getElementById('water-log-date')?.value || nowStr();
   const water = await dbAll('water');
   const existing = water.findIndex(w=>w.date===today);
   const entry = {date:today, oz:todayWaterOz, glasses:Math.round(todayWaterOz/8), entries:todayWaterEntries};
@@ -6856,9 +6871,10 @@ async function buildHydrationStatus(){
     <!-- Manual body water entry -->
     <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;background:var(--warm);border-radius:10px;">
       <div style="font-size:13px;color:var(--text);flex:1;">💧 Body water % <span style="font-size:11px;color:var(--muted);">from Withings app</span></div>
+      <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenWithings'" style="padding:5px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">📱 Open</button>
       <input type="number" id="body-water-input" placeholder="e.g. 52.3" step="0.1" min="30" max="75"
         value="${waterPct||''}"
-        style="width:80px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;">
+        style="width:72px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;">
       <span style="font-size:13px;color:var(--muted);">%</span>
       <button onclick="saveBodyWater()" style="padding:6px 12px;border-radius:8px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);">Save</button>
     </div>
@@ -7571,11 +7587,14 @@ Extract all available values and respond ONLY with valid JSON, no other text:
     });
 
     const data = await response.json();
+    console.log('myAir scan response:', JSON.stringify(data));
     // Backend may return {result:...} or direct content
     const text = data.result || data.content?.find(b=>b.type==='text')?.text || JSON.stringify(data);
+    console.log('myAir scan text:', text);
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if(!jsonMatch) throw new Error('No JSON in response');
+    if(!jsonMatch) throw new Error(`No JSON in response: ${text.slice(0,100)}`);
     const parsed = JSON.parse(jsonMatch[0]);
+    console.log('myAir parsed:', parsed);
 
     // Auto-fill form
     if(parsed.hours) document.getElementById('myair-hours').value = parsed.hours;
@@ -8281,7 +8300,8 @@ async function saveMedsChecklist(){
   const allMeds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo',
     'med-multivitamin','med-biotin','med-vitc','med-collagen','med-superbeets',
     'med-rosuvastatin','med-miralax','med-melatonin-eve','med-sleep-gummies-eve'];
-  const state = { date: nowStr(), isoDate: new Date().toISOString() };
+  const logDate = document.getElementById('meds-log-date')?.value || nowStr();
+  const state = { date: logDate, isoDate: new Date().toISOString() };
   allMeds.forEach(id=>{ state[id] = document.getElementById(id)?.classList.contains('done')||false; });
   localStorage.setItem('glowMedsToday', JSON.stringify(state));
 
@@ -8318,7 +8338,11 @@ function toggleMedsForm(){
   const open = body.style.display === 'none';
   body.style.display = open ? 'block' : 'none';
   if(btn) btn.textContent = open ? '▴' : '▾';
-  if(open) loadMedsChecklist();
+  if(open){
+    loadMedsChecklist();
+    const d = document.getElementById('meds-log-date');
+    if(d && !d.value) d.value = nowStr();
+  }
 }
 
 function toggleZepForm(){
