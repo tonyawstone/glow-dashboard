@@ -6855,6 +6855,17 @@ async function buildHydrationStatus(){
   }
 
   el.innerHTML = `
+    <!-- Manual body water entry — at top so it's seen first -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:10px 12px;background:var(--warm);border-radius:10px;">
+      <div style="font-size:13px;color:var(--text);flex:1;">💧 Body water % <span style="font-size:11px;color:var(--muted);">from Withings app</span></div>
+      <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenWithings'" style="padding:5px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">📱 Open</button>
+      <input type="number" id="body-water-input" placeholder="e.g. 52.3" step="0.1" min="30" max="75"
+        value="${waterPct||''}"
+        style="width:72px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;">
+      <span style="font-size:13px;color:var(--muted);">%</span>
+      <button onclick="saveBodyWater()" style="padding:6px 12px;border-radius:8px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);">Save</button>
+    </div>
+    <div class="toast-msg" id="bw-toast">Saved!</div>
     <div class="hydration-status-bar" style="background:${statusBg};">
       <div class="hydration-status-icon">${statusIcon}</div>
       <div class="hydration-status-text">
@@ -6870,17 +6881,6 @@ async function buildHydrationStatus(){
         <div style="color:var(--muted);">Watson formula · based on ${weightLbs?.toFixed(1)} lbs · ${latestWeight?.date===today?'today':smartDate(latestWeight?.date)}</div>
       </div>
     </div>`:''}
-    <!-- Manual body water entry -->
-    <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;background:var(--warm);border-radius:10px;">
-      <div style="font-size:13px;color:var(--text);flex:1;">💧 Body water % <span style="font-size:11px;color:var(--muted);">from Withings app</span></div>
-      <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenWithings'" style="padding:5px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">📱 Open</button>
-      <input type="number" id="body-water-input" placeholder="e.g. 52.3" step="0.1" min="30" max="75"
-        value="${waterPct||''}"
-        style="width:72px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;">
-      <span style="font-size:13px;color:var(--muted);">%</span>
-      <button onclick="saveBodyWater()" style="padding:6px 12px;border-radius:8px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);">Save</button>
-    </div>
-    <div class="toast-msg" id="bw-toast">Saved!</div>
     <div class="hydration-status-bar" style="background:var(--warm);margin-top:6px;">
       <div class="hydration-status-icon">🫙</div>
       <div class="hydration-status-text">
