@@ -1920,6 +1920,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <button class="btn-primary" style="flex:1;font-size:11px;padding:7px 4px;" onclick="saveCurrentHairEntry()">Save</button>
             <button class="btn-secondary" style="flex:1;font-size:11px;padding:7px 4px;" onclick="showHairCurrentCompare()">↔ Compare</button>
           </div>
+          <div id="hair-analyze-type" style="display:none;gap:6px;margin-top:4px;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">What type of photo?</div>
+            <div style="display:flex;gap:6px;">
+              <button class="tag" id="hair-type-full" onclick="selectHairAnalysisType('full')" style="flex:1;font-size:11px;">🌿 Full shot</button>
+              <button class="tag" id="hair-type-curl" onclick="selectHairAnalysisType('curl')" style="flex:1;font-size:11px;">🔍 Curl close-up</button>
+            </div>
+          </div>
+          <button id="hair-analyze-btn" class="btn-ai" style="font-size:11px;padding:7px 4px;display:none;" onclick="toggleHairAnalyzeType()">✨ Analyze my hair ↗</button>
           <div class="toast-msg" id="hair-current-toast">Saved!</div>
         </div>
       </div>
@@ -2014,7 +2022,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <div style="font-size:11px;color:var(--muted);text-align:center;">AI goal photo</div>
           </div>
         </div>
-        <button class="btn-secondary" style="margin-top:10px;width:100%;font-size:12px;" onclick="document.getElementById('hair-compare-panel').style.display='none'">Close comparison</button>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn-secondary" style="flex:1;font-size:12px;" onclick="document.getElementById('hair-compare-panel').style.display='none';document.getElementById('hair-analysis-output').style.display='none';">✕ Done</button>
+          <button class="btn-ai" style="flex:2;font-size:12px;" onclick="analyzeHairProgress()">✨ Analyze my progress ↗</button>
+        </div>
+        <div id="hair-analysis-output" class="coach-response" style="display:none;margin-top:10px;"></div>
       </div>
     </div>
 
@@ -2107,6 +2119,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="hair-weekly-length"><div class="log-empty">Log length measurements weekly to track growth.</div></div>
     </div>
     <div class="card"><div class="card-title">Weekly hair care summary</div><div id="weekly-hair-summary"><div class="log-empty">Log daily to see weekly summary.</div></div></div>
+    <div class="card">
+      <div class="card-title">💇 Hair analyses</div>
+      <div id="hair-analyses-log"><div class="log-empty">No analyses yet — tap ✨ Analyze my hair on the daily view.</div></div>
+    </div>
   </div>
 
   <div class="view-content" id="vc-hair-monthly">
@@ -2639,7 +2655,7 @@ function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildGaitWeekCharts();}if(v==='monthly')buildZepMonthlyTracker();}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); if(v==='monthly') setTimeout(()=>switchSkinMetricChart(activeSkinMetric, document.querySelector('#skin-metric-tabs .chart-tab.on')||document.querySelector('#skin-metric-tabs .chart-tab')),100); }
-  if(curTab==='hair'&&v!=='daily') buildHairCharts();
+  if(curTab==='hair'&&v!=='daily'){ buildHairCharts(); if(v==='weekly') loadHairAnalysesLog(); }
   if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); buildSleepMyAirCombinedChart(); buildSleepStagesWeeklyChart(); }
   if(curTab==='sleep'&&v==='monthly') { buildMyAirCharts(); buildSleepMonthlyCalendar(); }
 }
@@ -6161,6 +6177,8 @@ async function loadCurrentHairPhoto(){
       if(dataUrl){
         photoEl.style.border='none'; photoEl.style.background='transparent';
         photoEl.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onclick="uploadCurrentHair()">`;
+        const btn = document.getElementById('hair-analyze-btn');
+        if(btn) btn.style.display='block';
       }
       if(dateEl && date) dateEl.textContent = safeDate(date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
       if(notesEl && notes) notesEl.value = notes;
@@ -6570,6 +6588,22 @@ async function loadLatestHairScan(){
     if(!data||!data.length) return;
     const withScore = data.filter(d=>d.overallScore);
     if(withScore.length) renderHairScanResult(withScore[withScore.length-1], 'hair-scan-latest');
+  } catch(e){}
+}
+
+async function loadHairAnalysesLog(){
+  const el = document.getElementById('hair-analyses-log');
+  if(!el) return;
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=hair_analyses`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!Array.isArray(data)||!data.length){ el.innerHTML='<div class="log-empty">No analyses yet — tap ✨ Analyze my hair on the daily view.</div>'; return; }
+    el.innerHTML = data.slice().reverse().map(e=>`
+      <div style="padding:12px;border-radius:10px;background:var(--warm);margin-bottom:8px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${e.type==='curl'?'🔍 Curl close-up':'🌿 Full shot'} · ${e.date||''}</div>
+        <div style="font-size:13px;color:var(--text);">${e.text||''}</div>
+      </div>`).join('');
   } catch(e){}
 }
 
@@ -8782,6 +8816,168 @@ async function loadMoreCoach(){
 function closeCoachHistory(){
   document.getElementById('coach-history-overlay').style.display = 'none';
   document.body.style.overflow = '';
+}
+
+function toggleHairAnalyzeType(){
+  const typeEl = document.getElementById('hair-analyze-type');
+  if(!typeEl) return;
+  const visible = typeEl.style.display === 'flex';
+  typeEl.style.display = visible ? 'none' : 'flex';
+  typeEl.style.flexDirection = 'column';
+}
+
+function selectHairAnalysisType(type){
+  document.getElementById('hair-type-full')?.classList.toggle('on', type==='full');
+  document.getElementById('hair-type-curl')?.classList.toggle('on', type==='curl');
+  document.getElementById('hair-analyze-type').style.display = 'none';
+  analyzeCurrentHair(type);
+}
+
+async function analyzeCurrentHair(type='full'){
+  const photoEl = document.getElementById('hair-current-photo')?.querySelector('img');
+  if(!photoEl){ alert('Please upload a current hair photo first.'); return; }
+
+  let analysisEl = document.getElementById('hair-current-analysis');
+  if(!analysisEl){
+    analysisEl = document.createElement('div');
+    analysisEl.id = 'hair-current-analysis';
+    analysisEl.className = 'coach-response';
+    document.getElementById('hair-current-photo').closest('.card').appendChild(analysisEl);
+  }
+  analysisEl.style.display = 'block';
+  analysisEl.textContent = type==='curl' ? '🔍 Analyzing your curls...' : '🌿 Analyzing your hair...';
+
+  const prompts = {
+    full: `You are a curl hair coach analyzing Tonya's full head shot. She has natural curly/coily hair growing out, using Kinky-Curly, Camille Rose, and other curl products.
+
+Analyze:
+1. Overall length and how it's coming in (front and sides visible)
+2. Volume and shape/silhouette
+3. General curl pattern and shrinkage
+4. One specific style or product suggestion for her current length
+5. An encouraging observation about her growth journey
+
+Warm, personal, specific. 3-4 sentences max per point.`,
+    curl: `You are a curl specialist analyzing a close-up of Tonya's natural curls. She uses Kinky-Curly Original Curling Custard, Kinky-Curly Knot Today, Camille Rose Curl Love Moisture Milk, and Camille Rose Curl Maker.
+
+Analyze:
+1. Curl definition and pattern (coil size, uniformity)
+2. Moisture level (shine, elasticity, limpness vs springiness)
+3. Frizz assessment and likely cause
+4. Whether her current products appear to be working well
+5. One specific technique or product tweak to improve definition
+
+Specific, technical but accessible. Reference her products where relevant.`
+  };
+
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = photoEl.naturalWidth || photoEl.width;
+    canvas.height = photoEl.naturalHeight || photoEl.height;
+    canvas.getContext('2d').drawImage(photoEl, 0, 0);
+    const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+
+    const res = await fetch(`${BACKEND}/api/skin-analysis`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        mode: 'hair_compare',
+        images: [{ media_type: 'image/jpeg', data: base64 }],
+        prompt: prompts[type]
+      })
+    });
+    const data = await res.json();
+    const text = data.result || 'Could not analyze photo.';
+    const typeLabel = type === 'curl' ? '🔍 Curl close-up' : '🌿 Full shot';
+    analysisEl.innerHTML = `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;">${typeLabel} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>${text}`;
+
+    // Save to hair_analyses Blob
+    const dateStr = nowStr();
+    const entry = { date: dateStr, type, text };
+    fetch(`${BACKEND}/api/sync?pillar=hair_analyses`).then(r=>r.json()).then(d=>{
+      const history = Array.isArray(d.data) ? d.data : [];
+      history.push(entry);
+      fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'hair_analyses',data:history})});
+    }).catch(()=>{});
+
+    // Also save to coach history
+    const dateFmt = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+    fetch(`${BACKEND}/api/sync?pillar=coach_history`).then(r=>r.json()).then(d=>{
+      const history = Array.isArray(d.data) ? d.data : [];
+      history.push({ date: dateFmt, pillar: 'Hair', prompt: `Hair analysis (${typeLabel})`, response: text });
+      fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'coach_history',data:history})});
+    }).catch(()=>{});
+
+  } catch(e){
+    analysisEl.textContent = 'Analysis unavailable right now — try again shortly.';
+  }
+}
+
+async function analyzeHairProgress(){
+  const output = document.getElementById('hair-analysis-output');
+  if(!output) return;
+  output.style.display = 'block';
+  output.textContent = '✨ Analyzing your hair progress...';
+
+  // Get current and goal images
+  const currentImg = document.getElementById('hair-compare-current-img')?.querySelector('img');
+  const goalImg = document.getElementById('hair-compare-goal-img')?.querySelector('img');
+  const goalLabel = document.getElementById('hair-compare-goal-label')?.textContent || 'goal';
+
+  if(!currentImg || !goalImg){
+    output.textContent = 'Please make sure both current and goal photos are loaded.';
+    return;
+  }
+
+  try {
+    // Convert images to base64
+    const toBase64 = (img) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+    };
+
+    const currentB64 = toBase64(currentImg);
+    const goalB64 = toBase64(goalImg);
+
+    const res = await fetch(`${BACKEND}/api/skin-analysis`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        mode: 'hair_compare',
+        images: [
+          { media_type: 'image/jpeg', data: currentB64 },
+          { media_type: 'image/jpeg', data: goalB64 }
+        ],
+        prompt: `You are a hair care coach analyzing two photos: Image 1 is the person's CURRENT hair, Image 2 is their GOAL hair (target for ${goalLabel}).
+
+Compare the two and provide:
+1. How close they are to achieving the goal (0-100%)
+2. Key differences in curl pattern, length, volume, and definition
+3. Top 2-3 specific things to focus on to reach the goal
+4. An encouraging note about their progress
+
+Keep it warm, personal and actionable. 3-4 sentences max per section.`
+      })
+    });
+
+    const data = await res.json();
+    const text = data.result || data.content?.find(b=>b.type==='text')?.text || 'Could not analyze photos.';
+    output.textContent = text;
+
+    // Save to coach history
+    const dateStr = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+    fetch(`${BACKEND}/api/sync?pillar=coach_history`).then(r=>r.json()).then(d=>{
+      const history = Array.isArray(d.data) ? d.data : [];
+      history.push({ date: dateStr, pillar: 'Hair', prompt: `Hair progress analysis: current vs ${goalLabel}`, response: text });
+      fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'coach_history',data:history})});
+    }).catch(()=>{});
+
+  } catch(e){
+    output.textContent = 'Analysis unavailable right now — try again shortly.';
+  }
 }
 
 function toggleLabForm(){
