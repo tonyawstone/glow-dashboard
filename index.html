@@ -5982,16 +5982,16 @@ async function saveHairMilestone(input){
 
   // Save photo to individual key
   await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({pillar:`hair_milestone_${date}`, data:{dataUrl, date, label}})}).catch(()=>{});
+    body:JSON.stringify({pillar:`hair_milestone_${date.replace(/-/g,"_")}`, data:{dataUrl, date, label}})}).catch(()=>{});
 
   // Update index (no photos — just metadata)
-  const res = await fetch(`${BACKEND}/api/sync?pillar=hair_milestones_index`).catch(()=>null);
+  const res = await fetch(`${BACKEND}/api/sync?pillar=hair_milestones_idx`).catch(()=>null);
   const index = res&&res.ok ? (await res.json().catch(()=>({data:[]}))).data||[] : [];
   const idx = index.findIndex(m=>m.date===date);
   if(idx>=0) index[idx] = {date, label};
   else index.unshift({date, label});
   await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({pillar:'hair_milestones_index', data:index})}).catch(()=>{});
+    body:JSON.stringify({pillar:'hair_milestones_idx', data:index})}).catch(()=>{});
 
   loadHairMilestones();
 }
@@ -6002,14 +6002,14 @@ async function loadHairMilestones(){
   try {
     // Try new index format first
     let milestones = [];
-    const idxRes = await fetch(`${BACKEND}/api/sync?pillar=hair_milestones_index`);
+    const idxRes = await fetch(`${BACKEND}/api/sync?pillar=hair_milestones_idx`);
     if(idxRes.ok){
       const {data} = await idxRes.json();
       if(Array.isArray(data) && data.length){
         // Fetch each photo individually
         milestones = await Promise.all(data.map(async m=>{
           try {
-            const pr = await fetch(`${BACKEND}/api/sync?pillar=hair_milestone_${m.date}`);
+            const pr = await fetch(`${BACKEND}/api/sync?pillar=hair_milestone_${m.date.replace(/-/g,"_")}`);
             if(pr.ok){ const {data:pd}=await pr.json(); if(pd?.dataUrl) return {...m, dataUrl:pd.dataUrl}; }
           } catch(e){}
           return m; // no photo found
@@ -6225,12 +6225,13 @@ async function saveHairGoalPhoto(input){
     // Compress image
     const dataUrl = await compressImage(file, 500, 0.70);
 
-    // Save to individual Blob key per slot
+    // Save to individual Blob key per slot (encode hyphens)
+    const blobKey = `hairgoal_${_currentHairGoalSlot.replace(/-/g,'_')}`;
     await fetch(`${BACKEND}/api/sync`, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        pillar: `hairgoal_${_currentHairGoalSlot}`,
+        pillar: blobKey,
         data: { dataUrl, slot: _currentHairGoalSlot, uploadedDate: nowStr() }
       })
     });
@@ -6305,17 +6306,19 @@ async function loadHairGoalPhotos(){
   if(cacheCount > 0 && statusEl) statusEl.textContent = `✨ ${cacheCount} photos loaded from cache · checking for updates...`;
 
   // Fetch fresh from individual Blob keys — check both new (goal-1) and old (aug-2026) formats
+  // Note: hyphens encoded as underscores in Blob keys
+  const blobKey = s => s.replace(/-/g, '_');
   const oldSlotNames = ['aug-2026','nov-2026','feb-2027','may-2027','aug-2027','nov-2027','feb-2028','may-2028'];
   let blobCount = 0;
   for(let i=0; i<slots.length; i++){
     const slot = slots[i];
     const oldSlot = oldSlotNames[i];
     try {
-      // Try new key first
-      let res = await fetch(`${BACKEND}/api/sync?pillar=hairgoal_${slot}`);
-      // Fall back to old key if not found
+      // Try new key first (hyphens encoded)
+      let res = await fetch(`${BACKEND}/api/sync?pillar=hairgoal_${blobKey(slot)}`);
+      // Fall back to old key
       if(!res.ok || !(await res.clone().json()).data?.dataUrl){
-        res = await fetch(`${BACKEND}/api/sync?pillar=hairgoal_${oldSlot}`);
+        res = await fetch(`${BACKEND}/api/sync?pillar=hairgoal_${blobKey(oldSlot)}`);
       }
       if(!res.ok) continue;
       const {data} = await res.json();
@@ -7391,7 +7394,7 @@ async function calculateGlowScore(save=false) {
   else if(hairCheckins>=1) hairScore=11;
   // Goal photo bonus
   try {
-    const goalRes = await fetch(`${BACKEND}/api/sync?pillar=hairgoal_goal-1`);
+    const goalRes = await fetch(`${BACKEND}/api/sync?pillar=hairgoal_goal1`);
     if(goalRes.ok){ const {data}=await goalRes.json(); if(data?.dataUrl) hairScore=Math.min(20,hairScore+2); }
   } catch(e){}
   try {
