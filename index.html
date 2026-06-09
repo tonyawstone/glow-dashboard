@@ -450,16 +450,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
       ❤️ No BP reading today — tap to log
     </div>
     <!-- Outfit nudge -->
-    <div id="today-outfit-nudge" style="display:none;padding:7px 12px;border-radius:8px;background:#F3EEF8;border:0.5px solid #C4A8E0;margin-bottom:10px;cursor:pointer;font-size:12px;color:#6B3FA0;align-items:center;justify-content:space-between;" onclick="openQuickLog()">
+    <div id="today-outfit-nudge" style="display:none;padding:7px 12px;border-radius:8px;background:#FDEEE8;border:0.5px solid #C4735A;margin-bottom:10px;cursor:pointer;font-size:12px;color:#C4735A;align-items:center;justify-content:space-between;" onclick="openQuickLog()">
       <span>👗 No outfit logged today — tap to snap &amp; log</span>
       <span style="font-size:16px;">📷</span>
     </div>
     <!-- Mind habits nudge banner -->
-    <div id="mind-habits-banner" style="display:none;padding:8px 12px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <div style="font-size:11px;color:var(--muted);flex-shrink:0;">🧘🏼‍♀️ Take a moment · nourish your mind</div>
-        <button id="mind-journal-btn" onclick="mindHabitTap('journal')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">📖 Journal</button>
-        <button id="mind-wellspoken-btn" onclick="mindHabitTap('wellspoken')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">🗣 Wellspoken</button>
+    <div id="mind-habits-banner" style="display:none;padding:10px 14px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:nowrap;">
+        <div style="font-size:13px;flex-shrink:0;">🧘🏽‍♀️</div>
+        <div style="font-size:11px;color:var(--muted);flex-shrink:0;white-space:nowrap;">Take a moment · nourish your mind</div>
+        <button id="mind-journal-btn" onclick="mindHabitTap('journal')" style="padding:4px 12px;border-radius:20px;border:0.5px solid var(--border);background:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:var(--sans);color:var(--muted);white-space:nowrap;flex-shrink:0;">Journal</button>
+        <button id="mind-wellspoken-btn" onclick="mindHabitTap('wellspoken')" style="padding:4px 12px;border-radius:20px;border:0.5px solid var(--border);background:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:var(--sans);color:var(--muted);white-space:nowrap;flex-shrink:0;">Wellspoken</button>
       </div>
     </div>
     <div class="stat-strip">
@@ -8479,16 +8480,16 @@ function updateMindHabitsBanner(){
   if(journaled && wellspoken){ banner.style.display='none'; return; }
   banner.style.display='block';
   if(journalBtn){
-    journalBtn.style.background = journaled?'rgba(107,158,120,0.15)':'transparent';
+    journalBtn.style.background = journaled?'rgba(107,158,120,0.2)':'rgba(255,255,255,0.6)';
     journalBtn.style.color = journaled?'#27500A':'var(--muted)';
     journalBtn.style.borderColor = journaled?'#6B9E78':'var(--border)';
-    journalBtn.textContent = journaled?'📖 Journaled ✓':'📖 Journal';
+    journalBtn.textContent = journaled?'Journal ✓':'Journal';
   }
   if(wellspokenBtn){
-    wellspokenBtn.style.background = wellspoken?'rgba(107,158,120,0.15)':'transparent';
+    wellspokenBtn.style.background = wellspoken?'rgba(107,158,120,0.2)':'rgba(255,255,255,0.6)';
     wellspokenBtn.style.color = wellspoken?'#27500A':'var(--muted)';
     wellspokenBtn.style.borderColor = wellspoken?'#6B9E78':'var(--border)';
-    wellspokenBtn.textContent = wellspoken?'🗣 Wellspoken ✓':'🗣 Wellspoken';
+    wellspokenBtn.textContent = wellspoken?'Wellspoken ✓':'Wellspoken';
   }
 }
 
