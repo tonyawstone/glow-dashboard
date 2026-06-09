@@ -446,11 +446,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <span id="today-bp-date" style="font-size:11px;color:var(--muted);margin-left:6px;opacity:0.7;"></span>
       </div>
     </div>
-    <div id="today-bp-reminder" style="display:none;padding:7px 12px;border-radius:8px;background:#FEF3C7;border:0.5px solid #E8A87C;margin-bottom:10px;cursor:pointer;font-size:12px;color:#92400E;" onclick="tab('health');setTimeout(()=>document.getElementById('bp-entry-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)">
+    <div id="today-bp-reminder" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:6px;cursor:pointer;font-size:12px;color:var(--muted);" onclick="tab('health');setTimeout(()=>document.getElementById('bp-entry-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)">
       ❤️ No BP reading today — tap to log
     </div>
     <!-- Outfit nudge -->
-    <div id="today-outfit-nudge" style="display:none;padding:7px 12px;border-radius:8px;background:#EDF2ED;border:0.5px solid #4A7A52;margin-bottom:10px;cursor:pointer;font-size:12px;color:#4A7A52;align-items:center;justify-content:space-between;" onclick="openQuickLog()">
+    <div id="today-outfit-nudge" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;cursor:pointer;font-size:12px;color:var(--muted);align-items:center;justify-content:space-between;" onclick="openQuickLog()">
       <span>👗 No outfit logged today — tap to snap &amp; log</span>
       <span style="font-size:16px;">📷</span>
     </div>
@@ -8477,8 +8477,10 @@ function updateMindHabitsBanner(){
   if(!banner) return;
   const journaled = document.getElementById('journaled-today')?.classList.contains('on')||false;
   const wellspoken = document.getElementById('wellspoken-today')?.classList.contains('on')||false;
-  if(journaled && wellspoken){ banner.style.display='none'; return; }
+
+  // Always show banner — never hide
   banner.style.display='block';
+
   if(journalBtn){
     journalBtn.style.background = journaled?'rgba(107,158,120,0.2)':'rgba(255,255,255,0.6)';
     journalBtn.style.color = journaled?'#27500A':'var(--muted)';
