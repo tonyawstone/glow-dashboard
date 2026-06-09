@@ -2496,7 +2496,6 @@ async function boot(){
   const od=document.getElementById('outfit-date');if(od)od.value=nowStr();
   updateOutfitNudge();
   buildBodyChart();
-  // Sync from Blob in background — loads any data from other devices
   syncAllFromBlob();
   loadCoachingInsights();
   loadSavedScore();
@@ -2505,6 +2504,7 @@ async function boot(){
   updateUploadStatusBanner();
   initZepboundDefaults();
   await updateBPBanners();
+  loadMindHabits();
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
