@@ -1916,6 +1916,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
           <textarea id="hair-current-notes" rows="4" placeholder="How does your hair feel today? Length, texture, growth notes, products working well..." style="font-size:12px;resize:none;height:86px;"></textarea>
           <div style="display:flex;gap:6px;">
+            <button class="btn-secondary" style="flex:1;font-size:11px;padding:7px 4px;" onclick="uploadCurrentHair()">📷 Upload photo</button>
             <button class="btn-primary" style="flex:1;font-size:11px;padding:7px 4px;" onclick="saveCurrentHairEntry()">Save</button>
             <button class="btn-secondary" style="flex:1;font-size:11px;padding:7px 4px;" onclick="showHairCurrentCompare()">↔ Compare</button>
           </div>
@@ -6100,6 +6101,11 @@ async function deleteMilestone(idx){
 }
 function uploadCurrentHair(){
   document.getElementById('hair-current-input').click();
+}
+
+function selectHairType(type){
+  document.getElementById('hair-type-full')?.classList.toggle('on', type==='full');
+  document.getElementById('hair-type-curl')?.classList.toggle('on', type==='curl');
 }
 
 async function saveCurrentHairPhoto(input){
