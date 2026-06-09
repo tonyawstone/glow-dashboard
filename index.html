@@ -1733,7 +1733,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- AI Skin Scan -->
     <div class="card skin-scan-card">
-      <div class="card-title">✨ Weekly skin scan</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div class="card-title" style="margin:0;">✨ Weekly skin scan</div>
+        <button class="guide-btn" onclick="openGuide('skin_score')">?</button>
+      </div>
       <div id="skin-scan-latest">
         <div class="log-empty">No scan yet — take your first weekly skin scan below.</div>
       </div>
@@ -2623,6 +2626,7 @@ async function tab(id){
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); loadHairMilestones(); }
+  if(id==='skin'){ loadLatestSkinScan(); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
     const today = nowStr();
     ['skin-log-date','water-log-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=today; });
@@ -3407,6 +3411,37 @@ function closeAbout(ev){
 }
 
 const GUIDES = {
+  skin_score: {
+    title: '✨ Skin Score · How it works',
+    sections: [
+      { title: 'Score ranges', items: [
+        { text: '90–100 · Excellent', note: 'Optimal skin health across all metrics' },
+        { text: '75–89 · Good', note: 'Strong foundation · minor areas to improve' },
+        { text: '60–74 · Fair', note: 'Visible progress · consistent routine key' },
+        { text: 'Below 60 · Needs attention', note: 'Focus on hydration and routine consistency' },
+      ]},
+      { title: 'What each metric measures', items: [
+        { text: '💧 Hydration', note: 'Moisture levels · plumpness · dewy appearance' },
+        { text: '💪 Firmness', note: 'Elasticity · skin bounce · collagen support' },
+        { text: '🌊 Texture', note: 'Smoothness · evenness · pore appearance' },
+        { text: '✨ Acne-free', note: 'Clarity · absence of breakouts or active spots' },
+        { text: '🌿 No wrinkles', note: 'Fine lines · expression lines · skin aging' },
+        { text: '🌑 Spot-free', note: 'Hyperpigmentation · dark spots · even tone' },
+        { text: '🔍 Pore clarity', note: 'Pore size · visibility · congestion' },
+        { text: '🌹 Redness-free', note: 'Inflammation · sensitivity · rosacea markers' },
+      ]},
+      { title: 'How the score is calculated', items: [
+        { text: 'AI analyzes your weekly selfie across 8 skin metrics', note: 'Each scored 0–100' },
+        { text: 'Overall score = weighted average of all 8 metrics', note: '' },
+        { text: 'Skin age estimated from texture, elasticity and hydration', note: 'Compare to your chronological age 54' },
+      ]},
+      { title: 'Tips for best results', items: [
+        { text: 'Same conditions each scan — clean face, no makeup, natural light', note: '' },
+        { text: 'Morning scans after skincare routine show true baseline', note: '' },
+        { text: 'Musely + Olay routine consistency is your biggest score driver', note: '' },
+      ]},
+    ]
+  },
   score: {
     title: '✨ Your Glow Score · How it works',
     sections: [
@@ -5584,7 +5619,7 @@ async function runSkinAnalysis(input, isHistorical=false){
   status.textContent=`✨ Analyzing ${isHistorical?'historical photo':'your skin'}... this takes about 15 seconds`;
 
   try {
-    const photoDataUrl = await compressImage(file, 800, 0.8);
+    const photoDataUrl = await compressImage(file, 500, 0.70);
     const base64 = photoDataUrl.split(',')[1];
     const mimeType = 'image/jpeg';
 
@@ -5597,7 +5632,12 @@ async function runSkinAnalysis(input, isHistorical=false){
     const {result} = await response.json();
     if(!result) throw new Error('No result returned');
 
-    const scan = { date:scanDate, isoDate, photo:photoDataUrl, ...result };
+    // Save photo separately to avoid 5MB limit on skinscan blob
+    const photoKey = `skinscan_photo_${isoDate.replace(/[:.]/g,'-')}`;
+    await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pillar:photoKey,data:{photoDataUrl,date:scanDate}})}).catch(()=>{});
+
+    const scan = { date:scanDate, isoDate, photoKey, photo:photoDataUrl, ...result };
 
     // Save — update existing entry for same date or insert new, then sort
     const existing = await fetch(`${BACKEND}/api/sync?pillar=skinscan`)
@@ -5698,19 +5738,25 @@ function renderSkinScanResults(scan, containerId, compact=false){
       </div>
     </div>
     ${scan.highlights?`<div class="skin-insight"><div class="skin-insight-label" style="color:#27500A;">✅ Looking good</div>${scan.highlights}</div>`:''}
-    <div class="skin-metrics-grid">
-      ${metricList.map(m=>`
-        <div class="skin-metric-item">
-          <div class="skin-metric-name">${m.label}</div>
-          <div class="skin-metric-bar-wrap"><div class="skin-metric-bar" style="width:${metrics[m.key]||0}%;background:${m.color};"></div></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div class="skin-metric-score">${metrics[m.key]||'—'}/100</div>
-            <div style="font-size:10px;color:${metrics[m.key]>=90?'#27500A':metrics[m.key]>=75?'#6B9E78':metrics[m.key]>=60?'#92400E':'#7F1D1D'}">${metrics[m.key]?scoreLabel(metrics[m.key]):''}</div>
-          </div>
-        </div>`).join('')}
-    </div>
     ${scan.focus?`<div class="skin-insight"><div class="skin-insight-label" style="color:#92400E;">🎯 Focus area</div>${scan.focus}</div>`:''}
     ${scan.tip?`<div class="skin-insight"><div class="skin-insight-label" style="color:var(--accent);">💡 Tip</div>${scan.tip}</div>`:''}
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border);" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.skin-toggle').textContent=this.nextElementSibling.style.display==='none'?'▾':'▴';">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Pillar breakdown</div>
+      <span class="skin-toggle" style="font-size:16px;color:var(--muted);">▾</span>
+    </div>
+    <div style="display:none;">
+      <div class="skin-metrics-grid" style="margin-top:10px;">
+        ${metricList.map(m=>`
+          <div class="skin-metric-item">
+            <div class="skin-metric-name">${m.label}</div>
+            <div class="skin-metric-bar-wrap"><div class="skin-metric-bar" style="width:${metrics[m.key]||0}%;background:${m.color};"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div class="skin-metric-score">${metrics[m.key]||'—'}/100</div>
+              <div style="font-size:10px;color:${metrics[m.key]>=90?'#27500A':metrics[m.key]>=75?'#6B9E78':metrics[m.key]>=60?'#92400E':'#7F1D1D'}">${metrics[m.key]?scoreLabel(metrics[m.key]):''}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
   `;
 }
 
@@ -5721,8 +5767,15 @@ async function loadLatestSkinScan(){
     const {data} = await res.json();
     if(!data||!data.length) return;
     const latest = data[data.length-1];
-    renderSkinScanResults(latest, 'skin-scan-latest');         // daily — full detail
-    renderSkinScanResults(latest, 'skin-scan-weekly', true);   // weekly — photo + compact
+    // Fetch photo from separate key if not embedded
+    if(!latest.photo && latest.photoKey){
+      try {
+        const pr = await fetch(`${BACKEND}/api/sync?pillar=${latest.photoKey}`);
+        if(pr.ok){ const {data:pd}=await pr.json(); if(pd?.photoDataUrl) latest.photo=pd.photoDataUrl; }
+      } catch(e){}
+    }
+    renderSkinScanResults(latest, 'skin-scan-latest');
+    renderSkinScanResults(latest, 'skin-scan-weekly', true);
   } catch(e){}
 }
 
@@ -5732,6 +5785,16 @@ async function buildSkinCharts(){
     if(!res.ok) return;
     const {data} = await res.json();
     if(!data||!data.length) return;
+
+    // Fetch photos from separate keys where missing
+    await Promise.all(data.map(async s => {
+      if(!s.photo && s.photoKey){
+        try {
+          const pr = await fetch(`${BACKEND}/api/sync?pillar=${s.photoKey}`);
+          if(pr.ok){ const {data:pd}=await pr.json(); if(pd?.photoDataUrl) s.photo=pd.photoDataUrl; }
+        } catch(e){}
+      }
+    }));
 
     // Skin score trend chart
     const scoreCanvas = document.getElementById('skin-score-chart');
@@ -5912,6 +5975,7 @@ function addHairMilestone(){
 
 async function saveHairMilestone(input){
   const file = input.files[0]; if(!file) return;
+  input.value=''; // clear immediately to prevent double-trigger
   const dataUrl = await compressImage(file, 600, 0.75);
   const date = nowStr();
   const label = new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'});
@@ -5920,15 +5984,16 @@ async function saveHairMilestone(input){
   const res = await fetch(`${BACKEND}/api/sync?pillar=hair_milestones`).catch(()=>null);
   const milestones = res&&res.ok ? (await res.json().catch(()=>({data:[]}))).data||[] : [];
 
-  // Add new milestone (newest first)
-  milestones.unshift({ date, label, dataUrl });
+  // Prevent duplicate for same date
+  const idx = milestones.findIndex(m=>m.date===date);
+  if(idx>=0) milestones[idx] = { date, label, dataUrl };
+  else milestones.unshift({ date, label, dataUrl });
 
   // Save to Blob
   await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({pillar:'hair_milestones',data:milestones})}).catch(()=>{});
 
   loadHairMilestones();
-  input.value='';
 }
 
 async function loadHairMilestones(){
@@ -5940,13 +6005,16 @@ async function loadHairMilestones(){
     const {data} = await res.json();
     const milestones = Array.isArray(data) ? data : [];
     if(!milestones.length) return;
+    // Deduplicate by date (keep most recent)
+    const seen = new Set();
+    const deduped = milestones.filter(m=>{ if(seen.has(m.date)) return false; seen.add(m.date); return true; });
 
     // Render milestone photos (keep + button at start)
     const addBtn = strip.children[0];
     strip.innerHTML='';
     strip.appendChild(addBtn);
 
-    milestones.forEach((m,i)=>{
+    deduped.forEach((m,i)=>{
       const div = document.createElement('div');
       div.style.cssText='flex-shrink:0;text-align:center;width:72px;';
       div.innerHTML=`
@@ -6007,40 +6075,33 @@ function uploadCurrentHair(){
 
 async function saveCurrentHairPhoto(input){
   const file = input.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = async (e)=>{
-    const dataUrl = e.target.result;
-    const date = nowStr();
-
-    // Move current photo to history before replacing
-    const current = localStorage.getItem('glowHairCurrentPhoto');
-    if(current){
-      try {
-        const cur = JSON.parse(current);
-        const history = JSON.parse(localStorage.getItem('glowHairPhotoHistory')||'[]');
-        history.push({ dataUrl:cur.dataUrl, date:cur.date, notes:cur.notes||'' });
-        localStorage.setItem('glowHairPhotoHistory', JSON.stringify(history));
-      } catch(e){}
-    }
-
-    // Save new current
-    const notes = document.getElementById('hair-current-notes')?.value||'';
-    localStorage.setItem('glowHairCurrentPhoto', JSON.stringify({dataUrl, date, notes}));
-
-    // Upload to Blob
-    try {
-      const blob = await fetch(dataUrl).then(r=>r.blob());
-      const form = new FormData();
-      form.append('file', blob, `hair-${date}.jpg`);
-      form.append('key', `hair-current-${date}`);
-      await fetch(`${BACKEND}/api/photos`, {method:'POST', body:form});
-    } catch(err){}
-
-    loadCurrentHairPhoto();
-    toast('hair-current-toast');
-  };
-  reader.readAsDataURL(file);
   input.value='';
+  const dataUrl = await compressImage(file, 600, 0.75);
+  const date = nowStr();
+  const notes = document.getElementById('hair-current-notes')?.value||'';
+
+  // Move current to history
+  const current = localStorage.getItem('glowHairCurrentPhoto');
+  if(current){
+    try {
+      const cur = JSON.parse(current);
+      const history = JSON.parse(localStorage.getItem('glowHairPhotoHistory')||'[]');
+      history.push({ dataUrl:cur.dataUrl, date:cur.date, notes:cur.notes||'' });
+      localStorage.setItem('glowHairPhotoHistory', JSON.stringify(history));
+    } catch(e){}
+  }
+
+  // Save to localStorage
+  localStorage.setItem('glowHairCurrentPhoto', JSON.stringify({dataUrl, date, notes}));
+
+  // Save photo to Blob separately
+  await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'hair_current_photo', data:{dataUrl, date}})}).catch(()=>{});
+  await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'hair_current', data:{notes, date}})}).catch(()=>{});
+
+  loadCurrentHairPhoto();
+  toast('hair-current-toast');
 }
 
 async function saveCurrentHairEntry(){
@@ -6062,24 +6123,46 @@ async function saveCurrentHairEntry(){
   toast('hair-current-toast');
 }
 
-function loadCurrentHairPhoto(){
-  const saved = localStorage.getItem('glowHairCurrentPhoto');
+async function loadCurrentHairPhoto(){
   const photoEl = document.getElementById('hair-current-photo');
   const dateEl = document.getElementById('hair-current-date');
   const notesEl = document.getElementById('hair-current-notes');
-  if(!saved||!photoEl) return;
+  if(!photoEl) return;
+
+  // Try localStorage first (instant)
+  const saved = localStorage.getItem('glowHairCurrentPhoto');
+  if(saved){
+    try {
+      const {dataUrl, date, notes} = JSON.parse(saved);
+      if(dataUrl){
+        photoEl.style.border='none'; photoEl.style.background='transparent';
+        photoEl.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onclick="uploadCurrentHair()">`;
+      }
+      if(dateEl && date) dateEl.textContent = safeDate(date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      if(notesEl && notes) notesEl.value = notes;
+      return; // found in localStorage, done
+    } catch(e){}
+  }
+
+  // Fallback — fetch from Blob
   try {
-    const {dataUrl, date, notes} = JSON.parse(saved);
-    if(dataUrl){
-      photoEl.style.border='none';
-      photoEl.style.background='transparent';
-      photoEl.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onclick="uploadCurrentHair()">`;
+    const res = await fetch(`${BACKEND}/api/sync?pillar=hair_current`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!data) return;
+    // hair_current stores notes/date; photo is stored separately
+    const photoRes = await fetch(`${BACKEND}/api/sync?pillar=hair_current_photo`);
+    if(photoRes.ok){
+      const {data:pd} = await photoRes.json();
+      if(pd?.dataUrl){
+        photoEl.style.border='none'; photoEl.style.background='transparent';
+        photoEl.innerHTML = `<img src="${pd.dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onclick="uploadCurrentHair()">`;
+        // Cache to localStorage
+        localStorage.setItem('glowHairCurrentPhoto', JSON.stringify({dataUrl:pd.dataUrl, date:data.date||nowStr(), notes:data.notes||''}));
+      }
     }
-    if(dateEl && date){
-      const d = safeDate(date);
-      dateEl.textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    }
-    if(notesEl && notes) notesEl.value = notes;
+    if(dateEl && data.date) dateEl.textContent = safeDate(data.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    if(notesEl && data.notes) notesEl.value = data.notes;
   } catch(e){}
 }
 
