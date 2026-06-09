@@ -493,6 +493,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="health-score-content">
         <div class="log-empty">Calculating your score...</div>
       </div>
+      <button onclick="openGlowInsights()" style="width:100%;margin-top:10px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">✨ What's driving my score?</button>
     </div>
 
     <div class="card">
@@ -1277,6 +1278,26 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
+    <!-- Today's snapshot -->
+    <div class="card health-snapshot-card">
+      <div class="card-title">Today's snapshot</div>
+      <div id="health-snapshot-content">
+        <div class="log-empty">Loading your health data...</div>
+      </div>
+    </div>
+
+    <!-- Apple Health clinical metrics -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleClinicalMetrics()">
+        <div class="card-title" style="margin:0;">📊 Clinical metrics</div>
+        <button id="clinical-metrics-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+      </div>
+      <div id="clinical-metrics-body" style="display:none;margin-top:12px;">
+        <div id="health-clinical-metrics"><div class="log-empty">Upload your weekly CSV to see resting HR, gait and respiratory data.</div></div>
+      </div>
+    </div>
+
+
     <!-- Medications & Vitamins -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleMedsForm()">
@@ -1360,19 +1381,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="hydration-coach-output" class="coach-response" style="display:none"></div>
     </div>
 
-    <!-- Today's snapshot -->
-    <div class="card health-snapshot-card">
-      <div class="card-title">Today's snapshot</div>
-      <div id="health-snapshot-content">
-        <div class="log-empty">Loading your health data...</div>
-      </div>
-    </div>
-
-    <!-- Apple Health clinical metrics -->
-    <div class="card">
-      <div class="card-title">Apple Health · clinical metrics</div>
-      <div id="health-clinical-metrics"><div class="log-empty">Upload your weekly CSV to see resting HR, gait and respiratory data.</div></div>
-    </div>
 
     <!-- Zepbound -->
     <div class="card">
@@ -1499,8 +1507,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Lab results -->
     <div class="card">
-      <div class="card-title">Lab work · most recent results</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Last labs: Feb 11, 2026 · Next: ~Aug–Nov 2026</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleLabForm()">
+        <div class="card-title" style="margin:0;">🧪 Lab work</div>
+        <button id="lab-form-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Last: Feb 11, 2026 · Next: ~Aug–Nov 2026</div>
+      <div id="lab-form-body" style="display:none;margin-top:12px;">
 
       <div class="lab-section-title">Lipid Panel</div>
       <div class="lab-row"><div><div class="lab-name">Cholesterol</div><div class="lab-range">&lt;200 mg/dL</div></div><div><span class="lab-val lab-normal">116</span><span class="lab-trend">↓ from 132</span></div></div>
@@ -1520,19 +1532,19 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="lab-row"><div><div class="lab-name">Creatinine</div><div class="lab-range">0.6–1.0 mg/dL</div></div><span class="lab-val lab-normal">0.6</span></div>
       <div class="lab-row"><div><div class="lab-name">CO₂ Total</div><div class="lab-range">22–30 mEq/L</div></div><span class="lab-val lab-watch">22.0 ↓</span></div>
 
-      <button class="btn-ai" onclick="labCoach()">Discuss lab results with coach ↗</button>
+      <button class="btn-ai" style="margin-top:12px;" onclick="labCoach()">Discuss lab results with coach ↗</button>
       <div id="lab-coach-output" class="coach-response" style="display:none"></div>
-    </div>
 
-    <!-- Log new labs -->
-    <div class="card">
-      <div class="card-title">Log new lab results</div>
-      <div class="fl">Date of labs</div>
-      <input type="text" id="lab-date" placeholder="e.g. Aug 15, 2026">
-      <div class="fl">Notes / results to track</div>
-      <textarea id="lab-notes" rows="4" placeholder="Paste or type your key values — cholesterol, glucose, A1C, etc."></textarea>
-      <button class="btn-primary" onclick="saveLab()">Save lab results</button>
-      <div class="toast-msg" id="lt">Saved!</div>
+      <div style="margin-top:16px;padding-top:12px;border-top:0.5px solid var(--border);">
+        <div class="fl">Log new lab results</div>
+        <input type="text" id="lab-date" placeholder="e.g. Aug 15, 2026">
+        <div class="fl">Notes / results to track</div>
+        <textarea id="lab-notes" rows="4" placeholder="Paste or type your key values — cholesterol, glucose, A1C, etc."></textarea>
+        <button class="btn-primary" onclick="saveLab()">Save lab results</button>
+        <div class="toast-msg" id="lt">Saved!</div>
+      </div>
+
+      </div><!-- end lab-form-body -->
     </div>
 
     <!-- Health Insights -->
@@ -2392,6 +2404,18 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button onclick="closeGuide()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">×</button>
     </div>
     <div id="guide-body"></div>
+  </div>
+</div>
+
+<div id="glow-insights-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeGlowInsights()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">✨ Your Glow Score</div>
+    </div>
+    <div id="glow-insights-overlay-content">
+      <div class="log-empty">Loading insights...</div>
+    </div>
   </div>
 </div>
 
@@ -5361,31 +5385,18 @@ async function buildHealthSnapshot(){
   const bpDateFmt = displayDate ? fmtDate(parseBPDate(displayBP?.date)) : null;
 
   el.innerHTML = `
-    <div class="snapshot-grid">
-      <div class="snapshot-item">
-        <div class="snapshot-label">Blood Pressure</div>
-        <div class="snapshot-val">${displayBP ? displayBP.sys+'/'+displayBP.dia : '—'}</div>
-        <div class="snapshot-sub ${bpColor}">${displayBP ? bpStatus : 'No reading yet'}</div>
-        ${bpDateFmt ? `<div class="snapshot-sub" style="margin-top:4px;">${bpDateFmt}</div>` : ''}
-      </div>
-      <div class="snapshot-item">
-        <div class="snapshot-label">Pulse</div>
-        <div class="snapshot-val">${pulseDisplay}</div>
-        <div class="snapshot-sub">bpm</div>
-        ${pulseDateFmt ? `<div class="snapshot-sub" style="margin-top:4px;">${pulseDateFmt}</div>` : ''}
-      </div>
-      <div class="snapshot-item">
+    <div style="display:flex;gap:8px;">
+      <div class="snapshot-item" style="flex:1;">
         <div class="snapshot-label">Weight</div>
         <div class="snapshot-val">${weightDisplay}</div>
-        <div class="snapshot-sub snapshot-status-ok">${weightDateFmt||'↓ 30.7 lbs'}</div>
+        <div class="snapshot-sub">${weightDateFmt||'—'}</div>
       </div>
-      <div class="snapshot-item">
-        <div class="snapshot-label">Next labs</div>
-        <div class="snapshot-val" style="font-size:14px;">Aug–Nov</div>
-        <div class="snapshot-sub">2026</div>
+      <div class="snapshot-item" style="flex:1;">
+        <div class="snapshot-label">Pulse</div>
+        <div class="snapshot-val">${pulseDisplay}</div>
+        <div class="snapshot-sub">bpm${pulseDateFmt?' · '+pulseDateFmt:''}</div>
       </div>
     </div>
-    <div style="font-size:12px;color:var(--muted);">Medications: Irbesartan HCTZ · Metoprolol · Amlodipine</div>
   `;
 }
 
@@ -8365,6 +8376,36 @@ function loadMedsChecklist(){
   } catch(e){}
 }
 
+
+function openGlowInsights(){
+  const overlay = document.getElementById('glow-insights-overlay');
+  const content = document.getElementById('glow-insights-overlay-content');
+  const source = document.getElementById('health-insights-content');
+  if(content && source) content.innerHTML = source.innerHTML || '<div class="log-empty">Tap "Calculate" on your Glow Score to generate insights first.</div>';
+  overlay.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeGlowInsights(){
+  document.getElementById('glow-insights-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function toggleLabForm(){
+  const body = document.getElementById('lab-form-body');
+  const btn = document.getElementById('lab-form-toggle');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? '▴' : '▾';
+}
+
+function toggleClinicalMetrics(){
+  const body = document.getElementById('clinical-metrics-body');
+  const btn = document.getElementById('clinical-metrics-toggle');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? '▴' : '▾';
+}
 
 function toggleBPForm(){
   const body = document.getElementById('bp-form-body');
