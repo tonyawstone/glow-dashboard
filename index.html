@@ -1251,10 +1251,30 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-health-daily">
     <div class="section-label">Health · Today <button class="guide-btn" onclick="openGuide('health')">?</button></div>
 
-    <!-- BP reminder banner -->
-    <div id="bp-reminder-banner" style="display:none;padding:8px 12px;border-radius:10px;background:#FEF3C7;border:0.5px solid #E8A87C;margin-bottom:10px;align-items:center;justify-content:space-between;">
-      <div style="font-size:12px;color:#92400E;">❤️ No blood pressure reading today — tap below to log</div>
-      <div id="bp-last-reading" style="font-size:11px;color:#B45309;"></div>
+    <!-- BP Log — collapsible, first card -->
+    <div class="card" id="bp-entry-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleBPForm()">
+        <div class="card-title" style="margin:0;">❤️ Blood pressure</div>
+        <button id="bp-form-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+      </div>
+      <div id="bp-today-status" style="margin-top:8px;"></div>
+      <div id="bp-form-body" style="display:none;margin-top:12px;">
+        <div class="bp-row">
+          <div class="bp-input-wrap"><div class="bp-lbl">Systolic</div><input type="number" id="bp-sys" placeholder="120"></div>
+          <div class="bp-input-wrap"><div class="bp-lbl">Diastolic</div><input type="number" id="bp-dia" placeholder="80"></div>
+          <div class="bp-input-wrap"><div class="bp-lbl">Pulse</div><input type="number" id="bp-pulse" placeholder="72"></div>
+        </div>
+        <div class="fl">Time of reading</div>
+        <div class="tags" id="bp-time-tags">
+          <button class="tag" onclick="solo('bp-time-tags',this)">Morning</button>
+          <button class="tag" onclick="solo('bp-time-tags',this)">Afternoon</button>
+          <button class="tag" onclick="solo('bp-time-tags',this)">Evening</button>
+        </div>
+        <div class="fl">Notes</div>
+        <textarea id="bp-note" rows="2" placeholder="e.g. After medication, before exercise, felt dizzy..."></textarea>
+        <button class="btn-primary" onclick="saveBP()">Log blood pressure</button>
+        <div class="toast-msg" id="bpt">Saved!</div>
+      </div>
     </div>
 
     <!-- Medications & Vitamins -->
@@ -1302,27 +1322,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div><!-- end meds-form-body -->
     </div>
 
-    <!-- BP Log — after meds, before Zepbound -->
-    <div class="card" id="bp-entry-card">
-      <div class="card-title">❤️ Blood pressure · log today</div>
-      <div id="bp-today-status" style="margin-bottom:10px;"></div>
-      <div class="bp-row">
-        <div class="bp-input-wrap"><div class="bp-lbl">Systolic</div><input type="number" id="bp-sys" placeholder="120"></div>
-        <div class="bp-input-wrap"><div class="bp-lbl">Diastolic</div><input type="number" id="bp-dia" placeholder="80"></div>
-        <div class="bp-input-wrap"><div class="bp-lbl">Pulse</div><input type="number" id="bp-pulse" placeholder="72"></div>
-      </div>
-      <div class="fl">Time of reading</div>
-      <div class="tags" id="bp-time-tags">
-        <button class="tag" onclick="solo('bp-time-tags',this)">Morning</button>
-        <button class="tag" onclick="solo('bp-time-tags',this)">Afternoon</button>
-        <button class="tag" onclick="solo('bp-time-tags',this)">Evening</button>
-      </div>
-      <div class="fl">Notes</div>
-      <textarea id="bp-note" rows="2" placeholder="e.g. After medication, before exercise, felt dizzy..."></textarea>
-      <button class="btn-primary" onclick="saveBP()">Log blood pressure</button>
-      <div class="toast-msg" id="bpt">Saved!</div>
-    </div>
-
     <!-- Hydration -->
     <div class="card" id="hydration-card">
       <div class="card-title">💧 Hydration tracker</div>
@@ -1359,6 +1358,20 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="wt">Saved!</div>
       <button class="btn-ai" style="margin-top:8px;" onclick="hydrationCoach()">Hydration coaching ↗</button>
       <div id="hydration-coach-output" class="coach-response" style="display:none"></div>
+    </div>
+
+    <!-- Today's snapshot -->
+    <div class="card health-snapshot-card">
+      <div class="card-title">Today's snapshot</div>
+      <div id="health-snapshot-content">
+        <div class="log-empty">Loading your health data...</div>
+      </div>
+    </div>
+
+    <!-- Apple Health clinical metrics -->
+    <div class="card">
+      <div class="card-title">Apple Health · clinical metrics</div>
+      <div id="health-clinical-metrics"><div class="log-empty">Upload your weekly CSV to see resting HR, gait and respiratory data.</div></div>
     </div>
 
     <!-- Zepbound -->
@@ -1482,20 +1495,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="zep-side-toast">Logged!</div>
       </div><!-- end side-effects-body -->
       <div style="margin-top:10px;" id="zep-side-history"></div>
-    </div>
-
-    <!-- Today's snapshot -->
-    <div class="card health-snapshot-card">
-      <div class="card-title">Today's snapshot</div>
-      <div id="health-snapshot-content">
-        <div class="log-empty">Loading your health data...</div>
-      </div>
-    </div>
-
-    <!-- Apple Health clinical metrics -->
-    <div class="card">
-      <div class="card-title">Apple Health · clinical metrics</div>
-      <div id="health-clinical-metrics"><div class="log-empty">Upload your weekly CSV to see resting HR, gait and respiratory data.</div></div>
     </div>
 
     <!-- Lab results -->
@@ -7890,13 +7889,10 @@ async function updateBPBanners(){
       todayReminder.innerHTML = `❤️ No BP reading today — tap to log`;
     }
 
-    // Health pillar reminder banner
-    const hBanner = document.getElementById('bp-reminder-banner');
-    const hLast = document.getElementById('bp-last-reading');
+    // Health pillar BP status
     const bpStatus = document.getElementById('bp-today-status');
 
     if(todayReading && todayReading.sys){
-      if(hBanner) hBanner.style.display='none';
       if(bpStatus){
         const sys=parseInt(todayReading.sys), dia=parseInt(todayReading.dia);
         const color = sys>=140?'#7F1D1D':sys>=130?'#92400E':sys>=120?'#E8A87C':'#27500A';
@@ -7907,7 +7903,6 @@ async function updateBPBanners(){
         bpStatus.innerHTML=`<div style="padding:8px 12px;border-radius:10px;background:var(--warm);display:flex;justify-content:space-between;align-items:center;"><div><span style="font-size:20px;font-weight:700;color:${color};">${sys}/${dia}</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">${pulse}</span></div><div style="text-align:right;"><div style="font-size:12px;font-weight:600;color:${color};">${label}</div><div style="font-size:11px;color:var(--muted);">Today${time}${src}</div></div></div>`;
       }
     } else {
-      if(hBanner){ hBanner.style.display='flex'; }      if(hLast && lastBP) hLast.textContent = `Last: ${lastBP.sys}/${lastBP.dia} · ${lastBP.date}`;
       if(bpStatus) bpStatus.innerHTML='';
     }
   } catch(e){}
@@ -8360,6 +8355,14 @@ function loadMedsChecklist(){
   } catch(e){}
 }
 
+
+function toggleBPForm(){
+  const body = document.getElementById('bp-form-body');
+  const btn = document.getElementById('bp-form-toggle');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? '▴' : '▾';
+}
 
 function toggleMedsForm(){
   const body = document.getElementById('meds-form-body');
