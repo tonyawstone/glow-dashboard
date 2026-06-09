@@ -6501,19 +6501,21 @@ async function runHairAnalysis(input, isHistorical=false){
     if(frontVal||backVal) lengthInches = ((frontVal||0)+(backVal||0))/((frontVal?1:0)+(backVal?1:0));
   }
 
+  const photoType = document.getElementById('hair-type-curl')?.classList.contains('on') ? 'curl' : 'full';
+
   const status = document.getElementById('hair-scan-status');
   status.style.display='block'; status.style.background='#FEF3C7'; status.style.color='#92400E';
-  status.textContent='✨ Analyzing your hair... this takes about 15 seconds';
+  status.textContent= photoType==='curl' ? '🔍 Analyzing your curl close-up... this takes about 15 seconds' : '🌿 Analyzing your full shot... this takes about 15 seconds';
 
   try {
     const photoDataUrl = await compressImage(file, 800, 0.8);
     const base64 = photoDataUrl.split(',')[1];
     const mimeType = 'image/jpeg';
 
-    // Get nearest goal photo for comparison
-    const goalPhoto = await getNearestHairGoal();
+    // Get nearest goal photo for comparison (full shot only)
+    const goalPhoto = photoType === 'full' ? await getNearestHairGoal() : null;
 
-    const body = { imageBase64: base64, mimeType, lengthInches };
+    const body = { imageBase64: base64, mimeType, lengthInches, photoType };
     if(goalPhoto){ body.goalImageBase64 = goalPhoto.base64; body.goalMimeType = goalPhoto.mimeType; }
 
     const response = await fetch(`${BACKEND}/api/hair-analysis`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -6521,14 +6523,16 @@ async function runHairAnalysis(input, isHistorical=false){
     const {result} = await response.json();
     if(!result) throw new Error('No result');
 
-    const scan = { date:scanDate, isoDate, photo:photoDataUrl, lengthInches, hasGoalComparison:!!goalPhoto, ...result };
+    const scan = { date:scanDate, isoDate, photo:photoDataUrl, lengthInches, photoType, hasGoalComparison:!!goalPhoto, ...result };
     const existing = await fetch(`${BACKEND}/api/sync?pillar=hairscan`).then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
     existing.push(scan);
     existing.sort((a,b)=>new Date(a.isoDate)-new Date(b.isoDate));
     await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'hairscan',data:existing})});
 
     status.style.background='#EAF3DE'; status.style.color='#27500A';
-    status.textContent=`✅ Analysis complete! ${goalPhoto?'Compared to your goal photo.':'Upload a goal photo for comparison next time.'}`;
+    status.textContent= photoType==='curl'
+      ? `✅ Curl analysis complete!`
+      : `✅ Analysis complete! ${goalPhoto?'Compared to your goal photo.':'Upload a goal photo for comparison next time.'}`;
     renderHairScanResult(scan, 'hair-scan-latest');
     input.value='';
   } catch(err){
@@ -6543,7 +6547,9 @@ function renderHairScanResult(scan, containerId){
   const sColor = score>=80?'#27500A':score>=65?'#6B9E78':score>=50?'#92400E':'#7F1D1D';
   const sBg = score>=80?'#EAF3DE':score>=65?'rgba(107,158,120,0.15)':score>=50?'#FEF3C7':'#FEE2E2';
   const metrics = scan.metrics||{};
-  const mList = [
+  const isCurl = scan.photoType === 'curl';
+
+  const fullMetrics = [
     {key:'shine',label:'Shine',color:'#E8A87C'},
     {key:'thickness',label:'Thickness',color:'#6B9E78'},
     {key:'moisture',label:'Moisture',color:'#5B9EC9'},
@@ -6553,21 +6559,37 @@ function renderHairScanResult(scan, containerId){
     {key:'scalpHealth',label:'Scalp health',color:'#6B9E78'},
     {key:'lengthProgress',label:'Length progress',color:'#E8A87C'},
   ];
+
+  const curlMetrics = [
+    {key:'curlDefinition',label:'Curl def.',color:'#9B8EC4'},
+    {key:'moisture',label:'Moisture',color:'#5B9EC9'},
+    {key:'frizzControl',label:'Frizz control',color:'#C4735A'},
+    {key:'shine',label:'Shine',color:'#E8A87C'},
+    {key:'breakageFree',label:'Breakage-free',color:'#A07850'},
+    {key:'coilUniformity',label:'Coil uniformity',color:'#6B9E78'},
+    {key:'buildupFree',label:'Buildup-free',color:'#A07850'},
+    {key:'elasticity',label:'Elasticity',color:'#9B8EC4'},
+  ];
+
+  const mList = isCurl ? curlMetrics : fullMetrics;
   const sLabel = s => s>=90?'Excellent':s>=75?'Good':s>=60?'Fair':'Needs attention';
+  const typeLabel = isCurl ? '🔍 Curl close-up' : '🌿 Full shot';
 
   el.innerHTML = `
     <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
       ${scan.photo?`<img src="${scan.photo}" style="width:72px;height:72px;border-radius:12px;object-fit:cover;flex-shrink:0;border:2px solid var(--border);">`:''}
       <div style="flex:1;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${scan.date}${scan.lengthInches?` · ${scan.lengthInches}" measured`:scan.estimatedLengthInches?` · ~${scan.estimatedLengthInches}" estimated`:''}</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px;">${typeLabel}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${scan.date}${!isCurl&&scan.lengthInches?` · ${scan.lengthInches}" measured`:!isCurl&&scan.estimatedLengthInches?` · ~${scan.estimatedLengthInches}" estimated`:''}</div>
         <div style="background:${sBg};border-radius:50%;width:56px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid ${sColor};">
           <div style="font-size:22px;font-weight:700;color:${sColor};line-height:1;">${score}</div>
           <div style="font-size:9px;color:${sColor};text-transform:uppercase;">Score</div>
         </div>
       </div>
     </div>
+    ${isCurl&&scan.curlPattern?`<div class="skin-insight"><div class="skin-insight-label" style="color:#9B8EC4;">🔍 Curl pattern</div>${scan.curlPattern}</div>`:''}
     ${scan.highlights?`<div class="skin-insight"><div class="skin-insight-label" style="color:#27500A;">✅ Looking great</div>${scan.highlights}</div>`:''}
-    ${scan.goalComparison?`<div class="skin-insight"><div class="skin-insight-label" style="color:#9B8EC4;">🎯 vs. your goal</div>${scan.goalComparison}</div>`:''}
+    ${!isCurl&&scan.goalComparison?`<div class="skin-insight"><div class="skin-insight-label" style="color:#9B8EC4;">🎯 vs. your goal</div>${scan.goalComparison}</div>`:''}
     <div class="skin-metrics-grid">
       ${mList.map(m=>`<div class="skin-metric-item"><div class="skin-metric-name">${m.label}</div><div class="skin-metric-bar-wrap"><div class="skin-metric-bar" style="width:${metrics[m.key]||0}%;background:${m.color};"></div></div><div style="display:flex;justify-content:space-between;"><div class="skin-metric-score">${metrics[m.key]||'—'}/100</div><div style="font-size:10px;color:${metrics[m.key]>=90?'#27500A':metrics[m.key]>=75?'#6B9E78':'#92400E'}">${metrics[m.key]?sLabel(metrics[m.key]):''}</div></div></div>`).join('')}
     </div>
