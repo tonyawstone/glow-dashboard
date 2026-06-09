@@ -6982,30 +6982,40 @@ async function buildHydrationStatus(){
       </div>
     </div>
   `;
-  // 7-day body water average from CSV
+  // 7-day body water average from manually saved entries
   const bw7El = document.getElementById('body-water-7day');
   if(bw7El){
-    const csvRows = await getCSVRows();
-    const bwVals = csvRows.slice(0,7).map(r=>parseFloat(r.body_water_pct)).filter(v=>!isNaN(v)&&v>0);
-    if(bwVals.length){
-      const avg7 = bwVals.reduce((a,b)=>a+b,0)/bwVals.length;
-      const color = avg7>=50?'#27500A':avg7>=45?'#92400E':'#7F1D1D';
-      const bg = avg7>=50?'#EAF3DE':avg7>=45?'#FEF3C7':'#FEE2E2';
-      const status = avg7>=50?'Well hydrated':avg7>=45?'Mildly low':'Dehydrated ⚠️';
-      bw7El.innerHTML = `
-        <div style="display:flex;gap:8px;margin-top:2px;">
-          <div class="snapshot-item" style="flex:1;background:${bg};border-radius:10px;padding:10px;">
-            <div class="snapshot-label">Body water · 7-day avg</div>
-            <div class="snapshot-val" style="color:${color};">${avg7.toFixed(1)}%</div>
-            <div class="snapshot-sub" style="color:${color};">${status}</div>
-          </div>
-          <div class="snapshot-item" style="flex:1;">
-            <div class="snapshot-label">Healthy range</div>
-            <div class="snapshot-val" style="font-size:16px;">45–60%</div>
-            <div class="snapshot-sub">women · aim for 50%+</div>
-          </div>
-        </div>`;
-    }
+    try {
+      const res = await fetch(`${BACKEND}/api/sync?pillar=body_water`);
+      if(res.ok){
+        const {data} = await res.json();
+        // data could be array of {pct, date} or single entry
+        const entries = Array.isArray(data) ? data : (data?.pct ? [data] : []);
+        const recent = entries
+          .filter(e=>e.pct&&e.date)
+          .sort((a,b)=>b.date.localeCompare(a.date))
+          .slice(0,7);
+        if(recent.length){
+          const avg7 = recent.reduce((a,b)=>a+parseFloat(b.pct),0)/recent.length;
+          const color = avg7>=50?'#27500A':avg7>=45?'#92400E':'#7F1D1D';
+          const bg = avg7>=50?'#EAF3DE':avg7>=45?'#FEF3C7':'#FEE2E2';
+          const status = avg7>=50?'Well hydrated':avg7>=45?'Mildly low':'Dehydrated ⚠️';
+          bw7El.innerHTML = `
+            <div style="display:flex;gap:8px;margin-top:6px;">
+              <div class="snapshot-item" style="flex:1;background:${bg};border-radius:10px;padding:10px;">
+                <div class="snapshot-label">Body water · ${recent.length}-day avg</div>
+                <div class="snapshot-val" style="color:${color};">${avg7.toFixed(1)}%</div>
+                <div class="snapshot-sub" style="color:${color};">${status}</div>
+              </div>
+              <div class="snapshot-item" style="flex:1;">
+                <div class="snapshot-label">Healthy range</div>
+                <div class="snapshot-val" style="font-size:16px;">45–60%</div>
+                <div class="snapshot-sub">women · aim for 50%+</div>
+              </div>
+            </div>`;
+        }
+      }
+    } catch(e){}
   }
 }
 
@@ -7115,13 +7125,24 @@ async function buildBodyWaterWeekChart(){
 function saveBodyWater(){
   const pct = parseFloat(document.getElementById('body-water-input')?.value);
   if(!pct||pct<30||pct>75){ alert('Please enter a valid body water % (30–75)'); return; }
-  const data = { pct, date: nowStr() };
-  localStorage.setItem('glowBodyWater', JSON.stringify(data));
-  // Also save history to Blob
-  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({pillar:'body_water',data})}).catch(()=>{});
+  const entry = { pct, date: nowStr() };
+  localStorage.setItem('glowBodyWater', JSON.stringify(entry));
+  // Save to history array in Blob
+  fetch(`${BACKEND}/api/sync?pillar=body_water`)
+    .then(r=>r.json())
+    .then(d=>{
+      const history = Array.isArray(d.data) ? d.data : (d.data?.pct ? [d.data] : []);
+      // Replace today's entry if exists, otherwise append
+      const idx = history.findIndex(e=>e.date===nowStr());
+      if(idx>=0) history[idx] = entry; else history.push(entry);
+      fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({pillar:'body_water',data:history})});
+    }).catch(()=>{
+      fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({pillar:'body_water',data:[entry]})});
+    });
   toast('bw-toast');
-  buildHydrationStatus(); // refresh the status card
+  buildHydrationStatus();
 }
 
 function hydrationCoach(){ callCoach('Health','I take Zepbound (GLP-1) and Irbesartan HCTZ (diuretic). My Withings scale frequently flags dehydration. Give me specific hydration advice for my situation including how much water to drink, timing, and signs to watch for.','hydration-coach-output'); }
