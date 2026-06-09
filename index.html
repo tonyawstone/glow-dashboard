@@ -463,10 +463,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <span style="font-size:16px;">📷</span>
     </div>
     <div class="stat-strip">
-      <div class="stat-tile" style="cursor:pointer;" onclick="tab('body')"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs today</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
-      <div class="stat-tile" style="cursor:pointer;" onclick="tab('health')"><div class="stat-val" id="sw-steps">4,715</div><div class="stat-lbl">steps</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-steps-src"></div></div>
-      <div class="stat-tile" style="cursor:pointer;" onclick="tab('sleep')"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-sleep-src">Last night</div></div>
-      <div class="stat-tile" style="cursor:pointer;" onclick="tab('health');setTimeout(()=>{const el=document.getElementById('hydration-card');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},300)"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses today</div><div class="stat-src">Hydration</div><div class="stat-src">💧 Today</div></div>
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('body')"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('health')"><div class="stat-val" id="sw-steps">—</div><div class="stat-lbl">steps</div><div class="stat-src" id="s-steps-src">Apple Health</div></div>
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('sleep')"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src" id="s-sleep-src">Last night</div></div>
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('health');setTimeout(()=>{const el=document.getElementById('hydration-card');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},300)"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses</div><div class="stat-src">Hydration</div><div class="stat-src">💧 Today</div></div>
     </div>
     <div class="stat-strip" style="margin-top:6px;">
       <div class="stat-tile" style="grid-column:span 2;">
@@ -7749,16 +7749,18 @@ async function updateUploadStatusBanner(){
       if(dateEl) dateEl.textContent = uploadedAtStr ? `Uploaded ${uploadedAtStr}` : dateStr;
       if(innerBanner){ innerBanner.style.background='rgba(107,158,120,0.08)'; innerBanner.style.borderColor='rgba(107,158,120,0.3)'; }
     } else if(diffDays === 1){
-      textEl.textContent = '🕐 Data through yesterday · upload for today';
-      if(dateEl) dateEl.textContent = uploadedAtStr ? `Uploaded ${uploadedAtStr}` : dateStr;
+      textEl.textContent = '🕐 Upload for today';
+      if(dateEl) dateEl.textContent = uploadedAtStr ? `Last: ${uploadedAtStr}` : dateStr;
       if(innerBanner){ innerBanner.style.background=''; innerBanner.style.borderColor=''; }
     } else {
-      textEl.textContent = `⚠️ Last upload: ${diffDays} days ago`;
-      if(dateEl) dateEl.textContent = uploadedAtStr || dateStr;
+      textEl.textContent = `⚠️ Upload needed · ${diffDays} days behind`;
+      if(dateEl) dateEl.textContent = uploadedAtStr ? `Last: ${uploadedAtStr}` : dateStr;
       if(innerBanner){ innerBanner.style.background=''; innerBanner.style.borderColor='#E8A87C'; }
     }
   } catch(e){
-    if(bannerEl) bannerEl.style.display='none';
+    console.error('updateUploadStatusBanner error:', e);
+    if(bannerEl) bannerEl.style.display='flex';
+    if(textEl) textEl.textContent = '🕐 Upload for today';
   }
 }
 
@@ -7789,9 +7791,10 @@ async function loadTodaySleepFromCSV(){
     const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
     if(latestWeight){
       if(weightEl) weightEl.textContent = parseFloat(latestWeight.weight_lbs).toFixed(1);
-      if(weightSrcEl) weightSrcEl.textContent = 'Withings';
       const weightDateEl = document.getElementById('s-weight-date');
+      // Show just the date — "Today", "Yesterday", or "Jun 7"
       if(weightDateEl) weightDateEl.textContent = smartDate(latestWeight.date);
+      if(weightSrcEl) weightSrcEl.textContent = 'Withings';
     }
 
     // Steps — prefer today, fall back to most recent
