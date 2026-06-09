@@ -542,20 +542,16 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <!-- Glow Score — collapsible -->
+    <!-- Glow Score — pillar breakdown collapsible -->
     <div class="card health-score-card" id="health-score-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleScoreCard()">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
         <div class="card-title" style="margin:0;">Your Glow Score</div>
         <div style="display:flex;align-items:center;gap:6px;">
-          <button class="guide-btn" onclick="event.stopPropagation();openGuide('score')" style="flex-shrink:0;">?</button>
-          <button id="score-card-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+          <button class="guide-btn" onclick="openGuide('score')" style="flex-shrink:0;">?</button>
         </div>
       </div>
-      <div id="score-summary" style="margin-top:8px;"></div>
-      <div id="score-card-body" style="display:none;margin-top:8px;">
-        <div id="health-score-content">
-          <div class="log-empty">Calculating your score...</div>
-        </div>
+      <div id="health-score-content">
+        <div class="log-empty">Calculating your score...</div>
       </div>
       <button onclick="openGlowInsights()" style="width:100%;margin-top:10px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">✨ What's driving my score?</button>
     </div>
@@ -3420,29 +3416,41 @@ const GUIDES = {
         { text: '55–69 · Building', note: 'Solid progress · several areas have room to grow' },
         { text: 'Below 55 · Needs attention', note: 'Focus on one pillar at a time · small changes add up' },
       ]},
-      { title: 'How each pillar is scored (out of 20)', items: [
-        { text: '❤️ Cardio', note: 'Avg BP over 7 days + resting heart rate from Apple Health' },
-        { text: '🧪 Metabolic', note: 'Based on your most recent lab results (cholesterol, glucose, liver enzymes)' },
-        { text: '💪 Body', note: 'BMI from Apple Health + weight loss trend bonus' },
-        { text: '🏃 Activity', note: 'Avg daily steps over 7 days + exercise logs' },
-        { text: '😴 Sleep', note: 'Sleep score from CSV or avg hours · CPAP compliance bonus' },
-        { text: '🧠 Mind', note: 'Avg mood from daily check-ins · consistency bonus' },
-        { text: '✨ Skin', note: 'Latest AI skin scan score' },
+      { title: 'The 8 pillars (20 points each)', items: [
+        { text: '❤️ Heart & Fitness', note: 'BP readings + resting HR + daily steps + exercise logs' },
+        { text: '🧪 Metabolic Health', note: 'Lab results (cholesterol, glucose, enzymes) + BMI + weight trend + body fat %' },
+        { text: '😴 Sleep', note: 'Sleep hours + quality score + CPAP compliance' },
+        { text: '🧠 Mind', note: 'Mood from daily check-ins + consistency bonus' },
+        { text: '✨ Skin', note: 'AI scan score + AM/PM skincare routine consistency' },
+        { text: '💇 Hair', note: 'Hair care routine consistency + goal progress' },
+        { text: '👗 Style', note: 'Outfits logged + lookbook entries (Style pillar coming soon)' },
+        { text: '🌿 Wellness', note: 'Hydration + body water % + medication compliance + CPAP consistency' },
+      ]},
+      { title: 'Outcomes vs habits', items: [
+        { text: 'Metabolic Health measures what your numbers say', note: 'Labs, BMI, body composition — the results' },
+        { text: 'Wellness measures what you do daily to support them', note: 'Hydration, meds, CPAP — the habits' },
+        { text: 'Skin AI scan shows the outcome · routine consistency drives it', note: 'Both matter for your score' },
+      ]},
+      { title: 'How the score is calculated', items: [
+        { text: '8 pillars × 20 points each = 160 total points', note: 'Normalized to a 0–100 scale' },
+        { text: 'Your score = (total points ÷ 160) × 100', note: 'e.g. 128/160 = 80/100' },
+        { text: 'Recalculate weekly after uploading Apple Health data', note: '' },
       ]},
       { title: 'Biological age', items: [
         { text: 'Starts at your chronological age (54)', note: '' },
         { text: 'BP well controlled → −3 years', note: 'Avg systolic < 120' },
         { text: 'Excellent labs → −2 years', note: 'Metabolic score ≥ 16' },
         { text: 'Healthy BMI → −2 years', note: 'Body score ≥ 16' },
-        { text: 'Active lifestyle → −3 years', note: 'Activity score ≥ 17' },
+        { text: 'Active lifestyle → −3 years', note: 'Steps + exercise score ≥ 17' },
         { text: 'Good sleep → −2 years', note: 'Sleep score ≥ 15' },
         { text: 'Positive mindset → −1 year', note: 'Mind score ≥ 16' },
         { text: 'Active weight loss (Zepbound) → −2 years', note: 'Intentional weight loss has documented anti-aging effects' },
       ]},
       { title: 'Tips', items: [
-        { text: 'Recalculate weekly after uploading your Apple Health CSV', note: '' },
-        { text: 'Cardio and Activity have the biggest impact on biological age', note: '' },
-        { text: 'Consistent daily check-ins improve your Mind score over time', note: '' },
+        { text: 'Heart & Fitness and Sleep have the biggest impact on biological age', note: '' },
+        { text: 'Consistent daily check-ins improve Mind and Wellness scores', note: '' },
+        { text: 'Skin score improves with both routine consistency AND AI scan results', note: '' },
+        { text: 'Hair and Style remind you that Glow is about your whole self — not just clinical numbers', note: '' },
       ]},
     ]
   },
@@ -6858,7 +6866,7 @@ async function buildHealthInsights(){
   const wins = [];
   const focus = [];
 
-  // BP
+  // BP / Heart & Fitness
   if(avgSys&&avgSys<130) wins.push({icon:'❤️', title:'BP well controlled', impact:'−3 biological age years', detail:`Avg systolic ${Math.round(avgSys)} mmHg — excellent on your medications`});
   else if(avgSys&&avgSys>=130) focus.push({icon:'❤️', title:'BP needs attention', impact:'Could save 3 years', detail:`Avg systolic ${Math.round(avgSys)} mmHg — discuss with your doctor`, action:'Log readings more consistently and discuss with your doctor'});
 
@@ -7141,70 +7149,64 @@ async function calculateGlowScore(save=false) {
     return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
   };
 
-  // ── CARDIOVASCULAR (0–20) ──
-  let cardioScore = 10;
+  // ── HEART & FITNESS (0–20) — BP + HR + steps + exercise ──
+  let heartFitnessScore = 10;
   const allBPs = mergeBPReadings(await getCSVBPData(), bps).filter(b=>b.sys&&b.dia);
   const recentBPs = allBPs.sort((a,b)=>parseBPDate(b.date)-parseBPDate(a.date)).slice(0,7);
   if(recentBPs.length){
     const avgSys=recentBPs.reduce((a,b)=>a+b.sys,0)/recentBPs.length;
     const avgDia=recentBPs.reduce((a,b)=>a+b.dia,0)/recentBPs.length;
-    if(avgSys<120&&avgDia<80) cardioScore=20;
-    else if(avgSys<130&&avgDia<85) cardioScore=16;
-    else if(avgSys<140&&avgDia<90) cardioScore=12;
-    else cardioScore=8;
+    if(avgSys<120&&avgDia<80) heartFitnessScore=16;
+    else if(avgSys<130&&avgDia<85) heartFitnessScore=13;
+    else if(avgSys<140&&avgDia<90) heartFitnessScore=10;
+    else heartFitnessScore=7;
   }
   const avgRestHR=avgField(csvRows.slice(0,7),'resting_hr');
   if(avgRestHR){
-    if(avgRestHR<60) cardioScore=Math.min(20,cardioScore+2);
-    else if(avgRestHR<70) cardioScore=Math.min(20,cardioScore+1);
-    else if(avgRestHR>80) cardioScore=Math.max(0,cardioScore-2);
+    if(avgRestHR<60) heartFitnessScore=Math.min(20,heartFitnessScore+2);
+    else if(avgRestHR<70) heartFitnessScore=Math.min(20,heartFitnessScore+1);
+    else if(avgRestHR>80) heartFitnessScore=Math.max(0,heartFitnessScore-1);
   }
+  const avgSteps=avgField(csvRows.slice(0,7),'steps');
+  if(avgSteps){
+    if(avgSteps>=10000) heartFitnessScore=Math.min(20,heartFitnessScore+2);
+    else if(avgSteps>=7500) heartFitnessScore=Math.min(20,heartFitnessScore+1);
+    else if(avgSteps<2500) heartFitnessScore=Math.max(0,heartFitnessScore-1);
+  }
+  const recentEx=recent7(exercises);
+  if(recentEx.length>=4) heartFitnessScore=Math.min(20,heartFitnessScore+2);
+  else if(recentEx.length>=2) heartFitnessScore=Math.min(20,heartFitnessScore+1);
 
-  // ── METABOLIC (0–20) — from Feb 2026 labs ──
-  // Cholesterol 116✓ LDL 50✓ Glucose 88✓ ALT 25✓ Alk Phos 135⚠
-  let metabolicScore = 17;
-
-  // ── BODY COMPOSITION (0–20) ──
-  let bodyScore = 10;
+  // ── METABOLIC HEALTH (0–20) — labs + BMI + weight trend + body fat ──
+  let metabolicScore = 14; // base from Feb 2026 labs (good but Alk Phos elevated)
   const latestBMIRow = csvRows.find(r=>parseFloat(r.bmi)>0);
   if(latestBMIRow){
     const bmi=parseFloat(latestBMIRow.bmi);
-    if(bmi<25) bodyScore=18; else if(bmi<27) bodyScore=15; else if(bmi<30) bodyScore=12; else bodyScore=8;
+    if(bmi<25) metabolicScore=Math.min(20,metabolicScore+3);
+    else if(bmi<27) metabolicScore=Math.min(20,metabolicScore+2);
+    else if(bmi<30) metabolicScore=Math.min(20,metabolicScore+1);
   }
-  // Weight loss trend bonus
   const wRows=csvRows.filter(r=>parseFloat(r.weight_lbs)>0);
-  if(wRows.length>1&&parseFloat(wRows[0].weight_lbs)<parseFloat(wRows[wRows.length-1].weight_lbs)) bodyScore=Math.min(20,bodyScore+2);
+  if(wRows.length>1&&parseFloat(wRows[0].weight_lbs)<parseFloat(wRows[wRows.length-1].weight_lbs)) metabolicScore=Math.min(20,metabolicScore+1);
 
-  // ── ACTIVITY (0–20) ──
-  let activityScore=10;
-  const avgSteps=avgField(csvRows.slice(0,7),'steps');
-  if(avgSteps){
-    if(avgSteps>=10000) activityScore=20; else if(avgSteps>=7500) activityScore=17;
-    else if(avgSteps>=5000) activityScore=14; else if(avgSteps>=2500) activityScore=10; else activityScore=7;
-  }
-  const recentEx=recent7(exercises);
-  if(recentEx.length>=4) activityScore=Math.min(20,activityScore+2);
-  else if(recentEx.length>=2) activityScore=Math.min(20,activityScore+1);
-
-  // ── SLEEP (0–20) — prefer manual logs over CSV ──
+  // ── SLEEP (0–20) ──
   let sleepScore=10;
   const csvSleepScore = csvRows.length ? parseFloat(csvRows[0].sleep_score)||null : null;
   if(csvSleepScore){
-    // Map 0-100 sleep score to 0-20 pillar score
     sleepScore = Math.round(csvSleepScore * 0.20);
   } else {
-  const recentSleeps=recent7(sleeps);
-  const manualSleepHrs = recentSleeps.map(s=>parseFloat(s.hrs)||0).filter(v=>v>0);
-  const csvSleepHrs = csvRows.slice(0,7).map(r=>parseFloat(r.sleep_hrs)||0).filter(v=>v>0);
-  const sleepSource = manualSleepHrs.length ? manualSleepHrs : csvSleepHrs;
-  const avgSleepHrs = sleepSource.length ? sleepSource.reduce((a,b)=>a+b,0)/sleepSource.length : null;
-  if(avgSleepHrs){
-    if(avgSleepHrs>=7&&avgSleepHrs<=9) sleepScore=20; else if(avgSleepHrs>=6) sleepScore=15;
-    else if(avgSleepHrs>=5) sleepScore=10; else sleepScore=6;
+    const recentSleeps=recent7(sleeps);
+    const manualSleepHrs = recentSleeps.map(s=>parseFloat(s.hrs)||0).filter(v=>v>0);
+    const csvSleepHrs = csvRows.slice(0,7).map(r=>parseFloat(r.sleep_hrs)||0).filter(v=>v>0);
+    const sleepSource = manualSleepHrs.length ? manualSleepHrs : csvSleepHrs;
+    const avgSleepHrs = sleepSource.length ? sleepSource.reduce((a,b)=>a+b,0)/sleepSource.length : null;
+    if(avgSleepHrs){
+      if(avgSleepHrs>=7&&avgSleepHrs<=9) sleepScore=18; else if(avgSleepHrs>=6) sleepScore=14;
+      else if(avgSleepHrs>=5) sleepScore=10; else sleepScore=6;
+    }
+    const cpapOk=recentSleeps.filter(s=>s.cpap==='Full night').length;
+    if(cpapOk>=5) sleepScore=Math.min(20,sleepScore+2);
   }
-  const cpapOk=recentSleeps.filter(s=>s.cpap==='Full night').length;
-  if(cpapOk>=5) sleepScore=Math.min(20,sleepScore+2);
-  } // end else (no CSV sleep score)
 
   // ── MIND (0–20) ──
   let mindScore=12;
@@ -7216,8 +7218,8 @@ async function calculateGlowScore(save=false) {
   }
   if(recent7(checkins).length>=5) mindScore=Math.min(20,mindScore+2);
 
-  // ── SKIN (0–20) — from latest AI scan ──
-  let skinScore = 10; // default until first scan
+  // ── SKIN (0–20) — AI scan + routine consistency ──
+  let skinScore = 10;
   try {
     const skinRes = await fetch(`${BACKEND}/api/sync?pillar=skinscan`);
     if(skinRes.ok){
@@ -7225,33 +7227,87 @@ async function calculateGlowScore(save=false) {
       if(data&&data.length){
         const latestScan = data[data.length-1];
         const s = latestScan.metrics ? calcSkinScore(latestScan.metrics) : (latestScan.overallScore || 50);
-        if(s>=85) skinScore=20; else if(s>=75) skinScore=17;
-        else if(s>=65) skinScore=14; else if(s>=50) skinScore=10; else skinScore=7;
+        if(s>=85) skinScore=16; else if(s>=75) skinScore=13;
+        else if(s>=65) skinScore=11; else if(s>=50) skinScore=8; else skinScore=6;
       }
     }
   } catch(e){}
+  // Routine consistency bonus
+  const recentCheckins = recent7(checkins);
+  const amDone = recentCheckins.filter(c=>c.skinAM).length;
+  const pmDone = recentCheckins.filter(c=>c.skinPM).length;
+  if(amDone>=5) skinScore=Math.min(20,skinScore+2);
+  else if(amDone>=3) skinScore=Math.min(20,skinScore+1);
+  if(pmDone>=4) skinScore=Math.min(20,skinScore+2);
+  else if(pmDone>=2) skinScore=Math.min(20,skinScore+1);
 
-  // ── TOTAL — now 7 pillars, normalize to 0-100 ──
-  const rawTotal = cardioScore+metabolicScore+bodyScore+activityScore+sleepScore+mindScore+skinScore;
-  const totalScore = Math.round((rawTotal/140)*100); // 140 = max (7×20)
+  // ── HAIR (0–20) — routine + goal progress ──
+  let hairScore = 10;
+  const hairCheckins = recentCheckins.filter(c=>c.hairCare).length;
+  if(hairCheckins>=5) hairScore=16;
+  else if(hairCheckins>=3) hairScore=13;
+  else if(hairCheckins>=1) hairScore=11;
+  // Goal photo bonus
+  try {
+    const goalRes = await fetch(`${BACKEND}/api/sync?pillar=hairgoal_goal-1`);
+    if(goalRes.ok){ const {data}=await goalRes.json(); if(data?.dataUrl) hairScore=Math.min(20,hairScore+2); }
+  } catch(e){}
+  try {
+    const curRes = await fetch(`${BACKEND}/api/sync?pillar=hair_current`);
+    if(curRes.ok){ const {data}=await curRes.json(); if(data?.dataUrl) hairScore=Math.min(20,hairScore+2); }
+  } catch(e){}
+
+  // ── STYLE (0–20) — outfits logged ──
+  let styleScore = 10;
+  const outfits = await dbAll('outfits');
+  const recentOutfits = outfits.filter(o=>{
+    const d = safeDate(o.date); const now = new Date();
+    return (now-d)/(1000*60*60*24) <= 7;
+  });
+  if(recentOutfits.length>=5) styleScore=18;
+  else if(recentOutfits.length>=3) styleScore=15;
+  else if(recentOutfits.length>=1) styleScore=12;
+  else styleScore=8;
+
+  // ── WELLNESS (0–20) — hydration + meds + CPAP ──
+  let wellnessScore = 10;
+  const medsDone = recentCheckins.filter(c=>c.meds).length;
+  const cpapDone = recentCheckins.filter(c=>c.cpap).length;
+  if(medsDone>=6) wellnessScore=Math.min(20,wellnessScore+4);
+  else if(medsDone>=4) wellnessScore=Math.min(20,wellnessScore+2);
+  if(cpapDone>=5) wellnessScore=Math.min(20,wellnessScore+3);
+  else if(cpapDone>=3) wellnessScore=Math.min(20,wellnessScore+1);
+  // Hydration bonus
+  const waterEntries = await dbAll('water');
+  const recentWater = waterEntries.filter(w=>{
+    const d = safeDate(w.date); const now = new Date();
+    return (now-d)/(1000*60*60*24) <= 7;
+  });
+  const avgGlasses = recentWater.length ? recentWater.reduce((a,b)=>a+(b.glasses||0),0)/recentWater.length : 0;
+  if(avgGlasses>=10) wellnessScore=Math.min(20,wellnessScore+2);
+  else if(avgGlasses>=7) wellnessScore=Math.min(20,wellnessScore+1);
+
+  // ── TOTAL — 8 pillars, normalize to 0-100 ──
+  const rawTotal = heartFitnessScore+metabolicScore+sleepScore+mindScore+skinScore+hairScore+styleScore+wellnessScore;
+  const totalScore = Math.round((rawTotal/160)*100); // 160 = max (8×20)
   const pillars=[
-    {name:'❤️ Cardio',score:cardioScore,max:20,color:'#C4735A'},
+    {name:'❤️ Heart & Fitness',score:heartFitnessScore,max:20,color:'#C4735A'},
     {name:'🧪 Metabolic',score:metabolicScore,max:20,color:'#A07850'},
-    {name:'💪 Body',score:bodyScore,max:20,color:'#6B9E78'},
-    {name:'🏃 Activity',score:activityScore,max:20,color:'#9B8EC4'},
     {name:'😴 Sleep',score:sleepScore,max:20,color:'#6B9E78'},
     {name:'🧠 Mind',score:mindScore,max:20,color:'#E8A87C'},
     {name:'✨ Skin',score:skinScore,max:20,color:'#E8A87C'},
+    {name:'💇 Hair',score:hairScore,max:20,color:'#9B8EC4'},
+    {name:'👗 Style',score:styleScore,max:20,color:'#C4735A'},
+    {name:'🌿 Wellness',score:wellnessScore,max:20,color:'#6B9E78'},
   ];
 
-  // ── REAL AGE (based on RealAge methodology, chronological age 54) ──
+  // ── REAL AGE ──
   let realAge=54;
-  if(cardioScore>=16) realAge-=3; else if(cardioScore<=8) realAge+=3;
+  if(heartFitnessScore>=16) realAge-=3; else if(heartFitnessScore<=7) realAge+=3;
   if(metabolicScore>=16) realAge-=2;
-  if(bodyScore>=16) realAge-=2; else if(bodyScore<=8) realAge+=2;
-  if(activityScore>=17) realAge-=3; else if(activityScore<=7) realAge+=2;
   if(sleepScore>=15) realAge-=2; else if(sleepScore<=6) realAge+=3;
   if(mindScore>=16) realAge-=1;
+  if(recentEx.length>=4) realAge-=1;
   realAge-=2; // Zepbound active weight loss bonus
   realAge=Math.max(35,Math.min(75,Math.round(realAge)));
 
@@ -9059,9 +9115,15 @@ function renderSavedScore(saved){
         <div class="glow-score-date">Last saved ${savedDate} · tap 🔄 to update</div>
       </div>
     </div>
-    <div class="glow-pillar-scores">${pillarsHTML}</div>
-    <button class="glow-recalc-btn" onclick="calculateGlowScore(true)">🔄 Recalculate &amp; save</button>
-    <div class="glow-score-trend" id="glow-score-trend">Loading trend...</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:10px;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.pillar-toggle').textContent=this.nextElementSibling.style.display==='none'?'▾':'▴';">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Pillar breakdown</div>
+      <span class="pillar-toggle" style="font-size:16px;color:var(--muted);">▾</span>
+    </div>
+    <div style="display:none;">
+      <div class="glow-pillar-scores">${pillarsHTML}</div>
+      <button class="glow-recalc-btn" onclick="calculateGlowScore(true)">🔄 Recalculate &amp; save</button>
+      <div class="glow-score-trend" id="glow-score-trend">Loading trend...</div>
+    </div>
   `;
   loadScoreTrend();
 }
