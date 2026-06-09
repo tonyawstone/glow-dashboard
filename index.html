@@ -438,14 +438,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <button class="guide-btn" onclick="openGuide('today')">?</button>
     </div>
-    <!-- Mind habits nudge banner -->
-    <div id="mind-habits-banner" style="display:none;padding:8px 12px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <div style="font-size:11px;color:var(--muted);flex-shrink:0;">💭 Today</div>
-        <button id="mind-journal-btn" onclick="mindHabitTap('journal')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">📖 Journal</button>
-        <button id="mind-wellspoken-btn" onclick="mindHabitTap('wellspoken')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">🗣 Wellspoken</button>
-      </div>
-    </div>
+    <!-- BP last reading / reminder -->
     <div id="today-bp-banner" style="display:none;padding:5px 12px;border-radius:8px;background:transparent;border:0.5px solid var(--border);margin-bottom:6px;align-items:center;justify-content:space-between;">
       <div style="font-size:11px;color:var(--muted);">❤️ Last BP reading</div>
       <div>
@@ -453,7 +446,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <span id="today-bp-date" style="font-size:11px;color:var(--muted);margin-left:6px;opacity:0.7;"></span>
       </div>
     </div>
-    <!-- BP reminder if not logged today -->
     <div id="today-bp-reminder" style="display:none;padding:7px 12px;border-radius:8px;background:#FEF3C7;border:0.5px solid #E8A87C;margin-bottom:10px;cursor:pointer;font-size:12px;color:#92400E;" onclick="tab('health');setTimeout(()=>document.getElementById('bp-entry-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)">
       ❤️ No BP reading today — tap to log
     </div>
@@ -461,6 +453,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div id="today-outfit-nudge" style="display:none;padding:7px 12px;border-radius:8px;background:#F3EEF8;border:0.5px solid #C4A8E0;margin-bottom:10px;cursor:pointer;font-size:12px;color:#6B3FA0;align-items:center;justify-content:space-between;" onclick="openQuickLog()">
       <span>👗 No outfit logged today — tap to snap &amp; log</span>
       <span style="font-size:16px;">📷</span>
+    </div>
+    <!-- Mind habits nudge banner -->
+    <div id="mind-habits-banner" style="display:none;padding:8px 12px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="font-size:11px;color:var(--muted);flex-shrink:0;">🧘🏼‍♀️ Take a moment · nourish your mind</div>
+        <button id="mind-journal-btn" onclick="mindHabitTap('journal')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">📖 Journal</button>
+        <button id="mind-wellspoken-btn" onclick="mindHabitTap('wellspoken')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">🗣 Wellspoken</button>
+      </div>
     </div>
     <div class="stat-strip">
       <div class="stat-tile" style="cursor:pointer;" onclick="tab('body')"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
