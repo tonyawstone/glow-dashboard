@@ -440,10 +440,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <!-- Mind habits nudge banner -->
     <div id="mind-habits-banner" style="display:none;padding:8px 12px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">💭 Mind · today's practices</div>
-      <div style="display:flex;gap:8px;">
-        <button id="mind-journal-btn" onclick="mindHabitTap('journal')" style="flex:1;padding:7px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">📖 Journal</button>
-        <button id="mind-wellspoken-btn" onclick="mindHabitTap('wellspoken')" style="flex:1;padding:7px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">🗣 Wellspoken</button>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="font-size:11px;color:var(--muted);flex-shrink:0;">💭 Today</div>
+        <button id="mind-journal-btn" onclick="mindHabitTap('journal')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">📖 Journal</button>
+        <button id="mind-wellspoken-btn" onclick="mindHabitTap('wellspoken')" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:12px;cursor:pointer;font-family:var(--sans);color:var(--muted);">🗣 Wellspoken</button>
       </div>
     </div>
     <div id="today-bp-banner" style="display:none;padding:5px 12px;border-radius:8px;background:transparent;border:0.5px solid var(--border);margin-bottom:6px;align-items:center;justify-content:space-between;">
@@ -7748,14 +7748,10 @@ async function updateUploadStatusBanner(){
       textEl.textContent = '✅ Apple Health data is current';
       if(dateEl) dateEl.textContent = uploadedAtStr ? `Uploaded ${uploadedAtStr}` : dateStr;
       if(innerBanner){ innerBanner.style.background='rgba(107,158,120,0.08)'; innerBanner.style.borderColor='rgba(107,158,120,0.3)'; }
-    } else if(diffDays === 1){
-      textEl.textContent = '🕐 Upload for today';
-      if(dateEl) dateEl.textContent = uploadedAtStr ? `Last: ${uploadedAtStr}` : dateStr;
-      if(innerBanner){ innerBanner.style.background=''; innerBanner.style.borderColor=''; }
     } else {
-      textEl.textContent = `⚠️ Upload needed · ${diffDays} days behind`;
-      if(dateEl) dateEl.textContent = uploadedAtStr ? `Last: ${uploadedAtStr}` : dateStr;
-      if(innerBanner){ innerBanner.style.background=''; innerBanner.style.borderColor='#E8A87C'; }
+      textEl.textContent = '🛑 Need to upload Apple Health data';
+      if(dateEl) dateEl.textContent = `Last upload ${uploadDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;
+      if(innerBanner){ innerBanner.style.background=''; innerBanner.style.borderColor='var(--border)'; }
     }
   } catch(e){
     console.error('updateUploadStatusBanner error:', e);
