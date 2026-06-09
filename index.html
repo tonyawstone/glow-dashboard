@@ -551,12 +551,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <button id="score-card-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
         </div>
       </div>
-      <div id="health-score-content">
-        <div class="log-empty">Calculating your score...</div>
+      <div id="score-summary" style="margin-top:8px;"></div>
+      <div id="score-card-body" style="display:none;margin-top:8px;">
+        <div id="health-score-content">
+          <div class="log-empty">Calculating your score...</div>
+        </div>
       </div>
-      <div id="score-card-body" style="display:none;">
-        <button onclick="openGlowInsights()" style="width:100%;margin-top:10px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">✨ What's driving my score?</button>
-      </div>
+      <button onclick="openGlowInsights()" style="width:100%;margin-top:10px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">✨ What's driving my score?</button>
     </div>
 
     <!-- Ask your coach — separate card -->
@@ -1302,22 +1303,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <!-- Today's snapshot -->
-    <div class="card health-snapshot-card">
-      <div class="card-title">Today's snapshot</div>
-      <div id="health-snapshot-content">
-        <div class="log-empty">Loading your health data...</div>
-      </div>
-    </div>
-
     <!-- Apple Health clinical metrics -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleClinicalMetrics()">
-        <div class="card-title" style="margin:0;">📊 Clinical metrics</div>
+        <div class="card-title" style="margin:0;">📊 Clinical metrics · 7-day avg</div>
         <button id="clinical-metrics-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
       </div>
       <div id="clinical-metrics-body" style="display:none;margin-top:12px;">
-        <div id="health-clinical-metrics"><div class="log-empty">Upload your weekly CSV to see resting HR, gait and respiratory data.</div></div>
+        <div id="health-clinical-metrics"><div class="log-empty">Upload your weekly CSV to see weight trend, resting HR, gait and respiratory data.</div></div>
       </div>
     </div>
 
@@ -2634,7 +2627,7 @@ async function tab(id){
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); loadHairMilestones(); }
-  if(id==='health'){ buildBPChart(); buildHealthSnapshot(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
+  if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
     const today = nowStr();
     ['skin-log-date','water-log-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=today; });
   }
@@ -4430,8 +4423,30 @@ async function buildHealthClinicalMetrics(){
   const avgDS = avg('double_support');
   const fmt = (d) => d ? safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
 
+  const avgWeight = avg('weight_lbs');
+  const latestWeight = latest('weight_lbs');
+  const weightTrend = () => {
+    const wVals = rows.slice(0,7).map(r=>parseFloat(r.weight_lbs)).filter(v=>v>0);
+    if(wVals.length < 2) return null;
+    return (wVals[0] - wVals[wVals.length-1]).toFixed(1);
+  };
+  const trend = weightTrend();
+
   el.innerHTML = `
-    <div class="lab-section-title">Heart & Breathing · 7-day avg</div>
+    <div class="lab-section-title">Weight · 7-day avg</div>
+    <div class="snapshot-grid">
+      <div class="snapshot-item">
+        <div class="snapshot-label">7-day avg</div>
+        <div class="snapshot-val">${avgWeight?avgWeight.toFixed(1):'—'}</div>
+        <div class="snapshot-sub">lbs</div>
+      </div>
+      <div class="snapshot-item">
+        <div class="snapshot-label">7-day change</div>
+        <div class="snapshot-val" style="font-size:18px;color:${trend&&parseFloat(trend)<0?'#27500A':trend&&parseFloat(trend)>0?'#92400E':'var(--text)'};">${trend?(parseFloat(trend)>0?'+':'')+trend:'—'}</div>
+        <div class="snapshot-sub">lbs ${trend&&parseFloat(trend)<0?'↓ lost':trend&&parseFloat(trend)>0?'↑ gained':''}</div>
+      </div>
+    </div>
+    <div class="lab-section-title" style="margin-top:14px;">Heart & Breathing · 7-day avg</div>
     <div class="snapshot-grid">
       <div class="snapshot-item">
         <div class="snapshot-label">Resting HR</div>
@@ -8499,7 +8514,6 @@ function toggleScoreCard(){
   body.style.display = open ? 'block' : 'none';
   if(btn) btn.textContent = open ? '▴' : '▾';
 }
-
 async function openCheckinHistory(){
   const overlay = document.getElementById('checkin-history-overlay');
   const content = document.getElementById('checkin-history-content');
@@ -9005,6 +9019,7 @@ async function loadSavedScore(){
 
 function renderSavedScore(saved){
   const el = document.getElementById('health-score-content');
+  const summaryEl = document.getElementById('score-summary');
   if(!el) return;
   const totalScore = saved.totalScore;
   const realAge = saved.realAge;
@@ -9012,6 +9027,16 @@ function renderSavedScore(saved){
   const scoreBg = totalScore>=85?'#EAF3DE':totalScore>=70?'rgba(107,158,120,0.15)':totalScore>=55?'#FEF3C7':'#FEE2E2';
   const scoreLabel = totalScore>=85?'Thriving':totalScore>=70?'Strong':totalScore>=55?'Building':'Needs attention';
   const savedDate = new Date(saved.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  // Compact summary shown when collapsed
+  if(summaryEl) summaryEl.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+      <div style="font-size:28px;font-weight:700;color:${scoreColor};">${totalScore}</div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:${scoreColor};">${scoreLabel}</div>
+        <div style="font-size:11px;color:var(--muted);">Bio age ${realAge} · ${savedDate}</div>
+      </div>
+    </div>`;
 
   // Reconstruct pillar array from saved data
   const pillarColors = {'❤️ Cardio':'#C4735A','🧪 Metabolic':'#A07850','💪 Body':'#6B9E78','🏃 Activity':'#9B8EC4','😴 Sleep':'#6B9E78','🧠 Mind':'#E8A87C'};
@@ -9031,7 +9056,7 @@ function renderSavedScore(saved){
       <div class="glow-score-right">
         <div class="glow-real-age">${realAge} <span style="font-size:14px;font-weight:400;color:var(--muted);">biological age</span></div>
         <div class="glow-real-age-label">vs. your chronological age 54</div>
-        <div class="glow-score-date">Saved ${savedDate}</div>
+        <div class="glow-score-date">Last saved ${savedDate} · tap 🔄 to update</div>
       </div>
     </div>
     <div class="glow-pillar-scores">${pillarsHTML}</div>
