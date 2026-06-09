@@ -456,12 +456,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <span style="font-size:16px;">📷</span>
     </div>
     <!-- Mind habits nudge banner -->
-    <div id="mind-habits-banner" style="display:none;padding:8px 12px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;overflow:hidden;">
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span style="font-size:18px;flex-shrink:0;">🧘🏽‍♀️</span>
-        <span style="font-size:11px;color:var(--muted);flex-shrink:1;min-width:0;">Take a moment · nourish your mind</span>
-        <button id="mind-journal-btn" onclick="mindHabitTap('journal')" style="padding:4px 10px;border-radius:20px;border:0.5px solid var(--border);background:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:var(--sans);color:var(--muted);white-space:nowrap;flex-shrink:0;">Journal</button>
-        <button id="mind-wellspoken-btn" onclick="mindHabitTap('wellspoken')" style="padding:4px 10px;border-radius:20px;border:0.5px solid var(--border);background:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:var(--sans);color:var(--muted);white-space:nowrap;flex-shrink:0;">Wellspoken</button>
+    <div id="mind-habits-banner" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:5px;">
+        <span style="font-size:16px;flex-shrink:0;line-height:1;">🧘🏽‍♀️</span>
+        <span style="font-size:11px;color:var(--muted);flex-shrink:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Take a moment · nourish your mind</span>
+        <button id="mind-journal-btn" onclick="mindHabitTap('journal')" style="padding:3px 8px;border-radius:20px;border:0.5px solid var(--border);background:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:var(--sans);color:var(--muted);white-space:nowrap;flex-shrink:0;">Journal</button>
+        <button id="mind-wellspoken-btn" onclick="mindHabitTap('wellspoken')" style="padding:3px 8px;border-radius:20px;border:0.5px solid var(--border);background:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:var(--sans);color:var(--muted);white-space:nowrap;flex-shrink:0;">Wellspoken</button>
       </div>
     </div>
     <div class="stat-strip">
@@ -7748,7 +7748,7 @@ async function updateUploadStatusBanner(){
     const dateStr = uploadDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     if(diffDays === 0){
       textEl.textContent = '✅ Apple Health data is current';
-      if(dateEl) dateEl.textContent = uploadedAtStr ? `Uploaded ${uploadedAtStr}` : dateStr;
+      if(dateEl) dateEl.textContent = uploadedAtStr ? uploadedAtStr : dateStr;
       if(innerBanner){ innerBanner.style.background='rgba(107,158,120,0.08)'; innerBanner.style.borderColor='rgba(107,158,120,0.3)'; }
     } else {
       textEl.textContent = '🛑 Need to upload Apple Health data';
@@ -7847,7 +7847,19 @@ async function updateBPBanners(){
       if(todayBanner) todayBanner.style.display='flex';
       if(todayReminder) todayReminder.style.display='none';
       if(todayVal) todayVal.textContent = `${todayReading.sys}/${todayReading.dia}`;
-      if(todayDate) todayDate.textContent = `Today${todayReading.time?' · '+todayReading.time:''}`;
+      const fmtBPTime = (t) => {
+        if(!t) return '';
+        // If it's HH:MM format, convert to 12-hour
+        const match = t.match(/^(\d{1,2}):(\d{2})$/);
+        if(match){
+          const h = parseInt(match[1]), m = match[2];
+          const ampm = h >= 12 ? 'PM' : 'AM';
+          const h12 = h === 0 ? 12 : h > 12 ? h-12 : h;
+          return `${h12}:${m} ${ampm}`;
+        }
+        return t;
+      };
+      if(todayDate) todayDate.textContent = `Today${todayReading.time?' · '+fmtBPTime(todayReading.time):''}`;
       const sys = parseInt(todayReading.sys);
       // Color code the reading and banner background
       if(sys >= 140){
