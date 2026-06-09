@@ -487,63 +487,87 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="affirmation-sub">Your daily affirmation</div>
     </div>
 
-    <!-- Health Score Card -->
+    <!-- Daily check-in — collapsible -->
+    <div class="card" id="checkin-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleCheckinForm()">
+        <div class="card-title" style="margin:0;">Daily check-in</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="event.stopPropagation();openCheckinHistory()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--sans);text-decoration:underline;">Past check-ins</button>
+          <button id="checkin-form-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+        </div>
+      </div>
+      <div id="checkin-form-body" style="display:none;margin-top:12px;">
+        <div class="fl">How are you feeling?</div>
+        <div class="tags" id="mood-tags">
+          <button class="tag" onclick="tog(this)">Calm</button>
+          <button class="tag" onclick="tog(this)">Happy</button>
+          <button class="tag" onclick="tog(this)">Joyful</button>
+          <button class="tag" onclick="tog(this)">Excited</button>
+          <button class="tag" onclick="tog(this)">Grateful</button>
+          <button class="tag" onclick="tog(this)">Energized</button>
+          <button class="tag" onclick="tog(this)">Focused</button>
+          <button class="tag" onclick="tog(this)">Motivated</button>
+          <button class="tag" onclick="tog(this)">Confident</button>
+          <button class="tag" onclick="tog(this)">Strong</button>
+          <button class="tag" onclick="tog(this)">Fierce</button>
+          <button class="tag" onclick="tog(this)">Fearless</button>
+          <button class="tag" onclick="tog(this)">Beautiful</button>
+          <button class="tag" onclick="tog(this)">Pretty</button>
+          <button class="tag" onclick="tog(this)">Fashionable</button>
+          <button class="tag" onclick="tog(this)">Playful</button>
+          <button class="tag" onclick="tog(this)">Glowing</button>
+          <button class="tag" onclick="tog(this)">Successful</button>
+          <button class="tag" onclick="tog(this)">Insightful</button>
+          <button class="tag" onclick="tog(this)">Patient</button>
+          <button class="tag" onclick="tog(this)">Grounded</button>
+          <button class="tag" onclick="tog(this)">Tired</button>
+          <button class="tag" onclick="tog(this)">Stressed</button>
+          <button class="tag" onclick="tog(this)">Overwhelmed</button>
+          <button class="tag" onclick="tog(this)">Frustrated</button>
+          <button class="tag" onclick="tog(this)">Sad</button>
+          <button class="tag" onclick="tog(this)">Anxious</button>
+          <button class="tag" onclick="tog(this)">Bloated</button>
+          <button class="tag" onclick="tog(this)">Scattered</button>
+        </div>
+        <div class="fl">Treatments & compliance</div>
+        <div class="toggle-row" onclick="ts('t-cpap')"><div><div class="tl">CPAP used last night</div><div class="ts">Sleep apnea</div></div><div class="tog" id="t-cpap"><div class="tok"></div></div></div>
+        <div class="toggle-row" onclick="ts('t-meds')"><div><div class="tl">Daily medications taken</div><div class="ts">Irbesartan · Metoprolol · Amlodipine · Osteo Biflex</div></div><div class="tog" id="t-meds"><div class="tok"></div></div></div>
+        <div class="toggle-row" onclick="ts('t-skin-am')"><div><div class="tl">AM skin routine done</div><div class="ts">Olay Cleanser · Serum · Vit C · SPF</div></div><div class="tog" id="t-skin-am"><div class="tok"></div></div></div>
+        <div class="toggle-row" onclick="ts('t-skin-pm')"><div><div class="tl">Last night's PM routine done</div><div class="ts">Musely (alt nights) · Olay Regenerist · done before bed</div></div><div class="tog" id="t-skin-pm"><div class="tok"></div></div></div>
+        <div class="toggle-row" onclick="ts('t-exercise')"><div><div class="tl">Exercised today</div><div class="ts">Walk · Pilates · Strength · Yoga · any movement</div></div><div class="tog" id="t-exercise"><div class="tok"></div></div></div>
+        <div class="fl">Note for today</div>
+        <textarea id="today-note" rows="2" placeholder="Outfit win, energy, anything on your mind..."></textarea>
+        <button class="btn-primary" onclick="saveCheckin()">Save check-in</button>
+        <div class="toast-msg" id="tt">Saved!</div>
+      </div>
+    </div>
+
+    <!-- Glow Score — collapsible -->
     <div class="card health-score-card" id="health-score-card">
-      <div class="card-title">Your Glow Score</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleScoreCard()">
+        <div class="card-title" style="margin:0;">Your Glow Score</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="guide-btn" onclick="event.stopPropagation();openGuide('score')" style="flex-shrink:0;">?</button>
+          <button id="score-card-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+        </div>
+      </div>
       <div id="health-score-content">
         <div class="log-empty">Calculating your score...</div>
       </div>
-      <button onclick="openGlowInsights()" style="width:100%;margin-top:10px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">✨ What's driving my score?</button>
+      <div id="score-card-body" style="display:none;">
+        <button onclick="openGlowInsights()" style="width:100%;margin-top:10px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">✨ What's driving my score?</button>
+      </div>
     </div>
 
+    <!-- Ask your coach — separate card -->
     <div class="card">
-      <div class="card-title">Daily check-in</div>
-      <div class="fl">How are you feeling?</div>
-      <div class="tags" id="mood-tags">
-        <button class="tag" onclick="tog(this)">Calm</button>
-        <button class="tag" onclick="tog(this)">Happy</button>
-        <button class="tag" onclick="tog(this)">Joyful</button>
-        <button class="tag" onclick="tog(this)">Excited</button>
-        <button class="tag" onclick="tog(this)">Grateful</button>
-        <button class="tag" onclick="tog(this)">Energized</button>
-        <button class="tag" onclick="tog(this)">Focused</button>
-        <button class="tag" onclick="tog(this)">Motivated</button>
-        <button class="tag" onclick="tog(this)">Confident</button>
-        <button class="tag" onclick="tog(this)">Strong</button>
-        <button class="tag" onclick="tog(this)">Fierce</button>
-        <button class="tag" onclick="tog(this)">Fearless</button>
-        <button class="tag" onclick="tog(this)">Beautiful</button>
-        <button class="tag" onclick="tog(this)">Pretty</button>
-        <button class="tag" onclick="tog(this)">Fashionable</button>
-        <button class="tag" onclick="tog(this)">Playful</button>
-        <button class="tag" onclick="tog(this)">Glowing</button>
-        <button class="tag" onclick="tog(this)">Successful</button>
-        <button class="tag" onclick="tog(this)">Insightful</button>
-        <button class="tag" onclick="tog(this)">Patient</button>
-        <button class="tag" onclick="tog(this)">Grounded</button>
-        <button class="tag" onclick="tog(this)">Tired</button>
-        <button class="tag" onclick="tog(this)">Stressed</button>
-        <button class="tag" onclick="tog(this)">Overwhelmed</button>
-        <button class="tag" onclick="tog(this)">Frustrated</button>
-        <button class="tag" onclick="tog(this)">Sad</button>
-        <button class="tag" onclick="tog(this)">Anxious</button>
-        <button class="tag" onclick="tog(this)">Bloated</button>
-        <button class="tag" onclick="tog(this)">Scattered</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="card-title" style="margin:0;">Ask your coach</div>
+        <button onclick="openCoachHistory()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--sans);text-decoration:underline;">Past conversations</button>
       </div>
-      <div class="fl">Treatments & compliance</div>
-      <div class="toggle-row" onclick="ts('t-cpap')"><div><div class="tl">CPAP used last night</div><div class="ts">Sleep apnea</div></div><div class="tog" id="t-cpap"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('t-meds')"><div><div class="tl">Daily medications taken</div><div class="ts">Irbesartan · Metoprolol · Amlodipine · Osteo Biflex</div></div><div class="tog" id="t-meds"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('t-skin-am')"><div><div class="tl">AM skin routine done</div><div class="ts">Olay Cleanser · Serum · Vit C · SPF</div></div><div class="tog" id="t-skin-am"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('t-skin-pm')"><div><div class="tl">Last night's PM routine done</div><div class="ts">Musely (alt nights) · Olay Regenerist · done before bed</div></div><div class="tog" id="t-skin-pm"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('t-exercise')"><div><div class="tl">Exercised today</div><div class="ts">Walk · Pilates · Strength · Yoga · any movement</div></div><div class="tog" id="t-exercise"><div class="tok"></div></div></div>
-      <div class="fl">Note for today</div>
-      <textarea id="today-note" rows="2" placeholder="Outfit win, energy, anything on your mind..."></textarea>
-      <button class="btn-primary" onclick="saveCheckin()">Save check-in</button>
       <button class="btn-ai" onclick="aiCoach()">Ask your coach ↗</button>
       <div id="coach-output" class="coach-response" style="display:none"></div>
-      <div class="toast-msg" id="tt">Saved!</div>
     </div>
-    <div class="card"><div class="card-title">Recent check-ins</div><div id="checkin-log"><div class="log-empty">No check-ins yet.</div></div></div>
   </div>
   <div class="view-content" id="vc-today-weekly">
     <div class="section-label">This week</div>
@@ -2404,6 +2428,29 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
+<!-- Check-in history overlay -->
+<div id="checkin-history-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeCheckinHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Check-ins</div>
+    </div>
+    <div id="checkin-history-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<!-- Coach history overlay -->
+<div id="coach-history-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeCoachHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Conversations</div>
+    </div>
+    <div id="coach-history-content"><div class="log-empty">Loading...</div></div>
+    <button id="coach-load-more" onclick="loadMoreCoach()" style="display:none;width:100%;margin-top:12px;padding:10px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Load more</button>
+  </div>
+</div>
+
 <div id="glow-insights-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
@@ -3371,6 +3418,41 @@ function closeAbout(ev){
 }
 
 const GUIDES = {
+  score: {
+    title: '✨ Your Glow Score · How it works',
+    sections: [
+      { title: 'Score ranges', items: [
+        { text: '85–100 · Thriving', note: 'All pillars optimized · biological age well below 54' },
+        { text: '70–84 · Strong', note: 'Good foundation · 1–2 areas to focus on' },
+        { text: '55–69 · Building', note: 'Solid progress · several areas have room to grow' },
+        { text: 'Below 55 · Needs attention', note: 'Focus on one pillar at a time · small changes add up' },
+      ]},
+      { title: 'How each pillar is scored (out of 20)', items: [
+        { text: '❤️ Cardio', note: 'Avg BP over 7 days + resting heart rate from Apple Health' },
+        { text: '🧪 Metabolic', note: 'Based on your most recent lab results (cholesterol, glucose, liver enzymes)' },
+        { text: '💪 Body', note: 'BMI from Apple Health + weight loss trend bonus' },
+        { text: '🏃 Activity', note: 'Avg daily steps over 7 days + exercise logs' },
+        { text: '😴 Sleep', note: 'Sleep score from CSV or avg hours · CPAP compliance bonus' },
+        { text: '🧠 Mind', note: 'Avg mood from daily check-ins · consistency bonus' },
+        { text: '✨ Skin', note: 'Latest AI skin scan score' },
+      ]},
+      { title: 'Biological age', items: [
+        { text: 'Starts at your chronological age (54)', note: '' },
+        { text: 'BP well controlled → −3 years', note: 'Avg systolic < 120' },
+        { text: 'Excellent labs → −2 years', note: 'Metabolic score ≥ 16' },
+        { text: 'Healthy BMI → −2 years', note: 'Body score ≥ 16' },
+        { text: 'Active lifestyle → −3 years', note: 'Activity score ≥ 17' },
+        { text: 'Good sleep → −2 years', note: 'Sleep score ≥ 15' },
+        { text: 'Positive mindset → −1 year', note: 'Mind score ≥ 16' },
+        { text: 'Active weight loss (Zepbound) → −2 years', note: 'Intentional weight loss has documented anti-aging effects' },
+      ]},
+      { title: 'Tips', items: [
+        { text: 'Recalculate weekly after uploading your Apple Health CSV', note: '' },
+        { text: 'Cardio and Activity have the biggest impact on biological age', note: '' },
+        { text: 'Consistent daily check-ins improve your Mind score over time', note: '' },
+      ]},
+    ]
+  },
   today: {
     title: '☀️ Today · Daily Guide',
     sections: [
@@ -8400,6 +8482,90 @@ function closeGlowInsights(){
   document.body.style.overflow = '';
 }
 
+function toggleCheckinForm(){
+  const body = document.getElementById('checkin-form-body');
+  const btn = document.getElementById('checkin-form-toggle');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? '▴' : '▾';
+  if(open) loadCheckinState();
+}
+
+function toggleScoreCard(){
+  const body = document.getElementById('score-card-body');
+  const btn = document.getElementById('score-card-toggle');
+  if(!body) return;
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? '▴' : '▾';
+}
+
+async function openCheckinHistory(){
+  const overlay = document.getElementById('checkin-history-overlay');
+  const content = document.getElementById('checkin-history-content');
+  overlay.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  const checkins = await dbAll('checkins');
+  if(!checkins.length){ content.innerHTML = '<div class="log-empty">No check-ins yet.</div>'; return; }
+  content.innerHTML = checkins.slice().reverse().map(c => {
+    const d = c.date ? safeDate(c.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) : '';
+    const mood = Array.isArray(c.mood) ? c.mood.join(' · ') : (c.mood||'');
+    const tags = [c.cpap&&'CPAP ✓', c.meds&&'Meds ✓', c.skinAM&&'Skin AM ✓', c.skinPM&&'Skin PM ✓', c.exercise&&'Exercise ✓'].filter(Boolean).join(' · ');
+    return `<div style="padding:12px;border-radius:10px;background:var(--warm);margin-bottom:8px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${d}</div>
+      ${mood?`<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;">${mood}</div>`:''}
+      ${tags?`<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${tags}</div>`:''}
+      ${c.note?`<div style="font-size:12px;color:var(--text);font-style:italic;">"${c.note}"</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function closeCheckinHistory(){
+  document.getElementById('checkin-history-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+let _coachPage = 0;
+async function openCoachHistory(){
+  _coachPage = 0;
+  const overlay = document.getElementById('coach-history-overlay');
+  overlay.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  await renderCoachHistory();
+}
+
+async function renderCoachHistory(){
+  const content = document.getElementById('coach-history-content');
+  const loadMore = document.getElementById('coach-load-more');
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=coach_history`);
+    if(!res.ok) throw new Error();
+    const {data} = await res.json();
+    const entries = Array.isArray(data) ? data.slice().reverse() : [];
+    if(!entries.length){ content.innerHTML = '<div class="log-empty">No past conversations yet.</div>'; loadMore.style.display='none'; return; }
+    const page = entries.slice(_coachPage*5, (_coachPage+1)*5);
+    const html = page.map(e => `
+      <div style="padding:12px;border-radius:10px;background:var(--warm);margin-bottom:8px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">${e.date||''}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-style:italic;">"${e.prompt||''}"</div>
+        <div style="font-size:13px;color:var(--text);">${e.response||''}</div>
+      </div>`).join('');
+    if(_coachPage===0) content.innerHTML = html;
+    else content.innerHTML += html;
+    loadMore.style.display = entries.length > (_coachPage+1)*5 ? 'block' : 'none';
+  } catch(e){ content.innerHTML = '<div class="log-empty">No past conversations yet.</div>'; }
+}
+
+async function loadMoreCoach(){
+  _coachPage++;
+  await renderCoachHistory();
+}
+
+function closeCoachHistory(){
+  document.getElementById('coach-history-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
 function toggleLabForm(){
   const body = document.getElementById('lab-form-body');
   const btn = document.getElementById('lab-form-toggle');
@@ -9241,14 +9407,21 @@ async function callCoach(pillar, userMessage, outputId, logData) {
     const data = await res.json();
     const response = data.response || 'No response generated.';
     if (el) el.textContent = response;
-    // Save to Blob for persistence across devices
+    const dateStr = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+    // Save to coaching blob
     fetch(`${BACKEND}/api/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         pillar: 'coaching', 
-        data: { ...await getCoachingData(), [outputId]: { text: response, date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), pillar } }
+        data: { ...await getCoachingData(), [outputId]: { text: response, date: dateStr, pillar } }
       })
+    }).catch(()=>{});
+    // Save to coach history for past conversations overlay
+    fetch(`${BACKEND}/api/sync?pillar=coach_history`).then(r=>r.json()).then(d=>{
+      const history = Array.isArray(d.data) ? d.data : [];
+      history.push({ date: dateStr, pillar, prompt: userMessage, response });
+      fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'coach_history',data:history})});
     }).catch(()=>{});
   } catch (err) {
     if (el) el.textContent = 'Coach unavailable right now — try again shortly.';
