@@ -1998,7 +1998,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
       </div>
       <input type="file" id="hair-goal-input" accept="image/*" style="display:none" onchange="saveHairGoalPhoto(this)">
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;">✨ = AI goal photo · tap date label to rename · tap Compare to see current vs goal</div>
+      <div id="hair-goal-status" style="font-size:11px;color:var(--muted);margin-top:8px;">✨ = AI goal photo · tap date label to rename · tap Compare to see current vs goal</div>
       <!-- Hair compare panel -->
       <div id="hair-compare-panel" style="display:none;margin-top:14px;">
         <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;" id="hair-compare-title">Comparing current vs goal</div>
@@ -6286,21 +6286,27 @@ function loadGoalNotes(){
 
 async function loadHairGoalPhotos(){
   const slots = ['goal-1','goal-2','goal-3','goal-4','goal-5','goal-6','goal-7','goal-8'];
+  const statusEl = document.getElementById('hair-goal-status');
+  if(statusEl) statusEl.textContent = '⏳ Loading photos...';
 
   // Restore from localStorage cache instantly
   const cache = JSON.parse(localStorage.getItem('glowHairGoals')||'{}');
+  let cacheCount = 0;
   slots.forEach(slot=>{
     if(cache[slot]){
       const el = document.getElementById(`goal-${slot}`);
       if(el){
         el.innerHTML=`<img src="${cache[slot]}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
         el.style.border='2px solid var(--accent)';
+        cacheCount++;
       }
     }
   });
+  if(cacheCount > 0 && statusEl) statusEl.textContent = `✨ ${cacheCount} photos loaded from cache · checking for updates...`;
 
   // Fetch fresh from individual Blob keys — check both new (goal-1) and old (aug-2026) formats
   const oldSlotNames = ['aug-2026','nov-2026','feb-2027','may-2027','aug-2027','nov-2027','feb-2028','may-2028'];
+  let blobCount = 0;
   for(let i=0; i<slots.length; i++){
     const slot = slots[i];
     const oldSlot = oldSlotNames[i];
@@ -6318,6 +6324,7 @@ async function loadHairGoalPhotos(){
       if(el){
         el.innerHTML=`<img src="${data.dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
         el.style.border='2px solid var(--accent)';
+        blobCount++;
       }
       // Update localStorage cache
       const c = JSON.parse(localStorage.getItem('glowHairGoals')||'{}');
@@ -6325,6 +6332,12 @@ async function loadHairGoalPhotos(){
       localStorage.setItem('glowHairGoals', JSON.stringify(c));
     } catch(e){}
   }
+
+  const total = Math.max(cacheCount, blobCount);
+  if(statusEl) statusEl.textContent = total > 0
+    ? `✨ ${total} goal photo${total>1?'s':''} loaded · tap date label to rename · tap Compare to see current vs goal`
+    : '✨ = AI goal photo · tap date label to rename · tap Compare to see current vs goal';
+
   loadGoalNotes();
 }
 
