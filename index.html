@@ -6336,10 +6336,11 @@ async function loadHairGoalPhotos(){
     } catch(e){}
   }
 
-  const total = Math.max(cacheCount, blobCount);
+  const total = blobCount || cacheCount;
+  const timeStr = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
   if(statusEl) statusEl.textContent = total > 0
-    ? `✨ ${total} goal photo${total>1?'s':''} loaded · tap date label to rename · tap Compare to see current vs goal`
-    : '✨ = AI goal photo · tap date label to rename · tap Compare to see current vs goal';
+    ? `✨ ${total} goal photo${total>1?'s':''} loaded · Synced ${timeStr} · tap date label to rename`
+    : `⏳ No photos found · tap a slot to upload · Checked ${timeStr}`;
 
   loadGoalNotes();
 }
