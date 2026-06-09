@@ -1920,15 +1920,22 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <button class="btn-primary" style="flex:1;font-size:11px;padding:7px 4px;" onclick="saveCurrentHairEntry()">Save</button>
             <button class="btn-secondary" style="flex:1;font-size:11px;padding:7px 4px;" onclick="showHairCurrentCompare()">↔ Compare</button>
           </div>
-          <div id="hair-analyze-type" style="display:none;gap:6px;margin-top:4px;">
-            <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">What type of photo?</div>
+          <div class="toast-msg" id="hair-current-toast">Saved!</div>
+        </div>
+      </div>
+      <!-- Type selector + analyze — always visible, shown when photo exists -->
+      <div id="hair-analyze-section" style="display:none;margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="flex:1;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">What type of photo?</div>
             <div style="display:flex;gap:6px;">
-              <button class="tag" id="hair-type-full" onclick="selectHairAnalysisType('full')" style="flex:1;font-size:11px;">🌿 Full shot</button>
-              <button class="tag" id="hair-type-curl" onclick="selectHairAnalysisType('curl')" style="flex:1;font-size:11px;">🔍 Curl close-up</button>
+              <button class="tag on" id="hair-type-full" onclick="selectHairType('full')" style="flex:1;font-size:11px;">🌿 Full shot</button>
+              <button class="tag" id="hair-type-curl" onclick="selectHairType('curl')" style="flex:1;font-size:11px;">🔍 Curl close-up</button>
             </div>
           </div>
-          <button id="hair-analyze-btn" class="btn-ai" style="font-size:11px;padding:7px 4px;display:none;" onclick="toggleHairAnalyzeType()">✨ Analyze my hair ↗</button>
-          <div class="toast-msg" id="hair-current-toast">Saved!</div>
+          <button id="hair-analyze-btn" class="btn-ai" style="font-size:11px;padding:8px 12px;white-space:nowrap;align-self:flex-end;" onclick="triggerHairAnalysis()">✨ Analyze ↗</button>
+          <input type="file" id="hair-analyze-input" accept="image/*" capture="user" style="display:none" onchange="analyzeCurrentHair(this)">
+          <input type="file" id="hair-analyze-historical-input" accept="image/*" style="display:none" onchange="analyzeCurrentHair(this)">
         </div>
       </div>
       <input type="file" id="hair-current-input" accept="image/*" style="display:none;" onchange="saveCurrentHairPhoto(this)">
@@ -6142,6 +6149,8 @@ async function saveCurrentHairPhoto(input){
 
   loadCurrentHairPhoto();
   toast('hair-current-toast');
+  const sec = document.getElementById('hair-analyze-section');
+  if(sec) sec.style.display='block';
 }
 
 async function saveCurrentHairEntry(){
@@ -6177,7 +6186,7 @@ async function loadCurrentHairPhoto(){
       if(dataUrl){
         photoEl.style.border='none'; photoEl.style.background='transparent';
         photoEl.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onclick="uploadCurrentHair()">`;
-        const btn = document.getElementById('hair-analyze-btn');
+        const btn = document.getElementById('hair-analyze-section');
         if(btn) btn.style.display='block';
       }
       if(dateEl && date) dateEl.textContent = safeDate(date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
@@ -8818,31 +8827,25 @@ function closeCoachHistory(){
   document.body.style.overflow = '';
 }
 
-function toggleHairAnalyzeType(){
-  const typeEl = document.getElementById('hair-analyze-type');
-  if(!typeEl) return;
-  const visible = typeEl.style.display === 'flex';
-  typeEl.style.display = visible ? 'none' : 'flex';
-  typeEl.style.flexDirection = 'column';
+function triggerHairAnalysis(){
+  // Show camera vs upload choice like skin scan
+  const type = document.getElementById('hair-type-curl').classList.contains('on') ? 'curl' : 'full';
+  document.getElementById('hair-analyze-input').dataset.analysisType = type;
+  document.getElementById('hair-analyze-historical-input').dataset.analysisType = type;
+  document.getElementById('hair-analyze-input').click();
 }
 
-function selectHairAnalysisType(type){
-  document.getElementById('hair-type-full')?.classList.toggle('on', type==='full');
-  document.getElementById('hair-type-curl')?.classList.toggle('on', type==='curl');
-  document.getElementById('hair-analyze-type').style.display = 'none';
-  analyzeCurrentHair(type);
-}
-
-async function analyzeCurrentHair(type='full'){
-  const photoEl = document.getElementById('hair-current-photo')?.querySelector('img');
-  if(!photoEl){ alert('Please upload a current hair photo first.'); return; }
+async function analyzeCurrentHair(input){
+  const file = input.files[0]; if(!file) return;
+  const type = input.dataset.analysisType || 'full';
+  input.value = '';
 
   let analysisEl = document.getElementById('hair-current-analysis');
   if(!analysisEl){
     analysisEl = document.createElement('div');
     analysisEl.id = 'hair-current-analysis';
     analysisEl.className = 'coach-response';
-    document.getElementById('hair-current-photo').closest('.card').appendChild(analysisEl);
+    document.getElementById('hair-analyze-section').after(analysisEl);
   }
   analysisEl.style.display = 'block';
   analysisEl.textContent = type==='curl' ? '🔍 Analyzing your curls...' : '🌿 Analyzing your hair...';
@@ -8871,11 +8874,9 @@ Specific, technical but accessible. Reference her products where relevant.`
   };
 
   try {
-    const canvas = document.createElement('canvas');
-    canvas.width = photoEl.naturalWidth || photoEl.width;
-    canvas.height = photoEl.naturalHeight || photoEl.height;
-    canvas.getContext('2d').drawImage(photoEl, 0, 0);
-    const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+    // Same approach as skin scan — compress fresh file directly
+    const photoDataUrl = await compressImage(file, 500, 0.75);
+    const base64 = photoDataUrl.split(',')[1];
 
     const res = await fetch(`${BACKEND}/api/skin-analysis`, {
       method: 'POST',
@@ -8892,15 +8893,14 @@ Specific, technical but accessible. Reference her products where relevant.`
     analysisEl.innerHTML = `<div style="font-size:10px;color:var(--muted);margin-bottom:6px;">${typeLabel} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>${text}`;
 
     // Save to hair_analyses Blob
-    const dateStr = nowStr();
-    const entry = { date: dateStr, type, text };
+    const entry = { date: nowStr(), type, text };
     fetch(`${BACKEND}/api/sync?pillar=hair_analyses`).then(r=>r.json()).then(d=>{
       const history = Array.isArray(d.data) ? d.data : [];
       history.push(entry);
       fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'hair_analyses',data:history})});
     }).catch(()=>{});
 
-    // Also save to coach history
+    // Save to coach history
     const dateFmt = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
     fetch(`${BACKEND}/api/sync?pillar=coach_history`).then(r=>r.json()).then(d=>{
       const history = Array.isArray(d.data) ? d.data : [];
@@ -8910,6 +8910,7 @@ Specific, technical but accessible. Reference her products where relevant.`
 
   } catch(e){
     analysisEl.textContent = 'Analysis unavailable right now — try again shortly.';
+    console.error('Hair analysis error:', e);
   }
 }
 
@@ -8930,17 +8931,32 @@ async function analyzeHairProgress(){
   }
 
   try {
-    // Convert images to base64
-    const toBase64 = (img) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth || img.width;
-      canvas.height = img.naturalHeight || img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-    };
+    // Get current photo base64 from localStorage — avoids CORS canvas issue
+    let currentB64 = null;
+    try {
+      const saved = localStorage.getItem('glowHairCurrentPhoto');
+      if(saved){
+        const {dataUrl} = JSON.parse(saved);
+        if(dataUrl) currentB64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+      }
+    } catch(e){}
 
-    const currentB64 = toBase64(currentImg);
-    const goalB64 = toBase64(goalImg);
+    // Get goal photo base64 from localStorage cache
+    let goalB64 = null;
+    try {
+      const goalLabel_slot = goalImg.closest('[id^="goal-"]')?.id?.replace('goal-','');
+      const cache = JSON.parse(localStorage.getItem('glowHairGoals')||'{}');
+      const slot = goalLabel_slot || Object.keys(cache)[0];
+      if(slot && cache[slot]){
+        const dataUrl = cache[slot];
+        goalB64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+      }
+    } catch(e){}
+
+    if(!currentB64 || !goalB64){
+      output.textContent = 'Could not read photos — please make sure your current hair photo is uploaded.';
+      return;
+    }
 
     const res = await fetch(`${BACKEND}/api/skin-analysis`, {
       method: 'POST',
