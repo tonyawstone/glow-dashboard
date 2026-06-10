@@ -825,7 +825,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <!-- Sleep timeline placeholder -->
       <div id="sleep-timeline-wrap" style="margin-top:10px;">
         <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Sleep timeline</div>
-        <div id="sleep-timeline-canvas-wrap" style="position:relative;height:80px;background:var(--warm);border-radius:10px;overflow:hidden;">
+        <div id="sleep-timeline-canvas-wrap" style="position:relative;height:90px;background:var(--warm);border-radius:10px;overflow:hidden;">
           <canvas id="sleep-timeline-chart"></canvas>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:3px;" id="sleep-timeline-labels"></div>
@@ -2745,7 +2745,7 @@ function nowStr(d){
   const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
 }
-function logItem(date,chips,note){return`<div class="log-item"><div class="log-date">${date}</div><div class="chips">${chips.filter(Boolean).map(c=>'<span class="chip">'+c+'</span>').join('')}</div>${note?'<div class="log-note">'+note+'</div>':''}</div>`;}
+function logItem(date,chips,note){return`<div class="log-item"><div class="log-date">${date}</div><div class="chips">${chips.filter(Boolean).map(c=>'<span class="chip">'+c+'</span>').join('')}</div>${note?'<div class="log-note">'+note.replace(/\n/g,'<br>')+'</div>':''}</div>`;}
 function renderLog(id,items,fn){
   const el=document.getElementById(id);if(!el)return;
   if(!items||!items.length){el.innerHTML='<div class="log-empty">Nothing logged yet.</div>';return;}
@@ -4102,7 +4102,10 @@ async function loadLogs(){
   const hairs=await dbAll('hairs');
   renderLog('hair-log',hairs,e=>logItem(e.date,[...e.hairT,...e.care,...(e.prods||[])],e.note));
   const minds=await dbAll('minds');
-  renderLog('mind-log',minds,e=>logItem(e.date,[...e.vibe,...(e.energy?['Energy '+'★'.repeat(e.energy)]:[]),...(e.conf?['Conf '+'★'.repeat(e.conf)]:[]),...(e.stress?['Stress '+'★'.repeat(e.stress)]:[])],e.win+(e.gratitude?'\nGrateful: '+e.gratitude:'')+(e.intention?'\nIntention: '+e.intention:'')));
+  renderLog('mind-log',minds,e=>{
+    const gratFmt=e.gratitude?'\nGrateful: '+e.gratitude.split('\n').map(s=>s.replace(/^\d+\.\s*/,'')).filter(Boolean).join(', '):'';
+    return logItem(e.date,[...e.vibe,...(e.energy?['Energy '+'★'.repeat(e.energy)]:[]),...(e.conf?['Conf '+'★'.repeat(e.conf)]:[]),...(e.stress?['Stress '+'★'.repeat(e.stress)]:[])],e.win+gratFmt+(e.intention?'\nIntention: '+e.intention:''));
+  });
   const bps=await dbAll('bps');
   renderLog('bp-log',bps,e=>logItem(e.time?`${fmtOutfitDate(e.date)} · ${e.time}`:fmtOutfitDate(e.date),[e.sys+'/'+e.dia,e.pulse?'Pulse '+e.pulse:''],''));
   const exercises=await dbAll('exercises');
@@ -4691,32 +4694,49 @@ async function buildSleepTimeline(dateStr){
   const toMins = (str)=>{ const [d,t]=str.split(' '); const [h,m]=t.split(':').map(Number); return h<12?h*60+m+1440:h*60+m; };
   const allStarts = segments.map(s=>toMins(s.start));
   const allEnds = segments.map(s=>toMins(s.end));
-  const minTime = Math.min(...allStarts)-15;
-  const maxTime = Math.max(...allEnds)+15;
+  const minTime = Math.min(...allStarts)-10;
+  const maxTime = Math.max(...allEnds)+10;
   const totalMins = maxTime-minTime;
 
-  const stageColors = { deep:'#1a237e', core:'#5B8DD9', rem:'#90CAF9' };
-  const stageY = { deep:0.6, core:0.3, rem:0.05 }; // position in 0-1 range
-  const stageH = 0.25;
+  // 4 clean rows: REM / Core / Deep / Awake — each 16px with 3px gap
+  const CANVAS_H = 90;
+  const LABEL_H = 12;
+  const ROW_H = 16;
+  const GAP = 3;
+  const LABEL_W = 32;
+  const rows = {
+    rem:   LABEL_H,
+    core:  LABEL_H + (ROW_H+GAP),
+    deep:  LABEL_H + (ROW_H+GAP)*2,
+    awake: LABEL_H + (ROW_H+GAP)*3
+  };
+  const stageColors = { deep:'#1a237e', core:'#5B8DD9', rem:'#90CAF9', awake:'#FFAAA5' };
 
   const w = wrap.clientWidth||300;
-  canvas.width = w; canvas.height = 80;
+  canvas.width = w; canvas.height = CANVAS_H;
   const ctx = canvas.getContext('2d');
 
   // Background
   ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--warm')||'#F5EFE6';
-  ctx.fillRect(0,0,w,80);
+  ctx.fillRect(0,0,w,CANVAS_H);
+
+  // Row labels
+  ctx.font = '8px system-ui,sans-serif'; ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.fillText('REM',   2, rows.rem   + ROW_H - 4);
+  ctx.fillText('Core',  2, rows.core  + ROW_H - 4);
+  ctx.fillText('Deep',  2, rows.deep  + ROW_H - 4);
+  ctx.fillText('Awake', 2, rows.awake + ROW_H - 4);
 
   // Draw segments
+  const drawW = w - LABEL_W;
   segments.forEach(s=>{
-    const x = ((toMins(s.start)-minTime)/totalMins)*w;
-    const segW = ((parseInt(s.duration_min)||0)/totalMins)*w;
-    const color = stageColors[s.stage]||'#ccc';
-    const y = stageY[s.stage]*80||20;
-    const h = stageH*80;
+    const x = LABEL_W + ((toMins(s.start)-minTime)/totalMins)*drawW;
+    const segW = ((parseInt(s.duration_min)||0)/totalMins)*drawW;
+    const color = stageColors[s.stage];
+    if(!color || rows[s.stage]===undefined) return;
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.roundRect(x, y, Math.max(2,segW), h, 3);
+    ctx.roundRect(x, rows[s.stage], Math.max(3, segW), ROW_H, 3);
     ctx.fill();
   });
 
@@ -4735,11 +4755,7 @@ async function buildSleepTimeline(dateStr){
   }).join('');
   if(labelsEl) labelsEl.style.position='relative';
 
-  // Stage labels on left
-  ctx.font = '8px sans-serif'; ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  [['Deep',stageY.deep],['Core',stageY.core],['REM',stageY.rem]].forEach(([l,y])=>{
-    ctx.fillText(l, 3, y*80+stageH*80/2+3);
-  });
+  // (row labels drawn inline above)
 }
 
 // ── SLEEP WEEKLY QUALITY & MONTHLY CALENDAR ───────────────────────────
@@ -5117,7 +5133,7 @@ async function buildSleepAppleMetrics(){
   const yesterdayStr = `${yest.getFullYear()}-${String(yest.getMonth()+1).padStart(2,'0')}-${String(yest.getDate()).padStart(2,'0')}`;
   const latest = withSleep.find(r=>r.date===todayStr)
               || withSleep.find(r=>r.date===yesterdayStr)
-              || withSleep[0];
+              || withSleep[withSleep.length-1];
   const recent7 = withSleep.slice(0,7);
   const avgSleep = recent7.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/recent7.length;
   const fmt = d => safeDate(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
@@ -8137,14 +8153,20 @@ Extract all available values and respond ONLY with valid JSON, no other text:
     if(parsed.seal!=null) document.getElementById('myair-seal-lmin').value = parsed.seal;
     if(parsed.onoff!=null) document.getElementById('myair-onoff').value = parsed.onoff;
 
-    // Set date
+    // Set date — use month/day from AI but always force current year (AI often gets year wrong)
     if(parsed.date && parsed.date!=='null'){
       const dateEl = document.getElementById('myair-date');
       const labelEl = document.getElementById('myair-date-label');
-      if(dateEl) dateEl.value = parsed.date;
-      if(labelEl){
-        const d = new Date(parsed.date+'T12:00:00');
-        labelEl.textContent = '('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')';
+      if(dateEl){
+        const parts = parsed.date.match(/(\d{4})-(\d{2})-(\d{2})/);
+        if(parts){
+          const corrected = `${new Date().getFullYear()}-${parts[2]}-${parts[3]}`;
+          dateEl.value = corrected;
+          if(labelEl){
+            const d = new Date(corrected+'T12:00:00');
+            labelEl.textContent = '('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')';
+          }
+        }
       }
     }
 
@@ -8345,7 +8367,7 @@ async function loadTodaySleepFromCSV(){
       const yesterdayStr = `${yest.getFullYear()}-${String(yest.getMonth()+1).padStart(2,'0')}-${String(yest.getDate()).padStart(2,'0')}`;
       const latest = withSleep.find(r=>r.date===todayStr)
                   || withSleep.find(r=>r.date===yesterdayStr)
-                  || withSleep[0];
+                  || withSleep[withSleep.length-1];
       if(sleepEl && (sleepEl.textContent==='—'||sleepEl.textContent==='')){
         sleepEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
       }
