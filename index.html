@@ -2466,8 +2466,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div id="slb-items"></div>
       <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border);">
-        <input id="slb-new-item" type="text" placeholder="Add an item..." style="width:100%;padding:10px 12px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;background:var(--warm);margin-bottom:8px;display:block;" onkeydown="if(event.key==='Enter')addShoppingItem()">
-        <button class="btn-primary" style="width:100%;font-size:14px;padding:10px;" onclick="addShoppingItem()">Add item</button>
+        <input id="slb-new-item" type="text" placeholder="Type an item and tap Add..." style="width:100%;padding:12px;border-radius:8px;border:1.5px solid var(--accent);font-size:14px;background:#fff;margin-bottom:8px;display:block;color:var(--text);">
+        <button id="slb-add-btn" class="btn-primary" style="width:100%;font-size:14px;padding:10px;">Add item</button>
       </div>
     </div>
   </div>
@@ -2578,6 +2578,7 @@ req.onsuccess=e=>{db=e.target.result;boot().catch(err=>console.error('Boot error
 req.onerror=e=>console.error('IndexedDB error:',e);
 
 function dbAdd(store,data){return new Promise(r=>{const t=db.transaction(store,'readwrite');t.objectStore(store).add({...data,ts:Date.now()});t.oncomplete=r;});}
+function dbUpdate(store,data){return new Promise(r=>{const t=db.transaction(store,'readwrite');t.objectStore(store).put({...data,ts:Date.now()});t.oncomplete=r;});}
 function dbAll(store){return new Promise(r=>{const t=db.transaction(store,'readonly');const rq=t.objectStore(store).getAll();rq.onsuccess=()=>r(rq.result);});}
 function dbDelete(store,key){return new Promise(r=>{const t=db.transaction(store,'readwrite');t.objectStore(store).delete(key);t.oncomplete=r;});}
 function dbPutPhoto(key,dataUrl){return new Promise(r=>{const t=db.transaction('photos','readwrite');t.objectStore('photos').put({id:key,data:dataUrl});t.oncomplete=r;});}
@@ -3060,9 +3061,9 @@ async function saveBuyNotes(idx, id){
   const raw=document.getElementById(`buy-notes-input-${idx}`).value.trim();
   const items=raw.split(/[\n,]+/).map(i=>i.trim()).filter(Boolean);
   entry.buyNotes=items.join('\n');
-  await dbAdd('outfits',entry);
+  await dbUpdate('outfits',entry);
   syncToBlob('outfits');
-  document.getElementById(`buy-notes-${idx}`).style.display='none';
+  document.getElementById(`buy-notes-${idx}`)?.style && (document.getElementById(`buy-notes-${idx}`).style.display='none');
   showToast('✓ Saved to shopping list — '+items.length+' item'+(items.length!==1?'s':''));
   await renderLookbook();
 }
@@ -3204,7 +3205,7 @@ async function completeShoppingLook(id, items){
   // Clear buyNotes on the outfit entry
   const outfits=await dbAll('outfits');
   const entry=outfits.find(e=>e.id===id);
-  if(entry){ entry.buyNotes=''; await dbAdd('outfits',entry); syncToBlob('outfits'); }
+  if(entry){ entry.buyNotes=''; await dbUpdate('outfits',entry); syncToBlob('outfits'); }
   await fetch(BACKEND+'/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({pillar:'shopping_checks',data:checkState})});
   renderShoppingList();
@@ -3248,6 +3249,10 @@ async function openShoppingLightbox(id){
   _renderLightboxItems(entry, checkState);
   lb.style.display='block';
   document.body.style.overflow='hidden';
+  const addBtn=document.getElementById('slb-add-btn');
+  if(addBtn){ addBtn.onclick=null; addBtn.addEventListener('click', addShoppingItem); }
+  const addInput=document.getElementById('slb-new-item');
+  if(addInput){ addInput.onkeydown=null; addInput.addEventListener('keydown', e=>{if(e.key==='Enter')addShoppingItem();}); }
 }
 
 function _renderLightboxItems(entry, checkState){
@@ -3290,8 +3295,9 @@ async function addShoppingItem(){
   console.log('entry found:', entry);
   if(!entry) return;
   entry.buyNotes=(entry.buyNotes?entry.buyNotes+'\n':'')+text;
-  await dbAdd('outfits',entry); syncToBlob('outfits');
+  await dbUpdate('outfits',entry); syncToBlob('outfits');
   input.value='';
+  showToast('✓ Item added');
   let checkState={};
   try{ const res=await fetch(BACKEND+'/api/sync?pillar=shopping_checks'); if(res.ok){ const d=await res.json(); checkState=d.data||{}; } }catch(e){}
   _renderLightboxItems(entry, checkState);
