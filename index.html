@@ -8330,7 +8330,7 @@ async function loadTodaySleepFromCSV(){
     const manualSleeps = await dbAll('sleeps');
     const todaySleep = manualSleeps.find(s=>s.date===nowStr());
     if(todaySleep && todaySleep.hrs && todaySleep.hrs!=='—'){
-      if(sleepEl) sleepEl.textContent = todaySleep.hrs+'h';
+      if(sleepEl){ sleepEl.textContent = todaySleep.hrs+'h'; sleepEl.dataset.manual='1'; }
       if(sleepSrcEl) sleepSrcEl.textContent = 'manually logged';
     }
   } catch(e){}
@@ -8368,7 +8368,7 @@ async function loadTodaySleepFromCSV(){
       const latest = withSleep.find(r=>r.date===todayStr)
                   || withSleep.find(r=>r.date===yesterdayStr)
                   || withSleep[withSleep.length-1];
-      if(sleepEl && (sleepEl.textContent==='—'||sleepEl.textContent==='')){
+      if(sleepEl && !sleepEl.dataset.manual){
         sleepEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
       }
       if(sleepSrcEl){
