@@ -8373,7 +8373,7 @@ async function loadTodaySleepFromCSV(){
       }
       if(sleepSrcEl){
         const src = latest.sleep_source||'';
-        sleepSrcEl.textContent = src.includes('Withings')?'Withings':src.includes('Sleeptracker')?'Sleeptracker':'Last night';
+        sleepSrcEl.textContent = src.includes('Withings')?'Withings':'Last night';
       }
     }
   } catch(e){ console.warn('loadTodaySleepFromCSV error:', e); }
