@@ -1252,7 +1252,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
   <div class="view-content" id="vc-body-yearly">
     <div class="section-label">Body · Full journey</div>
-    <div class="card"><div class="card-title">Zepbound full journey</div><div class="chart-wrap" id="wrap-body-year-chart"></div></div>
+    <div class="card">
+      <div class="card-title">Journey stats</div>
+      <div id="body-yearly-stats"><div class="log-empty">Upload CSV to see journey stats.</div></div>
+    </div>
+    <div class="card"><div class="card-title">Zepbound full journey · monthly avg weight</div><div class="chart-wrap" style="height:220px;" id="wrap-body-year-chart"></div></div>
     <div class="card">
       <div class="card-title">Body composition · all time</div>
       <div class="chart-tabs" id="body-comp-tabs-yearly">
@@ -2646,6 +2650,7 @@ function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildGaitWeekCharts();}if(v==='monthly')buildZepMonthlyTracker();}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); if(v==='monthly') setTimeout(()=>switchSkinMetricChart(activeSkinMetric, document.querySelector('#skin-metric-tabs .chart-tab.on')||document.querySelector('#skin-metric-tabs .chart-tab')),100); }
   if(curTab==='hair'&&v!=='daily'){ buildHairCharts(); if(v==='weekly'){ loadHairAnalysesLog(); loadHairMilestones(); } }
+  if(curTab==='body'&&v!=='daily'){ buildBodyCompChartsForView(v); if(v==='weekly') buildWeeklyExercise(); if(v==='yearly') buildBodyYearlySummary(); }
   if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); buildSleepMyAirCombinedChart(); buildSleepStagesWeeklyChart(); }
   if(curTab==='sleep'&&v==='monthly') { buildMyAirCharts(); buildSleepMonthlyCalendar(); }
 }
@@ -5209,7 +5214,161 @@ function switchBodyCompChartView(metric, view, btn){
 async function buildBodyCompChartsForView(view){
   const rows = await getCSVRows();
   buildBodyCompChartForView(activeBodyCompMetricByView[view]||'body_fat_pct', view, rows);
-  if(view!=='yearly') buildStepsChartForView(view, rows);
+  if(view!=='yearly') {
+    buildStepsChartForView(view, rows);
+    buildBodyWeightChartForView(view, rows);
+  }
+}
+
+function buildBodyWeightChartForView(view, rows){
+  const wrapId = view==='weekly'?'wrap-body-week-chart':'wrap-body-month-chart';
+  const wrap = document.getElementById(wrapId); if(!wrap) return;
+  const canvasId = `body-weight-${view}-chart`;
+  if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id=canvasId;wrap.style.height='200px';wrap.appendChild(c);}
+  if(chartInstances[canvasId]){chartInstances[canvasId].destroy();delete chartInstances[canvasId];}
+  const now=new Date(), daysCount=view==='weekly'?7:30;
+  const days=[];for(let i=daysCount-1;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+  const labels=days.map(d=>safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const data=days.map(d=>{const r=rows.find(row=>row.date===d&&parseFloat(row.weight_lbs)>0);return r?parseFloat(r.weight_lbs):null;});
+  if(!data.some(v=>v!==null)){wrap.innerHTML='<div class="log-empty">No weight data — upload your weekly CSV.</div>';return;}
+  const goalWeight = parseFloat(document.getElementById('goal-weight')?.value)||null;
+  const datasets=[{label:'Weight (lbs)',data,borderColor:'#C4735A',backgroundColor:'rgba(196,115,90,0.12)',borderWidth:2,pointRadius:view==='weekly'?4:2,fill:true,tension:0.3,spanGaps:true}];
+  if(goalWeight) datasets.push({label:'Goal',data:days.map(()=>goalWeight),borderColor:'rgba(107,158,120,0.5)',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false});
+  chartInstances[canvasId]=new Chart(wrap.querySelector('canvas').getContext('2d'),{
+    type:'line',data:{labels,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:!!goalWeight},tooltip:{callbacks:{label:c=>`${c.parsed.y} lbs`}}},
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:view==='monthly'?10:7}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'},beginAtZero:false}
+      }
+    }
+  });
+}
+
+async function buildWeeklyExercise(){
+  const el = document.getElementById('weekly-exercise');
+  if(!el) return;
+  const now = new Date();
+  const weekStart = new Date(now); weekStart.setDate(now.getDate()-6); weekStart.setHours(0,0,0,0);
+  // Manual entries from Blob
+  const exercises = await fetch(`${BACKEND}/api/sync?pillar=exercises`).then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
+  const thisWeek = exercises.filter(e=>{
+    const d = safeDate(e.date.slice(0,10)||e.date); return d>=weekStart&&d<=now;
+  });
+  // CSV workouts
+  const rows = await getCSVRows();
+  const csvWorkouts = rows.filter(r=>{
+    if(!r.exercise_types&&!r.exercise_minutes) return false;
+    const d=safeDate(r.date); return d>=weekStart&&d<=now;
+  });
+  // Merge — prefer manual for same date
+  const manualDates = new Set(thisWeek.map(e=>e.date.slice(0,10)));
+  const allWorkouts = [
+    ...thisWeek.map(e=>({date:e.date.slice(0,10),types:e.summary||[],time:e.time,intensity:e.intensity,note:e.note,mins:(parseInt(e.walk||0)+parseInt(e.pilates||0)+parseInt(e.strength||0)+parseInt(e.abs||0)+parseInt(e.yoga||0)+parseInt(e.other||0))||null})),
+    ...csvWorkouts.filter(r=>!manualDates.has(r.date)).map(r=>({date:r.date,types:r.exercise_types?r.exercise_types.split('|'):[],mins:parseInt(r.exercise_minutes)||null,cals:parseInt(r.exercise_calories)||null,isCSV:true}))
+  ].sort((a,b)=>b.date.localeCompare(a.date));
+
+  if(!allWorkouts.length){el.innerHTML='<div class="log-empty">No workouts logged this week yet.</div>';return;}
+
+  // Build day-by-day grid
+  const totalMins = allWorkouts.reduce((s,w)=>s+(w.mins||0),0);
+  const totalDays = allWorkouts.length;
+  // Targets: Pilates 2×, Treadmill 3×, Stretch daily
+  const pilatesCount = allWorkouts.filter(w=>w.types.some(t=>/pilates/i.test(t))).length;
+  const walkCount = allWorkouts.filter(w=>w.types.some(t=>/walk|treadmill/i.test(t))).length;
+
+  let html = `<div style="display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap;">
+    <div style="text-align:center;"><div style="font-size:26px;font-weight:700;color:var(--accent);">${totalDays}</div><div style="font-size:11px;color:var(--muted);">active days</div></div>
+    <div style="text-align:center;"><div style="font-size:26px;font-weight:700;color:var(--accent);">${totalMins||'—'}</div><div style="font-size:11px;color:var(--muted);">total mins</div></div>
+    <div style="text-align:center;"><div style="font-size:26px;font-weight:700;color:${pilatesCount>=2?'#6B9E78':'var(--muted)'};">${pilatesCount}/2</div><div style="font-size:11px;color:var(--muted);">Pilates</div></div>
+    <div style="text-align:center;"><div style="font-size:26px;font-weight:700;color:${walkCount>=3?'#6B9E78':'var(--muted)'};">${walkCount}/3</div><div style="font-size:11px;color:var(--muted);">Treadmill</div></div>
+  </div>`;
+
+  allWorkouts.forEach(w=>{
+    const label = safeDate(w.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const types = w.types.filter(Boolean).join(' · ');
+    const meta = [w.mins?w.mins+'min':null, w.cals?w.cals+' cal':null, w.intensity, w.time].filter(Boolean).join(' · ');
+    html += `<div style="padding:8px 0;border-top:0.5px solid var(--border);">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:3px;">${label}</div>
+      <div style="font-size:13px;color:var(--text);">${types||'Workout logged'}</div>
+      ${meta?`<div style="font-size:11px;color:var(--muted);margin-top:2px;">${meta}</div>`:''}
+      ${w.note?`<div style="font-size:12px;color:var(--text);margin-top:3px;font-style:italic;">${w.note}</div>`:''}
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+async function buildBodyYearlySummary(){
+  const wrap = document.getElementById('wrap-body-year-chart');
+  if(wrap && !wrap.querySelector('canvas')){
+    const c=document.createElement('canvas');c.id='body-year-canvas';wrap.appendChild(c);
+  }
+  const rows = await getCSVRows();
+  if(!rows.length) return;
+
+  // Monthly avg weight — all time
+  const canvasId='body-year-canvas';
+  const canvas=document.getElementById(canvasId);
+  if(canvas){
+    if(chartInstances[canvasId]){chartInstances[canvasId].destroy();delete chartInstances[canvasId];}
+    const monthGroups={};
+    rows.filter(r=>parseFloat(r.weight_lbs)>0).forEach(r=>{
+      const d=safeDate(r.date);const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      if(!monthGroups[key]){monthGroups[key]={vals:[],label:d.toLocaleDateString('en-US',{month:'short',year:'2-digit'})};}
+      monthGroups[key].vals.push(parseFloat(r.weight_lbs));
+    });
+    const months=Object.keys(monthGroups).sort();
+    const labels=months.map(k=>monthGroups[k].label);
+    const data=months.map(k=>parseFloat((monthGroups[k].vals.reduce((a,b)=>a+b,0)/monthGroups[k].vals.length).toFixed(1)));
+    // Mark Zepbound start
+    const zepIdx=months.indexOf('2025-10');
+    chartInstances[canvasId]=new Chart(canvas.getContext('2d'),{
+      type:'line',
+      data:{labels,datasets:[{
+        label:'Weight (lbs)',data,
+        borderColor:'#C4735A',backgroundColor:'rgba(196,115,90,0.12)',
+        borderWidth:2,pointRadius:3,fill:true,tension:0.3,spanGaps:true,
+        segment:{borderColor:ctx=>ctx.p0DataIndex>=zepIdx?'#6B9E78':'#C4735A',backgroundColor:ctx=>ctx.p0DataIndex>=zepIdx?'rgba(107,158,120,0.12)':'rgba(196,115,90,0.12)'}
+      }]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:c=>`${c.parsed.y} lbs`}},
+          annotation:{annotations:zepIdx>=0?{zep:{type:'line',xMin:zepIdx,xMax:zepIdx,borderColor:'rgba(107,158,120,0.6)',borderWidth:1.5,borderDash:[4,3],label:{content:'Zepbound',enabled:true,position:'start',color:'#6B9E78',font:{size:10}}}}:{}}
+        },
+        scales:{
+          x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#8C7B6B',maxTicksLimit:14}},
+          y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'},beginAtZero:false}
+        }
+      }
+    });
+  }
+
+  // Yearly stats summary card
+  const statsEl = document.getElementById('body-yearly-stats');
+  if(!statsEl) return;
+  const weightRows = rows.filter(r=>parseFloat(r.weight_lbs)>0).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!weightRows.length){statsEl.innerHTML='<div class="log-empty">Upload CSV to see journey stats.</div>';return;}
+  const firstW = parseFloat(weightRows[0].weight_lbs);
+  const latestW = parseFloat(weightRows[weightRows.length-1].weight_lbs);
+  const minRow = weightRows.reduce((a,b)=>parseFloat(a.weight_lbs)<parseFloat(b.weight_lbs)?a:b);
+  const totalLost = (firstW-latestW).toFixed(1);
+  const allTimeLow = parseFloat(minRow.weight_lbs).toFixed(1);
+  const lowDate = safeDate(minRow.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  // Exercise totals from CSV
+  const totalExDays = rows.filter(r=>r.exercise_types&&r.exercise_count).length;
+  const totalExMins = rows.filter(r=>parseInt(r.exercise_minutes)>0).reduce((s,r)=>s+parseInt(r.exercise_minutes),0);
+
+  statsEl.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="stat-tile"><div class="stat-val" style="font-size:22px;">${totalLost}</div><div class="stat-lbl">lbs lost · journey</div></div>
+    <div class="stat-tile"><div class="stat-val" style="font-size:22px;">${allTimeLow}</div><div class="stat-lbl">all-time low · ${lowDate}</div></div>
+    <div class="stat-tile"><div class="stat-val" style="font-size:22px;">${totalExDays}</div><div class="stat-lbl">workout days logged</div></div>
+    <div class="stat-tile"><div class="stat-val" style="font-size:22px;">${totalExMins?Math.round(totalExMins/60)+'h':'—'}</div><div class="stat-lbl">total exercise</div></div>
+  </div>`;
 }
 
 function buildBodyCompChartForView(metric, view, rows){
