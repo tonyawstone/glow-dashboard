@@ -60,7 +60,6 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .vtab.on{background:var(--warm);color:var(--accent);border-color:var(--accent);font-weight:500;}
 
 /* CARDS */
-.shopping-card * { pointer-events:none; }
 .card{background:#fff;border:0.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
 .card-title{font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:16px;}
 .section-label{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;display:flex;align-items:center;justify-content:space-between;}
@@ -3011,7 +3010,7 @@ async function renderLookbook(){
     if(inspo.length===0){
       inspoGrid.innerHTML='<div class="lookbook-empty"><i class="ti ti-sparkles" aria-hidden="true"></i>Log outfits tagged "Inspo only" to build your board</div>';
     } else {
-      inspoGrid.innerHTML=[...inspo].reverse().map((e,idx)=>inspoCardHTML(e,idx)).join('');
+      const _inspoList=[...inspo].reverse(); window._inspoMap={}; _inspoList.forEach((e,idx)=>window._inspoMap[idx]=e); inspoGrid.innerHTML=_inspoList.map((e,idx)=>inspoCardHTML(e,idx)).join('');
     }
   }
 
@@ -3056,7 +3055,10 @@ function toggleBuyNotes(btn, idx){
 
 async function saveBuyNotes(idx, id){
   const outfits=await dbAll('outfits');
-  const entry=outfits.find(e=>e.id===id) || outfits[idx];
+  const mapped=window._inspoMap&&window._inspoMap[idx];
+  const entry=outfits.find(e=>e.id===id)
+    ||(mapped&&outfits.find(e=>e.date===mapped.date&&e.desc===mapped.desc))
+    ||null;
   if(!entry)return;
   // Support comma-separated or newline-separated — normalize to one item per line
   const raw=document.getElementById(`buy-notes-input-${idx}`).value.trim();
