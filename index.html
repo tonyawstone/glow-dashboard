@@ -2454,7 +2454,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div style="padding:16px;max-width:600px;margin:0 auto;">
     <div style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <button onclick="closeShoppingLightbox()" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;">← Inspo Looks</button>
+        <button onclick="closeShoppingLightbox()" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:0;font-weight:500;display:flex;align-items:center;gap:4px;">← Back to Inspo Looks</button>
         <button onclick="closeShoppingLightbox();toggleShoppingView();" style="background:none;border:none;font-size:13px;color:var(--accent);cursor:pointer;padding:0;font-weight:500;">🛍 View Shopping List →</button>
       </div>
       <div id="slb-title" style="font-size:16px;font-weight:600;color:var(--text);"></div>
@@ -3063,6 +3063,7 @@ async function saveBuyNotes(idx, id){
   const raw=document.getElementById(`buy-notes-input-${idx}`).value.trim();
   const items=raw.split(/[\n,]+/).map(i=>i.trim()).filter(Boolean);
   entry.buyNotes=items.join('\n');
+  if(!entry.buyNotesDate) entry.buyNotesDate=new Date().toISOString().slice(0,10);
   await dbUpdate('outfits',entry);
   syncToBlob('outfits');
   document.getElementById(`buy-notes-${idx}`)?.style && (document.getElementById(`buy-notes-${idx}`).style.display='none');
@@ -3158,21 +3159,32 @@ async function renderShoppingList(){
     }).length;
     const allDone=lookChecked===items.length&&items.length>0;
     const pct=items.length?Math.round(lookChecked/items.length*100):0;
-    html+=`<div class="card shopping-card" style="margin-bottom:10px;cursor:pointer;${allDone?'opacity:0.55;':''}" onclick="openShoppingLightbox(${e.id||0})">
-      <div style="display:flex;gap:12px;align-items:center;cursor:pointer;">
+    // Build items HTML with inline checkboxes
+    const itemsHTML = items.map(item=>{
+      const key = e.id+'_'+item.slice(0,20).replace(/\s+/g,'_');
+      const isChecked = checkState[key]||false;
+      return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-top:0.5px solid var(--border);" onclick="event.stopPropagation()">'
+        +'<input type="checkbox" '+(isChecked?'checked':'')
+        +' onchange="toggleShoppingItem(this,\''+key+'\','+JSON.stringify(e.id||e.date)+')" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">'
+        +'<div style="font-size:13px;flex:1;'+(isChecked?'text-decoration:line-through;color:var(--muted);':'')+'">' +item+'</div>'
+        +'</div>';
+    }).join('');
+
+    html+=`<div class="card" style="margin-bottom:10px;${allDone?'opacity:0.55;':''}">
+      <div style="display:flex;gap:12px;align-items:flex-start;">
         ${e.photo
-          ?`<img src="${e.photo}" style="width:72px;height:90px;object-fit:cover;border-radius:8px;flex-shrink:0;">`
-          :`<div style="width:72px;height:90px;border-radius:8px;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">👗</div>`}
+          ?`<img src="${e.photo}" style="width:64px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;cursor:pointer;" onclick="openShoppingLightbox(${e.id||0})">`
+          :`<div style="width:64px;height:80px;border-radius:8px;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;cursor:pointer;" onclick="openShoppingLightbox(${e.id||0})">👗</div>`}
         <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;">${e.desc||'Look'}</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${fmtOutfitDate(e.date)}</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${lookChecked}/${items.length} items found ${allDone?'✓':''}</div>
-          <div style="height:4px;background:var(--border);border-radius:20px;overflow:hidden;">
-            <div style="height:100%;background:${allDone?'#6B9E78':'var(--accent)'};border-radius:20px;width:${pct}%;"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:13px;font-weight:600;color:var(--text);">${e.desc||'Look'}</div>
+            <button onclick="openShoppingLightbox(${e.id||0})" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0;flex-shrink:0;">›</button>
           </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">${e.buyNotesDate?'Added '+fmtOutfitDate(e.buyNotesDate):fmtOutfitDate(e.date)} · ${lookChecked}/${items.length} found ${allDone?'✓':''}</div>
         </div>
-        <div style="color:var(--muted);font-size:18px;flex-shrink:0;">›</div>
       </div>
+      ${itemsHTML}
+      <button class="btn-secondary" style="width:100%;margin-top:10px;font-size:12px;" onclick="completeShoppingLook(${JSON.stringify(e.id||e.date)}, ${JSON.stringify(items)})">✓ Outfit complete — remove from list</button>
     </div>`;
   });
 
@@ -3207,7 +3219,7 @@ async function completeShoppingLook(id, items){
   // Clear buyNotes on the outfit entry
   const outfits=await dbAll('outfits');
   const entry=outfits.find(e=>e.id===id);
-  if(entry){ entry.buyNotes=''; await dbUpdate('outfits',entry); syncToBlob('outfits'); }
+  if(entry){ entry.buyNotes=''; entry.buyNotesDate=null; await dbUpdate('outfits',entry); syncToBlob('outfits'); }
   await fetch(BACKEND+'/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({pillar:'shopping_checks',data:checkState})});
   renderShoppingList();
@@ -3297,6 +3309,7 @@ async function addShoppingItem(){
   console.log('entry found:', entry);
   if(!entry) return;
   entry.buyNotes=(entry.buyNotes?entry.buyNotes+'\n':'')+text;
+  if(!entry.buyNotesDate) entry.buyNotesDate=new Date().toISOString().slice(0,10);
   await dbUpdate('outfits',entry); syncToBlob('outfits');
   input.value='';
   showToast('✓ Item added');
