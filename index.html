@@ -3184,7 +3184,10 @@ async function renderShoppingList(){
         </div>
       </div>
       ${itemsHTML}
-      <button class="btn-secondary" style="width:100%;margin-top:10px;font-size:12px;" onclick="completeShoppingLook(${JSON.stringify(e.id||e.date)}, ${JSON.stringify(items)})">✓ Outfit complete — remove from list</button>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn-primary" style="flex:1;font-size:12px;padding:8px;" onclick="purchaseShoppingLook(${JSON.stringify(e.id||e.date)}, ${JSON.stringify(items)})">✓ Mark as purchased</button>
+        <button class="btn-secondary" style="flex:1;font-size:12px;padding:8px;" onclick="removeShoppingLook(${JSON.stringify(e.id||e.date)})">✕ Remove from list</button>
+      </div>
     </div>`;
   });
 
@@ -3225,6 +3228,66 @@ async function completeShoppingLook(id, items){
   renderShoppingList();
 }
 
+
+
+async function purchaseShoppingLook(id, items){
+  // Record purchase and clear from shopping list
+  const outfits = await dbAll('outfits');
+  const entry = outfits.find(e=>e.id===id||e.date===id);
+  if(!entry) return;
+
+  // Build purchase record
+  const purchase = {
+    date: new Date().toISOString().slice(0,10),
+    outfitId: id,
+    outfitDesc: entry.desc||'',
+    outfitPhoto: entry.photo||'',
+    items: items,
+    occ: entry.occ||[],
+    vibe: entry.vibe||[],
+    colors: entry.colors||[],
+    season: entry.season||'',
+    addedDate: entry.buyNotesDate||'',
+    store: '',   // placeholder for future store tracking
+    price: null, // placeholder for future price tracking
+  };
+
+  // Save to purchases pillar
+  const existing = await fetch(BACKEND+'/api/sync?pillar=purchases')
+    .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
+  existing.push(purchase);
+  await fetch(BACKEND+'/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'purchases',data:existing})});
+
+  // Clear from shopping list
+  await _clearShoppingLook(id, items);
+  showToast('✓ Purchased! Added to your wardrobe history.');
+  renderShoppingList();
+}
+
+async function removeShoppingLook(id){
+  if(!confirm('Remove this look from your shopping list?')) return;
+  const outfits = await dbAll('outfits');
+  const entry = outfits.find(e=>e.id===id||e.date===id);
+  if(!entry) return;
+  const items = (entry.buyNotes||'').split('\n').map(i=>i.replace(/^[-*\u2022]\s*/,'').trim()).filter(Boolean);
+  await _clearShoppingLook(id, items);
+  showToast('Removed from shopping list.');
+  renderShoppingList();
+}
+
+async function _clearShoppingLook(id, items){
+  // Clear checkState keys
+  let checkState={};
+  try{ const res=await fetch(BACKEND+'/api/sync?pillar=shopping_checks'); if(res.ok){ const d=await res.json(); checkState=d.data||{}; } }catch(e){}
+  items.forEach(item=>{ const key=id+'_'+item.slice(0,20).replace(/\s+/g,'_'); delete checkState[key]; });
+  await fetch(BACKEND+'/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'shopping_checks',data:checkState})});
+  // Clear buyNotes on outfit
+  const outfits = await dbAll('outfits');
+  const entry = outfits.find(e=>e.id===id||e.date===id);
+  if(entry){ entry.buyNotes=''; entry.buyNotesDate=null; await dbUpdate('outfits',entry); syncToBlob('outfits'); }
+}
 
 let _slbDate = null;
 
