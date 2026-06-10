@@ -825,7 +825,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <!-- Sleep timeline placeholder -->
       <div id="sleep-timeline-wrap" style="margin-top:10px;">
         <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Sleep timeline</div>
-        <div id="sleep-timeline-canvas-wrap" style="position:relative;height:90px;background:var(--warm);border-radius:10px;overflow:hidden;">
+        <div id="sleep-timeline-canvas-wrap" style="position:relative;height:96px;background:var(--warm);border-radius:10px;overflow:hidden;">
           <canvas id="sleep-timeline-chart"></canvas>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:3px;" id="sleep-timeline-labels"></div>
@@ -4640,10 +4640,10 @@ function buildSleepStagesDisplay(row){
     </div>`;
 
   const stages = [
-    {label:'Deep', val:deep, pct:pct(deep), color:'#1a237e', note:'Physical recovery · target 15–20%'},
-    {label:'Core', val:core, pct:pct(core), color:'#5B8DD9', note:'Light sleep · largest portion'},
-    {label:'REM',  val:rem,  pct:pct(rem),  color:'#90CAF9', note:'Memory & mood · target 20–25%'},
-    {label:'Awake',val:awake,pct:pct(awake),color:'#F9A8A8', note:'Time awake in bed'},
+    {label:'Deep', val:deep, pct:pct(deep), color:'#1a237e', note:'Physical recovery', target:'15–20%', min:15, max:20},
+    {label:'Core', val:core, pct:pct(core), color:'#5B8DD9', note:'Light sleep',        target:'50–60%', min:50, max:60},
+    {label:'REM',  val:rem,  pct:pct(rem),  color:'#90CAF9', note:'Memory & mood',      target:'20–25%', min:20, max:25},
+    {label:'Awake',val:awake,pct:pct(awake),color:'#F9A8A8', note:'Time awake in bed',  target:'<10%',   min:0,  max:10},
   ].filter(s=>s.val>0||s.label==='Awake');
 
   return `
@@ -4651,14 +4651,18 @@ function buildSleepStagesDisplay(row){
       <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px;">Sleep stages</div>
       ${barHtml}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
-        ${stages.map(s=>`
-          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;background:var(--warm);">
-            <div style="width:10px;height:10px;border-radius:3px;background:${s.color};flex-shrink:0;"></div>
-            <div>
-              <div style="font-size:12px;font-weight:600;">${s.label} <span style="color:var(--accent);">${fmt(s.val)}</span></div>
-              <div style="font-size:10px;color:var(--muted);">${s.pct}% · ${s.note}</div>
-            </div>
-          </div>`).join('')}
+        ${stages.map(s=>{
+          const inRange = s.pct >= s.min && s.pct <= s.max;
+          const indicator = inRange ? '✓' : s.pct < s.min ? '↓' : '↑';
+          const indicatorColor = inRange ? '#6B9E78' : '#C4735A';
+          return '<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;background:var(--warm);">'
+            + '<div style="width:10px;height:10px;border-radius:3px;background:'+s.color+';flex-shrink:0;"></div>'
+            + '<div style="flex:1;min-width:0;">'
+            + '<div style="font-size:12px;font-weight:600;">'+s.label+' <span style="color:var(--accent);">'+fmt(s.val)+'</span></div>'
+            + '<div style="font-size:10px;color:var(--muted);">'+s.pct+'% · '+s.note+'</div>'
+            + '<div style="font-size:10px;margin-top:1px;"><span style="color:var(--muted);">target '+s.target+'</span> <span style="color:'+indicatorColor+';font-weight:600;">'+indicator+'</span></div>'
+            + '</div></div>';
+        }).join('')}
       </div>
     </div>`;
 }
@@ -4699,8 +4703,8 @@ async function buildSleepTimeline(dateStr){
   const totalMins = maxTime-minTime;
 
   // 4 clean rows: REM / Core / Deep / Awake — each 16px with 3px gap
-  const CANVAS_H = 90;
-  const LABEL_H = 12;
+  const CANVAS_H = 96;
+  const LABEL_H = 14;
   const ROW_H = 16;
   const GAP = 3;
   const LABEL_W = 32;
@@ -4720,13 +4724,6 @@ async function buildSleepTimeline(dateStr){
   ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--warm')||'#F5EFE6';
   ctx.fillRect(0,0,w,CANVAS_H);
 
-  // Row labels
-  ctx.font = '8px system-ui,sans-serif'; ctx.fillStyle = 'rgba(0,0,0,0.35)';
-  ctx.fillText('REM',   2, rows.rem   + ROW_H - 4);
-  ctx.fillText('Core',  2, rows.core  + ROW_H - 4);
-  ctx.fillText('Deep',  2, rows.deep  + ROW_H - 4);
-  ctx.fillText('Awake', 2, rows.awake + ROW_H - 4);
-
   // Draw segments
   const drawW = w - LABEL_W;
   segments.forEach(s=>{
@@ -4740,20 +4737,47 @@ async function buildSleepTimeline(dateStr){
     ctx.fill();
   });
 
-  // Time labels
+  // Vertical grid lines + time labels — drawn on canvas, aligned with LABEL_W offset
   const labelTimes = [];
-  const startH = Math.floor(minTime/60)%24;
-  for(let h=startH;h<=Math.floor(maxTime/60)%24+1;h++){
-    const hMod = h%24;
-    const mins = (h<12?h*60+1440:h*60);
-    if(mins>=minTime&&mins<=maxTime) labelTimes.push({h:hMod, mins});
+  const startH = Math.floor(minTime/60);
+  const endH = Math.ceil(maxTime/60);
+  for(let h=startH; h<=endH; h++){
+    const mins = h<12 ? h*60+1440 : h*60;
+    if(mins>=minTime && mins<=maxTime) labelTimes.push({h: h%24, mins});
   }
-  if(labelsEl) labelsEl.innerHTML = labelTimes.map(({h,mins})=>{
-    const pct = ((mins-minTime)/totalMins*100).toFixed(1);
+
+  // Draw vertical grid lines on canvas
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+  ctx.lineWidth = 1;
+  labelTimes.forEach(({mins})=>{
+    const x = LABEL_W + ((mins-minTime)/totalMins)*drawW;
+    ctx.beginPath();
+    ctx.moveTo(x, LABEL_H);
+    ctx.lineTo(x, CANVAS_H);
+    ctx.stroke();
+  });
+
+  // Draw time labels on canvas (aligned with grid lines)
+  ctx.font = '9px system-ui,sans-serif';
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.textAlign = 'center';
+  labelTimes.forEach(({h, mins})=>{
+    const x = LABEL_W + ((mins-minTime)/totalMins)*drawW;
     const label = h===0?'12 AM':h<12?`${h} AM`:h===12?'12 PM':`${h-12} PM`;
-    return `<span style="position:absolute;left:${pct}%;transform:translateX(-50%);font-size:9px;color:var(--muted);">${label}</span>`;
-  }).join('');
-  if(labelsEl) labelsEl.style.position='relative';
+    ctx.fillText(label, x, LABEL_H - 2);
+  });
+  ctx.textAlign = 'left';
+
+  // Clear the HTML labels element — labels now drawn on canvas
+  if(labelsEl) labelsEl.innerHTML = '';
+
+  // Row labels — darker so they're readable
+  ctx.font = '8px system-ui,sans-serif';
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillText('REM',   2, rows.rem   + ROW_H - 4);
+  ctx.fillText('Core',  2, rows.core  + ROW_H - 4);
+  ctx.fillText('Deep',  2, rows.deep  + ROW_H - 4);
+  ctx.fillText('Awake', 2, rows.awake + ROW_H - 4);
 
   // (row labels drawn inline above)
 }
@@ -8325,16 +8349,6 @@ async function loadTodaySleepFromCSV(){
   const stepsEl = document.getElementById('sw-steps');
   const stepsSrcEl = document.getElementById('s-steps-src');
 
-  // Prefer manual sleep entry for today
-  try {
-    const manualSleeps = await dbAll('sleeps');
-    const todaySleep = manualSleeps.find(s=>s.date===nowStr());
-    if(todaySleep && todaySleep.hrs && todaySleep.hrs!=='—'){
-      if(sleepEl){ sleepEl.textContent = todaySleep.hrs+'h'; sleepEl.dataset.manual='1'; }
-      if(sleepSrcEl) sleepSrcEl.textContent = 'manually logged';
-    }
-  } catch(e){}
-
   // Pull CSV data for all stat tiles
   try {
     const rows = await getCSVRows();
@@ -8358,7 +8372,7 @@ async function loadTodaySleepFromCSV(){
       if(stepsSrcEl) stepsSrcEl.textContent = smartDate(latestSteps.date);
     }
 
-    // Sleep from CSV — only if no manual entry today
+    // Sleep from CSV
     const withSleep = rows.filter(r=>r.date&&parseFloat(r.sleep_hrs)>0);
     if(withSleep.length){
       // Withings & Apple record last night's sleep under today's date (wake date)
@@ -8368,7 +8382,7 @@ async function loadTodaySleepFromCSV(){
       const latest = withSleep.find(r=>r.date===todayStr)
                   || withSleep.find(r=>r.date===yesterdayStr)
                   || withSleep[withSleep.length-1];
-      if(sleepEl && !sleepEl.dataset.manual){
+      if(sleepEl){
         sleepEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
       }
       if(sleepSrcEl){
