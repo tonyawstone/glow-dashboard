@@ -2465,9 +2465,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div id="slb-count" style="font-size:12px;color:var(--muted);"></div>
       </div>
       <div id="slb-items"></div>
-      <div style="display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border);">
-        <input id="slb-new-item" type="text" placeholder="Add an item..." style="flex:1;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;background:var(--warm);" onkeydown="if(event.key==='Enter')addShoppingItem()">
-        <button class="btn-primary" style="font-size:13px;padding:8px 14px;" onclick="addShoppingItem()">Add</button>
+      <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border);">
+        <input id="slb-new-item" type="text" placeholder="Add an item..." style="width:100%;padding:10px 12px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;background:var(--warm);margin-bottom:8px;display:block;" onkeydown="if(event.key==='Enter')addShoppingItem()">
+        <button class="btn-primary" style="width:100%;font-size:14px;padding:10px;" onclick="addShoppingItem()">Add item</button>
       </div>
     </div>
   </div>
@@ -3282,9 +3282,12 @@ async function toggleShoppingItemLightbox(checkbox, key){
 
 async function addShoppingItem(){
   const input=document.getElementById('slb-new-item');
-  const text=input.value.trim(); if(!text) return;
+  const text=input.value.trim();
+  console.log('addShoppingItem called, text:', text, '_slbDate:', _slbDate);
+  if(!text){ input.focus(); return; }
   const outfits=await dbAll('outfits');
   const entry=outfits.find(e=>e.id===_slbDate||e.date===_slbDate);
+  console.log('entry found:', entry);
   if(!entry) return;
   entry.buyNotes=(entry.buyNotes?entry.buyNotes+'\n':'')+text;
   await dbAdd('outfits',entry); syncToBlob('outfits');
