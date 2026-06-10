@@ -3034,7 +3034,7 @@ function inspoCardHTML(e, idx){
       ${allTags.length?`<div class="outfit-tags">${allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('')}</div>`:''}
       ${e.notes?`<div style="font-size:11px;color:var(--muted);font-style:italic;">"${e.notes}"</div>`:''}
       ${hasBuyNotes?`<div style="font-size:11px;color:var(--accent);font-style:italic;">🛍 ${e.buyNotes}</div>`:''}
-      <button class="btn-secondary" style="font-size:11px;padding:5px 8px;margin-top:auto;" onclick="openShoppingLightbox(${e.id||0}, 'inspo')">🛍 Plan this look</button>
+      <button class="btn-secondary" style="font-size:11px;padding:5px 8px;margin-top:auto;" onclick="openShoppingLightboxFromInspo(${idx})">🛍 Plan this look</button>
     </div>
   </div>
 `;  // buy-notes now handled in lightbox
@@ -3213,17 +3213,22 @@ async function completeShoppingLook(id, items){
 
 let _slbDate = null;
 
-async function openShoppingLightbox(id, source){
+async function openShoppingLightboxFromInspo(idx){
+  const mapped = window._inspoMap && window._inspoMap[idx];
+  if(!mapped){ console.warn('No inspo entry at idx', idx); return; }
+  const outfits = await dbAll('outfits');
+  const entry = outfits.find(e=>e.id===mapped.id) 
+    || outfits.find(e=>e.date===mapped.date&&e.desc===mapped.desc);
+  if(!entry){ console.warn('No outfit found for inspo entry', mapped); return; }
+  await openShoppingLightbox(entry.id||entry.date);
+}
+
+async function openShoppingLightbox(id){
   _slbDate = id;
   const outfits = await dbAll('outfits');
-  // Try by id first, then fall back to inspo map match
-  let entry = outfits.find(e=>e.id===id);
-  if(!entry && source==='inspo' && window._inspoMap){
-    const mapped = Object.values(window._inspoMap).find(e=>e.id===id||(id===0&&e));
-    if(mapped) entry = outfits.find(e=>e.date===mapped.date&&e.desc===mapped.desc);
-  }
-  if(!entry) { console.warn('openShoppingLightbox: no entry found for id', id); return; }
-  _slbDate = entry.id; // ensure we use the real id
+  let entry = outfits.find(e=>e.id===id) || outfits.find(e=>e.date===id);
+  if(!entry){ console.warn('openShoppingLightbox: no entry found for id', id); return; }
+  _slbDate = entry.id||entry.date;
 
   let checkState={};
   try{
@@ -3271,7 +3276,7 @@ async function toggleShoppingItemLightbox(checkbox, key){
     body:JSON.stringify({pillar:'shopping_checks',data:checkState})});
   // Re-render items in lightbox
   const outfits=await dbAll('outfits');
-  const entry=outfits.find(e=>e.date===_slbDate);
+  const entry=outfits.find(e=>e.id===_slbDate||e.date===_slbDate);
   if(entry) _renderLightboxItems(entry, checkState);
 }
 
@@ -3279,7 +3284,7 @@ async function addShoppingItem(){
   const input=document.getElementById('slb-new-item');
   const text=input.value.trim(); if(!text) return;
   const outfits=await dbAll('outfits');
-  const entry=outfits.find(e=>e.date===_slbDate);
+  const entry=outfits.find(e=>e.id===_slbDate||e.date===_slbDate);
   if(!entry) return;
   entry.buyNotes=(entry.buyNotes?entry.buyNotes+'\n':'')+text;
   await dbAdd('outfits',entry); syncToBlob('outfits');
@@ -3292,7 +3297,7 @@ async function addShoppingItem(){
 async function completeShoppingLookFromLightbox(){
   if(!_slbDate) return;
   const outfits=await dbAll('outfits');
-  const entry=outfits.find(e=>e.date===_slbDate);
+  const entry=outfits.find(e=>e.id===_slbDate||e.date===_slbDate);
   if(!entry) return;
   const items=(entry.buyNotes||'').split('\n').map(i=>i.replace(/^[-*\u2022]\s*/,'').trim()).filter(Boolean);
   await completeShoppingLook(_slbDate, items);
