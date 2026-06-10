@@ -60,6 +60,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .vtab.on{background:var(--warm);color:var(--accent);border-color:var(--accent);font-weight:500;}
 
 /* CARDS */
+.shopping-card * { pointer-events:none; }
 .card{background:#fff;border:0.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
 .card-title{font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:16px;}
 .section-label{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;display:flex;align-items:center;justify-content:space-between;}
@@ -2458,7 +2459,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button id="slb-complete-btn" class="btn-secondary" style="font-size:11px;padding:6px 10px;" onclick="completeShoppingLookFromLightbox()">✓ All done</button>
     </div>
     <img id="slb-photo" src="" style="width:100%;max-height:50vh;object-fit:contain;border-radius:12px;background:var(--warm);margin-bottom:16px;display:none;">
-    <div id="slb-no-photo" style="display:none;height:120px;border-radius:12px;background:var(--warm);display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:36px;">👗</div>
+    <div id="slb-no-photo" style="display:none;height:120px;border-radius:12px;background:var(--warm);align-items:center;justify-content:center;margin-bottom:16px;font-size:36px;text-align:center;line-height:120px;">👗</div>
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div class="card-title" style="margin:0;">Shopping list</div>
@@ -3152,7 +3153,7 @@ async function renderShoppingList(){
     }).length;
     const allDone=lookChecked===items.length&&items.length>0;
     const pct=items.length?Math.round(lookChecked/items.length*100):0;
-    html+=`<div class="card" style="margin-bottom:10px;${allDone?'opacity:0.55;':''}" onclick="openShoppingLightbox('${e.date}')" style="cursor:pointer;">
+    html+=`<div class="card shopping-card" style="margin-bottom:10px;cursor:pointer;${allDone?'opacity:0.55;':''}" onclick="openShoppingLightbox('${e.date}')">
       <div style="display:flex;gap:12px;align-items:center;cursor:pointer;">
         ${e.photo
           ?`<img src="${e.photo}" style="width:72px;height:90px;object-fit:cover;border-radius:8px;flex-shrink:0;">`
