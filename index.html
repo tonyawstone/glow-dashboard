@@ -8676,14 +8676,28 @@ async function saveMyAirLog(){
 }
 
 function loadMyAirState(){
+  // Always default date picker to yesterday (myAir data is always last night)
+  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const dateEl = document.getElementById('myair-date');
+  if(dateEl && !dateEl.value) {
+    dateEl.value = yesterday;
+    const labelEl = document.getElementById('myair-date-label');
+    if(labelEl){ const d=new Date(yesterday+'T12:00:00'); labelEl.textContent='('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')'; }
+  }
+
   const saved = localStorage.getItem('glowMyAirState');
   if(!saved) return;
   try {
     const state = JSON.parse(saved);
-    // Keep showing until a new day starts
     const today = new Date().toISOString().slice(0,10);
-    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
     if(state.date !== today && state.date !== yesterday){ localStorage.removeItem('glowMyAirState'); return; }
+
+    // Restore date
+    if(state.date && dateEl) {
+      dateEl.value = state.date;
+      const labelEl = document.getElementById('myair-date-label');
+      if(labelEl){ const d=new Date(state.date+'T12:00:00'); labelEl.textContent='('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')'; }
+    }
 
     // Restore raw input values
     if(state.hours){ const el=document.getElementById('myair-hours'); if(el) el.value=state.hours; }
