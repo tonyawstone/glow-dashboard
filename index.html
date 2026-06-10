@@ -1120,7 +1120,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleBodyLog()">
-        <div class="card-title" style="margin:0;">+ Today's log</div>
+        <div class="card-title" style="margin:0;">+ Today's body check-in</div>
         <div id="body-log-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
       </div>
       <div id="body-log-body" style="display:none;margin-top:12px;">
@@ -7844,8 +7844,10 @@ async function buildWaterWeekChart(){
   for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d);}
   const labels = days.map(d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
   const data = days.map(d=>{
-    const dateStr = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    const entry = water.filter(w=>w.date===dateStr).pop();
+    const isoDate = d.toISOString().slice(0,10);
+    const legacyDate = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    // Match both ISO format (new entries) and legacy locale format (old entries)
+    const entry = water.filter(w=>w.date===isoDate||w.date===legacyDate).pop();
     return entry?.glasses||0;
   });
 
@@ -7908,11 +7910,17 @@ async function buildBodyWaterWeekChart(){
   if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id=canvasId;wrap.appendChild(c);}
   if(chartInstances[canvasId]){chartInstances[canvasId].destroy();delete chartInstances[canvasId];}
 
-  const rows = await getCSVRows();
+  // Read from Blob manual entries (body water % is manually entered from Withings, not in CSV)
+  let history = [];
+  try{
+    const res = await fetch(`${BACKEND}/api/sync?pillar=body_water`);
+    if(res.ok){ const d=await res.json(); history=Array.isArray(d.data)?d.data:(d.data?.pct?[d.data]:[]);}
+  }catch(e){}
+
   const now = new Date();
   const days=[];for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
   const labels=days.map(d=>safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-  const data=days.map(d=>{const r=rows.find(row=>row.date===d&&parseFloat(row.body_water_pct)>0);return r?parseFloat(r.body_water_pct):null;});
+  const data=days.map(d=>{const r=history.find(e=>e.date===d);return r?parseFloat(r.pct):null;});
 
   if(!data.some(v=>v!==null)){wrap.innerHTML='<div class="log-empty">No body water data — upload your weekly CSV.</div>';return;}
 
