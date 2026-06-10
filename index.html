@@ -651,10 +651,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <!-- Style-specific Inspo tab button — shown only when on Style pillar -->
   <!-- Style action bar -->
   <div id="style-inspo-bar" style="display:none;padding:0 16px 10px;">
-    <div style="display:flex;gap:8px;">
-      <button id="style-inspo-btn" class="btn-secondary" style="flex:1;font-size:13px;" onclick="toggleInspoView()">&#x2728; Inspo Board</button>
-      <button id="style-shopping-btn" class="btn-secondary" style="flex:1;font-size:13px;" onclick="toggleShoppingView()">&#x1F6CD; Shopping List</button>
-    </div>
+    <button id="style-inspo-btn" class="btn-secondary" style="width:100%;font-size:13px;" onclick="toggleInspoView()">✨ Inspo Board</button>
   </div>
 
   <div class="view-content on" id="vc-style-daily">
@@ -736,6 +733,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="wt">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Wardrobe planning notes</div><div id="wardrobe-plan-log-daily"><div class="log-empty">No wardrobe plans yet.</div></div></div>
+    <button id="style-shopping-btn" class="btn-secondary" style="width:100%;font-size:14px;margin-top:4px;" onclick="toggleShoppingView()">🛍 Shopping List</button>
   </div>
   <div class="view-content" id="vc-style-weekly">
     <div class="section-label">This week's looks</div>
@@ -806,7 +804,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
   </div>
   <div class="view-content" id="vc-style-shopping">
-    <div class="section-label">&#x1F6CD; Shopping List</div>
+    <div class="section-label">🛍 Shopping List</div>
     <div id="shopping-list-content"></div>
   </div>
 </div>
@@ -2451,6 +2449,30 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
+<!-- Shopping look lightbox -->
+<div id="shopping-lightbox" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:1000;overflow-y:auto;">
+  <div style="padding:16px;max-width:600px;margin:0 auto;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <button onclick="closeShoppingLightbox()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div id="slb-title" style="font-size:16px;font-weight:600;color:var(--text);flex:1;"></div>
+      <button id="slb-complete-btn" class="btn-secondary" style="font-size:11px;padding:6px 10px;" onclick="completeShoppingLookFromLightbox()">✓ All done</button>
+    </div>
+    <img id="slb-photo" src="" style="width:100%;max-height:50vh;object-fit:contain;border-radius:12px;background:var(--warm);margin-bottom:16px;display:none;">
+    <div id="slb-no-photo" style="display:none;height:120px;border-radius:12px;background:var(--warm);display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:36px;">👗</div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="card-title" style="margin:0;">Shopping list</div>
+        <div id="slb-count" style="font-size:12px;color:var(--muted);"></div>
+      </div>
+      <div id="slb-items"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border);">
+        <input id="slb-new-item" type="text" placeholder="Add an item..." style="flex:1;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;background:var(--warm);" onkeydown="if(event.key==='Enter')addShoppingItem()">
+        <button class="btn-primary" style="font-size:13px;padding:8px 14px;" onclick="addShoppingItem()">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Coach history overlay -->
 <div id="coach-history-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
   <div style="padding:16px;">
@@ -2630,7 +2652,7 @@ async function tab(id){
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); }
-  else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} }
+  else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') { 
     buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState();
     // Default myAir date to yesterday — CPAP data is always for last night
@@ -3044,18 +3066,20 @@ async function saveBuyNotes(idx, date, desc){
 
 function toggleInspoView(){
   const btn=document.getElementById('style-inspo-btn');
+  const shopBtn=document.getElementById('style-shopping-btn');
   if(inspoViewOpen){
     inspoViewOpen=false;
     document.getElementById('vc-style-inspo').classList.remove('on');
     applyView();
-    btn.textContent='&#x2728; Inspo Board';
+    btn.textContent='✨ Inspo Board';
+    if(shopBtn) shopBtn.style.display='';
   } else {
     shoppingViewOpen=false;
     inspoViewOpen=true;
     document.querySelectorAll('#s-style .view-content').forEach(el=>el.classList.remove('on'));
     document.getElementById('vc-style-inspo').classList.add('on');
-    btn.textContent='&#x2190; Back';
-    document.getElementById('style-shopping-btn').textContent='&#x1F6CD; Shopping List';
+    btn.textContent='← Back';
+    if(shopBtn) shopBtn.style.display='none'; // hide shopping btn while inspo is open
     renderLookbook();
   }
 }
@@ -3066,14 +3090,14 @@ function toggleShoppingView(){
     shoppingViewOpen=false;
     document.getElementById('vc-style-shopping').classList.remove('on');
     applyView();
-    btn.textContent='&#x1F6CD; Shopping List';
+    btn.textContent='🛍 Shopping List';
   } else {
     inspoViewOpen=false;
     shoppingViewOpen=true;
     document.querySelectorAll('#s-style .view-content').forEach(el=>el.classList.remove('on'));
     document.getElementById('vc-style-shopping').classList.add('on');
-    btn.textContent='&#x2190; Back';
-    document.getElementById('style-inspo-btn').textContent='&#x2728; Inspo Board';
+    btn.textContent='← Back';
+    document.getElementById('style-inspo-btn').textContent='✨ Inspo Board';
     renderShoppingList();
   }
 }
@@ -3083,8 +3107,7 @@ async function renderShoppingList(){
   if(!el) return;
   const outfits=await dbAll('outfits');
   const withNotes=outfits.filter(e=>e.buyNotes&&e.buyNotes.trim());
-  
-  // Load saved checkbox state from Blob
+
   let checkState={};
   try{
     const res=await fetch(BACKEND+'/api/sync?pillar=shopping_checks');
@@ -3092,16 +3115,16 @@ async function renderShoppingList(){
   }catch(e){}
 
   if(!withNotes.length){
-    el.innerHTML='<div class="card"><div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">No looks planned yet.<br>Open the Inspo Board and tap &#x1F6CD; Plan this look on any outfit.</div></div>';
+    el.innerHTML='<div class="card"><div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">No looks planned yet.<br>Open the Inspo Board and tap \uD83D\uDECD Plan this look on any outfit.</div></div>';
     return;
   }
 
-  // All items summary at top
+  // Overall progress summary
   const allItems=[];
   withNotes.forEach(e=>{
     e.buyNotes.split('\n').forEach(item=>{
       const t=item.replace(/^[-*\u2022]\s*/,'').trim();
-      if(t) allItems.push({text:t,lookDesc:e.desc,lookDate:e.date});
+      if(t) allItems.push({text:t,lookDate:e.date});
     });
   });
   const totalItems=allItems.length;
@@ -3111,55 +3134,39 @@ async function renderShoppingList(){
   }).length;
 
   let html=`<div class="card" style="margin-bottom:12px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-      <div class="card-title" style="margin:0;">All items</div>
-      <div style="font-size:12px;color:var(--muted);">${checkedItems}/${totalItems} found</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div class="card-title" style="margin:0;">Overall progress</div>
+      <div style="font-size:12px;color:var(--muted);">${checkedItems}/${totalItems} items found</div>
     </div>
-    <div style="height:6px;background:var(--border);border-radius:20px;overflow:hidden;margin-bottom:12px;">
+    <div style="height:6px;background:var(--border);border-radius:20px;overflow:hidden;">
       <div style="height:100%;background:var(--accent);border-radius:20px;width:${totalItems?Math.round(checkedItems/totalItems*100):0}%;transition:width 0.3s;"></div>
     </div>
-    ${allItems.map(item=>{
-      const key=item.lookDate+'_'+item.text.slice(0,20).replace(/\s+/g,'_');
-      const checked=checkState[key]||false;
-      return '<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:0.5px solid var(--border);">'
-        +'<input type="checkbox" '+(checked?'checked':'')
-        +' onchange="toggleShoppingItem(this,&apos;"+key+"&apos;)" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">'
-        +'<div style="flex:1;">'
-        +'<div style="font-size:13px;color:var(--text);'+(checked?'text-decoration:line-through;color:var(--muted);':'')+'">' +item.text+'</div>'
-        +'<div style="font-size:10px;color:var(--muted);">'+item.lookDesc+'</div>'
-        +'</div></div>';
-    }).join('')}
   </div>`;
 
-  // Per-look cards
-  withNotes.forEach(e=>{
+  // Compact tap-to-open look cards
+  withNotes.forEach((e,idx)=>{
     const items=e.buyNotes.split('\n').map(i=>i.replace(/^[-*\u2022]\s*/,'').trim()).filter(Boolean);
     const lookChecked=items.filter(item=>{
       const key=e.date+'_'+item.slice(0,20).replace(/\s+/g,'_');
       return checkState[key];
     }).length;
     const allDone=lookChecked===items.length&&items.length>0;
-    html+=`<div class="card" style="margin-bottom:12px;${allDone?'opacity:0.6;':''}">
-      <div style="display:flex;gap:10px;margin-bottom:10px;">
-        ${e.photo?`<img src="${e.photo}" style="width:64px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;">`:''}
-        <div style="flex:1;">
-          <div style="font-size:13px;font-weight:600;color:var(--text);">${e.desc}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">${fmtOutfitDate(e.date)}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;">${lookChecked}/${items.length} items found</div>
+    const pct=items.length?Math.round(lookChecked/items.length*100):0;
+    html+=`<div class="card" style="margin-bottom:10px;${allDone?'opacity:0.55;':''}" onclick="openShoppingLightbox('${e.date}')" style="cursor:pointer;">
+      <div style="display:flex;gap:12px;align-items:center;cursor:pointer;">
+        ${e.photo
+          ?`<img src="${e.photo}" style="width:72px;height:90px;object-fit:cover;border-radius:8px;flex-shrink:0;">`
+          :`<div style="width:72px;height:90px;border-radius:8px;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">👗</div>`}
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;">${e.desc||'Look'}</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${fmtOutfitDate(e.date)}</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${lookChecked}/${items.length} items found ${allDone?'✓':''}</div>
+          <div style="height:4px;background:var(--border);border-radius:20px;overflow:hidden;">
+            <div style="height:100%;background:${allDone?'#6B9E78':'var(--accent)'};border-radius:20px;width:${pct}%;"></div>
+          </div>
         </div>
+        <div style="color:var(--muted);font-size:18px;flex-shrink:0;">›</div>
       </div>
-      ${items.map(item=>{
-        const key=e.date+'_'+item.slice(0,20).replace(/\s+/g,'_');
-        const checked=checkState[key]||false;
-        return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-top:0.5px solid var(--border);">'
-          +'<input type="checkbox" '+(checked?'checked':'')
-          +' onchange="toggleShoppingItem(this,&apos;"+key+"&apos;)" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">'
-          +'<div style="font-size:13px;color:var(--text);flex:1;'+(checked?'text-decoration:line-through;color:var(--muted);':'')+'">' +item+'</div>'
-          +'</div>';
-      }).join('')}
-      <button class="btn-secondary" style="width:100%;margin-top:10px;font-size:12px;" onclick="completeShoppingLook('${e.date}', ${JSON.stringify(items).replace(/'/g, '&#39;')})">
-        ${allDone?'&#x2713; Outfit complete! Clear list':'&#x2713; Mark outfit complete'}
-      </button>
     </div>`;
   });
 
@@ -3200,6 +3207,96 @@ async function completeShoppingLook(date, items){
   renderShoppingList();
 }
 
+
+let _slbDate = null;
+
+async function openShoppingLightbox(date){
+  _slbDate = date;
+  const outfits = await dbAll('outfits');
+  const entry = outfits.find(e=>e.date===date);
+  if(!entry) return;
+
+  let checkState={};
+  try{
+    const res=await fetch(BACKEND+'/api/sync?pillar=shopping_checks');
+    if(res.ok){ const d=await res.json(); checkState=d.data||{}; }
+  }catch(e){}
+
+  const lb = document.getElementById('shopping-lightbox');
+  document.getElementById('slb-title').textContent = entry.desc||'Look';
+
+  // Photo
+  const photoEl = document.getElementById('slb-photo');
+  const noPhotoEl = document.getElementById('slb-no-photo');
+  if(entry.photo){ photoEl.src=entry.photo; photoEl.style.display='block'; noPhotoEl.style.display='none'; }
+  else { photoEl.style.display='none'; noPhotoEl.style.display='flex'; }
+
+  _renderLightboxItems(entry, checkState);
+  lb.style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function _renderLightboxItems(entry, checkState){
+  const items = (entry.buyNotes||'').split('\n').map(i=>i.replace(/^[-*\u2022]\s*/,'').trim()).filter(Boolean);
+  const checked = items.filter(item=>{ const k=entry.date+'_'+item.slice(0,20).replace(/\s+/g,'_'); return checkState[k]; }).length;
+  document.getElementById('slb-count').textContent = checked+'/'+items.length+' found';
+
+  const itemsEl = document.getElementById('slb-items');
+  if(!items.length){ itemsEl.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0;">No items yet — add one below.</div>'; return; }
+  itemsEl.innerHTML = items.map(item=>{
+    const key = entry.date+'_'+item.slice(0,20).replace(/\s+/g,'_');
+    const isChecked = checkState[key]||false;
+    return '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:0.5px solid var(--border);">'
+      +'<input type="checkbox" '+(isChecked?'checked':'')
+      +' onchange="toggleShoppingItemLightbox(this,\''+key+'\')" style="width:20px;height:20px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">'
+      +'<div style="font-size:14px;flex:1;'+(isChecked?'text-decoration:line-through;color:var(--muted);':'')+'">' +item+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+async function toggleShoppingItemLightbox(checkbox, key){
+  let checkState={};
+  try{ const res=await fetch(BACKEND+'/api/sync?pillar=shopping_checks'); if(res.ok){ const d=await res.json(); checkState=d.data||{}; } }catch(e){}
+  checkState[key]=checkbox.checked;
+  await fetch(BACKEND+'/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'shopping_checks',data:checkState})});
+  // Re-render items in lightbox
+  const outfits=await dbAll('outfits');
+  const entry=outfits.find(e=>e.date===_slbDate);
+  if(entry) _renderLightboxItems(entry, checkState);
+}
+
+async function addShoppingItem(){
+  const input=document.getElementById('slb-new-item');
+  const text=input.value.trim(); if(!text) return;
+  const outfits=await dbAll('outfits');
+  const entry=outfits.find(e=>e.date===_slbDate);
+  if(!entry) return;
+  entry.buyNotes=(entry.buyNotes?entry.buyNotes+'\n':'')+text;
+  await dbAdd('outfits',entry); syncToBlob('outfits');
+  input.value='';
+  let checkState={};
+  try{ const res=await fetch(BACKEND+'/api/sync?pillar=shopping_checks'); if(res.ok){ const d=await res.json(); checkState=d.data||{}; } }catch(e){}
+  _renderLightboxItems(entry, checkState);
+}
+
+async function completeShoppingLookFromLightbox(){
+  if(!_slbDate) return;
+  const outfits=await dbAll('outfits');
+  const entry=outfits.find(e=>e.date===_slbDate);
+  if(!entry) return;
+  const items=(entry.buyNotes||'').split('\n').map(i=>i.replace(/^[-*\u2022]\s*/,'').trim()).filter(Boolean);
+  await completeShoppingLook(_slbDate, items);
+  closeShoppingLightbox();
+}
+
+function closeShoppingLightbox(){
+  document.getElementById('shopping-lightbox').style.display='none';
+  document.body.style.overflow='';
+  _slbDate=null;
+  renderShoppingList();
+}
+
 async function updateShoppingBadgeOnLoad(){
   try {
     const outfits=await dbAll('outfits');
@@ -3218,7 +3315,7 @@ function updateShoppingBadge(remaining){
   const btn=document.getElementById('style-shopping-btn');
   if(!btn) return;
   if(!shoppingViewOpen){
-    btn.textContent = remaining>0 ? '&#x1F6CD; Shopping List ('+remaining+')' : '&#x1F6CD; Shopping List';
+    btn.textContent = remaining>0 ? '🛍 Shopping List ('+remaining+')' : '🛍 Shopping List';
   }
 }
 
