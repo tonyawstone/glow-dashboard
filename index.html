@@ -3039,7 +3039,7 @@ function inspoCardHTML(e, idx){
   </div>
   <div id="buy-notes-${idx}" style="display:none;grid-column:span 2;padding:10px;border-top:0.5px solid var(--border);background:var(--warm);">
     <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">What do I need to buy?</div>
-    <textarea id="buy-notes-input-${idx}" rows="2" placeholder="e.g. White linen blazer, tan block heel sandals, gold hoop earrings..." style="font-size:12px;">${e.buyNotes||''}</textarea>
+    <textarea id="buy-notes-input-${idx}" rows="2" placeholder="One item per line, or separate with commas..." style="font-size:12px;">${e.buyNotes||''}</textarea>
     <button class="btn-primary" style="font-size:12px;margin-top:6px;" onclick="saveBuyNotes(${idx}, '${e.date}', '${(e.desc||'').replace(/'/g,"\\'")}')">Save</button>
   </div>`;
 }
@@ -3054,12 +3054,14 @@ function toggleBuyNotes(btn, idx){
 }
 
 async function saveBuyNotes(idx, date, desc){
-  // Find the entry and update it
   const outfits=await dbAll('outfits');
   const entry=outfits.find(e=>e.date===date&&e.desc===desc);
   if(!entry)return;
-  entry.buyNotes=document.getElementById(`buy-notes-input-${idx}`).value.trim();
-  await dbAdd('outfits',entry); // re-save (dbAdd upserts by key if same record)
+  // Support comma-separated or newline-separated — normalize to one item per line
+  const raw=document.getElementById(`buy-notes-input-${idx}`).value.trim();
+  const items=raw.split(/[\n,]+/).map(i=>i.trim()).filter(Boolean);
+  entry.buyNotes=items.join('\n');
+  await dbAdd('outfits',entry);
   syncToBlob('outfits');
   document.getElementById(`buy-notes-${idx}`).style.display='none';
   await renderLookbook();
