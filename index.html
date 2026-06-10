@@ -656,71 +656,81 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
   <div class="view-content on" id="vc-style-daily">
     <div class="section-label">Style & Wardrobe <button class="guide-btn" onclick="openGuide('style')">?</button></div>
-    <div class="card">
-      <div class="card-title">Log an outfit</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div class="fl" style="margin:0;">Date</div>
-        <input type="date" id="outfit-date" style="font-size:13px;padding:5px 8px;border-radius:8px;border:1px solid var(--border);color:var(--text);background:var(--warm);">
-      </div>
-      <div style="display:flex;gap:10px;align-items:flex-start;margin:7px 0;">
-        <div class="photo-slot" style="width:84px;height:105px;flex-shrink:0;" onclick="pickPhoto('outfit-new')" id="outfit-new">
-          <i class="ti ti-camera" aria-hidden="true"></i>
-        </div>
-        <div style="flex:1;">
-          <input type="text" id="outfit-desc" placeholder="Describe the outfit...">
-          <div class="fl" style="margin-top:8px;">Type</div>
-          <div class="tags" id="src-tags" style="margin:5px 0;">
-            <button class="tag" onclick="selectOutfitType(this,'My outfit')">My outfit</button>
-            <button class="tag" onclick="selectOutfitType(this,'Inspo')">Inspo</button>
-            <button class="tag" onclick="selectOutfitType(this,'DailyLook')">DailyLook</button>
-          </div>
-        </div>
-      </div>
-      <div class="fl">Occasion</div>
-      <div class="tags" id="occ-tags">
-        <button class="tag" onclick="tog(this)">Work</button><button class="tag" onclick="tog(this)">Weekend</button><button class="tag" onclick="tog(this)">Casual</button><button class="tag" onclick="tog(this)">Event</button><button class="tag" onclick="tog(this)">Date night</button><button class="tag" onclick="tog(this)">Church</button><button class="tag" onclick="tog(this)">Semi-formal</button><button class="tag" onclick="tog(this)">Dressy</button><button class="tag" onclick="tog(this)">School run</button>
-      </div>
-      <div class="fl">Vibe</div>
-      <div class="tags" id="outfit-vibe-tags">
-        <button class="tag" onclick="tog(this)">Polished</button><button class="tag" onclick="tog(this)">Cozy</button><button class="tag" onclick="tog(this)">Relaxed</button><button class="tag" onclick="tog(this)">Chic</button><button class="tag" onclick="tog(this)">Stylish</button><button class="tag" onclick="tog(this)">Preppy</button><button class="tag" onclick="tog(this)">Feminine</button><button class="tag" onclick="tog(this)">Sporty</button><button class="tag" onclick="tog(this)">Boho</button><button class="tag" onclick="tog(this)">Bold</button>
-      </div>
-      <div class="fl">Season</div>
-      <div class="tags" id="season-tags">
-        <button class="tag" onclick="tog(this)">Spring</button><button class="tag" onclick="tog(this)">Summer</button><button class="tag" onclick="tog(this)">Fall</button><button class="tag" onclick="tog(this)">Winter</button>
-      </div>
-      <div class="fl">Color palette</div>
-      <div class="tags" id="color-tags">
-        <button class="tag" onclick="tog(this)">Neutral</button><button class="tag" onclick="tog(this)">Black</button><button class="tag" onclick="tog(this)">White</button><button class="tag" onclick="tog(this)">Navy</button><button class="tag" onclick="tog(this)">Camel</button><button class="tag" onclick="tog(this)">Olive</button><button class="tag" onclick="tog(this)">Blush</button><button class="tag" onclick="tog(this)">Red</button><button class="tag" onclick="tog(this)">Light Blue</button><button class="tag" onclick="tog(this)">Denim</button><button class="tag" onclick="tog(this)">Multi</button><button class="tag" onclick="tog(this)">Pattern</button>
-      </div>
-      <!-- Keep or return — only shown for DailyLook -->
-      <div id="keep-return-section" style="display:none;">
-        <div class="fl">Keep or return?</div>
-        <div class="tags" id="keep-tags">
-          <button class="tag" onclick="solo('keep-tags',this)">Keeping</button><button class="tag" onclick="solo('keep-tags',this)">Returned</button>
-        </div>
-      </div>
-      <div class="fl" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Wear again?</span>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-          <input type="checkbox" id="wear-again-toggle" style="width:16px;height:16px;accent-color:var(--accent);"> Yes, I'd wear this again
-        </label>
-      </div>
-      <div class="fl">Notes</div>
-      <textarea id="outfit-notes" rows="2" placeholder="e.g. Felt so confident in this! Fits my new size perfectly."></textarea>
-      <div class="fl">Rating</div>
-      <div class="stars" id="outfit-stars">
-        <span class="star" onclick="setStars('outfit-stars',1)">★</span><span class="star" onclick="setStars('outfit-stars',2)">★</span><span class="star" onclick="setStars('outfit-stars',3)">★</span><span class="star" onclick="setStars('outfit-stars',4)">★</span><span class="star" onclick="setStars('outfit-stars',5)">★</span>
-      </div>
-      <button class="btn-primary" onclick="saveOutfit()">Log outfit</button>
-      <button class="btn-ai" onclick="styleCoach()">Style coaching ↗</button>
-      <div id="style-coach-output" class="coach-response" style="display:none"></div>
-      <div class="toast-msg" id="st">Logged!</div>
-    </div>
+
+    <!-- 1. Your Looks — first thing you see -->
     <div class="card" id="lookbook-card" style="display:none;">
       <div class="card-title">Your looks</div>
       <div class="outfit-grid" id="lookbook-grid"></div>
       <a href="https://www.dailylook.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open DailyLook</a>
     </div>
+
+    <!-- 2. Log an outfit — collapsed by default -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleOutfitForm()">
+        <div class="card-title" style="margin:0;">+ Log an outfit</div>
+        <div id="outfit-form-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+      </div>
+      <div id="outfit-form-body" style="display:none;margin-top:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div class="fl" style="margin:0;">Date</div>
+          <input type="date" id="outfit-date" style="font-size:13px;padding:5px 8px;border-radius:8px;border:1px solid var(--border);color:var(--text);background:var(--warm);">
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;margin:7px 0;">
+          <div class="photo-slot" style="width:84px;height:105px;flex-shrink:0;" onclick="toggleOutfitForm(true);pickPhoto('outfit-new')" id="outfit-new">
+            <i class="ti ti-camera" aria-hidden="true"></i>
+          </div>
+          <div style="flex:1;">
+            <input type="text" id="outfit-desc" placeholder="Describe the outfit...">
+            <div class="fl" style="margin-top:8px;">Type</div>
+            <div class="tags" id="src-tags" style="margin:5px 0;">
+              <button class="tag" onclick="selectOutfitType(this,'My outfit')">My outfit</button>
+              <button class="tag" onclick="selectOutfitType(this,'Inspo')">Inspo</button>
+              <button class="tag" onclick="selectOutfitType(this,'DailyLook')">DailyLook</button>
+            </div>
+          </div>
+        </div>
+        <div class="fl">Occasion</div>
+        <div class="tags" id="occ-tags">
+          <button class="tag" onclick="tog(this)">Work</button><button class="tag" onclick="tog(this)">Weekend</button><button class="tag" onclick="tog(this)">Casual</button><button class="tag" onclick="tog(this)">Event</button><button class="tag" onclick="tog(this)">Date night</button><button class="tag" onclick="tog(this)">Church</button><button class="tag" onclick="tog(this)">Semi-formal</button><button class="tag" onclick="tog(this)">Dressy</button><button class="tag" onclick="tog(this)">School run</button>
+        </div>
+        <div class="fl">Vibe</div>
+        <div class="tags" id="outfit-vibe-tags">
+          <button class="tag" onclick="tog(this)">Polished</button><button class="tag" onclick="tog(this)">Cozy</button><button class="tag" onclick="tog(this)">Relaxed</button><button class="tag" onclick="tog(this)">Chic</button><button class="tag" onclick="tog(this)">Stylish</button><button class="tag" onclick="tog(this)">Preppy</button><button class="tag" onclick="tog(this)">Feminine</button><button class="tag" onclick="tog(this)">Sporty</button><button class="tag" onclick="tog(this)">Boho</button><button class="tag" onclick="tog(this)">Bold</button>
+        </div>
+        <div class="fl">Season</div>
+        <div class="tags" id="season-tags">
+          <button class="tag" onclick="tog(this)">Spring</button><button class="tag" onclick="tog(this)">Summer</button><button class="tag" onclick="tog(this)">Fall</button><button class="tag" onclick="tog(this)">Winter</button>
+        </div>
+        <div class="fl">Color palette</div>
+        <div class="tags" id="color-tags">
+          <button class="tag" onclick="tog(this)">Neutral</button><button class="tag" onclick="tog(this)">Black</button><button class="tag" onclick="tog(this)">White</button><button class="tag" onclick="tog(this)">Navy</button><button class="tag" onclick="tog(this)">Camel</button><button class="tag" onclick="tog(this)">Olive</button><button class="tag" onclick="tog(this)">Blush</button><button class="tag" onclick="tog(this)">Red</button><button class="tag" onclick="tog(this)">Light Blue</button><button class="tag" onclick="tog(this)">Denim</button><button class="tag" onclick="tog(this)">Multi</button><button class="tag" onclick="tog(this)">Pattern</button>
+        </div>
+        <div id="keep-return-section" style="display:none;">
+          <div class="fl">Keep or return?</div>
+          <div class="tags" id="keep-tags">
+            <button class="tag" onclick="solo('keep-tags',this)">Keeping</button><button class="tag" onclick="solo('keep-tags',this)">Returned</button>
+          </div>
+        </div>
+        <div class="fl" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Wear again?</span>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="wear-again-toggle" style="width:16px;height:16px;accent-color:var(--accent);"> Yes, I'd wear this again
+          </label>
+        </div>
+        <div class="fl">Notes</div>
+        <textarea id="outfit-notes" rows="2" placeholder="e.g. Felt so confident in this! Fits my new size perfectly."></textarea>
+        <div class="fl">Rating</div>
+        <div class="stars" id="outfit-stars">
+          <span class="star" onclick="setStars('outfit-stars',1)">★</span><span class="star" onclick="setStars('outfit-stars',2)">★</span><span class="star" onclick="setStars('outfit-stars',3)">★</span><span class="star" onclick="setStars('outfit-stars',4)">★</span><span class="star" onclick="setStars('outfit-stars',5)">★</span>
+        </div>
+        <button class="btn-primary" onclick="saveOutfit()">Log outfit</button>
+        <button class="btn-ai" onclick="styleCoach()">Style coaching ↗</button>
+        <div id="style-coach-output" class="coach-response" style="display:none"></div>
+        <div class="toast-msg" id="st">Logged!</div>
+      </div>
+    </div>
+
+    <!-- 3. Wardrobe planning -->
     <div class="card">
       <div class="card-title">Wardrobe planning</div>
       <div class="fl">Upcoming occasion</div>
@@ -733,6 +743,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="wt">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Wardrobe planning notes</div><div id="wardrobe-plan-log-daily"><div class="log-empty">No wardrobe plans yet.</div></div></div>
+
+    <!-- 4. Shopping List -->
     <button id="style-shopping-btn" class="btn-secondary" style="width:100%;font-size:14px;margin-top:4px;" onclick="toggleShoppingView()">🛍 Shopping List</button>
   </div>
   <div class="view-content" id="vc-style-weekly">
@@ -2455,7 +2467,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <button onclick="closeShoppingLightbox()" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:0;font-weight:500;display:flex;align-items:center;gap:4px;">← Back to Inspo Looks</button>
-        <button onclick="closeShoppingLightbox();toggleShoppingView();" style="background:none;border:none;font-size:13px;color:var(--accent);cursor:pointer;padding:0;font-weight:500;">🛍 View Shopping List →</button>
+        <button onclick="goToShoppingList()" style="background:none;border:none;font-size:13px;color:var(--accent);cursor:pointer;padding:0;font-weight:500;">🛍 View Shopping List →</button>
       </div>
       <div id="slb-title" style="font-size:16px;font-weight:600;color:var(--text);"></div>
     </div>
@@ -2908,6 +2920,16 @@ function loadCheckinState(){
   } catch(e){}
 }
 
+
+
+function toggleOutfitForm(forceOpen){
+  const body = document.getElementById('outfit-form-body');
+  const chevron = document.getElementById('outfit-form-chevron');
+  const isOpen = body.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  chevron.style.transform = open ? 'rotate(90deg)' : '';
+}
 
 async function saveOutfit(){
   const desc=document.getElementById('outfit-desc').value.trim();if(!desc)return;
@@ -3395,6 +3417,20 @@ function closeShoppingLightbox(){
   document.getElementById('shopping-lightbox').style.display='none';
   document.body.style.overflow='';
   _slbDate=null;
+  if(shoppingViewOpen) renderShoppingList();
+}
+
+function goToShoppingList(){
+  document.getElementById('shopping-lightbox').style.display='none';
+  document.body.style.overflow='';
+  _slbDate=null;
+  // Ensure shopping view is open regardless of current state
+  inspoViewOpen=false;
+  shoppingViewOpen=true;
+  document.querySelectorAll('#s-style .view-content').forEach(el=>el.classList.remove('on'));
+  document.getElementById('vc-style-shopping').classList.add('on');
+  document.getElementById('style-inspo-btn').textContent='✨ Inspo Board';
+  document.getElementById('style-shopping-btn').style.display='';
   renderShoppingList();
 }
 
