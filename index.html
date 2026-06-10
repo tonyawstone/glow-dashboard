@@ -2742,6 +2742,7 @@ function ts(id){document.getElementById(id).classList.toggle('on'); autoSaveChec
 function setStars(id,n){document.getElementById(id).querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n));}
 function getStars(id){return document.getElementById(id).querySelectorAll('.on').length;}
 function gT(id){return Array.from(document.getElementById(id).querySelectorAll('.on')).map(b=>b.textContent.trim());}
+function showToast(msg,duration=2400){const t=document.getElementById('glow-toast');t.textContent=msg;t.style.display='block';clearTimeout(t._tid);t._tid=setTimeout(()=>t.style.display='none',duration);}
 function toast(id){const t=document.getElementById(id);t.style.display='block';setTimeout(()=>t.style.display='none',2400);}
 // ── DATE NAVIGATION ───────────────────────────────────────────────────
 let viewingDate = new Date();
@@ -3064,6 +3065,7 @@ async function saveBuyNotes(idx, id){
   await dbAdd('outfits',entry);
   syncToBlob('outfits');
   document.getElementById(`buy-notes-${idx}`).style.display='none';
+  showToast('✓ Saved to shopping list — '+items.length+' item'+(items.length!==1?'s':''));
   await renderLookbook();
 }
 
@@ -10516,5 +10518,6 @@ async function weeklyMindInsight(){
   callCoach('Mind',`Here is my week of mind & mood data:\n${summary}\n\nWhat patterns do you see in my energy, confidence, stress, and body image? Be warm, honest, and specific.`,'weekly-mind-insight');
 }
 </script>
+<div id="glow-toast" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#3D2E25;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.2);">Saved!</div>
 </body>
 </html>
