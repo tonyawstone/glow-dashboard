@@ -3040,7 +3040,7 @@ function inspoCardHTML(e, idx){
   <div id="buy-notes-${idx}" style="display:none;grid-column:span 2;padding:10px;border-top:0.5px solid var(--border);background:var(--warm);">
     <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">What do I need to buy?</div>
     <textarea id="buy-notes-input-${idx}" rows="2" placeholder="One item per line, or separate with commas..." style="font-size:12px;">${e.buyNotes||''}</textarea>
-    <button class="btn-primary" style="font-size:12px;margin-top:6px;" onclick="saveBuyNotes(${idx}, '${e.date}', '${(e.desc||'').replace(/'/g,"\\'")}')">Save</button>
+    <button class="btn-primary" style="font-size:12px;margin-top:6px;" onclick="saveBuyNotes(${idx}, ${e.id || -1})">Save</button>
   </div>`;
 }
 
@@ -3053,9 +3053,9 @@ function toggleBuyNotes(btn, idx){
   if(!isOpen)panel.querySelector('textarea').focus();
 }
 
-async function saveBuyNotes(idx, date, desc){
+async function saveBuyNotes(idx, id){
   const outfits=await dbAll('outfits');
-  const entry=outfits.find(e=>e.date===date&&e.desc===desc);
+  const entry=outfits.find(e=>e.id===id) || outfits[idx];
   if(!entry)return;
   // Support comma-separated or newline-separated — normalize to one item per line
   const raw=document.getElementById(`buy-notes-input-${idx}`).value.trim();
@@ -3127,12 +3127,12 @@ async function renderShoppingList(){
   withNotes.forEach(e=>{
     e.buyNotes.split('\n').forEach(item=>{
       const t=item.replace(/^[-*\u2022]\s*/,'').trim();
-      if(t) allItems.push({text:t,lookDate:e.date});
+      if(t) allItems.push({text:t,lookDate:e.date,lookId:e.id});
     });
   });
   const totalItems=allItems.length;
   const checkedItems=allItems.filter(item=>{
-    const key=item.lookDate+'_'+item.text.slice(0,20).replace(/\s+/g,'_');
+    const key=item.lookId+'_'+item.text.slice(0,20).replace(/\s+/g,'_');
     return checkState[key];
   }).length;
 
@@ -3150,12 +3150,12 @@ async function renderShoppingList(){
   withNotes.forEach((e,idx)=>{
     const items=e.buyNotes.split('\n').map(i=>i.replace(/^[-*\u2022]\s*/,'').trim()).filter(Boolean);
     const lookChecked=items.filter(item=>{
-      const key=e.date+'_'+item.slice(0,20).replace(/\s+/g,'_');
+      const key=e.id+'_'+item.slice(0,20).replace(/\s+/g,'_');
       return checkState[key];
     }).length;
     const allDone=lookChecked===items.length&&items.length>0;
     const pct=items.length?Math.round(lookChecked/items.length*100):0;
-    html+=`<div class="card shopping-card" style="margin-bottom:10px;cursor:pointer;${allDone?'opacity:0.55;':''}" onclick="openShoppingLightbox('${e.date}')">
+    html+=`<div class="card shopping-card" style="margin-bottom:10px;cursor:pointer;${allDone?'opacity:0.55;':''}" onclick="openShoppingLightbox(${e.id||0})">
       <div style="display:flex;gap:12px;align-items:center;cursor:pointer;">
         ${e.photo
           ?`<img src="${e.photo}" style="width:72px;height:90px;object-fit:cover;border-radius:8px;flex-shrink:0;">`
@@ -3189,7 +3189,7 @@ async function toggleShoppingItem(checkbox, key){
   renderShoppingList();
 }
 
-async function completeShoppingLook(date, items){
+async function completeShoppingLook(id, items){
   if(!confirm('Mark this outfit as complete and clear its items from the list?')) return;
   let checkState={};
   try{
@@ -3198,12 +3198,12 @@ async function completeShoppingLook(date, items){
   }catch(e){}
   // Remove all keys for this look
   items.forEach(item=>{
-    const key=date+'_'+item.slice(0,20).replace(/\s+/g,'_');
+    const key=id+'_'+item.slice(0,20).replace(/\s+/g,'_');
     delete checkState[key];
   });
   // Clear buyNotes on the outfit entry
   const outfits=await dbAll('outfits');
-  const entry=outfits.find(e=>e.date===date);
+  const entry=outfits.find(e=>e.id===id);
   if(entry){ entry.buyNotes=''; await dbAdd('outfits',entry); syncToBlob('outfits'); }
   await fetch(BACKEND+'/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({pillar:'shopping_checks',data:checkState})});
@@ -3213,10 +3213,10 @@ async function completeShoppingLook(date, items){
 
 let _slbDate = null;
 
-async function openShoppingLightbox(date){
-  _slbDate = date;
+async function openShoppingLightbox(id){
+  _slbDate = id;
   const outfits = await dbAll('outfits');
-  const entry = outfits.find(e=>e.date===date);
+  const entry = outfits.find(e=>e.id===id);
   if(!entry) return;
 
   let checkState={};
@@ -3247,7 +3247,7 @@ function _renderLightboxItems(entry, checkState){
   const itemsEl = document.getElementById('slb-items');
   if(!items.length){ itemsEl.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0;">No items yet — add one below.</div>'; return; }
   itemsEl.innerHTML = items.map(item=>{
-    const key = entry.date+'_'+item.slice(0,20).replace(/\s+/g,'_');
+    const key = entry.id+'_'+item.slice(0,20).replace(/\s+/g,'_');
     const isChecked = checkState[key]||false;
     return '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:0.5px solid var(--border);">'
       +'<input type="checkbox" '+(isChecked?'checked':'')
