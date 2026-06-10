@@ -3026,22 +3026,18 @@ function inspoCardHTML(e, idx){
   const starsHTML=e.stars?`<span style="font-size:11px;color:#D4A96A;letter-spacing:1px;">${'★'.repeat(e.stars)}</span> `:'';
   const hasBuyNotes=e.buyNotes&&e.buyNotes.trim();
   const buyPreview=hasBuyNotes?`<div style="font-size:11px;color:var(--accent);padding:0 10px 6px;font-style:italic;">🛍 ${e.buyNotes}</div>`:'';
-  return `<div class="outfit-card" style="grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;border-radius:12px;border:0.5px solid var(--border);overflow:hidden;background:var(--card);">
-    <div style="aspect-ratio:3/4;overflow:hidden;">${imgContent}</div>
+  return `<div class="outfit-card" style="grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;border-radius:12px;border:0.5px solid var(--border);background:var(--card);">
+    <div style="aspect-ratio:3/4;overflow:hidden;border-radius:12px 0 0 12px;">${imgContent}</div>
     <div style="padding:10px;display:flex;flex-direction:column;gap:4px;">
       <div style="font-size:13px;font-weight:500;color:var(--text);">${e.desc}</div>
       <div style="font-size:11px;color:var(--muted);">${fmtOutfitDate(e.date)}${e.src?' · '+e.src:''} ${starsHTML}</div>
       ${allTags.length?`<div class="outfit-tags">${allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('')}</div>`:''}
       ${e.notes?`<div style="font-size:11px;color:var(--muted);font-style:italic;">"${e.notes}"</div>`:''}
       ${hasBuyNotes?`<div style="font-size:11px;color:var(--accent);font-style:italic;">🛍 ${e.buyNotes}</div>`:''}
-      <button class="btn-secondary" style="font-size:11px;padding:5px 8px;margin-top:auto;" onclick="toggleBuyNotes(this, ${idx})">🛍 Plan this look</button>
+      <button class="btn-secondary" style="font-size:11px;padding:5px 8px;margin-top:auto;" onclick="openShoppingLightbox(${e.id||0}, 'inspo')">🛍 Plan this look</button>
     </div>
   </div>
-  <div id="buy-notes-${idx}" style="display:none;grid-column:span 2;padding:10px;border-top:0.5px solid var(--border);background:var(--warm);">
-    <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">What do I need to buy?</div>
-    <textarea id="buy-notes-input-${idx}" rows="2" placeholder="One item per line, or separate with commas..." style="font-size:12px;">${e.buyNotes||''}</textarea>
-    <button class="btn-primary" style="font-size:12px;margin-top:6px;" onclick="saveBuyNotes(${idx}, ${e.id || -1})">Save</button>
-  </div>`;
+`;  // buy-notes now handled in lightbox
 }
 
 function toggleBuyNotes(btn, idx){
@@ -3217,11 +3213,17 @@ async function completeShoppingLook(id, items){
 
 let _slbDate = null;
 
-async function openShoppingLightbox(id){
+async function openShoppingLightbox(id, source){
   _slbDate = id;
   const outfits = await dbAll('outfits');
-  const entry = outfits.find(e=>e.id===id);
-  if(!entry) return;
+  // Try by id first, then fall back to inspo map match
+  let entry = outfits.find(e=>e.id===id);
+  if(!entry && source==='inspo' && window._inspoMap){
+    const mapped = Object.values(window._inspoMap).find(e=>e.id===id||(id===0&&e));
+    if(mapped) entry = outfits.find(e=>e.date===mapped.date&&e.desc===mapped.desc);
+  }
+  if(!entry) { console.warn('openShoppingLightbox: no entry found for id', id); return; }
+  _slbDate = entry.id; // ensure we use the real id
 
   let checkState={};
   try{
