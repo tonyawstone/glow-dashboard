@@ -4055,22 +4055,25 @@ async function saveHair(){
 }
 async function saveMind(){
   const vibe=gT('vibe-tags');
-  const selfcare=gT('selfcare-tags');
-  const win=document.getElementById('win-note').value.trim();
-  const gratitude=document.getElementById('gratitude').value.trim();
-  const intention=document.getElementById('intention').value.trim();
+  const selfcareEl=document.getElementById('selfcare-tags');
+  const selfcare=selfcareEl?gT('selfcare-tags'):[];
+  const win=document.getElementById('win-note')?.value.trim()||'';
+  const gratitude=document.getElementById('gratitude')?.value.trim()||'';
+  const intentionEl=document.getElementById('intention');
+  const intention=intentionEl?intentionEl.value.trim():'';
   const energy=getStars('energy-stars');
   const conf=getStars('conf-stars');
   const stress=getStars('stress-stars');
   const bodyImage=getStars('body-image-stars');
+  if(!vibe.length && !win && !gratitude && !energy && !conf && !stress && !bodyImage) return;
   const mindEntry={vibe,selfcare,win,gratitude,intention,energy,conf,stress,bodyImage,date:nowStr()};
   await dbAdd('minds',mindEntry);
   syncToBlob('minds');
-  document.getElementById('win-note').value='';
-  document.getElementById('gratitude').value='';
-  document.getElementById('intention').value='';
-  document.getElementById('vibe-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
-  document.getElementById('selfcare-tags').querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+  if(document.getElementById('win-note')) document.getElementById('win-note').value='';
+  if(document.getElementById('gratitude')) document.getElementById('gratitude').value='';
+  if(intentionEl) intentionEl.value='';
+  document.getElementById('vibe-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+  selfcareEl?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
   setStars('energy-stars',0);setStars('conf-stars',0);setStars('stress-stars',0);setStars('body-image-stars',0);
   toast('mt');loadLogs();
 }
