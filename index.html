@@ -990,6 +990,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="fl">Notes</div>
       <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..."></textarea>
       <button class="btn-primary" onclick="saveSleep()">Log sleep</button>
+      <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px;">Saves to last night's date</div>
       <button class="btn-ai" onclick="sleepCoach()">Sleep pattern analysis ↗</button>
       <div id="sleep-coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="slp-t">Saved!</div>
@@ -1117,6 +1118,28 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="stat-tile"><div class="stat-val" style="font-size:24px;">168.7</div><div class="stat-lbl">All-time low · May 19</div></div>
     </div>
     <div class="card">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleBodyLog()">
+        <div class="card-title" style="margin:0;">+ Today's log</div>
+        <div id="body-log-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+      </div>
+      <div id="body-log-body" style="display:none;margin-top:12px;">
+        <div class="fl">Non-scale wins</div>
+        <div class="tags" id="nsv-tags">
+          <button class="tag" onclick="tog(this)">Clothes fit better</button><button class="tag" onclick="tog(this)">More energy</button><button class="tag" onclick="tog(this)">Compliment</button><button class="tag" onclick="tog(this)">New low</button><button class="tag" onclick="tog(this)">Less bloated</button>
+        </div>
+        <div class="two-col" style="margin-top:9px;">
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Waist (in)</div><input type="number" id="waist" placeholder="—" step="0.5"></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hips (in)</div><input type="number" id="hips" placeholder="—" step="0.5"></div>
+        </div>
+        <div class="fl">Zepbound notes</div>
+        <textarea id="zep-note" rows="2" placeholder="Appetite, side effects, energy..."></textarea>
+        <button class="btn-primary" onclick="saveBody()">Log body update</button>
+        <button class="btn-ai" onclick="zepCoach()">Zepbound review ↗</button>
+        <div id="zep-coach-output" class="coach-response" style="display:none"></div>
+        <div class="toast-msg" id="bt">Saved!</div>
+      </div>
+    </div>
       <div class="card-title">Weight charts</div>
       <div class="chart-tabs">
         <button class="chart-tab on" onclick="switchChart('journey',this)">Weight journey</button>
@@ -1218,23 +1241,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div onclick="pickPhoto('body-may26-side')" id="body-may26-side" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Side</div></div>
         <div onclick="pickPhoto('body-may26-back')" id="body-may26-back" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Back</div></div>
       </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Today's log</div>
-      <div class="fl">Non-scale wins</div>
-      <div class="tags" id="nsv-tags">
-        <button class="tag" onclick="tog(this)">Clothes fit better</button><button class="tag" onclick="tog(this)">More energy</button><button class="tag" onclick="tog(this)">Compliment</button><button class="tag" onclick="tog(this)">New low</button><button class="tag" onclick="tog(this)">Less bloated</button>
-      </div>
-      <div class="two-col" style="margin-top:9px;">
-        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Waist (in)</div><input type="number" id="waist" placeholder="—" step="0.5"></div>
-        <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hips (in)</div><input type="number" id="hips" placeholder="—" step="0.5"></div>
-      </div>
-      <div class="fl">Zepbound notes</div>
-      <textarea id="zep-note" rows="2" placeholder="Appetite, side effects, energy..."></textarea>
-      <button class="btn-primary" onclick="saveBody()">Log body update</button>
-      <button class="btn-ai" onclick="zepCoach()">Zepbound review ↗</button>
-      <div id="zep-coach-output" class="coach-response" style="display:none"></div>
-      <div class="toast-msg" id="bt">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Body log</div><div id="body-log"><div class="log-empty">No entries yet.</div></div></div>
   </div>
@@ -2793,6 +2799,10 @@ function nowStr(d){
   const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
 }
+function yesterdayStr(){ return new Date(Date.now()-86400000).toISOString().slice(0,10); }
+// Steps & exercise from CSV always use yesterday's complete data, not today's partial data
+function getStepsRow(rows){ return rows.find(r=>r.date===yesterdayStr()&&parseInt(r.steps)>0) || [...rows].reverse().find(r=>parseInt(r.steps)>0); }
+function getExerciseRows(rows, sinceDate){ return rows.filter(r=>r.date!==nowStr()&&(r.exercise_types||parseInt(r.exercise_minutes)>0)&&(!sinceDate||r.date>=sinceDate)); }
 function logItem(date,chips,note){return`<div class="log-item"><div class="log-date">${date}</div><div class="chips">${chips.filter(Boolean).map(c=>'<span class="chip">'+c+'</span>').join('')}</div>${note?'<div class="log-note">'+note.replace(/\n/g,'<br>')+'</div>':''}</div>`;}
 function renderLog(id,items,fn){
   const el=document.getElementById(id);if(!el)return;
@@ -4353,7 +4363,8 @@ async function saveSleep(){
 
   if(hrs!=='—'){ document.getElementById('sleep-display').textContent=hrs+'h'; document.getElementById('s-sleep-h').textContent=hrs+'h'; }
 
-  const sleepEntry={hrs,bed,wake,cpap:cpap[0]||'',quality,energy,note,date:nowStr()};
+  const sleepDate = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const sleepEntry={hrs,bed,wake,cpap:cpap[0]||'',quality,energy,note,date:sleepDate};
   await dbAdd('sleeps',sleepEntry);
   syncToBlob('sleeps');
   document.getElementById('sleep-note').value='';
@@ -4361,11 +4372,21 @@ async function saveSleep(){
   document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
   toast('slp-t');loadLogs();
 }
+
+function toggleBodyLog(forceOpen){
+  const body = document.getElementById('body-log-body');
+  const chevron = document.getElementById('body-log-chevron');
+  const isOpen = body.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  chevron.style.transform = open ? 'rotate(90deg)' : '';
+}
+
 async function saveBody(){
   const entry={type:'body',nsv:gT('nsv-tags'),note:document.getElementById('zep-note').value.trim(),waist:document.getElementById('waist').value,hips:document.getElementById('hips').value,date:nowStr()};
   await dbAdd('skins',entry);
   syncToBlob('skins');
-  toast('bt');
+  toast('bt');toggleBodyLog(false);loadLogs();
 }
 async function saveExercise(){
   const walk=document.getElementById('ex-walk').value;
@@ -4958,11 +4979,12 @@ async function buildBodyCompositionMetrics(){
   }
   // rows has data — render composition metrics
   if(elComp){
-    const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
-    const latestBMI = rows.find(r=>parseFloat(r.bmi)>0);
-    const latestFat = rows.find(r=>parseFloat(r.body_fat_pct)>0);
-    const latestLean = rows.find(r=>parseFloat(r.lean_mass_lbs)>0);
-    const latestBone = rows.find(r=>parseFloat(r.bone_mass_lbs)>0);
+    const rev = [...rows].reverse(); // most recent first
+    const latestWeight = rev.find(r=>parseFloat(r.weight_lbs)>0);
+    const latestBMI = rev.find(r=>parseFloat(r.bmi)>0);
+    const latestFat = rev.find(r=>parseFloat(r.body_fat_pct)>0);
+    const latestLean = rev.find(r=>parseFloat(r.lean_mass_lbs)>0);
+    const latestBone = rev.find(r=>parseFloat(r.bone_mass_lbs)>0);
     const fmt = (d) => d ? safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
     const bmi = latestBMI ? parseFloat(latestBMI.bmi) : null;
     elComp.innerHTML = `
@@ -4976,7 +4998,7 @@ async function buildBodyCompositionMetrics(){
         <div class="snapshot-item">
           <div class="snapshot-label">BMI</div>
           <div class="snapshot-val">${bmi?bmi.toFixed(1):'—'}</div>
-          <div class="snapshot-sub ${bmi&&bmi<25?'snapshot-status-ok':bmi<30?'snapshot-status-watch':'snapshot-status-high'}">${bmi?(bmi<25?'Normal':bmi<30?'Overweight':'Obese'):'—'}</div>
+          <div class="snapshot-sub ${bmi&&bmi<25?'snapshot-status-ok':bmi<30?'snapshot-status-watch':'snapshot-status-high'}">${bmi?(bmi<25?'Normal':bmi<30?'Overweight':'Obese'):'—'} · ${fmt(latestBMI?.date)||'—'}</div>
         </div>
         <div class="snapshot-item">
           <div class="snapshot-label">Body Fat</div>
@@ -4989,13 +5011,13 @@ async function buildBodyCompositionMetrics(){
           <div class="snapshot-sub">lbs · ${fmt(latestLean?.date)||'—'}</div>
         </div>
         ${latestBone?`<div class="snapshot-item"><div class="snapshot-label">Bone Mass</div><div class="snapshot-val" style="font-size:18px;">${parseFloat(latestBone.bone_mass_lbs).toFixed(1)}</div><div class="snapshot-sub">lbs · ${fmt(latestBone.date)}</div></div>`:''}
-        ${(()=>{const r=rows.find(row=>parseFloat(row.body_water_pct)>0);return r?`<div class="snapshot-item"><div class="snapshot-label">Body Water</div><div class="snapshot-val" style="font-size:18px;">${parseFloat(r.body_water_pct).toFixed(1)}%</div><div class="snapshot-sub">estimated · ${fmt(r.date)}</div></div>`:'';})()} 
+        ${(()=>{const r=rev.find(row=>parseFloat(row.body_water_pct)>0);return r?`<div class="snapshot-item"><div class="snapshot-label">Body Water</div><div class="snapshot-val" style="font-size:18px;">${parseFloat(r.body_water_pct).toFixed(1)}%</div><div class="snapshot-sub">estimated · ${fmt(r.date)}</div></div>`:'';})()} 
       </div>
     `;
   }
 
   if(elAct){
-    const recent7 = rows.slice(0,7);
+    const recent7 = [...rows].reverse().filter(r=>r.date!==nowStr()).slice(0,7); // exclude today (incomplete)
     const avgSteps = recent7.map(r=>parseInt(r.steps)||0).filter(v=>v>0);
     const avg = avgSteps.length ? Math.round(avgSteps.reduce((a,b)=>a+b,0)/avgSteps.length) : null;
     elAct.innerHTML = `
@@ -5704,8 +5726,10 @@ async function buildWeeklyExercise(){
   });
   // CSV workouts
   const rows = await getCSVRows();
+  const todayDateStr = nowStr();
   const csvWorkouts = rows.filter(r=>{
     if(!r.exercise_types&&!r.exercise_minutes) return false;
+    if(r.date===todayDateStr) return false; // exclude today (incomplete)
     const d=safeDate(r.date); return d>=weekStart&&d<=now;
   });
   // Merge — prefer manual for same date
@@ -7606,7 +7630,7 @@ async function buildHealthInsights(){
   ]);
   const csvRows = await getCSVRows();
 
-  const avgSteps = csvRows.slice(0,7).map(r=>parseInt(r.steps)||0).filter(v=>v>0);
+  const avgSteps = csvRows.filter(r=>r.date!==nowStr()).slice(0,7).map(r=>parseInt(r.steps)||0).filter(v=>v>0); // exclude today (incomplete)
   const avgStepsVal = avgSteps.length ? Math.round(avgSteps.reduce((a,b)=>a+b,0)/avgSteps.length) : 0;
   const recentEx = exercises.slice(-7);
   const csvSleep = csvRows.slice(0,7).map(r=>parseFloat(r.sleep_hrs)||0).filter(v=>v>0);
@@ -7969,7 +7993,7 @@ async function calculateGlowScore(save=false) {
     else if(avgRestHR<70) heartFitnessScore=Math.min(20,heartFitnessScore+1);
     else if(avgRestHR>80) heartFitnessScore=Math.max(0,heartFitnessScore-1);
   }
-  const avgSteps=avgField(csvRows.slice(0,7),'steps');
+  const avgSteps=avgField(csvRows.filter(r=>r.date!==nowStr()).slice(0,7),'steps'); // exclude today (incomplete)
   if(avgSteps){
     if(avgSteps>=10000) heartFitnessScore=Math.min(20,heartFitnessScore+2);
     else if(avgSteps>=7500) heartFitnessScore=Math.min(20,heartFitnessScore+1);
@@ -8636,7 +8660,8 @@ async function saveMyAirLog(){
 
   const datePickerEl = document.getElementById('myair-date');
   // Use local date string, not UTC
-  const isoStr = datePickerEl?.value || nowStr();
+  const yesterdayStr = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const isoStr = datePickerEl?.value || yesterdayStr;
   const logDate = new Date(isoStr+'T12:00:00');
   const dateStr = logDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
 
@@ -8679,6 +8704,7 @@ function loadMyAirState(){
   // Always default date picker to yesterday (myAir data is always last night)
   const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
   const dateEl = document.getElementById('myair-date');
+  if(dateEl){ dateEl.max = new Date(Date.now()-86400000).toISOString().slice(0,10); } // never allow future dates
   if(dateEl && !dateEl.value) {
     dateEl.value = yesterday;
     const labelEl = document.getElementById('myair-date-label');
@@ -8779,13 +8805,11 @@ async function loadTodaySleepFromCSV(){
       if(weightSrcEl) weightSrcEl.textContent = 'Withings';
     }
 
-    // Steps — prefer today, fall back to most recent
-    const todayStr = nowStr();
-    const todaySteps = rows.find(r=>r.date===todayStr&&parseInt(r.steps)>0);
-    const latestSteps = todaySteps || rows.find(r=>parseInt(r.steps)>0);
+    // Steps — always use yesterday's complete data (today's is still accumulating)
+    const latestSteps = getStepsRow(rows);
     if(latestSteps){
       if(stepsEl) stepsEl.textContent = parseInt(latestSteps.steps).toLocaleString();
-      if(stepsSrcEl) stepsSrcEl.textContent = smartDate(latestSteps.date);
+      if(stepsSrcEl) stepsSrcEl.textContent = latestSteps.date===yesterdayStr()?'Yesterday':smartDate(latestSteps.date);
     }
 
     // Sleep from CSV
