@@ -828,7 +828,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div id="sleep-timeline-canvas-wrap" style="position:relative;height:96px;background:var(--warm);border-radius:10px;overflow:hidden;">
           <canvas id="sleep-timeline-chart"></canvas>
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:3px;" id="sleep-timeline-labels"></div>
+        <div style="position:relative;height:14px;margin-top:3px;" id="sleep-timeline-labels"></div>
       </div>
       <a href="javascript:void(0)" onclick="openWithings()" class="ext-link" style="margin-top:10px;"><i class="ti ti-external-link" aria-hidden="true"></i>Open Withings · see your Sleep Score</a>
     </div>
@@ -4737,7 +4737,7 @@ async function buildSleepTimeline(dateStr){
     ctx.fill();
   });
 
-  // Vertical grid lines + time labels — drawn on canvas, aligned with LABEL_W offset
+  // Vertical grid lines — drawn on canvas
   const labelTimes = [];
   const startH = Math.floor(minTime/60);
   const endH = Math.ceil(maxTime/60);
@@ -4746,32 +4746,17 @@ async function buildSleepTimeline(dateStr){
     if(mins>=minTime && mins<=maxTime) labelTimes.push({h: h%24, mins});
   }
 
-  // Draw vertical grid lines on canvas
   ctx.strokeStyle = 'rgba(0,0,0,0.08)';
   ctx.lineWidth = 1;
   labelTimes.forEach(({mins})=>{
     const x = LABEL_W + ((mins-minTime)/totalMins)*drawW;
     ctx.beginPath();
-    ctx.moveTo(x, LABEL_H);
+    ctx.moveTo(x, 0);
     ctx.lineTo(x, CANVAS_H);
     ctx.stroke();
   });
 
-  // Draw time labels on canvas (aligned with grid lines)
-  ctx.font = '9px system-ui,sans-serif';
-  ctx.fillStyle = 'rgba(0,0,0,0.55)';
-  ctx.textAlign = 'center';
-  labelTimes.forEach(({h, mins})=>{
-    const x = LABEL_W + ((mins-minTime)/totalMins)*drawW;
-    const label = h===0?'12 AM':h<12?`${h} AM`:h===12?'12 PM':`${h-12} PM`;
-    ctx.fillText(label, x, LABEL_H - 2);
-  });
-  ctx.textAlign = 'left';
-
-  // Clear the HTML labels element — labels now drawn on canvas
-  if(labelsEl) labelsEl.innerHTML = '';
-
-  // Row labels — darker so they're readable
+  // Row labels on canvas
   ctx.font = '8px system-ui,sans-serif';
   ctx.fillStyle = 'rgba(0,0,0,0.55)';
   ctx.fillText('REM',   2, rows.rem   + ROW_H - 4);
@@ -4779,7 +4764,16 @@ async function buildSleepTimeline(dateStr){
   ctx.fillText('Deep',  2, rows.deep  + ROW_H - 4);
   ctx.fillText('Awake', 2, rows.awake + ROW_H - 4);
 
-  // (row labels drawn inline above)
+  // Time labels in HTML element below canvas — offset by LABEL_W to align with canvas segments
+  if(labelsEl){
+    labelsEl.style.position = 'relative';
+    labelsEl.style.marginLeft = LABEL_W + 'px';
+    labelsEl.innerHTML = labelTimes.map(({h, mins})=>{
+      const pct = ((mins-minTime)/totalMins*100).toFixed(2);
+      const label = h===0?'12 AM':h<12?`${h} AM`:h===12?'12 PM':`${h-12} PM`;
+      return `<span style="position:absolute;left:${pct}%;transform:translateX(-50%);font-size:9px;color:var(--muted);white-space:nowrap;">${label}</span>`;
+    }).join('');
+  }
 }
 
 // ── SLEEP WEEKLY QUALITY & MONTHLY CALENDAR ───────────────────────────
