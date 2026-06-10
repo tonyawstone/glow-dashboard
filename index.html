@@ -2452,9 +2452,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- Shopping look lightbox -->
 <div id="shopping-lightbox" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:1000;overflow-y:auto;">
   <div style="padding:16px;max-width:600px;margin:0 auto;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-      <button onclick="closeShoppingLightbox()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div id="slb-title" style="font-size:16px;font-weight:600;color:var(--text);flex:1;"></div>
+    <div style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <button onclick="closeShoppingLightbox()" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;">← Inspo Looks</button>
+        <button onclick="closeShoppingLightbox();toggleShoppingView();" style="background:none;border:none;font-size:13px;color:var(--accent);cursor:pointer;padding:0;font-weight:500;">🛍 View Shopping List →</button>
+      </div>
+      <div id="slb-title" style="font-size:16px;font-weight:600;color:var(--text);"></div>
     </div>
     <img id="slb-photo" src="" style="width:100%;max-height:50vh;object-fit:contain;border-radius:12px;background:var(--warm);margin-bottom:16px;display:none;">
     <div id="slb-no-photo" style="display:none;height:120px;border-radius:12px;background:var(--warm);align-items:center;justify-content:center;margin-bottom:16px;font-size:36px;text-align:center;line-height:120px;">👗</div>
