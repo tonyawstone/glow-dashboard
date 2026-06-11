@@ -3587,14 +3587,24 @@ function updatePillarRings(checks){
 function openOverlay(id){
   closeAllSheets();
   const el = document.getElementById(id);
-  if(el){ el.classList.add('open'); document.body.style.overflow='hidden'; }
+  if(el){
+    el.classList.add('open');
+    document.body.style.overflow='hidden';
+    const shell = document.querySelector('.shell');
+    if(shell) shell.style.visibility='hidden';
+    document.querySelector('.hero-wrap')?.style && (document.querySelector('.hero-wrap').style.visibility='hidden');
+    document.querySelector('.pillar-nav')?.style && (document.querySelector('.pillar-nav').style.visibility='hidden');
+  }
 }
 function closeOverlay(id){
   const el = document.getElementById(id);
   if(el){ el.classList.remove('open'); }
-  // Only remove overflow lock if no other overlays are open
   if(!document.querySelector('.fullscreen-overlay.open')){
     document.body.style.overflow='';
+    const shell = document.querySelector('.shell');
+    if(shell) shell.style.visibility='visible';
+    document.querySelector('.hero-wrap')?.style && (document.querySelector('.hero-wrap').style.visibility='visible');
+    document.querySelector('.pillar-nav')?.style && (document.querySelector('.pillar-nav').style.visibility='visible');
   }
 }
 function closeAllOverlays(){
