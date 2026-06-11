@@ -73,7 +73,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .pillar-detail .tag.sm{font-size:11px;padding:3px 8px;}
 .pillar-note{font-size:12px;padding:6px 10px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);width:100%;box-sizing:border-box;font-family:var(--sans);color:var(--text);}
 .pillar-detail.open{display:block;}
-.guide-sheet{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:997;align-items:flex-end;justify-content:center;}
+.guide-sheet{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:997;align-items:flex-end;justify-content:center;}
 .guide-sheet.open{display:flex;}
 .guide-content{background:var(--cream);border-radius:20px 20px 0 0;padding:20px 20px max(24px,env(safe-area-inset-bottom));width:100%;max-width:430px;max-height:80vh;overflow-y:auto;}
 .guide-title{font-family:var(--serif);font-size:20px;font-weight:300;color:var(--text);margin-bottom:16px;}
@@ -316,7 +316,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .cal-month-nav button{background:none;border:0.5px solid var(--border);border-radius:8px;padding:5px 12px;font-size:13px;color:var(--accent);cursor:pointer;}
 .cal-month-title{font-size:15px;font-weight:600;color:var(--text);}
 /* ── OUTFIT LIGHTBOX ──────────────────────────────── */
-.outfit-lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+.outfit-lightbox{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
 .outfit-lightbox.open{display:flex;}
 .lightbox-photo{width:100%;max-width:340px;max-height:55vh;object-fit:contain;border-radius:14px;}
 .lightbox-no-photo{font-size:60px;margin-bottom:12px;}
@@ -2712,7 +2712,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 </div>
 
 <!-- Check-in history overlay -->
-<div id="checkin-history-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
+<div id="checkin-history-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeCheckinHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2727,7 +2727,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
 
 
-<div id="body-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
+<div id="body-log-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('body-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2737,7 +2737,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="hair-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
+<div id="hair-log-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('hair-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2747,7 +2747,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="exercise-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
+<div id="exercise-log-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('exercise-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2757,7 +2757,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="skin-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
+<div id="skin-log-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('skin-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2767,7 +2767,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="facial-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
+<div id="facial-log-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('facial-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2777,7 +2777,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="musely-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
+<div id="musely-log-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('musely-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2787,7 +2787,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="sleep-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
+<div id="sleep-log-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeSleepLogOverlay()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2797,7 +2797,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="mood-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
+<div id="mood-log-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeMoodLogOverlay()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2808,7 +2808,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 </div>
 
 <!-- Shopping look lightbox -->
-<div id="shopping-lightbox" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:1000;overflow-y:auto;">
+<div id="shopping-lightbox" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:1000;overflow-y:auto;">
   <div style="padding:16px;max-width:600px;margin:0 auto;">
     <div style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -2834,7 +2834,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 </div>
 
 <!-- Coach history overlay -->
-<div id="coach-history-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
+<div id="coach-history-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeCoachHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2845,7 +2845,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="glow-insights-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
+<div id="glow-insights-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeGlowInsights()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2857,7 +2857,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="quick-log-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:998;align-items:flex-end;justify-content:center;">
+<div id="quick-log-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:998;align-items:flex-end;justify-content:center;">
   <div style="background:var(--cream);border-radius:20px 20px 0 0;padding:20px 20px max(20px,env(safe-area-inset-bottom));width:100%;max-width:430px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
       <div style="font-size:16px;font-weight:600;color:var(--text);">👗 Quick outfit log</div>
@@ -3702,7 +3702,12 @@ function updatePillarRings(checks){
 
 
 
+function closeAllSheets(){
+  document.querySelectorAll('.guide-sheet').forEach(s=>s.classList.remove('open'));
+}
+
 async function openPastSleepLog(){
+  closeAllSheets();
   const overlay = document.getElementById('sleep-log-overlay');
   const content = document.getElementById('sleep-log-overlay-content');
   overlay.style.display = 'block';
@@ -3735,6 +3740,7 @@ function closeSleepLogOverlay(){
 }
 
 async function openBodyLog(){
+  closeAllSheets();
   const overlay = document.getElementById('body-log-overlay');
   const el = document.getElementById('body-log-overlay-content');
   overlay.style.display='block';
@@ -3785,13 +3791,19 @@ async function openExerciseLog(){
 }
 
 async function openSkinLog(){
+  closeAllSheets();
   const overlay = document.getElementById('skin-log-overlay');
   const el = document.getElementById('skin-log-overlay-content');
   overlay.style.display='block';
   el.innerHTML='<div class="log-empty">Loading...</div>';
   try {
     const skins = await dbAll('skins');
-    const entries = skins.filter(s=>s.type==='checkin').reverse();
+    // Deduplicate — keep last entry per date (most complete)
+    const seen = new Set();
+    const entries = [...skins].filter(s=>s.type==='checkin').reverse().filter(e=>{
+      if(seen.has(e.date)) return false;
+      seen.add(e.date); return true;
+    });
     if(!entries.length){ el.innerHTML='<div class="log-empty">No skin check-ins yet.</div>'; return; }
     let html='';
     for(const e of entries){
@@ -3808,6 +3820,7 @@ async function openSkinLog(){
 }
 
 async function openFacialLog(){
+  closeAllSheets();
   const overlay = document.getElementById('facial-log-overlay');
   const el = document.getElementById('facial-log-overlay-content');
   overlay.style.display='block';
@@ -3858,6 +3871,7 @@ async function saveReflectionAnswer(){
 }
 
 async function openPastMindLog(){
+  closeAllSheets();
   const overlay = document.getElementById('mood-log-overlay');
   const content = document.getElementById('mood-log-overlay-content');
   overlay.style.display = 'block';
@@ -5706,6 +5720,7 @@ function toggleHairCheckin(forceOpen){
 }
 
 async function openHairLog(){
+  closeAllSheets();
   const overlay = document.getElementById('hair-log-overlay');
   if(!overlay) return;
   overlay.style.display='block';
