@@ -424,7 +424,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- 2-ROW PILLAR NAV -->
 <div class="pillar-nav">
   <div class="top-nav">
-    <button class="tnav on" onclick="tab('today')"><i class="ti ti-sun" aria-hidden="true"></i>Today</button>
+    <button class="tnav" onclick="tab('today')"><i class="ti ti-sun" aria-hidden="true"></i>Today</button>
     <button class="tnav" onclick="tab('mind')"><i class="ti ti-brain" aria-hidden="true"></i>Mind</button>
     <button class="tnav" onclick="tab('sleep')"><i class="ti ti-moon" aria-hidden="true"></i>Sleep</button>
     <button class="tnav" onclick="tab('health')"><i class="ti ti-heart-rate-monitor" aria-hidden="true"></i>Wellness</button>
@@ -1797,16 +1797,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Routine tracking -->
     <div class="card">
-      <div class="card-title">Morning routine</div>
-      <div class="toggle-row" onclick="ts('r-cleanser')"><div><div class="tl">Olay Super Facial Cleanser</div><div class="ts">Advanced Deep Clean</div></div><div class="tog" id="r-cleanser"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('r-serum')"><div><div class="tl">Olay Super Serum</div></div><div class="tog" id="r-serum"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('r-vitc')"><div><div class="tl">Olay Vitamin C Moisturizer</div></div><div class="tog" id="r-vitc"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('r-spf')"><div><div class="tl">Olay Super Cream with SPF</div><div class="ts">Daily sunscreen</div></div><div class="tog" id="r-spf"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('r-eye')"><div><div class="tl">Grace & Stella Under Eye Mask</div><div class="ts">Gold or blue — as needed</div></div><div class="tog" id="r-eye"><div class="tok"></div></div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;"><div class="card-title" style="margin:0;">Morning routine</div><div id="skin-am-progress" style="font-size:11px;color:var(--muted);"></div></div>
+      <div class="med-row" id="r-cleanser" onclick="toggleSkinStep('r-cleanser')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Facial Cleanser</div><div class="med-note">Advanced Deep Clean</div></div></div>
+      <div class="med-row" id="r-serum" onclick="toggleSkinStep('r-serum')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Serum</div></div></div>
+      <div class="med-row" id="r-vitc" onclick="toggleSkinStep('r-vitc')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Vitamin C Moisturizer</div></div></div>
+      <div class="med-row" id="r-spf" onclick="toggleSkinStep('r-spf')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Cream with SPF</div><div class="med-note">Daily sunscreen</div></div></div>
+      <div class="med-row" id="r-eye" onclick="toggleSkinStep('r-eye')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Grace &amp; Stella Under Eye Mask</div><div class="med-note">Gold or blue &middot; as needed</div></div></div>
     </div>
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
         <div class="card-title" style="margin:0;">Evening routine · Musely alternating tracker</div>
+        <div id="skin-pm-progress" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
         <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenMusely'" style="display:flex;align-items:center;gap:5px;background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:5px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">📱 Open Musely</button>
       </div>
       <div class="musely-track">
@@ -1827,7 +1828,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <button class="btn-primary" style="margin-top:12px;" onclick="confirmMuselyApplied()">✓ Log tonight's treatment as applied</button>
       <div class="toast-msg" id="musely-toast">Treatment logged!</div>
-      <div class="toggle-row" onclick="ts('r-regen')"><div><div class="tl">Olay Regenerist Ultra Rich</div><div class="ts">After Musely — every night</div></div><div class="tog" id="r-regen"><div class="tok"></div></div></div>
+      <div class="med-row" id="r-regen" onclick="toggleSkinStep('r-regen')"><div class="med-check">✓</div><div class="med-info"><div class="med-name">Olay Regenerist Ultra Rich</div><div class="med-note">After Musely · every night</div></div></div>
       <div id="musely-history" style="margin-top:10px;"></div>
       <a href="https://www.musely.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open Musely</a>
     </div>
@@ -2657,6 +2658,9 @@ async function boot(){
   initZepboundDefaults();
   await updateBPBanners();
   loadMindHabits();
+  loadSkinRoutineState();
+  buildDailyProgress();
+  tab('today');
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
@@ -3027,9 +3031,16 @@ async function buildDailyProgress(){
     autoChecks['dp-water'] = todayW && (todayW.glasses||0) >= (WATER_GOAL||8);
   } catch(e){}
 
-  // Skin AM/PM — manual (resets daily)
-  autoChecks['dp-skin-am'] = manualState['dp-skin-am']||false;
-  autoChecks['dp-skin-pm'] = manualState['dp-skin-pm']||false;
+  // Skin AM/PM — read from skin routine state (resets daily)
+  try {
+    const skinState = JSON.parse(localStorage.getItem('glowSkinRoutine')||'{}');
+    const skinToday = skinState.date === today;
+    autoChecks['dp-skin-am'] = skinToday && ['r-cleanser','r-serum','r-vitc','r-spf'].every(id=>skinState[id]);
+    autoChecks['dp-skin-pm'] = skinToday && skinState['r-regen']===true;
+  } catch(e){
+    autoChecks['dp-skin-am'] = manualState['dp-skin-am']||false;
+    autoChecks['dp-skin-pm'] = manualState['dp-skin-pm']||false;
+  }
 
   // Body check-in — logged today
   try { const bodies = await dbAll('bodies'); autoChecks['dp-body'] = bodies.some(e=>e.date===today); } catch(e){}
@@ -4585,6 +4596,45 @@ async function saveSleep(){
   ['cpap-tags','energy-am-tags'].forEach(id=>document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
   toast('slp-t');loadLogs();
+}
+
+
+const SKIN_STEPS_AM = ['r-cleanser','r-serum','r-vitc','r-spf','r-eye'];
+const SKIN_STEPS_PM = ['r-regen'];
+const SKIN_STEPS_KEY = 'glowSkinRoutine';
+
+function loadSkinRoutineState(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(SKIN_STEPS_KEY)||'{}');
+    if(saved.date !== nowStr()){ localStorage.removeItem(SKIN_STEPS_KEY); return; }
+    [...SKIN_STEPS_AM, ...SKIN_STEPS_PM].forEach(id=>{
+      if(saved[id]) document.getElementById(id)?.classList.add('done');
+    });
+    updateSkinProgress();
+  } catch(e){}
+}
+
+function toggleSkinStep(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('done');
+  // Save state
+  const state = { date: nowStr() };
+  [...SKIN_STEPS_AM, ...SKIN_STEPS_PM].forEach(sid=>{
+    state[sid] = document.getElementById(sid)?.classList.contains('done')||false;
+  });
+  localStorage.setItem(SKIN_STEPS_KEY, JSON.stringify(state));
+  updateSkinProgress();
+  buildDailyProgress(); // update the Today checklist
+}
+
+function updateSkinProgress(){
+  const amDone = SKIN_STEPS_AM.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
+  const pmDone = SKIN_STEPS_PM.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
+  const amEl = document.getElementById('skin-am-progress');
+  const pmEl = document.getElementById('skin-pm-progress');
+  if(amEl) amEl.textContent = amDone === SKIN_STEPS_AM.length ? '✅ AM routine complete' : amDone+'/'+SKIN_STEPS_AM.length+' steps done';
+  if(pmEl) pmEl.textContent = pmDone === SKIN_STEPS_PM.length ? '✅ PM routine complete' : pmDone+'/'+SKIN_STEPS_PM.length+' steps done';
 }
 
 function toggleBodyLog(forceOpen){
