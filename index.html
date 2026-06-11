@@ -413,15 +413,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div class="pillar-nav">
   <div class="top-nav">
     <button class="tnav on" onclick="tab('today')"><i class="ti ti-sun" aria-hidden="true"></i>Today</button>
-    <button class="tnav" onclick="tab('style')"><i class="ti ti-shirt" aria-hidden="true"></i>Style</button>
+    <button class="tnav" onclick="tab('mind')"><i class="ti ti-brain" aria-hidden="true"></i>Mind</button>
     <button class="tnav" onclick="tab('sleep')"><i class="ti ti-moon" aria-hidden="true"></i>Sleep</button>
-    <button class="tnav" onclick="tab('body')"><i class="ti ti-trending-down" aria-hidden="true"></i>Body</button>
+    <button class="tnav" onclick="tab('health')"><i class="ti ti-heart-rate-monitor" aria-hidden="true"></i>Wellness</button>
   </div>
   <div class="top-nav top-nav-row2">
-    <button class="tnav" onclick="tab('health')"><i class="ti ti-heart-rate-monitor" aria-hidden="true"></i>Health</button>
     <button class="tnav" onclick="tab('skin')"><i class="ti ti-sparkles" aria-hidden="true"></i>Skin</button>
+    <button class="tnav" onclick="tab('body')"><i class="ti ti-trending-down" aria-hidden="true"></i>Body</button>
+    <button class="tnav" onclick="tab('style')"><i class="ti ti-shirt" aria-hidden="true"></i>Style</button>
     <button class="tnav" onclick="tab('hair')"><i class="ti ti-scissors" aria-hidden="true"></i>Hair</button>
-    <button class="tnav" onclick="tab('mind')"><i class="ti ti-brain" aria-hidden="true"></i>Mind</button>
   </div>
 </div>
 
@@ -1301,7 +1301,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
   <!-- ── DAILY ── -->
   <div class="view-content on" id="vc-health-daily">
-    <div class="section-label">Health · Today <button class="guide-btn" onclick="openGuide('health')">?</button></div>
+    <div class="section-label">Wellness · Today <button class="guide-btn" onclick="openGuide('health')">?</button></div>
 
     <!-- BP Log — collapsible, first card -->
     <div class="card" id="bp-entry-card">
@@ -1668,7 +1668,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
   <!-- ── MONTHLY ── -->
   <div class="view-content" id="vc-health-monthly">
-    <div class="section-label">Health · Monthly trends</div>
+    <div class="section-label">Wellness · Monthly trends</div>
 
     <div class="health-insight-banner">
       <div class="hib-icon">📈</div>
@@ -1718,7 +1718,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
   <!-- ── YEARLY ── -->
   <div class="view-content" id="vc-health-yearly">
-    <div class="section-label">Health · Your journey</div>
+    <div class="section-label">Wellness · Your journey</div>
 
     <div class="health-insight-banner">
       <div class="hib-icon">🌿</div>
@@ -2153,7 +2153,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">~0.5 inch/month target · goal line shown</div>
     </div>
     <div class="card">
-      <div class="card-title">Health score trend</div>
+      <div class="card-title">Wellness score trend</div>
       <div class="chart-wrap" style="height:180px;"><canvas id="hair-score-chart"></canvas></div>
     </div>
     <div class="card">
@@ -3882,7 +3882,7 @@ const GUIDES = {
       ]},
       { title: 'The 8 pillars (20 points each)', items: [
         { text: '❤️ Heart & Fitness', note: 'BP readings + resting HR + daily steps + exercise logs' },
-        { text: '🧪 Metabolic Health', note: 'Lab results (cholesterol, glucose, enzymes) + BMI + weight trend + body fat %' },
+        { text: '🌿 Wellness', note: 'Lab results (cholesterol, glucose, enzymes) + BMI + weight trend + body fat %' },
         { text: '😴 Sleep', note: 'Sleep hours + quality score + CPAP compliance' },
         { text: '🧠 Mind', note: 'Mood from daily check-ins + consistency bonus' },
         { text: '✨ Skin', note: 'AI scan score + AM/PM skincare routine consistency' },
@@ -3999,7 +3999,7 @@ const GUIDES = {
     ]
   },
   health: {
-    title: '❤️ Health · Daily Guide',
+    title: '🌿 Wellness · Daily Guide',
     sections: [
       { title: 'Daily', items: [
         { text: '❤️ Log blood pressure', note: 'Morning reading after 5 min rest · iHealth syncs automatically' },
@@ -4026,7 +4026,7 @@ const GUIDES = {
     sections: [
       { title: 'Daily check-in', items: [
         { text: '🧴 Complete skincare routine', note: 'Log in Today check-in · morning and evening' },
-        { text: '💧 Hydration affects skin', note: 'Log water intake in Health · Zepbound + diuretic = extra hydration need' },
+        { text: '💧 Hydration affects skin', note: 'Log water intake in Wellness · Zepbound + diuretic = extra hydration need' },
       ]},
       { title: 'Weekly scan', items: [
         { text: '📸 Take weekly skin scan photo', note: 'Clean face, no makeup, good natural light · same conditions each time' },
@@ -7759,24 +7759,25 @@ async function buildHydrationStatus(){
   }
 
   el.innerHTML = `
-    <!-- Manual body water entry — at top so it's seen first -->
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:10px 12px;background:var(--warm);border-radius:10px;">
-      <div style="font-size:13px;color:var(--text);flex:1;">💧 Body water % <span style="font-size:11px;color:var(--muted);">from Withings app</span></div>
-      <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenWithings'" style="padding:5px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">📱 Open</button>
+    <!-- Manual body water entry -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <div style="font-size:13px;color:var(--text);font-weight:500;flex:1;">💧 Body water %</div>
+      <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenWithings'" style="padding:5px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">📱 Open Withings</button>
       <input type="number" id="body-water-input" placeholder="e.g. 52.3" step="0.1" min="30" max="75"
         value="${waterPct||''}"
         style="width:72px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;">
       <span style="font-size:13px;color:var(--muted);">%</span>
       <button onclick="saveBodyWater()" style="padding:6px 12px;border-radius:8px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);">Save</button>
     </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Step on your Withings scale and enter the body water % shown in the app</div>
     <div class="toast-msg" id="bw-toast">Saved!</div>
-    <div class="hydration-status-bar" style="background:${statusBg};">
+    ${statusTitle!=='Enter from Withings app'?`<div class="hydration-status-bar" style="background:${statusBg};">` : '<!--'}
       <div class="hydration-status-icon">${statusIcon}</div>
       <div class="hydration-status-text">
         <div class="hydration-status-title" style="color:${statusColor};">${statusTitle}</div>
         <div class="hydration-status-sub">${statusMsg}</div>
       </div>
-    </div>
+    ${statusTitle!=='Enter from Withings app'?'</div>':'-->'}
     ${watsonGoalPct?`
     <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;margin-top:6px;background:var(--warm);border-radius:10px;font-size:12px;">
       <span style="font-size:16px;">🎯</span>
@@ -8912,7 +8913,7 @@ async function updateBPBanners(){
       todayReminder.innerHTML = `❤️ No BP reading today — tap to log`;
     }
 
-    // Health pillar BP status
+    // Wellness pillar BP status
     const bpStatus = document.getElementById('bp-today-status');
 
     if(todayReading && todayReading.sys){
