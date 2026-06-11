@@ -504,7 +504,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleCheckinForm()">
         <div class="card-title" style="margin:0;">Daily check-in</div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <button onclick="event.stopPropagation();openCheckinHistory()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--sans);text-decoration:underline;">Past check-ins</button>
+          <button onclick="event.stopPropagation();openCheckinHistory()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
           <button id="checkin-form-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
         </div>
       </div>
@@ -548,6 +548,106 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
+    <!-- 7 Pillars weekly self-care -->
+    <div class="card">
+      <div class="card-title">🌟 7 pillars of self-care · this week</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Tap each pillar you've nurtured today — builds your weekly self-care picture</div>
+      <div id="pillars-checklist">
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-physical')">💪</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-physical')"><div class="pillar-name">Physical</div><div class="pillar-example">Movement, sleep, nutrition, hydration</div></div>
+          <button onclick="openPillarInfo('physical')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-physical" onclick="togglePillar('p-physical')"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-detail" id="pd-physical">
+          <div class="tags" id="pdt-physical">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">🚶 Walk</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🏃 Workout</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🧘 Stretch/Yoga</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💧 Hydrated</button><button class="tag sm" onclick="tog(this);savePillarsToday()">😴 Good sleep</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🥗 Ate well</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💊 Meds taken</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-physical" placeholder="Anything else...">
+        </div>
+
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-emotional')">💛</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-emotional')"><div class="pillar-name">Emotional</div><div class="pillar-example">Feelings acknowledged, boundaries set</div></div>
+          <button onclick="openPillarInfo('emotional')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-emotional" onclick="togglePillar('p-emotional')"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-detail" id="pd-emotional">
+          <div class="tags" id="pdt-emotional">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">💬 Talked it out</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🚫 Set a boundary</button><button class="tag sm" onclick="tog(this);savePillarsToday()">😢 Let myself feel it</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🙅 Said no</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🎉 Did something joyful</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-emotional" placeholder="Anything else...">
+        </div>
+
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-mental')">🧠</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-mental')"><div class="pillar-name">Mental</div><div class="pillar-example">Learning, creativity, reflection, journaling</div></div>
+          <button onclick="openPillarInfo('mental')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-mental" onclick="togglePillar('p-mental')"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-detail" id="pd-mental">
+          <div class="tags" id="pdt-mental">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">📖 Journaled</button><button class="tag sm" onclick="tog(this);savePillarsToday()">📚 Read</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🧩 Learned something</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🎨 Created</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🧘 Meditated</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🗣 Wellspoken</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-mental" placeholder="Anything else...">
+        </div>
+
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-social')">🤝</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-social')"><div class="pillar-name">Social</div><div class="pillar-example">Connection, conversation, community</div></div>
+          <button onclick="openPillarInfo('social')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-social" onclick="togglePillar('p-social')"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-detail" id="pd-social">
+          <div class="tags" id="pdt-social">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">📞 Called someone</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🍽 Shared a meal</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💌 Reached out</button><button class="tag sm" onclick="tog(this);savePillarsToday()">👨‍👩‍👧 Family time</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🤗 Real conversation</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-social" placeholder="Anything else...">
+        </div>
+
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-spiritual')">🙏</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-spiritual')"><div class="pillar-name">Spiritual</div><div class="pillar-example">Gratitude, prayer, purpose, breathing</div></div>
+          <button onclick="openPillarInfo('spiritual')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-spiritual" onclick="togglePillar('p-spiritual')"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-detail" id="pd-spiritual">
+          <div class="tags" id="pdt-spiritual">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">🙏 Prayed</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🙌 Gratitude practice</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌿 Time in nature</button><button class="tag sm" onclick="tog(this);savePillarsToday()">📖 Scripture/reading</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌬 Deep breathing</button><button class="tag sm" onclick="tog(this);savePillarsToday()">⛪ Church</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-spiritual" placeholder="Anything else...">
+        </div>
+
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-environmental')">🏡</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-environmental')"><div class="pillar-name">Environmental</div><div class="pillar-example">Tidy space, fresh air, nature, calm home</div></div>
+          <button onclick="openPillarInfo('environmental')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-environmental" onclick="togglePillar('p-environmental')"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-detail" id="pd-environmental">
+          <div class="tags" id="pdt-environmental">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">🧹 Tidied up</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌬 Fresh air</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌳 Outside time</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🕯 Calm atmosphere</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🗂 Decluttered</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-environmental" placeholder="Anything else...">
+        </div>
+
+        <div class="pillar-row">
+          <div class="pillar-icon" onclick="togglePillar('p-financial')">💚</div>
+          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-financial')"><div class="pillar-name">Financial</div><div class="pillar-example">Budget check-in, saving, stress reduction</div></div>
+          <button onclick="openPillarInfo('financial')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
+          <div class="tog" id="p-financial" onclick="togglePillar('p-financial')"><div class="tok"></div></div>
+        </div>
+        <div class="pillar-detail" id="pd-financial">
+          <div class="tags" id="pdt-financial">
+            <button class="tag sm" onclick="tog(this);savePillarsToday()">💳 Checked accounts</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💰 Saved something</button><button class="tag sm" onclick="tog(this);savePillarsToday()">📋 Paid a bill</button><button class="tag sm" onclick="tog(this);savePillarsToday()">✂️ Cut a cost</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🎉 Financial win</button>
+          </div>
+          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-financial" placeholder="Anything else...">
+        </div>
+      </div>
+      <div id="pillars-status" style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--warm);">Tap pillars above when you've nurtured them today</div>
+    </div>
+
+
     <!-- Daily Progress card -->
     <div class="card" id="daily-progress-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -575,7 +675,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div class="card-title" style="margin:0;">Ask your coach</div>
-        <button onclick="openCoachHistory()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--sans);text-decoration:underline;">Past conversations</button>
+        <button onclick="openCoachHistory()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past conversations</button>
       </div>
       <button class="btn-ai" onclick="aiCoach()">Ask your coach ↗</button>
       <div id="coach-output" class="coach-response" style="display:none"></div>
@@ -2254,7 +2354,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="dp-row" id="act-ground" style="margin-bottom:8px;">
           <div class="dp-check">&#x2713;</div>
           <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);">&#x1F9D8; Ground · wall sit</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text);"><svg width="26" height="22" viewBox="0 0 64 56"><circle cx="44" cy="9" r="7" fill="#D4956A"/><path d="M40 5 Q42 1 46 2 Q50 3 50 7 Q48 4 44 4 Q40 4 40 5 Z" fill="#3D2E25"/><rect x="41" y="15" width="7" height="16" rx="3" fill="#C4735A"/><path d="M41 18 Q34 22 28 26" stroke="#D4956A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M48 18 Q54 22 58 28" stroke="#D4956A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M41 32 Q32 31 24 32" stroke="#8B7355" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M24 35 Q23 44 24 52" stroke="#D4956A" stroke-width="6" fill="none" stroke-linecap="round"/><ellipse cx="21" cy="54" rx="8" ry="3" fill="#C4735A"/><path d="M28 26 Q26 30 24 33" stroke="#D4956A" stroke-width="4" fill="none" stroke-linecap="round"/></svg>Ground · wall sit</div>
             <div style="font-size:11px;color:var(--muted);">30 seconds · back flat · thighs parallel</div>
           </div>
           <button onclick="showActivationStep('act-ground-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
@@ -2310,7 +2410,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <button onclick="showActivationStep('act-cool-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
         </div>
         <div id="act-cool-widget" style="display:none;text-align:center;padding:12px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
-          <div style="font-size:48px;margin-bottom:8px;">&#x1F9D6;</div>
+          <div style="margin-bottom:8px;text-align:center;"><svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="18" r="12" fill="#D4956A"/><path d="M22 14 Q22 6 30 6 Q38 6 38 14 Q36 10 30 10 Q24 10 22 14 Z" fill="#3D2E25"/><rect x="26" y="28" width="8" height="18" rx="4" fill="#C4735A"/><path d="M18 32 Q14 36 16 42" stroke="#D4956A" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M42 32 Q46 36 44 42" stroke="#D4956A" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="30" cy="50" rx="12" ry="6" fill="#C4735A" opacity="0.4"/><path d="M20 42 Q18 50 22 52 Q30 56 38 52 Q42 50 40 42" stroke="#5B9EC9" stroke-width="1.5" fill="none" stroke-dasharray="2,2" opacity="0.6"/></svg></div>
           <div id="act-cool-timer" style="font-size:36px;font-weight:700;color:#5B9EC9;">20</div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds · go splash!</div>
           <div style="display:flex;gap:8px;justify-content:center;">
@@ -2342,13 +2442,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="dp-row" id="act-march" style="margin-bottom:12px;">
           <div class="dp-check">&#x2713;</div>
           <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);">&#x1F6B6; March · in place</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text);"><svg width="26" height="26" viewBox="0 0 52 52"><circle cx="26" cy="8" r="7" fill="#D4956A"/><path d="M22 4 Q24 0 28 1 Q32 2 32 6 Q30 3 26 3 Q22 3 22 4 Z" fill="#3D2E25"/><rect x="22" y="14" width="8" height="14" rx="3" fill="#C4735A"/><path d="M22 17 Q14 10 8 6" stroke="#D4956A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M30 17 Q38 10 44 6" stroke="#D4956A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M22 27 Q18 36 16 44" stroke="#8B7355" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M30 27 Q34 36 36 44" stroke="#8B7355" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="14" cy="47" rx="7" ry="3" fill="#C4735A"/><ellipse cx="38" cy="47" rx="7" ry="3" fill="#C4735A"/></svg>March · in place</div>
             <div style="font-size:11px;color:var(--muted);">60 seconds · march briskly</div>
           </div>
           <button onclick="showActivationStep('act-march-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
         </div>
         <div id="act-march-widget" style="display:none;text-align:center;padding:12px 0;margin-bottom:8px;">
-          <div style="font-size:48px;margin-bottom:8px;">&#x1F9B5;</div>
+          <div style="margin-bottom:8px;text-align:center;"><svg width="60" height="70" viewBox="0 0 60 70"><circle cx="30" cy="10" r="9" fill="#D4956A"/><path d="M23 6 Q23 0 30 0 Q37 0 37 6 Q35 3 30 3 Q25 3 23 6 Z" fill="#3D2E25"/><rect x="25" y="18" width="10" height="16" rx="4" fill="#C4735A"/><path d="M25 20 Q18 26 16 34" stroke="#D4956A" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M35 20 Q42 26 44 34" stroke="#D4956A" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M28 33 Q24 44 20 54" stroke="#8B7355" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M32 33 Q38 42 40 50" stroke="#8B7355" stroke-width="6" fill="none" stroke-linecap="round"/><ellipse cx="18" cy="57" rx="8" ry="5" fill="#C4735A"/><ellipse cx="41" cy="53" rx="8" ry="5" fill="#C4735A"/></svg></div>
           <div id="act-march-timer" style="font-size:36px;font-weight:700;color:#6B9E78;">60</div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds · keep it brisk!</div>
           <div style="display:flex;gap:8px;justify-content:center;">
@@ -2365,140 +2465,28 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <!-- Breathing Exercise -->
-    <div class="card">
-      <div class="card-title">🌬️ Box breathing · 60 seconds</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Inhale 4 · Hold 4 · Exhale 4 · Hold 4 · Lowers cortisol, resets your nervous system</div>
-      <div id="breath-display" style="text-align:center;padding:16px 0;">
-        <div id="breath-circle" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--accent);background:rgba(155,142,196,0.1);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--accent);font-weight:600;transition:all 0.5s ease;">Start</div>
-        <div id="breath-phase" style="font-size:14px;color:var(--muted);"></div>
-        <div id="breath-count" style="font-size:28px;font-weight:700;color:var(--accent);min-height:40px;"></div>
-      </div>
-      <button id="breath-btn" class="btn-primary" style="margin-top:0;" onclick="startBreathing()">▶ Start breathing exercise</button>
-    </div>
-
     <!-- Daily Reflection Prompt -->
     <div class="card">
-      <div class="card-title">💭 Today's reflection prompt</div>
-      <div id="reflection-prompt" style="font-size:14px;color:var(--text);line-height:1.5;padding:8px 0 12px;font-style:italic;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="card-title" style="margin:0;">💭 Today's reflection prompt</div>
+        <button onclick="newReflectionPrompt()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Different prompt</button>
+      </div>
+      <div id="reflection-prompt" style="font-size:14px;color:var(--text);line-height:1.5;padding:4px 0 12px;font-style:italic;"></div>
       <textarea id="reflection-answer" rows="3" placeholder="Write your thoughts here..."></textarea>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
-        <button onclick="newReflectionPrompt()" style="padding:6px 12px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--sans);">Different prompt</button>
-        <div style="display:flex;gap:12px;align-items:center;">
-          <div class="toggle-row" style="border:none;padding:0;margin:0;" onclick="toggleMindHabit('journaled-today')">
-            <div style="font-size:12px;color:var(--muted);margin-right:8px;">📖 Journaled</div>
-            <div class="tog" id="journaled-today"><div class="tok"></div></div>
-          </div>
-          <div class="toggle-row" style="border:none;padding:0;margin:0;" onclick="toggleMindHabit('wellspoken-today')">
-            <div style="font-size:12px;color:var(--muted);margin-right:8px;">🗣 Wellspoken</div>
-            <div class="tog" id="wellspoken-today"><div class="tok"></div></div>
-          </div>
-        </div>
+      <!-- Checkboxes -->
+      <div class="med-row" id="journaled-today" onclick="toggleMindHabitCheck('journaled-today')" style="margin-top:10px;">
+        <div class="med-check">&#x2713;</div>
+        <div class="med-info"><div class="med-name">Completed journal</div></div>
+      </div>
+      <div class="med-row" id="wellspoken-today" onclick="toggleMindHabitCheck('wellspoken-today')">
+        <div class="med-check">&#x2713;</div>
+        <div class="med-info"><div class="med-name">Completed Wellspoken</div></div>
       </div>
       <!-- App links -->
       <div style="display:flex;gap:8px;margin-top:12px;">
         <a href="javascript:void(0)" onclick="openDayOne()" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">📖 Open Day One</a>
         <a href="javascript:void(0)" onclick="window.location.href='shortcuts://run-shortcut?name=OpenWellspoken'" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">🗣 Wellspoken</a>
       </div>
-    </div>
-
-    <!-- 7 Pillars weekly self-care -->
-    <div class="card">
-      <div class="card-title">🌟 7 pillars of self-care · this week</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Tap each pillar you've nurtured today — builds your weekly self-care picture</div>
-      <div id="pillars-checklist">
-        <div class="pillar-row">
-          <div class="pillar-icon" onclick="togglePillar('p-physical')">💪</div>
-          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-physical')"><div class="pillar-name">Physical</div><div class="pillar-example">Movement, sleep, nutrition, hydration</div></div>
-          <button onclick="openPillarInfo('physical')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
-          <div class="tog" id="p-physical" onclick="togglePillar('p-physical')"><div class="tok"></div></div>
-        </div>
-        <div class="pillar-detail" id="pd-physical">
-          <div class="tags" id="pdt-physical">
-            <button class="tag sm" onclick="tog(this);savePillarsToday()">🚶 Walk</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🏃 Workout</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🧘 Stretch/Yoga</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💧 Hydrated</button><button class="tag sm" onclick="tog(this);savePillarsToday()">😴 Good sleep</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🥗 Ate well</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💊 Meds taken</button>
-          </div>
-          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-physical" placeholder="Anything else...">
-        </div>
-
-        <div class="pillar-row">
-          <div class="pillar-icon" onclick="togglePillar('p-emotional')">💛</div>
-          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-emotional')"><div class="pillar-name">Emotional</div><div class="pillar-example">Feelings acknowledged, boundaries set</div></div>
-          <button onclick="openPillarInfo('emotional')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
-          <div class="tog" id="p-emotional" onclick="togglePillar('p-emotional')"><div class="tok"></div></div>
-        </div>
-        <div class="pillar-detail" id="pd-emotional">
-          <div class="tags" id="pdt-emotional">
-            <button class="tag sm" onclick="tog(this);savePillarsToday()">💬 Talked it out</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🚫 Set a boundary</button><button class="tag sm" onclick="tog(this);savePillarsToday()">😢 Let myself feel it</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🙅 Said no</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🎉 Did something joyful</button>
-          </div>
-          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-emotional" placeholder="Anything else...">
-        </div>
-
-        <div class="pillar-row">
-          <div class="pillar-icon" onclick="togglePillar('p-mental')">🧠</div>
-          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-mental')"><div class="pillar-name">Mental</div><div class="pillar-example">Learning, creativity, reflection, journaling</div></div>
-          <button onclick="openPillarInfo('mental')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
-          <div class="tog" id="p-mental" onclick="togglePillar('p-mental')"><div class="tok"></div></div>
-        </div>
-        <div class="pillar-detail" id="pd-mental">
-          <div class="tags" id="pdt-mental">
-            <button class="tag sm" onclick="tog(this);savePillarsToday()">📖 Journaled</button><button class="tag sm" onclick="tog(this);savePillarsToday()">📚 Read</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🧩 Learned something</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🎨 Created</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🧘 Meditated</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🗣 Wellspoken</button>
-          </div>
-          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-mental" placeholder="Anything else...">
-        </div>
-
-        <div class="pillar-row">
-          <div class="pillar-icon" onclick="togglePillar('p-social')">🤝</div>
-          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-social')"><div class="pillar-name">Social</div><div class="pillar-example">Connection, conversation, community</div></div>
-          <button onclick="openPillarInfo('social')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
-          <div class="tog" id="p-social" onclick="togglePillar('p-social')"><div class="tok"></div></div>
-        </div>
-        <div class="pillar-detail" id="pd-social">
-          <div class="tags" id="pdt-social">
-            <button class="tag sm" onclick="tog(this);savePillarsToday()">📞 Called someone</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🍽 Shared a meal</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💌 Reached out</button><button class="tag sm" onclick="tog(this);savePillarsToday()">👨‍👩‍👧 Family time</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🤗 Real conversation</button>
-          </div>
-          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-social" placeholder="Anything else...">
-        </div>
-
-        <div class="pillar-row">
-          <div class="pillar-icon" onclick="togglePillar('p-spiritual')">🙏</div>
-          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-spiritual')"><div class="pillar-name">Spiritual</div><div class="pillar-example">Gratitude, prayer, purpose, breathing</div></div>
-          <button onclick="openPillarInfo('spiritual')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
-          <div class="tog" id="p-spiritual" onclick="togglePillar('p-spiritual')"><div class="tok"></div></div>
-        </div>
-        <div class="pillar-detail" id="pd-spiritual">
-          <div class="tags" id="pdt-spiritual">
-            <button class="tag sm" onclick="tog(this);savePillarsToday()">🙏 Prayed</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🙌 Gratitude practice</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌿 Time in nature</button><button class="tag sm" onclick="tog(this);savePillarsToday()">📖 Scripture/reading</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌬 Deep breathing</button><button class="tag sm" onclick="tog(this);savePillarsToday()">⛪ Church</button>
-          </div>
-          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-spiritual" placeholder="Anything else...">
-        </div>
-
-        <div class="pillar-row">
-          <div class="pillar-icon" onclick="togglePillar('p-environmental')">🏡</div>
-          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-environmental')"><div class="pillar-name">Environmental</div><div class="pillar-example">Tidy space, fresh air, nature, calm home</div></div>
-          <button onclick="openPillarInfo('environmental')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
-          <div class="tog" id="p-environmental" onclick="togglePillar('p-environmental')"><div class="tok"></div></div>
-        </div>
-        <div class="pillar-detail" id="pd-environmental">
-          <div class="tags" id="pdt-environmental">
-            <button class="tag sm" onclick="tog(this);savePillarsToday()">🧹 Tidied up</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌬 Fresh air</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🌳 Outside time</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🕯 Calm atmosphere</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🗂 Decluttered</button>
-          </div>
-          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-environmental" placeholder="Anything else...">
-        </div>
-
-        <div class="pillar-row">
-          <div class="pillar-icon" onclick="togglePillar('p-financial')">💚</div>
-          <div style="flex:1;cursor:pointer;" onclick="togglePillar('p-financial')"><div class="pillar-name">Financial</div><div class="pillar-example">Budget check-in, saving, stress reduction</div></div>
-          <button onclick="openPillarInfo('financial')" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;opacity:0.7;">ⓘ</button>
-          <div class="tog" id="p-financial" onclick="togglePillar('p-financial')"><div class="tok"></div></div>
-        </div>
-        <div class="pillar-detail" id="pd-financial">
-          <div class="tags" id="pdt-financial">
-            <button class="tag sm" onclick="tog(this);savePillarsToday()">💳 Checked accounts</button><button class="tag sm" onclick="tog(this);savePillarsToday()">💰 Saved something</button><button class="tag sm" onclick="tog(this);savePillarsToday()">📋 Paid a bill</button><button class="tag sm" onclick="tog(this);savePillarsToday()">✂️ Cut a cost</button><button class="tag sm" onclick="tog(this);savePillarsToday()">🎉 Financial win</button>
-          </div>
-          <input type="text" class="pillar-note" oninput="savePillarsToday()" id="pdn-financial" placeholder="Anything else...">
-        </div>
-      </div>
-      <div id="pillars-status" style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--warm);">Tap pillars above when you've nurtured them today</div>
     </div>
 
     <!-- Weekly Intention -->
@@ -2525,7 +2513,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <div class="card-title" style="margin:0;">&#x1F9E0; Mind check-in</div>
-        <button onclick="openPastMindLog()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--sans);text-decoration:underline;">Past check-ins &#x2197;</button>
+        <button onclick="openPastMindLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
       </div>
       <div class="fl">How are you feeling?</div>
       <div class="tags" id="vibe-tags">
@@ -2545,8 +2533,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="mt">Saved!</div>
     </div>
 
-    <!-- Mood log history overlay trigger + inline log -->
-    <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-title" style="margin:0;">Mood log</div></div><div id="mind-log" style="margin-top:10px;"><div class="log-empty">No entries yet.</div></div></div>
 
   <div class="view-content" id="vc-mind-weekly">
     <div class="section-label">Mind · this week</div>
@@ -2624,6 +2610,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Check-ins</div>
     </div>
     <div id="checkin-history-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+
+<div id="mood-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeMoodLogOverlay()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Mind Check-ins</div>
+    </div>
+    <div id="mood-log-overlay-content"><div class="log-empty">Loading...</div></div>
   </div>
 </div>
 
@@ -3123,9 +3120,28 @@ const DP_MANUAL_KEY = 'glowDailyProgress';
 function getDPManualState(){
   try {
     const saved = JSON.parse(localStorage.getItem(DP_MANUAL_KEY)||'{}');
-    if(saved.date !== nowStr()) return {date: nowStr()}; // reset if new day
+    if(saved.date !== nowStr()){
+      // New day — reset manual states but keep activation steps too
+      resetActivationSteps();
+      return {date: nowStr()};
+    }
     return saved;
   } catch(e){ return {date: nowStr()}; }
+}
+
+function resetActivationSteps(){
+  ['act-breathe','act-ground','act-cool','act-move','act-march'].forEach(id=>{
+    document.getElementById(id)?.classList.remove('done');
+  });
+  const msg = document.getElementById('act-complete-msg');
+  if(msg) msg.style.display='none';
+  // Also reset widget visibility
+  ['act-breath-widget','act-ground-widget','act-cool-widget','act-move-widget','act-march-widget'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display='none';
+  });
+  const jj = document.getElementById('act-jj-count');
+  if(jj) jj.textContent='0';
 }
 
 function saveDPManualState(state){
@@ -3348,10 +3364,31 @@ function updatePillarRings(checks){
 // ── MORNING ACTIVATION RITUAL ───────────────────────────────────────────────
 
 
-function openPastMindLog(){
-  const log = document.getElementById('mind-log');
-  if(!log) return;
-  log.scrollIntoView({behavior:'smooth', block:'start'});
+async function openPastMindLog(){
+  const overlay = document.getElementById('mood-log-overlay');
+  const content = document.getElementById('mood-log-overlay-content');
+  overlay.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  const minds = await dbAll('minds');
+  if(!minds.length){ content.innerHTML='<div class="log-empty">No mood entries yet.</div>'; return; }
+  const sorted = [...minds].reverse();
+  content.innerHTML = sorted.map(e=>{
+    const gratFmt = e.gratitude ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Grateful: '+e.gratitude.split('\n').map(s=>s.replace(/^\d+\.\s*/,'')).filter(Boolean).join(', ')+'</div>' : '';
+    const winFmt = e.win ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Win: '+e.win+'</div>' : '';
+    const vibeFmt = e.vibe&&e.vibe.length ? '<div style="margin-top:6px;">'+e.vibe.map(v=>'<span class="chip">'+v+'</span>').join('')+'</div>' : '';
+    const stars = (label, val) => val ? '<span style="font-size:11px;color:var(--muted);margin-right:8px;">'+label+' '+'★'.repeat(val)+'</span>' : '';
+    return '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+      +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'+e.date+'</div>'
+      +vibeFmt
+      +'<div style="margin-top:4px;">'+stars('Energy',e.energy)+stars('Confidence',e.conf)+stars('Stress',e.stress)+stars('Body',e.bodyImage)+'</div>'
+      +winFmt+gratFmt
+      +'</div>';
+  }).join('');
+}
+
+function closeMoodLogOverlay(){
+  document.getElementById('mood-log-overlay').style.display='none';
+  document.body.style.overflow='';
 }
 
 function toggleActivation(){
@@ -10347,6 +10384,16 @@ function toggleMindHabit(id){
   const tog = document.getElementById(id);
   if(tog) tog.classList.toggle('on');
   saveMindHabits();
+
+function toggleMindHabitCheck(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('done');
+  saveMindHabits();
+  updateMindHabitsBanner();
+  buildDailyProgress();
+}
+
   updateMindHabitsBanner();
 }
 
@@ -10378,8 +10425,8 @@ function loadMindHabits(){
   try {
     const {date, journaled, wellspoken} = JSON.parse(saved);
     if(date !== nowStr()){ updateMindHabitsBanner(); return; }
-    if(journaled) document.getElementById('journaled-today')?.classList.add('on');
-    if(wellspoken) document.getElementById('wellspoken-today')?.classList.add('on');
+    if(journaled){ document.getElementById('journaled-today')?.classList.add('done'); document.getElementById('journaled-today')?.classList.remove('on'); }
+    if(wellspoken){ document.getElementById('wellspoken-today')?.classList.add('done'); document.getElementById('wellspoken-today')?.classList.remove('on'); }
   } catch(e){}
   updateMindHabitsBanner();
 }
