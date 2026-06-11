@@ -1254,10 +1254,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="stat-tile"><div class="stat-val" style="font-size:24px;">168.7</div><div class="stat-lbl">All-time low · May 19</div></div>
     </div>
     <div class="card">
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleBodyLog()">
-        <div class="card-title" style="margin:0;">+ Today's body check-in</div>
-        <div id="body-log-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;" onclick="toggleBodyLog()">
+          <div class="card-title" style="margin:0;">Today's body check-in</div>
+          <div id="body-log-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+        </div>
+        <button onclick="openBodyLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
       </div>
       <div id="body-log-body" style="display:none;margin-top:12px;">
         <div class="fl">Non-scale wins</div>
@@ -1276,6 +1278,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="toast-msg" id="bt">Saved!</div>
       </div>
     </div>
+    <div class="card">
       <div class="card-title">Weight charts</div>
       <div class="chart-tabs">
         <button class="chart-tab on" onclick="switchChart('journey',this)">Weight journey</button>
@@ -1338,14 +1341,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Exercise goals -->
     <div class="card">
-      <div class="card-title">Today's exercise goal</div>
-      <div id="exercise-goal-display" style="padding:10px 0;font-size:14px;color:var(--text);">
-        <div style="color:var(--muted);font-size:13px;">Weekly targets: Pilates 2×/wk · Treadmill walk 3×/wk · Stretching daily</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="card-title" style="margin:0;">Exercise</div>
+        <button onclick="openExerciseLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
       </div>
-      <div id="exercise-today-status" style="margin-top:8px;"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Exercise log</div>
+      <div id="exercise-goal-display" style="padding:4px 0 10px;font-size:13px;color:var(--muted);">
+        Weekly targets: Pilates 2×/wk · Treadmill walk 3×/wk · Stretching daily
+      </div>
+      <div id="exercise-today-status" style="margin-bottom:8px;"></div>
       <div class="fl">Workout time</div>
       <div class="tags" id="ex-time-tags">
         <button class="tag" onclick="solo('ex-time-tags',this)">AM</button>
@@ -1369,7 +1372,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button class="btn-primary" onclick="saveExercise()">Log exercise</button>
       <div class="toast-msg" id="ext">Saved!</div>
     </div>
-    <div class="card"><div class="card-title">Exercise log</div><div id="exercise-log"><div class="log-empty">No exercise entries yet.</div></div></div>
     <div class="card">
       <div class="card-title">Monthly progress photos · May 2026</div>
       <div class="photo-grid">
@@ -1378,7 +1380,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div onclick="pickPhoto('body-may26-back')" id="body-may26-back" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Back</div></div>
       </div>
     </div>
-    <div class="card"><div class="card-title">Body log</div><div id="body-log"><div class="log-empty">No entries yet.</div></div></div>
   </div>
   <div class="view-content" id="vc-body-weekly">
     <div class="section-label">Body · this week</div>
@@ -2008,6 +2009,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="ft">Saved!</div>
     </div>
     <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-title" style="margin:0;">Log a facial</div><button onclick="openFacialLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button></div>
+    </div>
     <div class="card">
       <div class="card-title">Monthly photos · May 2026</div>
       <div class="photo-grid">
@@ -2655,6 +2657,27 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
 
 
+
+<div id="body-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="document.getElementById('body-log-overlay').style.display='none';document.body.style.overflow='';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Body Check-ins</div>
+    </div>
+    <div id="body-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="exercise-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="document.getElementById('exercise-log-overlay').style.display='none';document.body.style.overflow='';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Exercise Log</div>
+    </div>
+    <div id="exercise-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
 <div id="skin-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
@@ -2795,7 +2818,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-</div><!-- shell -->
 
 <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handlePhoto(event)">
 
@@ -2916,6 +2938,7 @@ async function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
+  if(curTab==='body'&&id&&id!=='daily') { if(id==='weekly') buildBodyWeeklyView(); if(id==='monthly') buildBodyMonthlyView(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') { 
@@ -2940,6 +2963,7 @@ async function tab(id){
   }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
+  if(curTab==='body'){ if(v==='weekly') setTimeout(buildBodyWeeklyView,50); if(v==='monthly') setTimeout(buildBodyMonthlyView,50); if(v==='yearly') setTimeout(buildBodyYearlyView,50); }
   if(curTab==='style'){ renderLookbook(); if(v==='monthly') renderStyleCalendar(); }
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
@@ -3375,7 +3399,7 @@ function updatePillarRings(checks){
     sleep:   ['dp-sleep-q','dp-myair','dp-cpap'],
     health:  ['dp-bp','dp-meds','dp-bodywater','dp-water'],
     skin:    ['dp-skin-checkin','dp-skin-am','dp-skin-pm','dp-musely-game'],
-    body:    ['dp-body'],
+    body:    ['dp-body','dp-exercise'],
     style:   ['dp-outfit'],
     hair:    ['dp-hair'],
   };
@@ -3462,6 +3486,45 @@ function closeSleepLogOverlay(){
   document.getElementById('sleep-log-overlay').style.display='none';
   document.body.style.overflow='';
 }
+
+async function openBodyLog(){
+  const overlay = document.getElementById('body-log-overlay');
+  const el = document.getElementById('body-log-overlay-content');
+  overlay.style.display='block'; document.body.style.overflow='hidden';
+  const bodies = await dbAll('bodies');
+  if(!bodies.length){ el.innerHTML='<div class="log-empty">No body check-ins yet.</div>'; return; }
+  el.innerHTML = [...bodies].reverse().map(e=>'<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+    +'<div style="font-size:12px;color:var(--muted);">'+e.date+'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
+    +[...(e.nsv||[])].map(c=>'<span class="chip">'+c+'</span>').join('')
+    +'</div>'
+    +((e.waist||e.hips)?'<div style="font-size:12px;color:var(--muted);margin-top:4px;">'+(e.waist?'Waist: '+e.waist+'" ':'')+(e.hips?'Hips: '+e.hips+'"':'')+'</div>':'')
+    +(e.note?'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+e.note+'</div>':'')
+    +'</div>').join('');
+}
+
+async function openExerciseLog(){
+  const overlay = document.getElementById('exercise-log-overlay');
+  const el = document.getElementById('exercise-log-overlay-content');
+  overlay.style.display='block'; document.body.style.overflow='hidden';
+  const exs = await dbAll('exercises');
+  if(!exs.length){ el.innerHTML='<div class="log-empty">No exercise entries yet.</div>'; return; }
+  el.innerHTML = [...exs].reverse().map(e=>{
+    const types = [];
+    if(e.walk) types.push('Treadmill '+e.walk+'min');
+    if(e.pilates) types.push('Pilates '+e.pilates+'min');
+    if(e.strength) types.push('Strength '+e.strength+'min');
+    if(e.abs) types.push('Abs '+e.abs+'min');
+    if(e.yoga) types.push('Yoga '+e.yoga+'min');
+    if(e.other) types.push('Other '+e.other+'min');
+    return '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+      +'<div style="font-size:12px;color:var(--muted);">'+e.date+(e.time?' · '+e.time:'')+(e.intensity?' · '+e.intensity:'')+'</div>'
+      +'<div style="font-size:13px;color:var(--text);margin-top:4px;">'+types.join(' · ')+'</div>'
+      +(e.note?'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+e.note+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
 async function openSkinLog(){
   const overlay = document.getElementById('skin-log-overlay');
   const el = document.getElementById('skin-log-overlay-content');
