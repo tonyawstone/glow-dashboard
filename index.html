@@ -787,7 +787,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <i class="ti ti-camera" aria-hidden="true"></i>
           </div>
           <div style="flex:1;">
-            <input type="text" id="outfit-desc" placeholder="Describe the outfit...">
+            <input type="text" id="outfit-desc" placeholder="Describe the outfit..." oninput="saveStyleDraft()">
             <div class="fl" style="margin-top:8px;">Type</div>
             <div class="tags" id="src-tags" style="margin:5px 0;">
               <button class="tag" onclick="selectOutfitType(this,'My outfit')">My outfit</button>
@@ -825,7 +825,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
           </label>
         </div>
         <div class="fl">Notes</div>
-        <textarea id="outfit-notes" rows="2" placeholder="e.g. Felt so confident in this! Fits my new size perfectly."></textarea>
+        <textarea id="outfit-notes" rows="2" placeholder="e.g. Felt so confident in this! Fits my new size perfectly." oninput="saveStyleDraft()"></textarea>
         <div class="fl">Rating</div>
         <div class="stars" id="outfit-stars">
           <span class="star" onclick="setStars('outfit-stars',1)">★</span><span class="star" onclick="setStars('outfit-stars',2)">★</span><span class="star" onclick="setStars('outfit-stars',3)">★</span><span class="star" onclick="setStars('outfit-stars',4)">★</span><span class="star" onclick="setStars('outfit-stars',5)">★</span>
@@ -1110,7 +1110,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="med-info"><div class="med-name">Sleep gummies</div><div class="med-note">CBD / magnesium / other</div></div>
       </div>
       <div class="fl">Notes</div>
-      <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..."></textarea>
+      <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..." oninput="saveSleepDraft()"></textarea>
       <button class="btn-primary" onclick="saveSleep()">Log sleep</button>
       <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px;">Saves to last night's date</div>
       <button class="btn-ai" onclick="sleepCoach()">Sleep pattern analysis ↗</button>
@@ -1268,11 +1268,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <button class="tag" onclick="tog(this)">Clothes fit better</button><button class="tag" onclick="tog(this)">More energy</button><button class="tag" onclick="tog(this)">Compliment</button><button class="tag" onclick="tog(this)">New low</button><button class="tag" onclick="tog(this)">Less bloated</button>
         </div>
         <div class="two-col" style="margin-top:9px;">
-          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Waist (in)</div><input type="number" id="waist" placeholder="—" step="0.5"></div>
-          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hips (in)</div><input type="number" id="hips" placeholder="—" step="0.5"></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Waist (in)</div><input type="number" id="waist" placeholder="—" step="0.5" oninput="saveBodyDraft()"></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hips (in)</div><input type="number" id="hips" placeholder="—" step="0.5" oninput="saveBodyDraft()"></div>
         </div>
         <div class="fl">Zepbound notes</div>
-        <textarea id="zep-note" rows="2" placeholder="Appetite, side effects, energy..."></textarea>
+        <textarea id="zep-note" rows="2" placeholder="Appetite, side effects, energy..." oninput="saveBodyDraft()"></textarea>
         <button class="btn-primary" onclick="saveBody()">Log body update</button>
         <button class="btn-ai" onclick="zepCoach()">Zepbound review ↗</button>
         <div id="zep-coach-output" class="coach-response" style="display:none"></div>
@@ -1932,7 +1932,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="tag" onclick="tog(this)">Hyperpigmentation</button><button class="tag" onclick="tog(this)">Fine lines</button><button class="tag" onclick="tog(this)">Texture</button><button class="tag" onclick="tog(this)">Pores</button><button class="tag" onclick="tog(this)">Redness</button>
       </div>
       <div class="fl">Derm notes</div>
-      <textarea id="derm-note" rows="2" placeholder="Rx changes, appt notes..."></textarea>
+      <textarea id="derm-note" rows="2" placeholder="Rx changes, appt notes..." oninput="saveSkinDraft()"></textarea>
       <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
         <div style="font-size:12px;color:var(--muted);">Logging for:</div>
         <input type="date" id="skin-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
@@ -2974,11 +2974,11 @@ async function tab(id){
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
-  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
-  if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); }
+  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); }
+  if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') { 
-    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState();
+    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft();
     // Default myAir date to yesterday — CPAP data is always for last night
     const myairDate = document.getElementById('myair-date');
     const myairLabel = document.getElementById('myair-date-label');
@@ -2991,8 +2991,8 @@ async function tab(id){
   }
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); buildDailyProgress(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); restoreMindDraft(); loadIntentionHistory(); }
-  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); }
-  if(id==='skin'){ loadLatestSkinScan(); }
+  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); restoreHairDraft(); }
+  if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
     const today = nowStr();
     ['skin-log-date','water-log-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=today; });
@@ -3019,7 +3019,18 @@ function applyView(){
 }
 
 // ── UI HELPERS ────────────────────────────────────────────────────────
-function tog(b){b.classList.toggle('on'); autoSaveCheckinState(); saveMindDraft();}
+function tog(b){
+  b.classList.toggle('on');
+  autoSaveCheckinState();
+  saveMindDraft();
+  // Save pillar draft based on active tab
+  const p = curTab;
+  if(p==='sleep') saveSleepDraft();
+  else if(p==='body') saveBodyDraft();
+  else if(p==='skin') saveSkinDraft();
+  else if(p==='hair') saveHairDraft();
+  else if(p==='style') saveStyleDraft();
+}
 
 function autoSaveCheckinState(){
   // Only auto-save if we're on the check-in form
@@ -3040,6 +3051,124 @@ function autoSaveCheckinState(){
     };
     localStorage.setItem('glowCheckinState', JSON.stringify({...state, savedAt: new Date().toISOString()}));
   } catch(e){}
+}
+
+// ── UNIFIED PILLAR DRAFT SYSTEM ───────────────────────────────────────
+// Persists check-in form fields across reloads until midnight
+function getDraftStore(){ try{ return JSON.parse(localStorage.getItem('glowDrafts')||'{}'); }catch(e){ return {}; } }
+function saveDraftStore(store){ try{ localStorage.setItem('glowDrafts', JSON.stringify(store)); }catch(e){} }
+function savePillarDraft(pillar, data){
+  const store = getDraftStore();
+  store[pillar] = { date: nowStr(), ...data };
+  saveDraftStore(store);
+}
+function getPillarDraft(pillar){
+  const store = getDraftStore();
+  const d = store[pillar];
+  if(!d || d.date !== nowStr()){ delete store[pillar]; saveDraftStore(store); return null; }
+  return d;
+}
+function clearPillarDraft(pillar){
+  const store = getDraftStore();
+  delete store[pillar];
+  saveDraftStore(store);
+}
+function getTags(id){ const el=document.getElementById(id); if(!el) return []; return Array.from(el.querySelectorAll('.on')).map(b=>b.textContent.trim()); }
+function restoreTags(id, vals){ if(!vals||!vals.length) return; const el=document.getElementById(id); if(!el) return; el.querySelectorAll('.tag,.qb').forEach(t=>{ if(vals.includes(t.textContent.trim())) t.classList.add('on'); }); }
+function restoreCheckbox(id, val){ const el=document.getElementById(id); if(el && val) el.classList.add('on'); }
+
+// Sleep draft
+function saveSleepDraft(){
+  savePillarDraft('sleep',{
+    cpap: getTags('cpap-tags'),
+    quality: document.getElementById('sq-tags')?.querySelector('.on')?.textContent||'',
+    energy: getTags('energy-am-tags'),
+    note: document.getElementById('sleep-note')?.value||''
+  });
+}
+function restoreSleepDraft(){
+  const d = getPillarDraft('sleep'); if(!d) return;
+  restoreTags('cpap-tags', d.cpap);
+  if(d.quality) document.getElementById('sq-tags')?.querySelectorAll('.qb').forEach(b=>{ if(b.textContent.trim()===d.quality) b.classList.add('on'); });
+  restoreTags('energy-am-tags', d.energy);
+  if(d.note && document.getElementById('sleep-note')) document.getElementById('sleep-note').value = d.note;
+}
+
+// Body draft
+function saveBodyDraft(){
+  savePillarDraft('body',{
+    nsv: getTags('nsv-tags'),
+    note: document.getElementById('zep-note')?.value||'',
+    waist: document.getElementById('waist')?.value||'',
+    hips: document.getElementById('hips')?.value||''
+  });
+}
+function restoreBodyDraft(){
+  const d = getPillarDraft('body'); if(!d) return;
+  restoreTags('nsv-tags', d.nsv);
+  if(d.note && document.getElementById('zep-note')) document.getElementById('zep-note').value = d.note;
+  if(d.waist && document.getElementById('waist')) document.getElementById('waist').value = d.waist;
+  if(d.hips && document.getElementById('hips')) document.getElementById('hips').value = d.hips;
+  toggleBodyLog(true);
+}
+
+// Skin draft
+function saveSkinDraft(){
+  savePillarDraft('skin',{
+    skinT: getTags('skin-tags'),
+    concerns: getTags('concern-tags'),
+    derm: document.getElementById('derm-note')?.value||'',
+    musely_aa: document.getElementById('r-musely-aa')?.classList.contains('on')||false,
+    musely_spot: document.getElementById('r-musely-spot')?.classList.contains('on')||false
+  });
+}
+function restoreSkinDraft(){
+  const d = getPillarDraft('skin'); if(!d) return;
+  restoreTags('skin-tags', d.skinT);
+  restoreTags('concern-tags', d.concerns);
+  if(d.derm && document.getElementById('derm-note')) document.getElementById('derm-note').value = d.derm;
+  restoreCheckbox('r-musely-aa', d.musely_aa);
+  restoreCheckbox('r-musely-spot', d.musely_spot);
+}
+
+// Hair draft
+function saveHairDraft(){
+  savePillarDraft('hair',{
+    tags: getTags('hair-tags'),
+    hcare: getTags('hcare-tags'),
+    note: document.getElementById('hair-note')?.value||''
+  });
+}
+function restoreHairDraft(){
+  const d = getPillarDraft('hair'); if(!d) return;
+  restoreTags('hair-tags', d.tags);
+  restoreTags('hcare-tags', d.hcare);
+  if(d.note && document.getElementById('hair-note')) document.getElementById('hair-note').value = d.note;
+  toggleHairCheckin(true);
+}
+
+// Style draft
+function saveStyleDraft(){
+  savePillarDraft('style',{
+    desc: document.getElementById('outfit-desc')?.value||'',
+    occ: getTags('occ-tags'),
+    vibe: getTags('outfit-vibe-tags'),
+    season: getTags('season-tags'),
+    color: getTags('color-tags'),
+    notes: document.getElementById('outfit-notes')?.value||'',
+    stars: document.getElementById('outfit-stars')?.querySelectorAll('.on').length||0
+  });
+}
+function restoreStyleDraft(){
+  const d = getPillarDraft('style'); if(!d) return;
+  if(d.desc && document.getElementById('outfit-desc')) document.getElementById('outfit-desc').value = d.desc;
+  restoreTags('occ-tags', d.occ);
+  restoreTags('outfit-vibe-tags', d.vibe);
+  restoreTags('season-tags', d.season);
+  restoreTags('color-tags', d.color);
+  if(d.notes && document.getElementById('outfit-notes')) document.getElementById('outfit-notes').value = d.notes;
+  if(d.stars) { const el=document.getElementById('outfit-stars'); if(el) el.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<d.stars)); }
+  toggleOutfitForm(true);
 }
 function fmtOutfitDate(d){
   if(!d)return '';
@@ -3062,6 +3191,14 @@ function selectOutfitType(btn, type){
 function solo(gid,btn){document.getElementById(gid).querySelectorAll('.tag').forEach(t=>t.classList.remove('on'));btn.classList.add('on');}
 function soloQ(btn){document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function ts(id){document.getElementById(id).classList.toggle('on'); autoSaveCheckinState();}
+function fmtOutfitDate(d){
+  if(!d)return '';
+  if(d.match(/^\d{4}-\d{2}-\d{2}$/)){
+    const dt=new Date(d+'T12:00:00');
+    return dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  }
+  return d;
+}
 function setStars(id,n){document.getElementById(id).querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n)); saveMindDraft();}
 function getStars(id){return document.getElementById(id).querySelectorAll('.on').length;}
 function gT(id){return Array.from(document.getElementById(id).querySelectorAll('.on')).map(b=>b.textContent.trim());}
@@ -5493,7 +5630,6 @@ async function saveMind(){
     selfcareEl?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     setStars('energy-stars',0);setStars('conf-stars',0);setStars('stress-stars',0);setStars('body-image-stars',0);
     toast('mt');
-    localStorage.removeItem('glowMindDraft');
     loadLogs();
     buildDailyProgress();
     toggleMindCheckin(false);
