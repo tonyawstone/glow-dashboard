@@ -37,7 +37,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 /* 2-ROW PILLAR NAV */
 .fullscreen-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;box-sizing:border-box;}
 .fullscreen-overlay.open{display:block;}
-body.overlay-open{overflow:hidden;position:fixed;width:100%;}
+body.overlay-open{overflow:hidden;}
 .top-nav{display:grid;grid-template-columns:repeat(4,1fr);background:var(--cream);border-bottom:0.5px solid var(--border);border-top:0.5px solid var(--border);flex-shrink:0;margin-top:0;margin-bottom:0;}
 .top-nav-row2{grid-template-columns:repeat(4,1fr);margin-top:0;border-top:none;margin-bottom:0;}
 .tnav{border:none;background:transparent;padding:12px 2px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);font-family:var(--sans);border-bottom:2px solid transparent;}
@@ -5764,8 +5764,8 @@ async function openHairLog(){
 
 async function saveBody(){
   const entry={type:'body',nsv:gT('nsv-tags'),note:document.getElementById('zep-note').value.trim(),waist:document.getElementById('waist').value,hips:document.getElementById('hips').value,date:nowStr()};
-  await dbAdd('skins',entry);
-  syncToBlob('skins');
+  await dbAdd('bodies',entry);
+  syncToBlob('bodies');
   toast('bt');toggleBodyLog(false);loadLogs();
 }
 async function saveExercise(){
@@ -11018,7 +11018,7 @@ function openGlowInsights(){
 }
 
 function closeGlowInsights(){
-  document.getElementById('glow-insights-overlay').style.display = 'none';
+  document.getElementById('glow-insights-overlay').classList.remove('open');document.body.classList.remove('overlay-open');
   
 }
 
@@ -11060,7 +11060,7 @@ async function openCheckinHistory(){
 }
 
 function closeCheckinHistory(){
-  document.getElementById('checkin-history-overlay').style.display = 'none';
+  document.closeOverlay('checkin-history-overlay');
   
 }
 
@@ -11101,7 +11101,7 @@ async function loadMoreCoach(){
 }
 
 function closeCoachHistory(){
-  document.getElementById('coach-history-overlay').style.display = 'none';
+  document.closeOverlay('coach-history-overlay');
   
 }
 
