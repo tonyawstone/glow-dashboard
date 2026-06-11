@@ -852,17 +852,54 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- 3. Wardrobe planning -->
     <div class="card">
-      <div class="card-title">Wardrobe planning</div>
-      <div class="fl">Upcoming occasion</div>
-      <input type="text" id="wardrobe-occasion" placeholder="e.g. Work conference, birthday dinner, vacation...">
-      <div class="fl">What I need / want to plan</div>
-      <textarea id="wardrobe-plan" rows="3" placeholder="e.g. Need a blazer that fits my new size. Want to try a wrap dress. Next DailyLook box should focus on..."></textarea>
-      <div class="fl">Next DailyLook box wish list</div>
-      <textarea id="dailylook-wishlist" rows="2" placeholder="e.g. Neutral blazer, wide leg trousers, something dressy for fall..."></textarea>
-      <button class="btn-primary" onclick="saveWardrobePlan()">Save plan</button>
-      <div class="toast-msg" id="wt">Saved!</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleWardrobePlan()">
+        <div class="card-title" style="margin:0;">📋 Wardrobe planning</div>
+        <div id="wardrobe-plan-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+      </div>
+      <div id="wardrobe-plan-body" style="display:none;margin-top:12px;">
+        <div class="fl">Occasion / goal</div>
+        <input type="text" id="wardrobe-occasion" placeholder="e.g. Work conference, birthday dinner, vacation...">
+        <div class="fl">What I need</div>
+        <div class="tags" id="wardrobe-need-tags" style="margin:5px 0 8px;">
+          <button class="tag" onclick="tog(this)">Blazer</button>
+          <button class="tag" onclick="tog(this)">Dress</button>
+          <button class="tag" onclick="tog(this)">Jeans</button>
+          <button class="tag" onclick="tog(this)">Trousers</button>
+          <button class="tag" onclick="tog(this)">Top</button>
+          <button class="tag" onclick="tog(this)">Cardigan</button>
+          <button class="tag" onclick="tog(this)">Jacket</button>
+          <button class="tag" onclick="tog(this)">Skirt</button>
+          <button class="tag" onclick="tog(this)">Shoes</button>
+          <button class="tag" onclick="tog(this)">Accessories</button>
+          <button class="tag" onclick="tog(this)">Swimwear</button>
+          <button class="tag" onclick="tog(this)">Loungewear</button>
+        </div>
+        <div class="fl">Notes / details</div>
+        <textarea id="wardrobe-plan" rows="2" placeholder="e.g. Need a blazer that fits my new size 14. Wrap dresses are working well right now..."></textarea>
+        <div class="fl" style="margin-top:8px;">Next DailyLook box wish list</div>
+        <textarea id="dailylook-wishlist" rows="2" placeholder="e.g. Neutral blazer, wide leg trousers, something dressy for fall..."></textarea>
+        <div class="fl" style="margin-top:8px;">Current size notes <span style="font-size:11px;color:var(--muted);">(update as you change)</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Tops / Dresses</div>
+            <input type="text" id="wardrobe-size-top" placeholder="e.g. 14 / XL" style="font-size:13px;">
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">Bottoms / Jeans</div>
+            <input type="text" id="wardrobe-size-bottom" placeholder="e.g. 14 / 33W" style="font-size:13px;">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="saveWardrobePlan()">Save plan</button>
+        <div class="toast-msg" id="wt">Saved!</div>
+      </div>
     </div>
-    <div class="card"><div class="card-title">Wardrobe planning notes</div><div id="wardrobe-plan-log-daily"><div class="log-empty">No wardrobe plans yet.</div></div></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="card-title" style="margin:0;">Wardrobe planning notes</div>
+        <button class="pill-btn" onclick="openWardrobePlanLog()" style="font-size:12px;">Past plans ↗</button>
+      </div>
+      <div id="wardrobe-plan-log-daily" style="margin-top:8px;"><div class="log-empty">No wardrobe plans yet.</div></div>
+    </div>
 
     <!-- 4. Shopping List -->
     <button id="style-shopping-btn" class="btn-secondary" style="width:100%;font-size:14px;margin-top:4px;" onclick="toggleShoppingView()">🛍 Shopping List</button>
@@ -916,15 +953,72 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="bxt">Saved!</div>
     </div>
     <div class="card"><div class="card-title">Monthly style log</div><div id="monthly-style-log"><div class="log-empty">No monthly summaries yet.</div></div></div>
+
+    <!-- Purchase history this month -->
+    <div class="card">
+      <div class="card-title">🛍 Purchased this month</div>
+      <div id="style-purchase-history-monthly"><div class="log-empty">No purchases recorded this month.</div></div>
+    </div>
   </div>
   <div class="view-content" id="vc-style-yearly">
     <div class="section-label">2026 style evolution</div>
+
+    <!-- Stats strip -->
     <div class="card"><div class="card-title">Style journey · by the numbers</div>
       <div class="stat-strip" style="grid-template-columns:repeat(3,1fr);">
         <div class="stat-tile"><div class="stat-val" id="total-outfits">0</div><div class="stat-lbl">Outfits logged</div></div>
         <div class="stat-tile"><div class="stat-val" id="total-kept">0</div><div class="stat-lbl">Items kept</div></div>
         <div class="stat-tile"><div class="stat-val" id="total-returned">0</div><div class="stat-lbl">Returned</div></div>
       </div>
+      <div id="style-yearly-extra-stats" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- Size milestones — Zepbound transformation -->
+    <div class="card">
+      <div class="card-title">👗 Size milestones</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Track each time you drop a size — every one is a win 🎉</div>
+      <div id="size-milestones-log" style="margin-bottom:12px;"><div class="log-empty">No size milestones logged yet.</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div>
+          <div class="fl" style="font-size:11px;">Date</div>
+          <input type="date" id="size-milestone-date" style="font-size:13px;">
+        </div>
+        <div>
+          <div class="fl" style="font-size:11px;">New size (tops)</div>
+          <input type="text" id="size-milestone-top" placeholder="e.g. 14 / XL" style="font-size:13px;">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div>
+          <div class="fl" style="font-size:11px;">New size (bottoms)</div>
+          <input type="text" id="size-milestone-bottom" placeholder="e.g. 14 / 33" style="font-size:13px;">
+        </div>
+        <div>
+          <div class="fl" style="font-size:11px;">Weight at time</div>
+          <input type="text" id="size-milestone-weight" placeholder="e.g. 174.2 lbs" style="font-size:13px;">
+        </div>
+      </div>
+      <input type="text" id="size-milestone-note" placeholder="How did it feel to fit into this size?" style="font-size:13px;margin-bottom:8px;">
+      <button class="btn-primary" onclick="saveSizeMilestone()">Save milestone</button>
+    </div>
+
+    <!-- Vibe trends -->
+    <div class="card">
+      <div class="card-title">Your vibe this year</div>
+      <div id="style-vibe-trends"><div class="log-empty">Log more outfits to see your style trends.</div></div>
+    </div>
+
+    <!-- Outfit wins -->
+    <div class="card">
+      <div class="card-title">⭐ Outfit wins · 4–5 star looks</div>
+      <div id="style-outfit-wins"><div class="log-empty">Rate outfits 4–5 stars to see your wins here.</div></div>
+    </div>
+
+    <!-- Purchase history -->
+    <div class="card">
+      <div class="card-title">🛍 Wardrobe additions</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Items marked as purchased from your shopping list</div>
+      <div id="style-purchase-history-yearly"><div class="log-empty">No purchases recorded yet.</div></div>
     </div>
   </div>
   <div class="view-content" id="vc-style-inspo">
@@ -2934,7 +3028,7 @@ async function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); }
-  if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); }
+  if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); loadWardrobePlanLog(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') { 
     buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft();
@@ -2965,7 +3059,7 @@ async function tab(id){
   }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
-  if(curTab==='style'){ renderLookbook(); if(v==='monthly') renderStyleCalendar(); }
+  if(curTab==='style'){ renderLookbook(); if(v==='monthly'){ renderStyleCalendar(); buildStylePurchaseHistory('style-purchase-history-monthly',false); } if(v==='yearly') buildStyleYearlyView(); }
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
@@ -4513,13 +4607,210 @@ async function saveWardrobePlan(){
   const occasion=document.getElementById('wardrobe-occasion').value.trim();
   const plan=document.getElementById('wardrobe-plan').value.trim();
   const wishlist=document.getElementById('dailylook-wishlist').value.trim();
-  if(!occasion&&!plan&&!wishlist)return;
-  await dbAdd('wardrobeplans',{occasion,plan,wishlist,date:nowStr()});
+  const need=Array.from(document.querySelectorAll('#wardrobe-need-tags .on')).map(b=>b.textContent.trim());
+  const sizeTop=document.getElementById('wardrobe-size-top').value.trim();
+  const sizeBottom=document.getElementById('wardrobe-size-bottom').value.trim();
+  if(!occasion&&!plan&&!wishlist&&!need.length)return;
+  await dbAdd('wardrobeplans',{occasion,plan,wishlist,need,sizeTop,sizeBottom,date:nowStr()});
   syncToBlob('wardrobeplans');
   document.getElementById('wardrobe-occasion').value='';
   document.getElementById('wardrobe-plan').value='';
   document.getElementById('dailylook-wishlist').value='';
+  document.querySelectorAll('#wardrobe-need-tags .on').forEach(b=>b.classList.remove('on'));
   toast('wt');
+  // Collapse and reload log
+  const body=document.getElementById('wardrobe-plan-body');
+  const chev=document.getElementById('wardrobe-plan-chevron');
+  if(body){body.style.display='none';if(chev)chev.style.transform='';}
+  loadWardrobePlanLog();
+}
+
+function toggleWardrobePlan(){
+  const body=document.getElementById('wardrobe-plan-body');
+  const chev=document.getElementById('wardrobe-plan-chevron');
+  if(!body)return;
+  const open=body.style.display==='block'||body.style.display==='';
+  body.style.display=open?'none':'block';
+  if(chev) chev.style.transform=open?'':'rotate(90deg)';
+}
+
+async function loadWardrobePlanLog(){
+  const plans=await dbAll('wardrobeplans');
+  const sorted=[...plans].reverse();
+  const recent=sorted.slice(0,3);
+  const el=document.getElementById('wardrobe-plan-log-daily');
+  if(!el)return;
+  if(!recent.length){el.innerHTML='<div class="log-empty">No wardrobe plans yet.</div>';return;}
+  el.innerHTML=recent.map(e=>{
+    const tags=[...(e.need||[])].filter(Boolean);
+    const sizes=[e.sizeTop?'Tops: '+e.sizeTop:'',e.sizeBottom?'Bottoms: '+e.sizeBottom:''].filter(Boolean).join(' · ');
+    return `<div style="padding:8px 0;border-bottom:0.5px solid var(--border);">
+      <div style="font-size:11px;color:var(--muted);">${fmtOutfitDate(e.date)}${e.occasion?' · '+e.occasion:''}</div>
+      ${tags.length?`<div style="margin-top:4px;">${tags.map(t=>`<span style="font-size:11px;background:var(--warm);padding:2px 7px;border-radius:10px;margin:2px 2px 0 0;display:inline-block;">${t}</span>`).join('')}</div>`:''}
+      ${e.plan?`<div style="font-size:13px;margin-top:4px;">${e.plan}</div>`:''}
+      ${e.wishlist?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">📦 DailyLook: ${e.wishlist}</div>`:''}
+      ${sizes?`<div style="font-size:11px;color:var(--accent);margin-top:3px;">📐 ${sizes}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+async function openWardrobePlanLog(){
+  openOverlay('wardrobe-plan-log-overlay');
+  const el=document.getElementById('wardrobe-plan-log-overlay-content');
+  if(!el)return;
+  el.innerHTML='<div class="log-empty">Loading...</div>';
+  try{
+    const plans=await dbAll('wardrobeplans');
+    const sorted=[...plans].reverse();
+    if(!sorted.length){el.innerHTML='<div class="log-empty">No wardrobe plans yet.</div>';return;}
+    el.innerHTML=sorted.map(e=>{
+      const tags=[...(e.need||[])].filter(Boolean);
+      const sizes=[e.sizeTop?'Tops: '+e.sizeTop:'',e.sizeBottom?'Bottoms: '+e.sizeBottom:''].filter(Boolean).join(' · ');
+      return `<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${fmtOutfitDate(e.date)}${e.occasion?' · <strong>'+e.occasion+'</strong>':''}</div>
+        ${tags.length?`<div style="margin-bottom:6px;">${tags.map(t=>`<span style="font-size:11px;background:var(--warm);padding:2px 7px;border-radius:10px;margin:2px 2px 0 0;display:inline-block;">${t}</span>`).join('')}</div>`:''}
+        ${e.plan?`<div style="font-size:13px;margin-bottom:4px;">${e.plan}</div>`:''}
+        ${e.wishlist?`<div style="font-size:12px;color:var(--muted);">📦 DailyLook wish list: ${e.wishlist}</div>`:''}
+        ${sizes?`<div style="font-size:11px;color:var(--accent);margin-top:4px;">📐 Size at time: ${sizes}</div>`:''}
+      </div>`;
+    }).join('');
+  }catch(e){el.innerHTML='<div class="log-empty">Could not load plans.</div>';}
+}
+
+async function buildStylePurchaseHistory(containerId, yearOnly){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  try{
+    const res=await fetch(BACKEND+'/api/sync?pillar=purchases&t='+Date.now());
+    if(!res.ok){el.innerHTML='<div class="log-empty">No purchases recorded yet.</div>';return;}
+    const d=await res.json();
+    let purchases=Array.isArray(d.data)?d.data:[];
+    if(!purchases.length){el.innerHTML='<div class="log-empty">No purchases recorded yet.</div>';return;}
+    // For monthly view, filter to current month
+    if(!yearOnly){
+      const now=new Date();
+      const mo=now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
+      purchases=purchases.filter(p=>p.date&&p.date.startsWith(mo));
+    }
+    purchases=[...purchases].reverse();
+    if(!purchases.length){el.innerHTML='<div class="log-empty">No purchases this month.</div>';return;}
+    el.innerHTML=purchases.map(p=>{
+      const items=(p.items||[]).slice(0,3);
+      const more=(p.items||[]).length-3;
+      return `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);align-items:flex-start;">
+        ${p.outfitPhoto?`<img src="${p.outfitPhoto}" style="width:52px;height:65px;object-fit:cover;border-radius:8px;flex-shrink:0;" onerror="this.style.display='none'">`:'<div style="width:52px;height:65px;border-radius:8px;background:var(--warm);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;">🛍</div>'}
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;color:var(--muted);">${fmtOutfitDate(p.date)}</div>
+          <div style="font-size:13px;font-weight:500;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.outfitDesc||'Look'}</div>
+          ${items.length?`<div style="font-size:12px;color:var(--text);">${items.join(' · ')}${more>0?' +'+more+' more':''}</div>`:''}
+          ${p.occ&&p.occ.length?`<div style="margin-top:4px;">${p.occ.map(t=>`<span style="font-size:10px;background:var(--warm);padding:1px 6px;border-radius:8px;margin-right:3px;">${t}</span>`).join('')}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){el.innerHTML='<div class="log-empty">Could not load purchases.</div>';}
+}
+
+async function buildStyleYearlyView(){
+  // Stats
+  const outfits=await dbAll('outfits');
+  const boxes=await dbAll('boxsummaries');
+  const yr=new Date().getFullYear();
+  const thisYr=outfits.filter(e=>e.date&&e.date.startsWith(yr+''));
+  const kept=boxes.reduce((s,b)=>s+(parseInt(b.kept)||0),0);
+  const returned=boxes.reduce((s,b)=>s+(parseInt(b.returned)||0),0);
+  const el1=document.getElementById('total-outfits'); if(el1) el1.textContent=thisYr.length;
+  const el2=document.getElementById('total-kept'); if(el2) el2.textContent=kept;
+  const el3=document.getElementById('total-returned'); if(el3) el3.textContent=returned;
+  // Extra stats
+  const extra=document.getElementById('style-yearly-extra-stats');
+  if(extra){
+    const rated=thisYr.filter(e=>e.rating>=4);
+    const wearAgain=thisYr.filter(e=>e.wear_again);
+    extra.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="stat-tile"><div class="stat-val">${rated.length}</div><div class="stat-lbl">4–5 ★ looks</div></div>
+      <div class="stat-tile"><div class="stat-val">${wearAgain.length}</div><div class="stat-lbl">Wear again</div></div>
+    </div>`;
+  }
+  // Vibe trends
+  const vibeCounts={};
+  thisYr.forEach(e=>(e.vibe||[]).forEach(v=>{vibeCounts[v]=(vibeCounts[v]||0)+1;}));
+  const topVibes=Object.entries(vibeCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const vibeEl=document.getElementById('style-vibe-trends');
+  if(vibeEl){
+    if(!topVibes.length){vibeEl.innerHTML='<div class="log-empty">Log more outfits to see your style trends.</div>';}
+    else{
+      const max=topVibes[0][1];
+      vibeEl.innerHTML=topVibes.map(([v,c])=>`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="font-size:13px;width:90px;flex-shrink:0;">${v}</div>
+          <div style="flex:1;height:8px;border-radius:4px;background:var(--warm);overflow:hidden;">
+            <div style="height:100%;border-radius:4px;background:var(--accent);width:${Math.round(c/max*100)}%;transition:width 0.3s;"></div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);width:24px;text-align:right;">${c}x</div>
+        </div>`).join('');
+    }
+  }
+  // Outfit wins
+  const winsEl=document.getElementById('style-outfit-wins');
+  if(winsEl){
+    const wins=thisYr.filter(e=>e.rating>=4).sort((a,b)=>b.rating-a.rating).slice(0,6);
+    if(!wins.length){winsEl.innerHTML='<div class="log-empty">Rate outfits 4–5 stars to see your wins here.</div>';}
+    else{
+      winsEl.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">'+wins.map(e=>`
+        <div style="text-align:center;">
+          ${e.photo?`<img src="${e.photo}" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'">`:'<div style="width:100%;aspect-ratio:4/5;border-radius:10px;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:28px;">👗</div>'}
+          <div style="font-size:11px;margin-top:4px;">${'★'.repeat(e.rating||0)}</div>
+          <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.date||''}</div>
+        </div>`).join('')+'</div>';
+    }
+  }
+  // Size milestones
+  loadSizeMilestones();
+  // Purchase history
+  buildStylePurchaseHistory('style-purchase-history-yearly', true);
+}
+
+async function saveSizeMilestone(){
+  const date=document.getElementById('size-milestone-date').value||nowStr();
+  const top=document.getElementById('size-milestone-top').value.trim();
+  const bottom=document.getElementById('size-milestone-bottom').value.trim();
+  const weight=document.getElementById('size-milestone-weight').value.trim();
+  const note=document.getElementById('size-milestone-note').value.trim();
+  if(!top&&!bottom)return;
+  const existing=await fetch(BACKEND+'/api/sync?pillar=size_milestones&t='+Date.now())
+    .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
+  existing.push({date,top,bottom,weight,note});
+  await fetch(BACKEND+'/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'size_milestones',data:existing})});
+  // Clear form
+  document.getElementById('size-milestone-top').value='';
+  document.getElementById('size-milestone-bottom').value='';
+  document.getElementById('size-milestone-weight').value='';
+  document.getElementById('size-milestone-note').value='';
+  document.getElementById('size-milestone-date').value='';
+  showToast('🎉 Size milestone saved!');
+  loadSizeMilestones();
+}
+
+async function loadSizeMilestones(){
+  const el=document.getElementById('size-milestones-log');
+  if(!el)return;
+  try{
+    const res=await fetch(BACKEND+'/api/sync?pillar=size_milestones&t='+Date.now());
+    if(!res.ok){el.innerHTML='<div class="log-empty">No size milestones logged yet.</div>';return;}
+    const d=await res.json();
+    const milestones=Array.isArray(d.data)?[...d.data].reverse():[];
+    if(!milestones.length){el.innerHTML='<div class="log-empty">No size milestones logged yet.</div>';return;}
+    el.innerHTML=milestones.map(m=>`
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);">
+        <div style="font-size:24px;flex-shrink:0;">🎉</div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);">${fmtOutfitDate(m.date)}${m.weight?' · '+m.weight:''}</div>
+          <div style="font-size:14px;font-weight:500;margin:2px 0;">${[m.top?'Tops: '+m.top:'',m.bottom?'Bottoms: '+m.bottom:''].filter(Boolean).join(' · ')}</div>
+          ${m.note?`<div style="font-size:12px;color:var(--text);font-style:italic;">"${m.note}"</div>`:''}
+        </div>
+      </div>`).join('');
+  }catch(e){el.innerHTML='<div class="log-empty">Could not load milestones.</div>';}
 }
 async function buildMonthlyTodayView(){
   const now = new Date();
@@ -5848,7 +6139,7 @@ async function loadLogs(){
   renderLog('sleep-log',sleeps,e=>logItem(e.date,[e.hrs+'h',e.cpap,e.cpapHours?e.cpapHours+'h CPAP':'',e.cpapAHI?'AHI '+e.cpapAHI:'',e.quality,...e.energy],e.note));
   const wardrobeplans=await dbAll('wardrobeplans');
   renderLog('wardrobe-plan-log',wardrobeplans,e=>logItem(e.date,[e.occasion||''].filter(Boolean),`${e.plan||''}${e.wishlist?'\nWishlist: '+e.wishlist:''}`));
-  renderLog('wardrobe-plan-log-daily',wardrobeplans,e=>logItem(e.date,[e.occasion||''].filter(Boolean),`${e.plan||''}${e.wishlist?'\nWishlist: '+e.wishlist:''}`));
+  loadWardrobePlanLog();
   const skins=await dbAll('skins');
   renderLog('skin-log',skins.filter(s=>s.type==='checkin'),e=>logItem(e.date,[...e.skinT,...e.concerns,...(e.musely_aa?['Musely Anti-Age']:[]),...(e.musely_spot?['Musely Spot']:[])],e.derm));
   renderLog('facial-log',skins.filter(s=>s.type==='facial'),e=>logItem(e.date,[e.next?'Next: '+e.next:''],e.notes));
@@ -12438,8 +12729,6 @@ async function weeklyMindInsight(){
 
 <!-- ═══ FULLSCREEN OVERLAYS — outside shell for proper iOS rendering ═══ -->
 
-<div id="zep-side-overlay" class="fullscreen-overlay">
-
 <div id="water-log-overlay" class="fullscreen-overlay">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
@@ -12575,6 +12864,16 @@ async function weeklyMindInsight(){
     </div>
     <div id="coach-history-content"><div class="log-empty">Loading...</div></div>
     <button id="coach-load-more" onclick="loadMoreCoach()" style="display:none;width:100%;margin-top:12px;padding:10px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Load more</button>
+  </div>
+</div>
+
+<div id="wardrobe-plan-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('wardrobe-plan-log-overlay')" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Wardrobe Plans</div>
+    </div>
+    <div id="wardrobe-plan-log-overlay-content"><div class="log-empty">Loading...</div></div>
   </div>
 </div>
 
