@@ -2715,102 +2715,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<!-- Check-in history overlay -->
-<div id="checkin-history-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeCheckinHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Check-ins</div>
-    </div>
-    <div id="checkin-history-content"><div class="log-empty">Loading...</div></div>
-  </div>
-</div>
-
-
-
-
-
-
-<div id="body-log-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeOverlay('body-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Body Check-ins</div>
-    </div>
-    <div id="body-log-overlay-content"><div class="log-empty">Loading...</div></div>
-  </div>
-</div>
-
-<div id="hair-log-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeOverlay('hair-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Hair Check-ins</div>
-    </div>
-    <div class="overlay-list"><div class="log-empty">Loading...</div></div>
-  </div>
-</div>
-
-<div id="exercise-log-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeOverlay('exercise-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Exercise Log</div>
-    </div>
-    <div id="exercise-log-overlay-content"><div class="log-empty">Loading...</div></div>
-  </div>
-</div>
-
-<div id="skin-log-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeOverlay('skin-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Skin Check-ins</div>
-    </div>
-    <div id="skin-log-overlay-content"><div class="log-empty">Loading...</div></div>
-  </div>
-</div>
-
-<div id="facial-log-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeOverlay('facial-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Facial Log</div>
-    </div>
-    <div id="facial-log-overlay-content"><div class="log-empty">Loading...</div></div>
-  </div>
-</div>
-
-<div id="musely-log-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeOverlay('musely-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Musely Treatment Log</div>
-    </div>
-    <div id="musely-log-overlay-content"><div class="log-empty">Loading...</div></div>
-  </div>
-</div>
-
-<div id="sleep-log-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeSleepLogOverlay()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Sleep Logs</div>
-    </div>
-    <div id="sleep-log-overlay-content"><div class="log-empty">Loading...</div></div>
-  </div>
-</div>
-
-<div id="mood-log-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeMoodLogOverlay()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Mind Check-ins</div>
-    </div>
-    <div id="mood-log-overlay-content"><div class="log-empty">Loading...</div></div>
-  </div>
-</div>
-
+<!-- overlays at end of body -->
 <!-- Shopping look lightbox -->
 <div id="shopping-lightbox" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:1000;overflow-y:auto;">
   <div style="padding:16px;max-width:600px;margin:0 auto;">
@@ -2837,29 +2742,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<!-- Coach history overlay -->
-<div id="coach-history-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeCoachHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Conversations</div>
-    </div>
-    <div id="coach-history-content"><div class="log-empty">Loading...</div></div>
-    <button id="coach-load-more" onclick="loadMoreCoach()" style="display:none;width:100%;margin-top:12px;padding:10px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Load more</button>
-  </div>
-</div>
-
-<div id="glow-insights-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeGlowInsights()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">✨ Your Glow Score</div>
-    </div>
-    <div id="glow-insights-overlay-content">
-      <div class="log-empty">Loading insights...</div>
-    </div>
-  </div>
-</div>
 
 <div id="quick-log-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:998;align-items:flex-end;justify-content:center;">
   <div style="background:var(--cream);border-radius:20px 20px 0 0;padding:20px 20px max(20px,env(safe-area-inset-bottom));width:100%;max-width:430px;">
@@ -12357,5 +12239,127 @@ async function weeklyMindInsight(){
 }
 </script>
 <div id="glow-toast" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#3D2E25;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.2);">Saved!</div>
+
+<!-- ═══ FULLSCREEN OVERLAYS — outside shell for proper iOS rendering ═══ -->
+<!-- Check-in history overlay -->
+<div id="checkin-history-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeCheckinHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Check-ins</div>
+    </div>
+    <div id="checkin-history-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+
+
+
+
+
+<div id="body-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('body-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Body Check-ins</div>
+    </div>
+    <div id="body-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="hair-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('hair-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Hair Check-ins</div>
+    </div>
+    <div class="overlay-list"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="exercise-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('exercise-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Exercise Log</div>
+    </div>
+    <div id="exercise-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="skin-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('skin-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Skin Check-ins</div>
+    </div>
+    <div id="skin-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="facial-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('facial-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Facial Log</div>
+    </div>
+    <div id="facial-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="musely-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('musely-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Musely Treatment Log</div>
+    </div>
+    <div id="musely-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="sleep-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeSleepLogOverlay()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Sleep Logs</div>
+    </div>
+    <div id="sleep-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="mood-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeMoodLogOverlay()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Mind Check-ins</div>
+    </div>
+    <div id="mood-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<!-- Coach history overlay -->
+<div id="coach-history-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeCoachHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Conversations</div>
+    </div>
+    <div id="coach-history-content"><div class="log-empty">Loading...</div></div>
+    <button id="coach-load-more" onclick="loadMoreCoach()" style="display:none;width:100%;margin-top:12px;padding:10px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Load more</button>
+  </div>
+</div>
+
+<div id="glow-insights-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeGlowInsights()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">✨ Your Glow Score</div>
+    </div>
+    <div id="glow-insights-overlay-content">
+      <div class="log-empty">Loading insights...</div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
