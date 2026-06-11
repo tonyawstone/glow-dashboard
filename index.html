@@ -1262,15 +1262,21 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-body-daily">
     <div class="section-label">Body & Zepbound Journey <button class="guide-btn" onclick="openGuide('body')">?</button></div>
     <div class="success-banner"><strong>Zepbound started Oct 25, 2025</strong><br>201.4 → 170.7 lbs · <strong>30.7 lbs lost</strong> · 7 months · All-time low 168.7 (May 19)</div>
-    <div class="stat-strip" style="grid-template-columns:1fr 1fr;">
-      <div class="stat-tile"><div class="stat-val" style="font-size:24px;">170.7</div><div class="stat-lbl">Current · Withings</div></div>
-      <div class="stat-tile"><div class="stat-val" style="font-size:24px;">168.7</div><div class="stat-lbl">All-time low · May 19</div></div>
-    </div>
-
-    <!-- BMI & Body Fat — compact card right after weight -->
-    <div class="card">
-      <div class="card-title">BMI & Body Fat</div>
-      <div id="bmi-bodyfat-card"><div class="log-empty">Upload CSV to see latest values.</div></div>
+    <!-- Unified body stats card — populated dynamically -->
+    <div class="card" id="body-stats-card">
+      <div id="body-stats-content">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div style="text-align:center;">
+            <div style="font-family:var(--serif);font-size:28px;font-weight:300;color:var(--text);">—<span style="font-size:14px;font-weight:400;color:var(--muted);"> lbs</span></div>
+            <div style="font-size:11px;color:var(--muted);">Current</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:var(--serif);font-size:28px;font-weight:300;color:var(--text);">—<span style="font-size:14px;font-weight:400;color:var(--muted);"> lbs</span></div>
+            <div style="font-size:11px;color:var(--muted);">All-time low</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;">Upload CSV to see latest values</div>
+      </div>
     </div>
 
     <div class="card">
@@ -6300,44 +6306,62 @@ async function buildHealthClinicalMetrics(){
 }
 
 async function buildBodyCompositionMetrics(){
-  const elAct = document.getElementById('body-activity-metrics');
-  const elBmiBf = document.getElementById('bmi-bodyfat-card');
+  const elStats = document.getElementById('body-stats-content');
   
   let rows = [];
   try { rows = await getCSVRows(); } catch(e){ console.error('CSV fetch error:', e); }
 
-  if(!rows.length){
-    if(elAct) elAct.innerHTML='<div class="log-empty">Upload your weekly CSV to see activity data.</div>';
-    if(elBmiBf) elBmiBf.innerHTML='<div class="log-empty">Upload CSV to see BMI & body fat.</div>';
-    return;
-  }
+  if(!rows.length) return;
 
-  // BMI & Body Fat card — compact two-tile display
-  if(elBmiBf){
+  // Unified body stats card
+  if(elStats){
     const rev = [...rows].reverse();
+    const latestWeight = rev.find(r=>parseFloat(r.weight_lbs)>0);
     const latestBMI = rev.find(r=>parseFloat(r.bmi)>0);
     const latestFat = rev.find(r=>parseFloat(r.body_fat_pct)>0);
     const fmt = (d) => d ? safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+
+    // All-time low weight since Zepbound start (Oct 25, 2025)
+    const zepStart = '2025-10-25';
+    const allWeights = rows.filter(r=>parseFloat(r.weight_lbs)>0 && r.date>=zepStart).map(r=>({w:parseFloat(r.weight_lbs),d:r.date}));
+    const atl = allWeights.length ? allWeights.reduce((min,r)=>r.w<min.w?r:min) : null;
+
+    const curW = latestWeight ? parseFloat(latestWeight.weight_lbs).toFixed(1) : '—';
+    const curDate = fmt(latestWeight?.date);
+    const atlW = atl ? atl.w.toFixed(1) : '—';
+    const atlDate = atl ? fmt(atl.d) : '';
+    
     const bmi = latestBMI ? parseFloat(latestBMI.bmi) : null;
     const fat = latestFat ? parseFloat(latestFat.body_fat_pct) : null;
-    const bmiStatus = bmi ? (bmi<25?'Normal':bmi<30?'Overweight':'Obese') : '—';
+    const bmiStatus = bmi ? (bmi<18.5?'Underweight':bmi<25?'Normal':bmi<30?'Overweight':'Obese') : '';
     const bmiColor = bmi ? (bmi<25?'#6B9E78':bmi<30?'#C4735A':'#C0392B') : 'var(--muted)';
-    const fatRange = fat ? (fat<21?'Athletic':fat<=33?'Healthy':'Above range') : '—';
+    const fatStatus = fat ? (fat<21?'Athletic':fat<=33?'Healthy':'Above range') : '';
     const fatColor = fat ? (fat<=33?'#6B9E78':'#C4735A') : 'var(--muted)';
-    elBmiBf.innerHTML = `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div style="text-align:center;padding:12px;background:var(--warm);border-radius:10px;">
-          <div style="font-size:22px;font-weight:600;color:var(--text);">${bmi?bmi.toFixed(1):'—'}</div>
-          <div style="font-size:11px;color:${bmiColor};font-weight:500;">${bmiStatus}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px;">${fmt(latestBMI?.date)}</div>
+
+    elStats.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+        <div style="text-align:center;">
+          <div style="font-family:var(--serif);font-size:28px;font-weight:300;color:var(--text);">${curW}<span style="font-size:14px;font-weight:400;color:var(--muted);"> lbs</span></div>
+          <div style="font-size:11px;color:var(--muted);">Current · ${curDate}</div>
         </div>
-        <div style="text-align:center;padding:12px;background:var(--warm);border-radius:10px;">
-          <div style="font-size:22px;font-weight:600;color:var(--text);">${fat?fat.toFixed(1)+'%':'—'}</div>
-          <div style="font-size:11px;color:${fatColor};font-weight:500;">${fatRange}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px;">${fmt(latestFat?.date)}</div>
+        <div style="text-align:center;">
+          <div style="font-family:var(--serif);font-size:28px;font-weight:300;color:var(--text);">${atlW}<span style="font-size:14px;font-weight:400;color:var(--muted);"> lbs</span></div>
+          <div style="font-size:11px;color:var(--muted);">All-time low · ${atlDate} 🎉</div>
         </div>
       </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:8px;text-align:center;">From Withings scale via Apple Health</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:10px;border-top:0.5px solid var(--border);">
+        <div style="text-align:center;">
+          <div style="font-family:var(--serif);font-size:20px;font-weight:300;color:var(--text);">${bmi?bmi.toFixed(1):'—'}</div>
+          <div style="font-size:11px;color:${bmiColor};font-weight:500;">${bmiStatus}</div>
+          <div style="font-size:10px;color:var(--muted);">BMI · ideal 18.5–24.9</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:var(--serif);font-size:20px;font-weight:300;color:var(--text);">${fat?fat.toFixed(1)+'%':'—'}</div>
+          <div style="font-size:11px;color:${fatColor};font-weight:500;">${fatStatus}</div>
+          <div style="font-size:10px;color:var(--muted);">Body fat · healthy 21–33%</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:8px;text-align:center;">From Withings scale via Apple Health · ${fmt(latestBMI?.date)}</div>
     `;
   }
 
