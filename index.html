@@ -1085,7 +1085,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
 
     <div class="card">
-      <div class="card-title">Sleep quality & morning notes</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="card-title" style="margin:0;">Sleep check-in</div><button onclick="openPastSleepLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button></div>
       <div class="fl">Sleep quality</div>
       <div class="quality-row" id="sq-tags">
         <button class="qb" onclick="soloQ(this)">Awful</button><button class="qb" onclick="soloQ(this)">Poor</button><button class="qb" onclick="soloQ(this)">OK</button><button class="qb" onclick="soloQ(this)">Good</button><button class="qb" onclick="soloQ(this)">Great</button>
@@ -1100,8 +1100,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="tag" onclick="tog(this)">Exhausted</button>
       </div>
       <div class="fl">Sleep aids taken last night</div>
-      <div class="toggle-row" onclick="ts('t-melatonin')"><div><div class="tl">Melatonin</div><div class="ts">Sleep onset support</div></div><div class="tog" id="t-melatonin"><div class="tok"></div></div></div>
-      <div class="toggle-row" onclick="ts('t-sleep-gummies')"><div><div class="tl">Sleep gummies</div><div class="ts">CBD / magnesium / other</div></div><div class="tog" id="t-sleep-gummies"><div class="tok"></div></div></div>
+      <div class="med-row" id="t-melatonin" onclick="toggleSleepAid('t-melatonin')">
+        <div class="med-check">&#x2713;</div>
+        <div class="med-info"><div class="med-name">Melatonin</div><div class="med-note">Sleep onset support</div></div>
+      </div>
+      <div class="med-row" id="t-sleep-gummies" onclick="toggleSleepAid('t-sleep-gummies')" style="margin-bottom:8px;">
+        <div class="med-check">&#x2713;</div>
+        <div class="med-info"><div class="med-name">Sleep gummies</div><div class="med-note">CBD / magnesium / other</div></div>
+      </div>
       <div class="fl">Notes</div>
       <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..."></textarea>
       <button class="btn-primary" onclick="saveSleep()">Log sleep</button>
@@ -1110,35 +1116,50 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="sleep-coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="slp-t">Saved!</div>
     </div>
-    <div class="card"><div class="card-title">Sleep log</div><div id="sleep-log"><div class="log-empty">No entries yet.</div></div></div>
 
     <!-- CPAP Equipment -->
     <div class="card">
       <div class="card-title">🔧 CPAP equipment · ResMed AirSense 11</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">AirTouch F30i Clear mask · Weekly cleaning: Sunday soak</div>
-      <div id="cpap-equipment-status">
-        <div class="log-empty">Loading equipment status...</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">AirTouch F30i Clear mask</div>
+
+      <!-- Weekly cleaning — top, checkboxes persist until Sunday midnight -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:12px;font-weight:600;color:var(--text);">🧼 Weekly cleaning · every Sunday</div>
+        <div id="cpap-clean-reminder" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--warm);color:var(--muted);"></div>
       </div>
-      <div style="margin-top:14px;">
-        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">Enter replacement date:</div>
-        <div class="cpap-date-row"><span>Mask cushion</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_cushion" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_cushion')">Save</button></div></div>
-        <div class="cpap-date-row"><span>Mask frame</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_frame" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_frame')">Save</button></div></div>
-        <div class="cpap-date-row"><span>Headgear</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-headgear" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('headgear')">Save</button></div></div>
-        <div class="cpap-date-row"><span>Tubing</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-tubing" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('tubing')">Save</button></div></div>
-        <div class="cpap-date-row"><span>Water chamber</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-water_chamber" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('water_chamber')">Save</button></div></div>
-        <div style="margin-top:12px;">
-          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Disposable filter · replaced frequently:</div>
-          <button class="cpap-replace-btn" style="width:100%;" onclick="replaceCPAPItem('filter_disposable')">✓ Replaced disposable filter today</button>
+      <div class="med-row" id="cpap-clean-mask" onclick="toggleCPAPClean('cpap-clean-mask')">
+        <div class="med-check">&#x2713;</div>
+        <div class="med-info"><div class="med-name">Mask &amp; cushion soaked</div><div class="med-note">Warm water + mild soap</div></div>
+      </div>
+      <div class="med-row" id="cpap-clean-tube" onclick="toggleCPAPClean('cpap-clean-tube')">
+        <div class="med-check">&#x2713;</div>
+        <div class="med-info"><div class="med-name">Tubing cleaned</div><div class="med-note">Rinse through tube</div></div>
+      </div>
+      <div class="med-row" id="cpap-clean-chamber" onclick="toggleCPAPClean('cpap-clean-chamber')" style="margin-bottom:10px;">
+        <div class="med-check">&#x2713;</div>
+        <div class="med-info"><div class="med-name">Water chamber cleaned</div><div class="med-note">Empty &amp; rinse · deep clean weekly</div></div>
+      </div>
+      <button class="btn-primary" style="margin-bottom:4px;" onclick="saveCPAPCleaning()">Log cleaning done</button>
+      <div class="toast-msg" id="cpap-clean-toast">Cleaning logged!</div>
+
+      <!-- Replacement tracker -->
+      <div style="margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">🔄 Replacement schedule</div>
+        <div id="cpap-equipment-status">
+          <div class="log-empty">Loading equipment status...</div>
         </div>
-        <div class="toast-msg" id="cpap-replace-toast">Saved!</div>
-      </div>
-      <div style="margin-top:14px;">
-        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Weekly cleaning log (Sunday):</div>
-        <div class="toggle-row" onclick="ts('cpap-clean-mask')"><div><div class="tl">Mask & cushion soaked</div><div class="ts">Warm water + mild soap</div></div><div class="tog" id="cpap-clean-mask"><div class="tok"></div></div></div>
-        <div class="toggle-row" onclick="ts('cpap-clean-tube')"><div><div class="tl">Tubing cleaned</div><div class="ts">Rinse through tube</div></div><div class="tog" id="cpap-clean-tube"><div class="tok"></div></div></div>
-        <div class="toggle-row" onclick="ts('cpap-clean-chamber')"><div><div class="tl">Water chamber cleaned</div><div class="ts">Empty & rinse daily · deep clean weekly</div></div><div class="tog" id="cpap-clean-chamber"><div class="tok"></div></div></div>
-        <button class="btn-primary" style="margin-top:10px;" onclick="saveCPAPCleaning()">Log cleaning done</button>
-        <div class="toast-msg" id="cpap-clean-toast">Cleaning logged!</div>
+        <div style="margin-top:12px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Enter replacement date:</div>
+          <div class="cpap-date-row"><span>Mask cushion</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_cushion" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_cushion')">Save</button></div></div>
+          <div class="cpap-date-row"><span>Mask frame</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_frame" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_frame')">Save</button></div></div>
+          <div class="cpap-date-row"><span>Headgear</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-headgear" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('headgear')">Save</button></div></div>
+          <div class="cpap-date-row"><span>Tubing</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-tubing" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('tubing')">Save</button></div></div>
+          <div class="cpap-date-row"><span>Water chamber</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-water_chamber" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('water_chamber')">Save</button></div></div>
+          <div style="margin-top:10px;">
+            <button class="cpap-replace-btn" style="width:100%;" onclick="replaceCPAPItem('filter_disposable')">&#x2713; Replaced disposable filter today</button>
+          </div>
+          <div class="toast-msg" id="cpap-replace-toast">Saved!</div>
+        </div>
       </div>
     </div>
   </div>
@@ -2614,6 +2635,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
 </div>
 
 
+
+<div id="sleep-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeSleepLogOverlay()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Sleep Logs</div>
+    </div>
+    <div id="sleep-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
 <div id="mood-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
@@ -2800,6 +2832,9 @@ async function boot(){
   await updateBPBanners();
   loadMindHabits();
   loadSkinRoutineState();
+  loadMyAirState();
+  loadCPAPCleanState();
+  loadSleepAidState();
   buildDailyProgress();
   tab('today');
 }
@@ -2835,7 +2870,7 @@ async function tab(id){
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') { 
-    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState();
+    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState();
     // Default myAir date to yesterday — CPAP data is always for last night
     const myairDate = document.getElementById('myair-date');
     const myairLabel = document.getElementById('myair-date-label');
@@ -3040,8 +3075,8 @@ async function saveCheckin(){
   const cpap=document.getElementById('t-cpap')?.classList.contains('on')||false;
   const meds=document.getElementById('t-meds')?.classList.contains('on')||false;
   const exercise=document.getElementById('t-exercise')?.classList.contains('on')||false;
-  const melatonin=document.getElementById('t-melatonin')?.classList.contains('on')||false;
-  const sleepGummies=document.getElementById('t-sleep-gummies')?.classList.contains('on')||false;
+  const melatonin=document.getElementById('t-melatonin')?.classList.contains('done')||false;
+  const sleepGummies=document.getElementById('t-sleep-gummies')?.classList.contains('done')||false;
   const skinAM=document.getElementById('t-skin-am')?.classList.contains('on')||false;
   const skinPM=document.getElementById('t-skin-pm')?.classList.contains('on')||false;
   const timeStr = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
@@ -3189,8 +3224,8 @@ async function buildDailyProgress(){
   // BP — logged today
   try { const bps = await dbAll('bps'); autoChecks['dp-bp'] = bps.some(e=>e.date===today||(e.time&&e.date===today)); } catch(e){}
 
-  // CPAP — manual (resets daily)
-  autoChecks['dp-cpap'] = manualState['dp-cpap']||false;
+  // CPAP — reads from weekly cleaning state
+  try { const cs=getCPAPCleanState(); autoChecks['dp-cpap']=['cpap-clean-mask','cpap-clean-tube','cpap-clean-chamber'].every(id=>cs[id]); } catch(e){ autoChecks['dp-cpap']=manualState['dp-cpap']||false; }
 
   // Water — 8+ glasses today
   try {
@@ -3363,6 +3398,32 @@ function updatePillarRings(checks){
 
 // ── MORNING ACTIVATION RITUAL ───────────────────────────────────────────────
 
+
+
+async function openPastSleepLog(){
+  const overlay = document.getElementById('sleep-log-overlay');
+  const content = document.getElementById('sleep-log-overlay-content');
+  overlay.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  const sleeps = await dbAll('sleeps');
+  if(!sleeps.length){ content.innerHTML='<div class="log-empty">No sleep entries yet.</div>'; return; }
+  const sorted = [...sleeps].reverse();
+  content.innerHTML = sorted.map(e=>{
+    const chips = [e.hrs+'h', e.quality, ...(e.energy||[])].filter(Boolean);
+    return '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+      +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'+e.date+(e.bed?' · '+e.bed+'→'+e.wake:'')+'</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">'
+      +chips.map(c=>'<span class="chip">'+c+'</span>').join('')
+      +'</div>'
+      +(e.note?'<div style="font-size:12px;color:var(--muted);">'+e.note+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+function closeSleepLogOverlay(){
+  document.getElementById('sleep-log-overlay').style.display='none';
+  document.body.style.overflow='';
+}
 
 async function openPastMindLog(){
   const overlay = document.getElementById('mood-log-overlay');
@@ -4905,6 +4966,30 @@ async function saveBoxSummary(){
   syncToBlob('boxsummaries');
   toast('bxt');
 }
+
+const SLEEP_AIDS_KEY = 'glowSleepAids';
+
+function loadSleepAidState(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(SLEEP_AIDS_KEY)||'{}');
+    if(saved.date !== yesterdayStr()){ localStorage.removeItem(SLEEP_AIDS_KEY); return; }
+    ['t-melatonin','t-sleep-gummies'].forEach(id=>{
+      if(saved[id]) document.getElementById(id)?.classList.add('done');
+    });
+  } catch(e){}
+}
+
+function toggleSleepAid(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('done');
+  const state = {date: yesterdayStr()};
+  ['t-melatonin','t-sleep-gummies'].forEach(sid=>{
+    state[sid] = document.getElementById(sid)?.classList.contains('done')||false;
+  });
+  localStorage.setItem(SLEEP_AIDS_KEY, JSON.stringify(state));
+}
+
 async function saveSleep(){
   const cpap=gT('cpap-tags'),quality=document.getElementById('sq-tags').querySelector('.on')?.textContent||'';
   const energy=gT('energy-am-tags'),note=document.getElementById('sleep-note').value.trim();
@@ -9146,6 +9231,93 @@ function buildCPAPEquipmentStatus(){
   `;
 }
 
+
+const CPAP_CLEAN_KEY = 'glowCPAPClean';
+
+function getCPAPCleanState(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(CPAP_CLEAN_KEY)||'{}');
+    // Reset on Sunday midnight — keep until end of Sunday
+    const now = new Date();
+    const sunday = new Date(now);
+    sunday.setDate(now.getDate() - now.getDay()); // This past Sunday
+    sunday.setHours(0,0,0,0);
+    if(!saved.weekStart || new Date(saved.weekStart) < sunday){
+      return {weekStart: sunday.toISOString()};
+    }
+    return saved;
+  } catch(e){ return {weekStart: new Date().toISOString()}; }
+}
+
+function saveCPAPCleanState(logCleaning){
+  const state = getCPAPCleanState();
+  ['cpap-clean-mask','cpap-clean-tube','cpap-clean-chamber'].forEach(id=>{
+    state[id] = document.getElementById(id)?.classList.contains('done')||false;
+  });
+  if(logCleaning) state.lastCleaned = new Date().toISOString();
+  localStorage.setItem(CPAP_CLEAN_KEY, JSON.stringify(state));
+}
+
+function loadCPAPCleanState(){
+  const state = getCPAPCleanState();
+  ['cpap-clean-mask','cpap-clean-tube','cpap-clean-chamber'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(state[id]) el.classList.add('done');
+    else el.classList.remove('done');
+  });
+  // Update reminder pill — escalates if missed
+  const reminder = document.getElementById('cpap-clean-reminder');
+  if(reminder){
+    const now = new Date();
+    const day = now.getDay(); // 0=Sun
+    const allDone = ['cpap-clean-mask','cpap-clean-tube','cpap-clean-chamber'].every(id=>state[id]);
+    const daysUntilSunday = day === 0 ? 0 : 7 - day;
+
+    // Check if last cleaning was more than 7 days ago
+    let daysSinceClean = null;
+    if(state.lastCleaned){
+      daysSinceClean = Math.floor((now - new Date(state.lastCleaned)) / 86400000);
+    }
+
+    if(allDone){
+      reminder.textContent = '✅ Done this week';
+      reminder.style.background = '#EAF3DE';
+      reminder.style.color = '#27500A';
+    } else if(day === 1 && daysSinceClean !== null && daysSinceClean >= 1){
+      // Monday — gentle nudge if not cleaned Sunday
+      reminder.textContent = '⚠️ Did you clean Sunday?';
+      reminder.style.background = '#FEF3C7';
+      reminder.style.color = '#92400E';
+    } else if(day >= 2 && daysSinceClean !== null && daysSinceClean >= 2){
+      // Tuesday+ — overdue alert
+      reminder.textContent = '🚨 Overdue! Clean ASAP';
+      reminder.style.background = '#FEE2E2';
+      reminder.style.color = '#7F1D1D';
+    } else if(day === 0){
+      reminder.textContent = '🔔 Clean today!';
+      reminder.style.background = '#FEF3C7';
+      reminder.style.color = '#92400E';
+    } else if(daysUntilSunday === 1){
+      reminder.textContent = 'Tomorrow · Sunday';
+      reminder.style.background = 'var(--warm)';
+      reminder.style.color = 'var(--muted)';
+    } else {
+      reminder.textContent = 'Sunday in ' + daysUntilSunday + ' days';
+      reminder.style.background = 'var(--warm)';
+      reminder.style.color = 'var(--muted)';
+    }
+  }
+}
+
+function toggleCPAPClean(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('done');
+  saveCPAPCleanState();
+  buildDailyProgress();
+}
+
 async function saveCPAPCleaning(){
   const entry = {
     date: nowStr(),
@@ -9158,8 +9330,8 @@ async function saveCPAPCleaning(){
   existing.push(entry);
   fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'cpap_cleaning',data:existing})}).catch(()=>{});
   localStorage.setItem('glowCPAPLastCleaned', entry.isoDate);
+  saveCPAPCleanState(true); loadCPAPCleanState();
   toast('cpap-clean-toast');
-  ['cpap-clean-mask','cpap-clean-tube','cpap-clean-chamber'].forEach(id=>document.getElementById(id)?.classList.remove('on'));
 }
 
 
