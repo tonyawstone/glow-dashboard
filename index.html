@@ -1910,25 +1910,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-skin-daily">
     <div class="section-label">Skin · Face Care <button class="guide-btn" onclick="openGuide('skin')">?</button></div>
 
-    <!-- AI Skin Scan -->
-    <div class="card skin-scan-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div class="card-title" style="margin:0;">✨ Weekly skin scan</div>
-        <button class="guide-btn" onclick="openGuide('skin_score')">?</button>
-      </div>
-      <div id="skin-scan-latest">
-        <div class="log-empty">No scan yet — take your first weekly skin scan below.</div>
-      </div>
-      <div style="margin-top:14px;">
-        <input type="file" id="skin-scan-input" accept="image/*" capture="user" style="display:none" onchange="runSkinAnalysis(this, false)">
-        <input type="file" id="skin-scan-historical-input" accept="image/*" style="display:none" onchange="runSkinAnalysis(this, true)">
-        <button class="btn-primary" onclick="document.getElementById('skin-scan-input').click()">📷 Scan my skin</button>
-        <button class="btn-secondary" style="margin-top:8px;width:100%;" onclick="document.getElementById('skin-scan-historical-input').click()">📂 Upload historical photo</button>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Weekly scanning recommended · Upload past photos to build your history</div>
-        <div id="skin-scan-status" style="display:none;margin-top:10px;padding:12px;border-radius:12px;font-size:13px;"></div>
-      </div>
-    </div>
-
+    <!-- Skin check-in — collapsible, first card -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinCheckin()">
         <div class="card-title" style="margin:0;">Skin check-in</div>
@@ -1959,55 +1941,76 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <!-- Routine tracking -->
+    <!-- Morning routine — collapsible with counter -->
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;"><div class="card-title" style="margin:0;">Morning routine</div><div id="skin-am-progress" style="font-size:11px;color:var(--muted);"></div></div>
-      <div class="med-row" id="r-cleanser" onclick="toggleSkinStep('r-cleanser')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Facial Cleanser</div><div class="med-note">Advanced Deep Clean</div></div></div>
-      <div class="med-row" id="r-serum" onclick="toggleSkinStep('r-serum')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Serum</div></div></div>
-      <div class="med-row" id="r-vitc" onclick="toggleSkinStep('r-vitc')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Vitamin C Moisturizer</div></div></div>
-      <div class="med-row" id="r-spf" onclick="toggleSkinStep('r-spf')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Cream with SPF</div><div class="med-note">Daily sunscreen</div></div></div>
-      <div class="med-row" id="r-eye" onclick="toggleSkinStep('r-eye')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Grace &amp; Stella Under Eye Mask</div><div class="med-note">Gold or blue &middot; as needed</div></div></div>
-    </div>
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div class="card-title" style="margin:0;">Evening routine</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div id="skin-pm-progress" style="font-size:11px;color:var(--muted);"></div>
-          <button onclick="openMuselyLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinAM()">
+        <div class="card-title" style="margin:0;">Morning routine</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div id="skin-am-progress" style="font-size:12px;color:var(--muted);"></div>
+          <span id="skin-am-arrow" style="font-size:16px;color:var(--muted);">▾</span>
         </div>
       </div>
-
-      <!-- Tonight's Musely treatment — alternating checkboxes -->
-      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Tonight's Musely treatment</div>
-      <div class="med-row" id="r-musely-aa" onclick="selectMuselyCheck('aa')" style="margin-bottom:5px;">
-        <div class="med-check">&#x2713;</div>
-        <div class="med-info"><div class="med-name">Anti-Aging Cream</div><div class="med-note">Alternate nightly with Spot Treatment</div></div>
+      <div id="skin-am-body" style="display:none;margin-top:12px;">
+        <div class="med-row" id="r-cleanser" onclick="toggleSkinStep('r-cleanser')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Facial Cleanser</div><div class="med-note">Advanced Deep Clean</div></div></div>
+        <div class="med-row" id="r-serum" onclick="toggleSkinStep('r-serum')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Serum</div></div></div>
+        <div class="med-row" id="r-vitc" onclick="toggleSkinStep('r-vitc')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Vitamin C Moisturizer</div></div></div>
+        <div class="med-row" id="r-spf" onclick="toggleSkinStep('r-spf')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Cream with SPF</div><div class="med-note">Daily sunscreen</div></div></div>
+        <div class="med-row" id="r-eye" onclick="toggleSkinStep('r-eye')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Grace &amp; Stella Under Eye Mask</div><div class="med-note">Gold or blue &middot; as needed</div></div></div>
       </div>
-      <div class="med-row" id="r-musely-spot" onclick="selectMuselyCheck('spot')" style="margin-bottom:10px;">
-        <div class="med-check">&#x2713;</div>
-        <div class="med-info"><div class="med-name">Spot Treatment</div><div class="med-note">Alternate nightly with Anti-Aging Cream</div></div>
+    </div>
+
+    <!-- Evening routine — collapsible with counter -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinPM()">
+        <div class="card-title" style="margin:0;">Evening routine</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div id="skin-pm-progress" style="font-size:12px;color:var(--muted);"></div>
+          <button onclick="event.stopPropagation();openMuselyLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
+          <span id="skin-pm-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+        </div>
       </div>
-      <!-- Olay Regenerist — part of nightly treatment, follows Musely -->
-      <div class="med-row" id="r-regen" onclick="toggleSkinStep('r-regen')" style="margin-bottom:10px;">
-        <div class="med-check">&#x2713;</div>
-        <div class="med-info"><div class="med-name">Olay Regenerist Ultra Rich</div><div class="med-note">After Musely · every night</div></div>
+      <div id="skin-pm-body" style="display:none;margin-top:12px;">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Tonight's Musely treatment</div>
+        <div class="med-row" id="r-musely-aa" onclick="selectMuselyCheck('aa')" style="margin-bottom:5px;">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Anti-Aging Cream</div><div class="med-note">Alternate nightly with Spot Treatment</div></div>
+        </div>
+        <div class="med-row" id="r-musely-spot" onclick="selectMuselyCheck('spot')" style="margin-bottom:10px;">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Spot Treatment</div><div class="med-note">Alternate nightly with Anti-Aging Cream</div></div>
+        </div>
+        <div class="med-row" id="r-regen" onclick="toggleSkinStep('r-regen')" style="margin-bottom:10px;">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Olay Regenerist Ultra Rich</div><div class="med-note">After Musely · every night</div></div>
+        </div>
+        <button class="btn-primary" style="margin-bottom:6px;" onclick="confirmMuselyApplied()">&#x2713; Log tonight's treatment</button>
+        <div class="toast-msg" id="musely-toast">Treatment logged!</div>
+        <div class="med-row" id="r-musely-game" onclick="toggleSkinStep('r-musely-game')" style="margin-top:8px;">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Musely avatar skin health game</div><div class="med-note">Daily skin health activity</div></div>
+        </div>
+        <div id="musely-history" style="margin-top:12px;"></div>
+        <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenMusely'" style="width:100%;margin-top:10px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">&#x1F4F1; Open Musely</button>
       </div>
+    </div>
 
-
-      <button class="btn-primary" style="margin-bottom:6px;" onclick="confirmMuselyApplied()">&#x2713; Log tonight's treatment</button>
-      <div class="toast-msg" id="musely-toast">Treatment logged!</div>
-
-      <!-- Musely skin game -->
-      <div class="med-row" id="r-musely-game" onclick="toggleSkinStep('r-musely-game')" style="margin-top:8px;">
-        <div class="med-check">&#x2713;</div>
-        <div class="med-info"><div class="med-name">Musely avatar skin health game</div><div class="med-note">Daily skin health activity</div></div>
+    <!-- AI Skin Scan -->
+    <div class="card skin-scan-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div class="card-title" style="margin:0;">✨ Weekly skin scan</div>
+        <button class="guide-btn" onclick="openGuide('skin_score')">?</button>
       </div>
-
-      <!-- Last night's treatment + history -->
-      <div id="musely-history" style="margin-top:12px;"></div>
-
-      <!-- Open Musely at bottom -->
-      <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenMusely'" style="width:100%;margin-top:10px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">&#x1F4F1; Open Musely</button>
+      <div id="skin-scan-latest">
+        <div class="log-empty">No scan yet — take your first weekly skin scan below.</div>
+      </div>
+      <div style="margin-top:14px;">
+        <input type="file" id="skin-scan-input" accept="image/*" capture="user" style="display:none" onchange="runSkinAnalysis(this, false)">
+        <input type="file" id="skin-scan-historical-input" accept="image/*" style="display:none" onchange="runSkinAnalysis(this, true)">
+        <button class="btn-primary" onclick="document.getElementById('skin-scan-input').click()">📷 Scan my skin</button>
+        <button class="btn-secondary" style="margin-top:8px;width:100%;" onclick="document.getElementById('skin-scan-historical-input').click()">📂 Upload historical photo</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Weekly scanning recommended · Upload past photos to build your history</div>
+        <div id="skin-scan-status" style="display:none;margin-top:10px;padding:12px;border-radius:12px;font-size:13px;"></div>
+      </div>
     </div>
     <div class="card">
       <div class="card-title">Treatment start dates</div>
@@ -5459,6 +5462,8 @@ async function loadSkinRoutineState(){
         if(saved[id]) document.getElementById(id)?.classList.add('done');
       });
       updateSkinProgress();
+      if(SKIN_STEPS_AM.some(id=>saved[id])) toggleSkinAM(true);
+      if(SKIN_STEPS_PM.some(id=>saved[id])) toggleSkinPM(true);
       return;
     }
   } catch(e){}
@@ -5475,6 +5480,11 @@ async function loadSkinRoutineState(){
         // Also write to localStorage for future fast loads
         localStorage.setItem(SKIN_STEPS_KEY, JSON.stringify(saved));
         updateSkinProgress();
+        // Auto-open routines if any steps done
+        const amDone = SKIN_STEPS_AM.some(id=>saved[id]);
+        const pmDone = SKIN_STEPS_PM.some(id=>saved[id]);
+        if(amDone) toggleSkinAM(true);
+        if(pmDone) toggleSkinPM(true);
       }
     }
   } catch(e){}
@@ -5505,8 +5515,12 @@ function updateSkinProgress(){
   const pmDone = SKIN_STEPS_PM.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
   const amEl = document.getElementById('skin-am-progress');
   const pmEl = document.getElementById('skin-pm-progress');
-  if(amEl) amEl.textContent = amDone === SKIN_STEPS_AM.length ? '✅ AM routine complete' : amDone+'/'+SKIN_STEPS_AM.length+' steps done';
-  if(pmEl) pmEl.textContent = pmDone === SKIN_STEPS_PM.length ? '✅ PM routine complete' : pmDone+'/'+SKIN_STEPS_PM.length+' steps done';
+  const amComplete = amDone === SKIN_STEPS_AM.length;
+  const pmComplete = pmDone === SKIN_STEPS_PM.length;
+  if(amEl) amEl.textContent = amComplete ? '✅ Complete' : amDone+'/'+SKIN_STEPS_AM.length+' done';
+  if(amEl) amEl.style.color = amComplete ? '#6B9E78' : 'var(--muted)';
+  if(pmEl) pmEl.textContent = pmComplete ? '✅ Complete' : pmDone+'/'+SKIN_STEPS_PM.length+' done';
+  if(pmEl) pmEl.style.color = pmComplete ? '#6B9E78' : 'var(--muted)';
 }
 
 function toggleDailyProgress(forceOpen){
@@ -5561,6 +5575,26 @@ function restoreMindDraft(){
     if(draft.stress) setStars('stress-stars', draft.stress);
     if(draft.bodyImage) setStars('body-image-stars', draft.bodyImage);
   } catch(e){}
+}
+
+function toggleSkinAM(forceOpen){
+  const body = document.getElementById('skin-am-body');
+  const arrow = document.getElementById('skin-am-arrow');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  if(arrow) arrow.textContent = open ? '▴' : '▾';
+}
+
+function toggleSkinPM(forceOpen){
+  const body = document.getElementById('skin-pm-body');
+  const arrow = document.getElementById('skin-pm-arrow');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  if(arrow) arrow.textContent = open ? '▴' : '▾';
 }
 
 function toggleSkinCheckin(forceOpen){
