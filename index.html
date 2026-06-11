@@ -2682,7 +2682,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="guide-content" style="max-height:85vh;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;color:var(--text);">Glow Dashboard</div>
-      <button onclick="closeOverlay('about-sheet')" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">×</button>
+      <button onclick="document.getElementById('about-sheet').classList.remove('open')" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">×</button>
     </div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:4px;" id="about-version">Version 2.0 · Jun 11, 2026</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">A personal wellness PWA by Tonya Stone · Built with Claude</div>
@@ -4974,7 +4974,7 @@ function openAbout(){
 }
 function closeAbout(ev){
   if(ev && ev.target !== document.getElementById('about-sheet')) return;
-  closeOverlay('about-sheet');
+  document.getElementById('about-sheet').classList.remove('open');
 }
 
 const GUIDES = {
@@ -5243,7 +5243,7 @@ function openGuide(pillar){
 
 function closeGuide(ev){
   if(ev&&ev.target!==document.getElementById('guide-sheet')) return;
-  closeOverlay('guide-sheet');
+  document.getElementById('guide-sheet').classList.remove('open');
   
 }
 async function updateOutfitNudge(){
@@ -5461,7 +5461,7 @@ function openLightbox(e){
 
 function closeLightbox(ev){
   if(ev&&ev.target!==document.getElementById('outfit-lightbox')&&!ev.target.classList.contains('lightbox-close'))return;
-  closeOverlay('outfit-lightbox');
+  document.getElementById('outfit-lightbox').style.display='none';
   
 }
 
