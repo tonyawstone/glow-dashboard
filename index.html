@@ -499,6 +499,20 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="affirmation-sub">Your daily affirmation</div>
     </div>
 
+    <!-- Glow Score — right after affirmation -->
+    <div class="card health-score-card" id="health-score-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="card-title" style="margin:0;">Your Glow Score</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="guide-btn" onclick="openGuide('score')" style="flex-shrink:0;">?</button>
+        </div>
+      </div>
+      <div id="health-score-content">
+        <div class="log-empty">Calculating your score...</div>
+      </div>
+      <button onclick="openGlowInsights()" style="width:100%;margin-top:10px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">✨ What's driving my score?</button>
+    </div>
+
     <!-- Daily check-in — collapsible -->
     <div class="card" id="checkin-card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleCheckinForm()">
@@ -546,6 +560,18 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="btn-primary" onclick="saveCheckin()">Save check-in</button>
         <div class="toast-msg" id="tt">Saved!</div>
       </div>
+    </div>
+
+    <!-- Daily Progress card -->
+    <div class="card" id="daily-progress-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleDailyProgress()">
+        <div class="card-title" style="margin:0;">Daily progress</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div id="dp-overall" style="font-size:12px;color:var(--muted);"></div>
+          <span id="dp-chevron" style="font-size:16px;color:var(--muted);">▾</span>
+        </div>
+      </div>
+      <div id="daily-progress-list" style="display:none;margin-top:12px;"></div>
     </div>
 
     <!-- 7 Pillars weekly self-care -->
@@ -647,31 +673,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="pillars-status" style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--warm);">Tap pillars above when you've nurtured them today</div>
     </div>
 
-
-    <!-- Daily Progress card -->
-    <div class="card" id="daily-progress-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div class="card-title" style="margin:0;">Daily progress</div>
-        <div id="dp-overall" style="font-size:12px;color:var(--muted);"></div>
-      </div>
-      <div id="daily-progress-list"></div>
-    </div>
-
-    <!-- Glow Score — pillar breakdown collapsible -->
-    <div class="card health-score-card" id="health-score-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div class="card-title" style="margin:0;">Your Glow Score</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <button class="guide-btn" onclick="openGuide('score')" style="flex-shrink:0;">?</button>
-        </div>
-      </div>
-      <div id="health-score-content">
-        <div class="log-empty">Calculating your score...</div>
-      </div>
-      <button onclick="openGlowInsights()" style="width:100%;margin-top:10px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">✨ What's driving my score?</button>
-    </div>
-
-    <!-- Ask your coach — separate card -->
+    <!-- Ask your coach -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div class="card-title" style="margin:0;">Ask your coach</div>
@@ -680,6 +682,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button class="btn-ai" onclick="aiCoach()">Ask your coach ↗</button>
       <div id="coach-output" class="coach-response" style="display:none"></div>
     </div>
+
   </div>
   <div class="view-content" id="vc-today-weekly">
     <div class="section-label">This week</div>
@@ -5438,6 +5441,16 @@ function updateSkinProgress(){
   const pmEl = document.getElementById('skin-pm-progress');
   if(amEl) amEl.textContent = amDone === SKIN_STEPS_AM.length ? '✅ AM routine complete' : amDone+'/'+SKIN_STEPS_AM.length+' steps done';
   if(pmEl) pmEl.textContent = pmDone === SKIN_STEPS_PM.length ? '✅ PM routine complete' : pmDone+'/'+SKIN_STEPS_PM.length+' steps done';
+}
+
+function toggleDailyProgress(forceOpen){
+  const list = document.getElementById('daily-progress-list');
+  const chevron = document.getElementById('dp-chevron');
+  if(!list) return;
+  const isOpen = list.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  list.style.display = open ? 'block' : 'none';
+  if(chevron) chevron.textContent = open ? '▴' : '▾';
 }
 
 function toggleBodyLog(forceOpen){
