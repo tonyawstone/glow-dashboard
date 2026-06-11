@@ -1282,7 +1282,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
         <div style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;" onclick="toggleBodyLog()">
-          <div class="card-title" style="margin:0;">Today's body check-in</div>
+          <div class="card-title" style="margin:0;">Body check-in</div>
           <div id="body-log-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
         <button onclick="openBodyLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
@@ -1307,17 +1307,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Exercise check-in — collapsible -->
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleExerciseCheckin()">
-        <div class="card-title" style="margin:0;">Exercise check-in</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button onclick="event.stopPropagation();openExerciseLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
-          <span id="exercise-checkin-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;" onclick="toggleExerciseCheckin()">
+          <div class="card-title" style="margin:0;">Exercise check-in</div>
+          <span id="exercise-checkin-arrow" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</span>
         </div>
+        <button onclick="openExerciseLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
       </div>
       <div id="exercise-checkin-body" style="display:none;margin-top:12px;">
-        <div id="exercise-goal-display" style="padding:0 0 8px;font-size:12px;color:var(--muted);">
-          Weekly targets: Pilates 2×/wk · Treadmill 3×/wk · Stretching daily
-        </div>
         <div id="exercise-stats-strip"><div class="log-empty" style="font-size:12px;">Upload CSV to see activity data.</div></div>
         <div id="exercise-today-status" style="margin:8px 0;"></div>
         <div style="border-top:0.5px solid var(--border);margin-top:10px;padding-top:10px;">
@@ -1326,6 +1323,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <span id="manual-exercise-arrow" style="font-size:14px;color:var(--muted);">▾</span>
           </div>
           <div id="manual-exercise-body" style="display:none;margin-top:10px;">
+            <div id="exercise-goal-display" style="padding:0 0 8px;font-size:12px;color:var(--muted);">
+              Weekly targets: Pilates 2×/wk · Treadmill 3×/wk · Stretching daily
+            </div>
             <div style="display:flex;gap:6px;margin-bottom:8px;">
               <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">AM</button>
               <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">PM</button>
@@ -5598,7 +5598,7 @@ function toggleExerciseCheckin(forceOpen){
   const isOpen = body.style.display !== 'none';
   const open = forceOpen !== undefined ? forceOpen : !isOpen;
   body.style.display = open ? 'block' : 'none';
-  if(arrow) arrow.textContent = open ? '▴' : '▾';
+  if(arrow) arrow.style.transform = open ? 'rotate(90deg)' : '';
 }
 
 function toggleDermCard(forceOpen){
@@ -6374,24 +6374,37 @@ async function buildBodyCompositionMetrics(){
         const v = parseInt(r[field]);
         if(v > 0) return {val:v, lbl:fmt(r.date)};
       }
-      return {val:0, lbl:''};
+      return {val:0, lbl:fmt(rows[0]?.date)};
+    };
+    // Exercise cal & min should share the same date (last workout date)
+    const pickExercise = () => {
+      for(const r of rows){
+        if(parseInt(r.exercise_calories)>0 || parseInt(r.exercise_minutes)>0){
+          return {
+            cals: {val:parseInt(r.exercise_calories)||0, lbl:fmt(r.date)},
+            mins: {val:parseInt(r.exercise_minutes)||0, lbl:fmt(r.date)}
+          };
+        }
+      }
+      const d = fmt(rows[0]?.date);
+      return { cals:{val:0,lbl:d}, mins:{val:0,lbl:d} };
     };
     const steps = pick('steps');
     const active = pick('active_energy_cal');
-    const cals = pick('exercise_calories');
-    const mins = pick('exercise_minutes');
-    const tile = (data, label) => `
+    const ex = pickExercise();
+    const tile = (data, label, suffix) => `
       <div style="text-align:center;padding:8px;background:var(--warm);border-radius:8px;">
-        <div style="font-size:18px;font-weight:600;color:var(--text);">${data.val?data.val.toLocaleString():'—'}</div>
+        <div style="font-size:18px;font-weight:600;color:var(--text);">${data.val?data.val.toLocaleString():'0'}${suffix||''}</div>
         <div style="font-size:10px;color:var(--muted);">${label}</div>
         <div style="font-size:9px;color:var(--muted);margin-top:1px;">${data.lbl}</div>
       </div>`;
     elExStats.innerHTML = `
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Daily targets: Steps 10,000 · Exercise 45–60 min</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        ${tile(steps,'Steps')}
-        ${tile(active,'Active energy')}
-        ${tile(cals,'Cal burned')}
-        ${tile(mins,'Exercise min')}
+        ${tile(steps,'Steps','')}
+        ${tile(active,'Active energy',' cal')}
+        ${tile(ex.cals,'Exercise cal','')}
+        ${tile(ex.mins,'Exercise min','')}
       </div>
       <div style="font-size:10px;color:var(--muted);margin-top:4px;text-align:center;">Apple Health</div>
     `;
