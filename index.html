@@ -42,7 +42,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .tnav i{font-size:22px;}
 .tnav.on{color:var(--accent);border-bottom-color:var(--accent);}
 .tnav{position:relative;}
-.pillar-ring{pointer-events:none;}
+.pillar-ring{pointer-events:none;flex-shrink:0;}
 
 /* STAT STRIP */
 .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px;}
@@ -3100,7 +3100,6 @@ function toggleDPItem(id, deepLink){
 }
 
 function updatePillarRings(checks){
-  // Group completion by pillar tab
   const pillarItems = {
     mind:    ['dp-mood'],
     sleep:   ['dp-sleep-q','dp-myair','dp-cpap'],
@@ -3118,20 +3117,32 @@ function updatePillarRings(checks){
     const btn = document.querySelector(`.tnav[onclick="tab('${pillar}')"]`);
     if(!btn) return;
 
-    // Remove existing ring
-    let ring = btn.querySelector('.pillar-ring');
-    if(!ring){ ring=document.createElement('div'); ring.className='pillar-ring'; btn.prepend(ring); }
+    const icon = btn.querySelector('i');
+    if(!icon) return;
 
-    const color = pct===100?'#6B9E78':pct>0?'#C4735A':'rgba(0,0,0,0.1)';
-    const dash = 2*Math.PI*8; // circumference for r=8
+    // Wrap icon in ring container if not already done
+    let wrapper = btn.querySelector('.pillar-ring');
+    if(!wrapper){
+      wrapper = document.createElement('div');
+      wrapper.className = 'pillar-ring';
+      icon.parentNode.insertBefore(wrapper, icon);
+      wrapper.appendChild(icon);
+    }
+
+    const color = pct===100?'#6B9E78':pct>0?'#C4735A':'rgba(0,0,0,0.12)';
+    const r = 16;
+    const dash = 2*Math.PI*r;
     const offset = dash*(1-pct/100);
-    ring.innerHTML = `<svg width="20" height="20" style="position:absolute;top:4px;left:50%;transform:translateX(-50%);">
-      <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="2"/>
-      <circle cx="10" cy="10" r="8" fill="none" stroke="${color}" stroke-width="2"
-        stroke-dasharray="${dash.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
-        stroke-linecap="round" transform="rotate(-90 10 10)"/>
-    </svg>`;
-    ring.style.cssText='position:relative;width:20px;height:20px;display:block;margin:0 auto 2px;';
+    const iconClass = icon.className;
+
+    wrapper.style.cssText = 'position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin:0 auto;';
+    wrapper.innerHTML = '<svg width="36" height="36" style="position:absolute;top:0;left:0;pointer-events:none;">'
+      + '<circle cx="18" cy="18" r="'+r+'" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="2.5"/>'
+      + '<circle cx="18" cy="18" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="2.5"'
+      + ' stroke-dasharray="'+dash.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'"'
+      + ' stroke-linecap="round" transform="rotate(-90 18 18)"/>'
+      + '</svg>'
+      + '<i class="'+iconClass+'" aria-hidden="true" style="font-size:22px;position:relative;z-index:1;"></i>';
   });
 }
 
