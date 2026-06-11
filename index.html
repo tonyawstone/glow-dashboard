@@ -1586,9 +1586,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Zepbound -->
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;" onclick="toggleZepForm()" style="cursor:pointer;">
-        <div class="card-title" style="margin:0;">💉 Zepbound · weekly dose</div>
-        <button id="zep-form-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;" onclick="toggleZepForm()">
+          <div class="card-title" style="margin:0;">💉 Zepbound · weekly dose</div>
+          <span id="zep-form-toggle" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</span>
+        </div>
+        <button onclick="openInjectionNotes()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past notes</button>
       </div>
       <div id="zep-dose-status" style="margin-top:10px;"></div>
       <!-- Collapsible form -->
@@ -11269,8 +11272,7 @@ function toggleZepForm(){
   const btn = document.getElementById('zep-form-toggle');
   const open = body.style.display === 'none';
   body.style.display = open ? 'block' : 'none';
-  if(btn) btn.textContent = open ? '▴' : '▾';
-  // Load site history when opening
+  if(btn) btn.style.transform = open ? 'rotate(90deg)' : '';
   if(open) loadInjectionSiteHistory();
 }
 
@@ -11464,13 +11466,30 @@ function updateInjectionSiteDiagram(selectedSite, history){
   sites.forEach(s=>{
     const e = document.querySelector(`#site-${s} ellipse`);
     if(e) e.setAttribute('fill','#6B9E78');
+    // Remove any red dots
+    const dot = document.querySelector(`#site-${s} .red-dot`);
+    if(dot) dot.remove();
   });
 
-  // Previous site = red (avoid)
+  // Previous site = darker with red dot (avoid)
   if(history && history.length > 1){
-    const prevSite = history[history.length-2].site;
-    const prevEl = document.querySelector(`#site-${prevSite} ellipse`);
-    if(prevEl) prevEl.setAttribute('fill','#C4735A');
+    const prev = history[history.length-2];
+    const prevEl = document.querySelector(`#site-${prev.site} ellipse`);
+    if(prevEl) prevEl.setAttribute('fill','#4A6B3A');
+    // Add red dot in center
+    const prevG = document.getElementById(`site-${prev.site}`);
+    if(prevG){
+      const cx = prevG.querySelector('ellipse')?.getAttribute('cx');
+      const cy = prevG.querySelector('ellipse')?.getAttribute('cy');
+      if(cx && cy){
+        const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        dot.setAttribute('cx', cx); dot.setAttribute('cy', cy);
+        dot.setAttribute('r', '8'); dot.setAttribute('fill', '#E53E3E');
+        dot.setAttribute('stroke', '#fff'); dot.setAttribute('stroke-width', '2');
+        dot.setAttribute('class', 'red-dot'); dot.setAttribute('pointer-events', 'none');
+        prevG.appendChild(dot);
+      }
+    }
   }
 
   // Current site = dark green
@@ -11481,18 +11500,53 @@ function updateInjectionSiteDiagram(selectedSite, history){
 
   // Update status text
   const statusEl = document.getElementById('injection-site-status');
-  if(statusEl && selectedSite){
-    const prev = history && history.length > 1 ? history[history.length-2].site : null;
-    statusEl.innerHTML = `<strong style="color:#27500A;">✓ This week: ${SITE_LABELS[selectedSite]}</strong>${prev ? ` · <span style="color:#C4735A;">Avoid: ${SITE_LABELS[prev]}</span>` : ''}`;
+  if(statusEl){
+    const prev = history && history.length > 1 ? history[history.length-2] : null;
+    const prevDate = prev ? safeDate(prev.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    let html = '';
+    if(prev) html += '<div style="font-size:12px;color:#D94040;margin-bottom:4px;">🔴 Previous injection '+prevDate+': <strong>'+SITE_LABELS[prev.site]+'</strong></div>';
+    if(selectedSite){
+      let doseStr = '';
+      try { const d = JSON.parse(localStorage.getItem('glowZepDose')||'{}'); if(d.mg) doseStr = ' · '+d.mg+' mg'; } catch(e){}
+      html += '<div style="font-size:12px;color:#27500A;">🟢 This week: <strong>'+SITE_LABELS[selectedSite]+'</strong>'+doseStr+'</div>';
+    }
+    else html += '<div style="font-size:12px;color:var(--muted);">Tap a zone to log this week\'s site</div>';
+    statusEl.innerHTML = html;
   }
 
   // Show recent history
   const histEl = document.getElementById('injection-site-history');
   if(histEl && history && history.length > 1){
     const recent = history.slice(-4).reverse().slice(1);
-    histEl.innerHTML = `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Previous sites</div>`
-      + recent.map(e=>`<div style="padding:3px 0;font-size:12px;color:var(--muted);">${e.date} · ${e.label}</div>`).join('');
+    histEl.innerHTML = '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Previous sites</div>'
+      + recent.map(e=>'<div style="padding:3px 0;font-size:12px;color:var(--muted);">'+e.date+' · '+e.label+'</div>').join('');
   }
+}
+
+function openInjectionNotes(){
+  const el = document.getElementById('injection-notes-overlay-content');
+  openOverlay('injection-notes-overlay');
+  if(!el) return;
+  // Combine localStorage history + Blob data
+  const history = JSON.parse(localStorage.getItem('glowInjectionSites')||'[]');
+  const withNotes = history.filter(e=>e.notes||e.pain||e.sensation?.length).reverse();
+  if(!withNotes.length){
+    el.innerHTML = '<div class="log-empty">No injection notes yet.</div>';
+    return;
+  }
+  let html = '';
+  for(const e of withNotes){
+    const d = safeDate(e.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const details = [e.label||'', e.pain||''].filter(Boolean).join(' · ');
+    const sensations = e.sensation?.length ? e.sensation.join(' · ') : '';
+    html += '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+      + '<div style="font-size:12px;color:var(--muted);">'+d+'</div>'
+      + (details ? '<div style="font-size:13px;color:var(--text);margin-top:4px;">'+details+'</div>' : '')
+      + (sensations ? '<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+sensations+'</div>' : '')
+      + (e.notes ? '<div style="font-size:12px;color:var(--text);font-style:italic;margin-top:4px;">"'+e.notes+'"</div>' : '')
+      + '</div>';
+  }
+  el.innerHTML = html;
 }
 
 function loadInjectionSiteHistory(){
@@ -11501,12 +11555,10 @@ function loadInjectionSiteHistory(){
   const last = history[history.length-1];
   updateInjectionSiteDiagram(last.site, history);
   renderInjectionNotesLog();
-  // Restore notes if same day
-  if(last.date === nowStr()){
-    if(last.pain) document.querySelectorAll('#injection-pain-tags .tag').forEach(t=>{ if(t.textContent.includes(last.pain.replace(/😊|😐|😬|😣 /g,''))) t.classList.add('on'); });
-    if(last.sensation) last.sensation.forEach(s=>{ document.querySelectorAll('#injection-sensation-tags .tag').forEach(t=>{ if(t.textContent===s) t.classList.add('on'); }); });
-    if(last.notes) { const el=document.getElementById('injection-notes'); if(el) el.value=last.notes; }
-  }
+  // Restore last injection's pain/sensation/notes (regardless of date)
+  if(last.pain) document.querySelectorAll('#injection-pain-tags .tag').forEach(t=>{ if(t.textContent.includes(last.pain.replace(/😊|😐|😬|😣 /g,''))) t.classList.add('on'); });
+  if(last.sensation) last.sensation.forEach(s=>{ document.querySelectorAll('#injection-sensation-tags .tag').forEach(t=>{ if(t.textContent===s) t.classList.add('on'); }); });
+  if(last.notes) { const el=document.getElementById('injection-notes'); if(el) el.value=last.notes; }
 }
 
 
@@ -11641,6 +11693,22 @@ async function buildZepboundStatus(){
   const statusBg = nextDue?'#FEF3C7':daysSince>=5?'#FDF6EC':'#EAF3DE';
   const statusMsg = nextDue?`Due now (${daysSince} days ago)`:daysUntilNext===1?'Due tomorrow':`Due in ${daysUntilNext} days`;
   const weeksOn = Math.floor((new Date()-new Date('2025-10-25'))/(1000*60*60*24*7));
+  // Get injection details from Blob
+  let siteLabel = '', pain = '', notes = '';
+  try {
+    const siteHistory = JSON.parse(localStorage.getItem('glowInjectionSites')||'[]');
+    const lastSite = siteHistory.length ? siteHistory[siteHistory.length-1] : null;
+    if(lastSite){
+      siteLabel = lastSite.label || '';
+      pain = lastSite.pain || '';
+      notes = lastSite.notes || '';
+    }
+  } catch(e){}
+  // Also check Blob data for injection details
+  if(!siteLabel && lastDose.injectionSiteLabel) siteLabel = lastDose.injectionSiteLabel;
+  if(!pain && lastDose.injectionPain) pain = lastDose.injectionPain;
+  if(!notes && lastDose.injectionNotes) notes = lastDose.injectionNotes;
+  const details = [siteLabel, pain].filter(Boolean).join(' · ');
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:16px;padding:12px;border-radius:12px;background:${statusBg};">
       <div style="text-align:center;min-width:48px;">
@@ -11650,6 +11718,8 @@ async function buildZepboundStatus(){
       <div>
         <div style="font-size:14px;font-weight:600;color:${statusColor};">${statusMsg}</div>
         <div style="font-size:13px;color:var(--text);margin-top:2px;">Last: <strong>${lastDose.mg} mg</strong> · ${lastDose.date}</div>
+        ${details?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">${details}</div>`:''}
+        ${notes?`<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:2px;">"${notes}"</div>`:''}
         <div style="font-size:11px;color:var(--muted);margin-top:2px;">Week ${weeksOn} on Zepbound · started Oct 25, 2025</div>
       </div>
     </div>
@@ -12309,6 +12379,17 @@ async function weeklyMindInsight(){
 <div id="glow-toast" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#3D2E25;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.2);">Saved!</div>
 
 <!-- ═══ FULLSCREEN OVERLAYS — outside shell for proper iOS rendering ═══ -->
+
+<div id="injection-notes-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('injection-notes-overlay')" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Injection Notes</div>
+    </div>
+    <div id="injection-notes-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
 <!-- Check-in history overlay -->
 <div id="checkin-history-overlay" class="fullscreen-overlay">
   <div style="padding:16px;">
