@@ -3137,14 +3137,13 @@ const DP_ITEMS = [
   ['🧠 Mind',    'dp-mood',      'Mood logged',              'Vibe · energy · gratitude · wins',   null, 'mind'],
   ['😴 Sleep',   'dp-sleep-q',   'Sleep quality logged',     'Rate last night\u2019s sleep',            null, 'sleep'],
   ['😴 Sleep',   'dp-myair',     'myAir data saved',         'CPAP · AHI · usage',                 null, 'sleep'],
-  ['🌿 Wellness','dp-meds',      'Medications taken',        'Rx meds · supplements',              null, 'health'],
   ['🌿 Wellness','dp-bp',        'BP logged',                'Blood pressure reading',             null, 'health'],
-  ['🌿 Wellness','dp-cpap',      'CPAP used last night',     'Sleep apnea compliance',             null, 'sleep'],
-  ['🌿 Wellness','dp-water',     'Water goal met',           '8+ glasses today',                   null, 'health'],
+  ['🌿 Wellness','dp-meds',      'Medications taken',        'Rx meds · supplements',              null, 'health'],
+  ['🌿 Wellness','dp-bodywater', 'Body water % entered',     'From Withings scale',                null, 'health'],
+  ['🌿 Wellness','dp-water',     'Water goal met',           '64 oz · 8 glasses',                  null, 'health'],
   ['✨ Skin',    'dp-skin-am',   'AM skin routine done',     'Cleanser · Serum · Vit C · SPF',     null, 'skin'],
   ['✨ Skin',    'dp-skin-pm',   'PM routine done',          'Musely · Olay Regenerist',           null, 'skin'],
   ['❤️ Body',   'dp-body',      'Body check-in logged',     'Non-scale wins · measurements',      null, 'body'],
-  ['❤️ Body',   'dp-bodywater', 'Body water % entered',     'From Withings scale',                null, 'health'],
   ['👗 Style',   'dp-outfit',    'Outfit logged',            'My outfit · Inspo · DailyLook',      null, 'style'],
   ['💇 Hair',   'dp-hair',      'Hair check-in done',       'Products · style · condition',       null, 'hair'],
 ];
@@ -3224,14 +3223,12 @@ async function buildDailyProgress(){
   // BP — logged today
   try { const bps = await dbAll('bps'); autoChecks['dp-bp'] = bps.some(e=>e.date===today||(e.time&&e.date===today)); } catch(e){}
 
-  // CPAP — reads from weekly cleaning state
-  try { const cs=getCPAPCleanState(); autoChecks['dp-cpap']=['cpap-clean-mask','cpap-clean-tube','cpap-clean-chamber'].every(id=>cs[id]); } catch(e){ autoChecks['dp-cpap']=manualState['dp-cpap']||false; }
 
   // Water — 8+ glasses today
   try {
     const water = await dbAll('water');
     const todayW = water.filter(w=>w.date===today||w.date===new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})).pop();
-    autoChecks['dp-water'] = todayW && (todayW.glasses||0) >= (WATER_GOAL||8);
+    autoChecks['dp-water'] = todayW && ((todayW.oz||0) >= 64 || (todayW.glasses||0) >= 8);
   } catch(e){}
 
   // Skin AM/PM — read from skin routine state (resets daily)
@@ -3334,8 +3331,8 @@ function updateTodayRing(score){
 function updatePillarRings(checks){
   const pillarItems = {
     mind:    ['dp-activation','dp-reflection','dp-mood'],
-    sleep:   ['dp-sleep-q','dp-myair','dp-cpap'],
-    health:  ['dp-meds','dp-bp','dp-water','dp-bodywater'],
+    sleep:   ['dp-sleep-q','dp-myair'],
+    health:  ['dp-bp','dp-meds','dp-bodywater','dp-water'],
     skin:    ['dp-skin-am','dp-skin-pm'],
     body:    ['dp-body'],
     style:   ['dp-outfit'],
