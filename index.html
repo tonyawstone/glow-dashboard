@@ -2521,33 +2521,32 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="wi-toast">Intention set!</div>
     </div>
 
-    <!-- Mood check-in -->
+    <!-- Mind check-in — consolidated -->
     <div class="card">
-      <div class="card-title">Today's check-in</div>
-      <div class="stars-row"><div class="stars-row-label">Energy level</div><div class="stars" id="energy-stars"><span class="star" onclick="setStars('energy-stars',1)">★</span><span class="star" onclick="setStars('energy-stars',2)">★</span><span class="star" onclick="setStars('energy-stars',3)">★</span><span class="star" onclick="setStars('energy-stars',4)">★</span><span class="star" onclick="setStars('energy-stars',5)">★</span></div></div>
-      <div class="stars-row"><div class="stars-row-label">Confidence</div><div class="stars" id="conf-stars"><span class="star" onclick="setStars('conf-stars',1)">★</span><span class="star" onclick="setStars('conf-stars',2)">★</span><span class="star" onclick="setStars('conf-stars',3)">★</span><span class="star" onclick="setStars('conf-stars',4)">★</span><span class="star" onclick="setStars('conf-stars',5)">★</span></div></div>
-      <div class="stars-row"><div class="stars-row-label">Stress level</div><div class="stars" id="stress-stars"><span class="star" onclick="setStars('stress-stars',1)">★</span><span class="star" onclick="setStars('stress-stars',2)">★</span><span class="star" onclick="setStars('stress-stars',3)">★</span><span class="star" onclick="setStars('stress-stars',4)">★</span><span class="star" onclick="setStars('stress-stars',5)">★</span></div></div>
-      <div class="stars-row"><div class="stars-row-label">Body image</div><div class="stars" id="body-image-stars"><span class="star" onclick="setStars('body-image-stars',1)">★</span><span class="star" onclick="setStars('body-image-stars',2)">★</span><span class="star" onclick="setStars('body-image-stars',3)">★</span><span class="star" onclick="setStars('body-image-stars',4)">★</span><span class="star" onclick="setStars('body-image-stars',5)">★</span></div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Gratitude · 3 things</div>
-      <textarea id="gratitude" rows="3" placeholder="1. &#10;2. &#10;3. "></textarea>
-    </div>
-    <div class="card">
-      <div class="card-title">Today's vibe & wins</div>
-      <div class="fl">Vibe</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="card-title" style="margin:0;">&#x1F9E0; Mind check-in</div>
+        <button onclick="openPastMindLog()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--sans);text-decoration:underline;">Past check-ins &#x2197;</button>
+      </div>
+      <div class="fl">How are you feeling?</div>
       <div class="tags" id="vibe-tags">
         <button class="tag" onclick="tog(this)">Motivated</button><button class="tag" onclick="tog(this)">Overwhelmed</button><button class="tag" onclick="tog(this)">Grateful</button><button class="tag" onclick="tog(this)">Anxious</button><button class="tag" onclick="tog(this)">Grounded</button><button class="tag" onclick="tog(this)">In my power</button><button class="tag" onclick="tog(this)">Scattered</button>
       </div>
-      <div class="fl">Today's win</div>
+      <div class="stars-row" style="margin-top:10px;"><div class="stars-row-label">Energy</div><div class="stars" id="energy-stars"><span class="star" onclick="setStars('energy-stars',1)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',2)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',3)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',4)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',5)">&#x2605;</span></div></div>
+      <div class="stars-row"><div class="stars-row-label">Confidence</div><div class="stars" id="conf-stars"><span class="star" onclick="setStars('conf-stars',1)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',2)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',3)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',4)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',5)">&#x2605;</span></div></div>
+      <div class="stars-row"><div class="stars-row-label">Stress</div><div class="stars" id="stress-stars"><span class="star" onclick="setStars('stress-stars',1)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',2)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',3)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',4)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',5)">&#x2605;</span></div></div>
+      <div class="stars-row"><div class="stars-row-label">Body image</div><div class="stars" id="body-image-stars"><span class="star" onclick="setStars('body-image-stars',1)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',2)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',3)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',4)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',5)">&#x2605;</span></div></div>
+      <div class="fl" style="margin-top:10px;">Today's win</div>
       <textarea id="win-note" rows="2" placeholder="Big or small — new low, wore something I love, survived the school morning..."></textarea>
+      <div class="fl">Gratitude · 3 things</div>
+      <textarea id="gratitude" rows="3" placeholder="1. &#10;2. &#10;3. "></textarea>
       <button class="btn-primary" onclick="saveMind()">Log mood</button>
-      <button class="btn-ai" onclick="mindCoach()">Weekly mind & mood reflection ↗</button>
+      <button class="btn-ai" onclick="mindCoach()">Weekly mind &amp; mood reflection &#x2197;</button>
       <div id="mind-coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="mt">Saved!</div>
     </div>
-    <div class="card"><div class="card-title">Mood log</div><div id="mind-log"><div class="log-empty">No entries yet.</div></div></div>
-  </div>
+
+    <!-- Mood log history overlay trigger + inline log -->
+    <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-title" style="margin:0;">Mood log</div></div><div id="mind-log" style="margin-top:10px;"><div class="log-empty">No entries yet.</div></div></div>
 
   <div class="view-content" id="vc-mind-weekly">
     <div class="section-label">Mind · this week</div>
@@ -3102,7 +3101,8 @@ function loadCheckinState(){
 const DP_ITEMS = [
   // pillar, id, label, note, autoCheck fn (null = manual), deepLink tab
   ['🧠 Mind',    'dp-activation','Morning activation',       '5-step energy ritual',               null, 'mind'],
-  ['🧠 Mind',    'dp-mood',      'Mood logged',              'Vibe · energy · gratitude',          null, 'mind'],
+  ['🧠 Mind',    'dp-reflection','Reflection prompt answered','Journal · DayOne · prompt',           null, 'mind'],
+  ['🧠 Mind',    'dp-mood',      'Mood logged',              'Vibe · energy · gratitude · wins',   null, 'mind'],
   ['😴 Sleep',   'dp-sleep-q',   'Sleep quality logged',     'Rate last night\u2019s sleep',            null, 'sleep'],
   ['😴 Sleep',   'dp-myair',     'myAir data saved',         'CPAP · AHI · usage',                 null, 'sleep'],
   ['🌿 Wellness','dp-meds',      'Medications taken',        'Rx meds · supplements',              null, 'health'],
@@ -3145,6 +3145,9 @@ async function buildDailyProgress(){
 
   // Mind — morning activation
   try { const ms=getDPManualState(); autoChecks['dp-activation']=ms['dp-morning-activation']||false; } catch(e){}
+
+  // Mind — reflection prompt (manual)
+  try { const ms=getDPManualState(); autoChecks['dp-reflection']=ms['dp-reflection']||false; } catch(e){}
 
   // Mind — mood logged today
   try { const minds = await dbAll('minds'); autoChecks['dp-mood'] = minds.some(e=>e.date===today); } catch(e){}
@@ -3279,7 +3282,7 @@ function updateTodayRing(score){
 
 function updatePillarRings(checks){
   const pillarItems = {
-    mind:    ['dp-activation','dp-mood'],
+    mind:    ['dp-activation','dp-reflection','dp-mood'],
     sleep:   ['dp-sleep-q','dp-myair','dp-cpap'],
     health:  ['dp-meds','dp-bp','dp-water','dp-bodywater'],
     skin:    ['dp-skin-am','dp-skin-pm'],
@@ -3343,6 +3346,13 @@ function updatePillarRings(checks){
 
 
 // ── MORNING ACTIVATION RITUAL ───────────────────────────────────────────────
+
+
+function openPastMindLog(){
+  const log = document.getElementById('mind-log');
+  if(!log) return;
+  log.scrollIntoView({behavior:'smooth', block:'start'});
+}
 
 function toggleActivation(){
   const body = document.getElementById('activation-body');
