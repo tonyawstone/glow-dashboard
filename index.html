@@ -1930,28 +1930,33 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
 
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinCheckin()">
         <div class="card-title" style="margin:0;">Skin check-in</div>
-        <button onclick="openSkinLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="event.stopPropagation();openSkinLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
+          <span id="skin-checkin-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+        </div>
       </div>
-      <div class="fl">Skin today</div>
-      <div class="tags" id="skin-tags">
-        <button class="tag" onclick="tog(this)">Clear</button><button class="tag" onclick="tog(this)">Glowing</button><button class="tag" onclick="tog(this)">Breaking out</button><button class="tag" onclick="tog(this)">Dry</button><button class="tag" onclick="tog(this)">Oily</button><button class="tag" onclick="tog(this)">Irritated</button><button class="tag" onclick="tog(this)">Uneven tone</button><button class="tag" onclick="tog(this)">Dull</button>
+      <div id="skin-checkin-body" style="display:none;margin-top:12px;">
+        <div class="fl">Skin today</div>
+        <div class="tags" id="skin-tags">
+          <button class="tag" onclick="tog(this)">Clear</button><button class="tag" onclick="tog(this)">Glowing</button><button class="tag" onclick="tog(this)">Breaking out</button><button class="tag" onclick="tog(this)">Dry</button><button class="tag" onclick="tog(this)">Oily</button><button class="tag" onclick="tog(this)">Irritated</button><button class="tag" onclick="tog(this)">Uneven tone</button><button class="tag" onclick="tog(this)">Dull</button>
+        </div>
+        <div class="fl">Concerns</div>
+        <div class="tags" id="concern-tags">
+          <button class="tag" onclick="tog(this)">Hyperpigmentation</button><button class="tag" onclick="tog(this)">Fine lines</button><button class="tag" onclick="tog(this)">Texture</button><button class="tag" onclick="tog(this)">Pores</button><button class="tag" onclick="tog(this)">Redness</button>
+        </div>
+        <div class="fl">Derm notes</div>
+        <textarea id="derm-note" rows="2" placeholder="Rx changes, appt notes..." oninput="saveSkinDraft()"></textarea>
+        <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
+          <div style="font-size:12px;color:var(--muted);">Logging for:</div>
+          <input type="date" id="skin-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
+        </div>
+        <button class="btn-primary" onclick="saveSkin()">Log skin check-in</button>
+        <button class="btn-ai" onclick="dermCoach()">Derm prep questions &#x2197;</button>
+        <div id="derm-coach-output" class="coach-response" style="display:none"></div>
+        <div class="toast-msg" id="skt">Saved!</div>
       </div>
-      <div class="fl">Concerns</div>
-      <div class="tags" id="concern-tags">
-        <button class="tag" onclick="tog(this)">Hyperpigmentation</button><button class="tag" onclick="tog(this)">Fine lines</button><button class="tag" onclick="tog(this)">Texture</button><button class="tag" onclick="tog(this)">Pores</button><button class="tag" onclick="tog(this)">Redness</button>
-      </div>
-      <div class="fl">Derm notes</div>
-      <textarea id="derm-note" rows="2" placeholder="Rx changes, appt notes..." oninput="saveSkinDraft()"></textarea>
-      <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
-        <div style="font-size:12px;color:var(--muted);">Logging for:</div>
-        <input type="date" id="skin-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
-      </div>
-      <button class="btn-primary" onclick="saveSkin()">Log skin check-in</button>
-      <button class="btn-ai" onclick="dermCoach()">Derm prep questions &#x2197;</button>
-      <div id="derm-coach-output" class="coach-response" style="display:none"></div>
-      <div class="toast-msg" id="skt">Saved!</div>
     </div>
 
     <!-- Routine tracking -->
@@ -3154,6 +3159,7 @@ function restoreSkinDraft(){
   if(d.derm && document.getElementById('derm-note')) document.getElementById('derm-note').value = d.derm;
   restoreCheckbox('r-musely-aa', d.musely_aa);
   restoreCheckbox('r-musely-spot', d.musely_spot);
+  toggleSkinCheckin(true);
 }
 
 // Hair draft
@@ -5557,6 +5563,16 @@ function restoreMindDraft(){
   } catch(e){}
 }
 
+function toggleSkinCheckin(forceOpen){
+  const body = document.getElementById('skin-checkin-body');
+  const arrow = document.getElementById('skin-checkin-arrow');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  if(arrow) arrow.textContent = open ? '▴' : '▾';
+}
+
 function toggleSleepCheckin(forceOpen){
   const body = document.getElementById('sleep-checkin-body');
   const arrow = document.getElementById('sleep-checkin-arrow');
@@ -5693,7 +5709,7 @@ async function saveSkin(){
   syncToBlob('skins');
   document.getElementById('derm-note').value='';
   ['skin-tags','concern-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
-  toast('skt');loadLogs();
+  toast('skt');loadLogs();toggleSkinCheckin(false);
 }
 async function saveHair(){
   const hairT=gT('hair-tags'),care=gT('hcare-tags'),prods=gT('products-used-tags'),note=document.getElementById('hair-note').value.trim();
