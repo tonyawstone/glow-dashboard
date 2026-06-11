@@ -1266,6 +1266,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="stat-tile"><div class="stat-val" style="font-size:24px;">170.7</div><div class="stat-lbl">Current · Withings</div></div>
       <div class="stat-tile"><div class="stat-val" style="font-size:24px;">168.7</div><div class="stat-lbl">All-time low · May 19</div></div>
     </div>
+
+    <!-- BMI & Body Fat — compact card right after weight -->
+    <div class="card">
+      <div class="card-title">BMI & Body Fat</div>
+      <div id="bmi-bodyfat-card"><div class="log-empty">Upload CSV to see latest values.</div></div>
+    </div>
+
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
         <div style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;" onclick="toggleBodyLog()">
@@ -1291,6 +1298,55 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="toast-msg" id="bt">Saved!</div>
       </div>
     </div>
+
+    <!-- Exercise check-in — collapsible -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleExerciseCheckin()">
+        <div class="card-title" style="margin:0;">Exercise check-in</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="event.stopPropagation();openExerciseLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
+          <span id="exercise-checkin-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+        </div>
+      </div>
+      <div id="exercise-checkin-body" style="display:none;margin-top:12px;">
+        <div id="exercise-goal-display" style="padding:0 0 8px;font-size:12px;color:var(--muted);">
+          Weekly targets: Pilates 2×/wk · Treadmill 3×/wk · Stretching daily
+        </div>
+        <div id="exercise-stats-strip"><div class="log-empty" style="font-size:12px;">Upload CSV to see activity data.</div></div>
+        <div id="exercise-today-status" style="margin:8px 0;"></div>
+        <div style="border-top:0.5px solid var(--border);margin-top:10px;padding-top:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleManualExercise()">
+            <div style="font-size:12px;font-weight:500;color:var(--text);">✏️ Log manually</div>
+            <span id="manual-exercise-arrow" style="font-size:14px;color:var(--muted);">▾</span>
+          </div>
+          <div id="manual-exercise-body" style="display:none;margin-top:10px;">
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+              <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">AM</button>
+              <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">PM</button>
+            </div>
+            <div id="ex-time-tags" style="display:none;"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Treadmill</div><input type="number" id="ex-walk" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Pilates</div><input type="number" id="ex-pilates" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Strength</div><input type="number" id="ex-strength" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Abs</div><input type="number" id="ex-abs" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Yoga</div><input type="number" id="ex-yoga" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Other</div><input type="number" id="ex-other" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+            </div>
+            <div style="display:flex;gap:6px;margin:8px 0;">
+              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">Low</button>
+              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">Medium</button>
+              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">High</button>
+            </div>
+            <div id="ex-intensity" style="display:none;"></div>
+            <textarea id="ex-note" rows="1" placeholder="Notes: hip, energy, how it felt..." style="font-size:12px;"></textarea>
+            <button class="btn-primary" style="margin-top:8px;" onclick="saveExercise()">Log exercise</button>
+            <div class="toast-msg" id="ext">Saved!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">Weight charts</div>
       <div class="chart-tabs">
@@ -1332,59 +1388,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">Daily data from Withings via Apple Health · upload CSV weekly</div>
     </div>
 
-    <div class="card">
-      <div class="card-title">Apple Health · body composition</div>
-      <div id="body-composition-metrics"><div class="log-empty">Upload your weekly CSV to see body composition data.</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Apple Health · activity</div>
-      <div id="body-activity-metrics"><div class="log-empty">Upload your weekly CSV to see steps data.</div></div>
-    </div>
-    <!-- Exercise goals -->
-    <div class="card">
-      <div class="card-title">Body fat %</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Healthy range for women: 21–33% · Athletic: 14–20%</div>
-      <div class="chart-wrap" style="height:200px;"><canvas id="body-fat-chart"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Weight vs lean mass</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">As weight drops on Zepbound, lean mass should stay stable — shows quality of fat loss</div>
-      <div class="chart-wrap" style="height:200px;"><canvas id="body-lean-bone-chart"></canvas></div>
-    </div>
-
-    <!-- Exercise goals -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div class="card-title" style="margin:0;">Exercise</div>
-        <button onclick="openExerciseLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
-      </div>
-      <div id="exercise-goal-display" style="padding:4px 0 10px;font-size:13px;color:var(--muted);">
-        Weekly targets: Pilates 2×/wk · Treadmill walk 3×/wk · Stretching daily
-      </div>
-      <div id="exercise-today-status" style="margin-bottom:8px;"></div>
-      <div class="fl">Workout time</div>
-      <div class="tags" id="ex-time-tags">
-        <button class="tag" onclick="solo('ex-time-tags',this)">AM</button>
-        <button class="tag" onclick="solo('ex-time-tags',this)">PM</button>
-      </div>
-      <div class="fl">Type & duration</div>
-      <div class="toggle-row"><div><div class="tl">Treadmill walking</div></div><input type="number" id="ex-walk" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
-      <div class="toggle-row"><div><div class="tl">Pilates reformer</div></div><input type="number" id="ex-pilates" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
-      <div class="toggle-row"><div><div class="tl">Dumbbells / strength</div></div><input type="number" id="ex-strength" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
-      <div class="toggle-row"><div><div class="tl">Abdominal exercises</div></div><input type="number" id="ex-abs" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
-      <div class="toggle-row"><div><div class="tl">Yoga / stretching</div></div><input type="number" id="ex-yoga" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
-      <div class="toggle-row"><div><div class="tl">Swimming / other</div></div><input type="number" id="ex-other" placeholder="mins" style="width:70px;padding:6px 8px;font-size:13px;"></div>
-      <div class="fl">Intensity overall</div>
-      <div class="tags" id="ex-intensity">
-        <button class="tag" onclick="solo('ex-intensity',this)">Low</button>
-        <button class="tag" onclick="solo('ex-intensity',this)">Medium</button>
-        <button class="tag" onclick="solo('ex-intensity',this)">High</button>
-      </div>
-      <div class="fl">Notes (hip, energy, how it felt)</div>
-      <textarea id="ex-note" rows="2" placeholder="e.g. 30 min treadmill + 20 min Pilates. Right hip felt great."></textarea>
-      <button class="btn-primary" onclick="saveExercise()">Log exercise</button>
-      <div class="toast-msg" id="ext">Saved!</div>
-    </div>
     <div class="card">
       <div class="card-title">Monthly progress photos · May 2026</div>
       <div class="photo-grid">
@@ -5572,6 +5575,26 @@ function toggleSkinPM(forceOpen){
   if(arrow) arrow.textContent = open ? '▴' : '▾';
 }
 
+function toggleManualExercise(forceOpen){
+  const body = document.getElementById('manual-exercise-body');
+  const arrow = document.getElementById('manual-exercise-arrow');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  if(arrow) arrow.textContent = open ? '▴' : '▾';
+}
+
+function toggleExerciseCheckin(forceOpen){
+  const body = document.getElementById('exercise-checkin-body');
+  const arrow = document.getElementById('exercise-checkin-arrow');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  if(arrow) arrow.textContent = open ? '▴' : '▾';
+}
+
 function toggleDermCard(forceOpen){
   const body = document.getElementById('derm-card-body');
   const arrow = document.getElementById('derm-card-arrow');
@@ -6277,75 +6300,84 @@ async function buildHealthClinicalMetrics(){
 }
 
 async function buildBodyCompositionMetrics(){
-  const elComp = document.getElementById('body-composition-metrics');
   const elAct = document.getElementById('body-activity-metrics');
+  const elBmiBf = document.getElementById('bmi-bodyfat-card');
   
   let rows = [];
   try { rows = await getCSVRows(); } catch(e){ console.error('CSV fetch error:', e); }
 
   if(!rows.length){
-    if(elComp) elComp.innerHTML='<div class="log-empty">Upload your weekly CSV to see body composition.</div>';
     if(elAct) elAct.innerHTML='<div class="log-empty">Upload your weekly CSV to see activity data.</div>';
+    if(elBmiBf) elBmiBf.innerHTML='<div class="log-empty">Upload CSV to see BMI & body fat.</div>';
     return;
   }
-  // rows has data — render composition metrics
-  if(elComp){
-    const rev = [...rows].reverse(); // most recent first
-    const latestWeight = rev.find(r=>parseFloat(r.weight_lbs)>0);
+
+  // BMI & Body Fat card — compact two-tile display
+  if(elBmiBf){
+    const rev = [...rows].reverse();
     const latestBMI = rev.find(r=>parseFloat(r.bmi)>0);
     const latestFat = rev.find(r=>parseFloat(r.body_fat_pct)>0);
-    const latestLean = rev.find(r=>parseFloat(r.lean_mass_lbs)>0);
-    const latestBone = rev.find(r=>parseFloat(r.bone_mass_lbs)>0);
-    const fmt = (d) => d ? safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+    const fmt = (d) => d ? safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
     const bmi = latestBMI ? parseFloat(latestBMI.bmi) : null;
-    elComp.innerHTML = `
-      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">From Withings scale via Apple Health</div>
-      <div class="snapshot-grid">
-        <div class="snapshot-item">
-          <div class="snapshot-label">Weight</div>
-          <div class="snapshot-val">${latestWeight?parseFloat(latestWeight.weight_lbs).toFixed(1):'—'}</div>
-          <div class="snapshot-sub snapshot-status-ok">${fmt(latestWeight?.date)||'—'}</div>
+    const fat = latestFat ? parseFloat(latestFat.body_fat_pct) : null;
+    const bmiStatus = bmi ? (bmi<25?'Normal':bmi<30?'Overweight':'Obese') : '—';
+    const bmiColor = bmi ? (bmi<25?'#6B9E78':bmi<30?'#C4735A':'#C0392B') : 'var(--muted)';
+    const fatRange = fat ? (fat<21?'Athletic':fat<=33?'Healthy':'Above range') : '—';
+    const fatColor = fat ? (fat<=33?'#6B9E78':'#C4735A') : 'var(--muted)';
+    elBmiBf.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="text-align:center;padding:12px;background:var(--warm);border-radius:10px;">
+          <div style="font-size:22px;font-weight:600;color:var(--text);">${bmi?bmi.toFixed(1):'—'}</div>
+          <div style="font-size:11px;color:${bmiColor};font-weight:500;">${bmiStatus}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">${fmt(latestBMI?.date)}</div>
         </div>
-        <div class="snapshot-item">
-          <div class="snapshot-label">BMI</div>
-          <div class="snapshot-val">${bmi?bmi.toFixed(1):'—'}</div>
-          <div class="snapshot-sub ${bmi&&bmi<25?'snapshot-status-ok':bmi<30?'snapshot-status-watch':'snapshot-status-high'}">${bmi?(bmi<25?'Normal':bmi<30?'Overweight':'Obese'):'—'} · ${fmt(latestBMI?.date)||'—'}</div>
+        <div style="text-align:center;padding:12px;background:var(--warm);border-radius:10px;">
+          <div style="font-size:22px;font-weight:600;color:var(--text);">${fat?fat.toFixed(1)+'%':'—'}</div>
+          <div style="font-size:11px;color:${fatColor};font-weight:500;">${fatRange}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">${fmt(latestFat?.date)}</div>
         </div>
-        <div class="snapshot-item">
-          <div class="snapshot-label">Body Fat</div>
-          <div class="snapshot-val">${latestFat?parseFloat(latestFat.body_fat_pct).toFixed(1)+'%':'—'}</div>
-          <div class="snapshot-sub">${fmt(latestFat?.date)||'—'}</div>
-        </div>
-        <div class="snapshot-item">
-          <div class="snapshot-label">Lean Mass</div>
-          <div class="snapshot-val" style="font-size:18px;">${latestLean?parseFloat(latestLean.lean_mass_lbs).toFixed(1):'—'}</div>
-          <div class="snapshot-sub">lbs · ${fmt(latestLean?.date)||'—'}</div>
-        </div>
-        ${latestBone?`<div class="snapshot-item"><div class="snapshot-label">Bone Mass</div><div class="snapshot-val" style="font-size:18px;">${parseFloat(latestBone.bone_mass_lbs).toFixed(1)}</div><div class="snapshot-sub">lbs · ${fmt(latestBone.date)}</div></div>`:''}
-        ${(()=>{const r=rev.find(row=>parseFloat(row.body_water_pct)>0);return r?`<div class="snapshot-item"><div class="snapshot-label">Body Water</div><div class="snapshot-val" style="font-size:18px;">${parseFloat(r.body_water_pct).toFixed(1)}%</div><div class="snapshot-sub">estimated · ${fmt(r.date)}</div></div>`:'';})()} 
       </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:8px;text-align:center;">From Withings scale via Apple Health</div>
     `;
   }
 
-  if(elAct){
-    const recent7 = [...rows].reverse().filter(r=>r.date!==nowStr()).slice(0,7); // exclude today (incomplete)
+  // Exercise stats strip — avg steps, active energy, exercise mins
+  const elExStats = document.getElementById('exercise-stats-strip');
+  if(elExStats){
+    const recent7 = [...rows].reverse().filter(r=>r.date!==nowStr()).slice(0,7);
     const avgSteps = recent7.map(r=>parseInt(r.steps)||0).filter(v=>v>0);
     const avg = avgSteps.length ? Math.round(avgSteps.reduce((a,b)=>a+b,0)/avgSteps.length) : null;
-    elAct.innerHTML = `
-      <div class="snapshot-grid">
-        <div class="snapshot-item">
-          <div class="snapshot-label">Avg Steps</div>
-          <div class="snapshot-val" style="font-size:20px;">${avg?avg.toLocaleString():'—'}</div>
-          <div class="snapshot-sub">7-day avg</div>
+    const avgCals = recent7.map(r=>parseInt(r.exercise_calories)||0).filter(v=>v>0);
+    const avgCal = avgCals.length ? Math.round(avgCals.reduce((a,b)=>a+b,0)/avgCals.length) : null;
+    const avgMins = recent7.map(r=>parseInt(r.exercise_minutes)||0).filter(v=>v>0);
+    const avgMin = avgMins.length ? Math.round(avgMins.reduce((a,b)=>a+b,0)/avgMins.length) : null;
+    const avgActive = recent7.map(r=>parseInt(r.active_energy_cal)||0).filter(v=>v>0);
+    const avgAct = avgActive.length ? Math.round(avgActive.reduce((a,b)=>a+b,0)/avgActive.length) : null;
+    elExStats.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="text-align:center;padding:8px;background:var(--warm);border-radius:8px;">
+          <div style="font-size:18px;font-weight:600;color:var(--text);">${avg?avg.toLocaleString():'—'}</div>
+          <div style="font-size:10px;color:var(--muted);">Avg steps</div>
+        </div>
+        <div style="text-align:center;padding:8px;background:var(--warm);border-radius:8px;">
+          <div style="font-size:18px;font-weight:600;color:var(--text);">${avgAct?avgAct.toLocaleString():'—'}</div>
+          <div style="font-size:10px;color:var(--muted);">Active energy</div>
+        </div>
+        <div style="text-align:center;padding:8px;background:var(--warm);border-radius:8px;">
+          <div style="font-size:18px;font-weight:600;color:var(--text);">${avgCal||'—'}</div>
+          <div style="font-size:10px;color:var(--muted);">Cal burned</div>
+        </div>
+        <div style="text-align:center;padding:8px;background:var(--warm);border-radius:8px;">
+          <div style="font-size:18px;font-weight:600;color:var(--text);">${avgMin||'—'}</div>
+          <div style="font-size:10px;color:var(--muted);">Exercise min</div>
         </div>
       </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;text-align:center;">7-day averages from Apple Health</div>
     `;
   }
 
-  // Build all body charts
+  // Build body charts
   buildBodyCompChart('weight_lbs', rows);
-  buildBodyFatChart(rows);
-  buildLeanBoneChart(rows);
 }
 
 function buildSleepStagesDisplay(row){
@@ -10948,8 +10980,7 @@ async function openCheckinHistory(){
 }
 
 function closeCheckinHistory(){
-  document.closeOverlay('checkin-history-overlay');
-  
+  closeOverlay('checkin-history-overlay');
 }
 
 let _coachPage = 0;
@@ -10989,7 +11020,7 @@ async function loadMoreCoach(){
 }
 
 function closeCoachHistory(){
-  document.closeOverlay('coach-history-overlay');
+  closeOverlay('coach-history-overlay');
   
 }
 
