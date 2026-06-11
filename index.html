@@ -772,14 +772,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-style-daily">
     <div class="section-label">Style & Wardrobe <button class="guide-btn" onclick="openGuide('style')">?</button></div>
 
-    <!-- 1. Your Looks — first thing you see -->
-    <div class="card" id="lookbook-card" style="display:none;">
-      <div class="card-title">Your looks</div>
-      <div class="outfit-grid" id="lookbook-grid"></div>
-      <a href="https://www.dailylook.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open DailyLook</a>
-    </div>
-
-    <!-- 2. Log an outfit — collapsed by default -->
+    <!-- 1. Log an outfit — first card -->
+    
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleOutfitForm()">
         <div class="card-title" style="margin:0;">+ Log an outfit</div>
@@ -844,6 +838,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="toast-msg" id="st">Logged!</div>
       </div>
     </div>
+
+    <!-- 2. Your Looks -->
+    
+    <div class="card" id="lookbook-card" style="display:none;">
+      <div class="card-title">Your looks</div>
+      <div class="outfit-grid" id="lookbook-grid"></div>
+      <a href="https://www.dailylook.com" target="_blank" class="ext-link"><i class="ti ti-external-link" aria-hidden="true"></i>Open DailyLook</a>
+    </div>
+
 
     <!-- 3. Wardrobe planning -->
     <div class="card">
@@ -2938,7 +2941,6 @@ async function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); }
-  if(curTab==='body'&&id&&id!=='daily') { if(id==='weekly') buildBodyWeeklyView(); if(id==='monthly') buildBodyMonthlyView(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') { 
@@ -2963,7 +2965,6 @@ async function tab(id){
   }
 }
 function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyView();
-  if(curTab==='body'){ if(v==='weekly') setTimeout(buildBodyWeeklyView,50); if(v==='monthly') setTimeout(buildBodyMonthlyView,50); if(v==='yearly') setTimeout(buildBodyYearlyView,50); }
   if(curTab==='style'){ renderLookbook(); if(v==='monthly') renderStyleCalendar(); }
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
