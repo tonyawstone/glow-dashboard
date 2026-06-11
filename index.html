@@ -2590,6 +2590,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content" id="vc-mind-weekly">
     <div class="section-label">Mind · this week</div>
     <div class="card">
+      <div class="card-title">🎯 This week's intention</div>
+      <div id="intention-weekly"><div class="log-empty">No intention set this week.</div></div>
+    </div>
+    <div class="card">
       <div class="card-title">7 pillars · this week</div>
       <div id="pillars-weekly"><div class="log-empty">Log daily to see your weekly pillar coverage.</div></div>
     </div>
@@ -2603,12 +2607,20 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
   <div class="view-content" id="vc-mind-monthly">
     <div class="section-label">Mind · Monthly</div>
+    <div class="card">
+      <div class="card-title">🎯 Intention words this month</div>
+      <div id="intention-monthly"><div class="log-empty">No intentions logged yet.</div></div>
+    </div>
     <div class="card"><div class="card-title">Monthly mood trend</div><div class="chart-wrap" id="wrap-mood-month-chart"></div></div>
     <div class="card"><div class="card-title">Monthly reflection</div><div id="monthly-mind-log"><div class="log-empty">No reflections yet.</div></div></div>
   </div>
 
   <div class="view-content" id="vc-mind-yearly">
     <div class="section-label">Mind · 2026</div>
+    <div class="card">
+      <div class="card-title">🎯 Intention words · 2026</div>
+      <div id="intention-yearly"><div class="log-empty">No intentions logged yet.</div></div>
+    </div>
     <div class="card"><div class="card-title">Confidence journey 2026</div><div class="log-empty" style="padding:2rem 0;">Your yearly confidence arc tracked here.</div></div>
   </div>
 </div>
@@ -2870,10 +2882,10 @@ async function getRealAge(){
 
 // ── DB ────────────────────────────────────────────────────────────────
 let db;
-const req=indexedDB.open('GlowDashboard',4);
+const req=indexedDB.open('GlowDashboard',5);
 req.onupgradeneeded=e=>{
   db=e.target.result;
-  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries','water'].forEach(s=>{
+  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries','water','intentions'].forEach(s=>{
     if(!db.objectStoreNames.contains(s)) db.createObjectStore(s,{keyPath:'id',autoIncrement:true});
   });
   if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});
@@ -2978,7 +2990,7 @@ async function tab(id){
     }
   }
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); buildDailyProgress(); }
-  if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); restoreMindDraft(); }
+  if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); restoreMindDraft(); loadIntentionHistory(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); }
   if(id==='skin'){ loadLatestSkinScan(); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
@@ -9457,22 +9469,91 @@ function loadPillarsToday(){
   }catch(e){}
 }
 function setIntentionWord(word){const input=document.getElementById('week-intention-input');if(input)input.value=word;}
-function saveWeekIntention(){
-  const word=document.getElementById('week-intention-input')?.value?.trim(); if(!word) return;
-  const display=document.getElementById('week-intention-display'); if(display) display.textContent=word;
-  localStorage.setItem('glowWeekIntention',JSON.stringify({word,date:nowStr()}));
-  toast('wi-toast');
+function getWeekStart(){
+  const d = new Date(); d.setHours(0,0,0,0);
+  d.setDate(d.getDate() - d.getDay()); // Sunday
+  return d.toISOString().slice(0,10);
 }
-function loadWeekIntention(){
-  const saved=localStorage.getItem('glowWeekIntention'); if(!saved) return;
+async function saveWeekIntention(){
+  const word=document.getElementById('week-intention-input')?.value?.trim(); if(!word) return;
+  const weekStart = getWeekStart();
+  // Upsert — remove existing entry for this week then add fresh
+  const existing = await dbAll('intentions');
+  const thisWeek = existing.find(e=>e.weekStart===weekStart);
+  if(thisWeek) await dbDelete('intentions', thisWeek.id);
+  await dbAdd('intentions',{word, weekStart, date:nowStr()});
+  syncToBlob('intentions');
+  const display=document.getElementById('week-intention-display');
+  if(display) display.textContent=word;
+  localStorage.setItem('glowWeekIntention',JSON.stringify({word,weekStart}));
+  toast('wi-toast');
+  loadIntentionHistory();
+}
+async function loadWeekIntention(){
+  const weekStart = getWeekStart();
+  // Try localStorage first (fast)
   try{
-    const {word}=JSON.parse(saved);
-    const display=document.getElementById('week-intention-display'); if(display&&word) display.textContent=word;
-    const input=document.getElementById('week-intention-input'); if(input&&word) input.value=word;
+    const saved = localStorage.getItem('glowWeekIntention');
+    if(saved){
+      const {word, weekStart:savedWeek} = JSON.parse(saved);
+      if(savedWeek===weekStart && word){
+        const display=document.getElementById('week-intention-display'); if(display) display.textContent=word;
+        const input=document.getElementById('week-intention-input'); if(input) input.value=word;
+        return;
+      } else {
+        localStorage.removeItem('glowWeekIntention'); // stale — new week
+      }
+    }
+  }catch(e){}
+  // Fall back to IndexedDB
+  try{
+    const all = await dbAll('intentions');
+    const thisWeek = all.find(e=>e.weekStart===weekStart);
+    if(thisWeek){
+      const display=document.getElementById('week-intention-display'); if(display) display.textContent=thisWeek.word;
+      const input=document.getElementById('week-intention-input'); if(input) input.value=thisWeek.word;
+      localStorage.setItem('glowWeekIntention',JSON.stringify({word:thisWeek.word,weekStart}));
+    }
   }catch(e){}
 }
 
-// ── CPAP EQUIPMENT TRACKING ───────────────────────────────────────────
+async function loadIntentionHistory(){
+  try{
+    const all = await dbAll('intentions');
+    const sorted = [...all].sort((a,b)=>b.weekStart.localeCompare(a.weekStart));
+    const weekStart = getWeekStart();
+    const now = new Date();
+    const thisMonth = now.toISOString().slice(0,7);
+    const thisYear = now.getFullYear().toString();
+
+    // Weekly — just this week
+    const weekEl = document.getElementById('intention-weekly');
+    if(weekEl){
+      const thisWeek = sorted.find(e=>e.weekStart===weekStart);
+      weekEl.innerHTML = thisWeek
+        ? `<div style="font-size:32px;font-weight:700;color:var(--accent);text-align:center;padding:12px 0;">${thisWeek.word}</div><div style="font-size:11px;color:var(--muted);text-align:center;">Week of ${thisWeek.weekStart}</div>`
+        : '<div class="log-empty">No intention set this week.</div>';
+    }
+
+    // Monthly — all weeks this month
+    const monthEl = document.getElementById('intention-monthly');
+    if(monthEl){
+      const monthEntries = sorted.filter(e=>e.weekStart.startsWith(thisMonth));
+      monthEl.innerHTML = monthEntries.length
+        ? monthEntries.map(e=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);"><span style="font-size:15px;font-weight:600;color:var(--accent);">${e.word}</span><span style="font-size:11px;color:var(--muted);">Week of ${e.weekStart}</span></div>`).join('')
+        : '<div class="log-empty">No intentions logged this month.</div>';
+    }
+
+    // Yearly — all weeks this year
+    const yearEl = document.getElementById('intention-yearly');
+    if(yearEl){
+      const yearEntries = sorted.filter(e=>e.weekStart.startsWith(thisYear));
+      yearEl.innerHTML = yearEntries.length
+        ? yearEntries.map(e=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);"><span style="font-size:15px;font-weight:600;color:var(--accent);">${e.word}</span><span style="font-size:11px;color:var(--muted);">Week of ${e.weekStart}</span></div>`).join('')
+        : '<div class="log-empty">No intentions logged yet this year.</div>';
+    }
+  }catch(e){}
+}
 const CPAP_ITEMS = [
   { key:'mask_cushion',     label:'Mask cushion (F30i)',  days:30,  interval:'4–6 weeks' },
   { key:'mask_frame',       label:'Mask frame',           days:90,  interval:'3 months' },
