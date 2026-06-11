@@ -760,8 +760,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
   </div>
 </div>
-
-<!-- ═══════════════ STYLE ═══════════════ -->
 <div id="s-style" class="sec">
   <!-- Style-specific Inspo tab button — shown only when on Style pillar -->
   <!-- Style action bar -->
@@ -2114,7 +2112,80 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <input type="file" id="hair-current-input" accept="image/*" style="display:none;" onchange="saveCurrentHairPhoto(this)">
     </div>
 
-    <!-- Card 2: Goal photos — DO NOT CHANGE -->
+    <!-- Card 2: Daily hair check-in -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleHairCheckin()">
+        <div class="card-title" style="margin:0;">Daily hair check-in</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="event.stopPropagation();openHairLog()" style="padding:5px 12px;border-radius:20px;background:var(--warm);border:0.5px solid var(--border);font-size:11px;color:var(--muted);cursor:pointer;">Past check-ins</button>
+          <span id="hair-checkin-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+        </div>
+      </div>
+      <div id="hair-checkin-body" style="display:none;margin-top:12px;">
+        <div class="fl">Products used today</div>
+        <div class="tags" id="products-used-tags"></div>
+        <div class="fl">Hair today</div>
+        <div class="tags" id="hair-tags">
+          <button class="tag" onclick="tog(this)">New growth visible</button>
+          <button class="tag" onclick="tog(this)">Shedding</button>
+          <button class="tag" onclick="tog(this)">Healthy shine</button>
+          <button class="tag" onclick="tog(this)">Frizzy</button>
+          <button class="tag" onclick="tog(this)">Loving it</button>
+          <button class="tag" onclick="tog(this)">Dry</button>
+        </div>
+        <div class="fl">Haircare done</div>
+        <div class="tags" id="hcare-tags">
+          <button class="tag" onclick="tog(this)">Wash day</button>
+          <button class="tag" onclick="tog(this)">Deep condition</button>
+          <button class="tag" onclick="tog(this)">Protein treatment</button>
+          <button class="tag" onclick="tog(this)">Silk pillowcase</button>
+          <button class="tag" onclick="tog(this)">Protective style</button>
+          <button class="tag" onclick="tog(this)">Dusting trim</button>
+          <button class="tag" onclick="tog(this)">Salon visit</button>
+        </div>
+        <hr style="border:none;border-top:0.5px solid var(--border);margin:12px 0;">
+        <div class="card-title" style="font-size:13px;">Current products</div>
+        <div id="product-list">
+          <div class="product-item" data-product="Kinky-Curly Original Curling Custard"><span>Kinky-Curly Original Curling Custard</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
+          <div class="product-item" data-product="Kinky-Curly Knot Today"><span>Kinky-Curly Knot Today (detangler)</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
+          <div class="product-item" data-product="Camille Rose Curl Love Moisture Milk"><span>Camille Rose Curl Love Moisture Milk</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
+          <div class="product-item" data-product="Camille Rose Curl Maker"><span>Camille Rose Curl Maker</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
+          <div class="product-item" data-product="Camille Rose Honey Hydrate Leave-In"><span>Camille Rose Honey Hydrate Leave-In</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <input type="text" id="new-product" placeholder="Add a product..." style="flex:1;">
+          <button class="btn-sm accent" onclick="addProduct()">Add</button>
+        </div>
+        <hr style="border:none;border-top:0.5px solid var(--border);margin:12px 0;">
+        <div class="fl">Note</div>
+        <textarea id="hair-note" rows="2" placeholder="e.g. Can pull into a bun now. Edges filling in."></textarea>
+        <button class="btn-primary" onclick="saveHair()">Log hair</button>
+        <button class="btn-ai" onclick="hairCoach()">Hair growth coaching ↗</button>
+        <div id="hair-coach-output" class="coach-response" style="display:none"></div>
+        <div class="toast-msg" id="ht">Saved!</div>
+      </div>
+    </div>
+
+    <!-- Card 3: AI Hair Analysis -->
+    <div class="card">
+      <div class="card-title">✨ AI hair analysis</div>
+      <div id="hair-scan-latest"><div class="log-empty">No analysis yet — take or upload a photo below.</div></div>
+      <div style="margin-top:12px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">What type of photo?</div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;">
+          <button class="tag on" id="hair-type-full" onclick="selectHairType('full')" style="flex:1;font-size:12px;">🌿 Full shot</button>
+          <button class="tag" id="hair-type-curl" onclick="selectHairType('curl')" style="flex:1;font-size:12px;">🔍 Curl close-up</button>
+        </div>
+        <input type="file" id="hair-scan-input" accept="image/*" capture="user" style="display:none" onchange="runHairAnalysis(this, false)">
+        <input type="file" id="hair-scan-historical-input" accept="image/*" style="display:none" onchange="runHairAnalysis(this, true)">
+        <button class="btn-ai" style="width:100%;" onclick="document.getElementById('hair-scan-input').click()">📷 Take photo &amp; analyze ↗</button>
+        <button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="document.getElementById('hair-scan-historical-input').click()">📂 Upload historical photo</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Upload goal photo first for best comparison results</div>
+        <div id="hair-scan-status" style="display:none;margin-top:10px;padding:12px;border-radius:12px;font-size:13px;"></div>
+      </div>
+    </div>
+
+    <!-- Card 4: Goal photos — DO NOT CHANGE -->
     <div class="card">
       <div class="card-title">🎯 Goal photos · AI vision</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Upload your AI-generated goal photos. Tap the date label to edit it.</div>
@@ -2185,73 +2256,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <!-- Card 3: AI Hair Analysis (renamed from Monthly assessment, with type selector) -->
-    <div class="card">
-      <div class="card-title">✨ AI hair analysis</div>
-      <div id="hair-scan-latest"><div class="log-empty">No analysis yet — take or upload a photo below.</div></div>
-      <div style="margin-top:12px;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">What type of photo?</div>
-        <div style="display:flex;gap:6px;margin-bottom:10px;">
-          <button class="tag on" id="hair-type-full" onclick="selectHairType('full')" style="flex:1;font-size:12px;">🌿 Full shot</button>
-          <button class="tag" id="hair-type-curl" onclick="selectHairType('curl')" style="flex:1;font-size:12px;">🔍 Curl close-up</button>
-        </div>
-        <input type="file" id="hair-scan-input" accept="image/*" capture="user" style="display:none" onchange="runHairAnalysis(this, false)">
-        <input type="file" id="hair-scan-historical-input" accept="image/*" style="display:none" onchange="runHairAnalysis(this, true)">
-        <button class="btn-ai" style="width:100%;" onclick="document.getElementById('hair-scan-input').click()">📷 Take photo &amp; analyze ↗</button>
-        <button class="btn-secondary" style="width:100%;margin-top:8px;" onclick="document.getElementById('hair-scan-historical-input').click()">📂 Upload historical photo</button>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">Upload goal photo first for best comparison results</div>
-        <div id="hair-scan-status" style="display:none;margin-top:10px;padding:12px;border-radius:12px;font-size:13px;"></div>
-      </div>
-    </div>
-
-    <!-- Check-in -->
-    <div class="card">
-      <div class="card-title">Daily hair check-in</div>
-      <div class="fl">Products used today</div>
-      <div class="tags" id="products-used-tags"></div>
-      <div class="fl">Hair today</div>
-      <div class="tags" id="hair-tags">
-        <button class="tag" onclick="tog(this)">New growth visible</button>
-        <button class="tag" onclick="tog(this)">Shedding</button>
-        <button class="tag" onclick="tog(this)">Healthy shine</button>
-        <button class="tag" onclick="tog(this)">Frizzy</button>
-        <button class="tag" onclick="tog(this)">Loving it</button>
-        <button class="tag" onclick="tog(this)">Dry</button>
-      </div>
-      <div class="fl">Haircare done</div>
-      <div class="tags" id="hcare-tags">
-        <button class="tag" onclick="tog(this)">Wash day</button>
-        <button class="tag" onclick="tog(this)">Deep condition</button>
-        <button class="tag" onclick="tog(this)">Protein treatment</button>
-        <button class="tag" onclick="tog(this)">Silk pillowcase</button>
-        <button class="tag" onclick="tog(this)">Protective style</button>
-        <button class="tag" onclick="tog(this)">Dusting trim</button>
-        <button class="tag" onclick="tog(this)">Salon visit</button>
-      </div>
-      <div class="fl">Note</div>
-      <textarea id="hair-note" rows="2" placeholder="e.g. Can pull into a bun now. Edges filling in."></textarea>
-      <button class="btn-primary" onclick="saveHair()">Log hair</button>
-      <button class="btn-ai" onclick="hairCoach()">Hair growth coaching ↗</button>
-      <div id="hair-coach-output" class="coach-response" style="display:none"></div>
-      <div class="toast-msg" id="ht">Saved!</div>
-    </div>
-
-    <!-- Current products -->
-    <div class="card">
-      <div class="card-title">Current products</div>
-      <div id="product-list">
-        <div class="product-item" data-product="Kinky-Curly Original Curling Custard"><span>Kinky-Curly Original Curling Custard</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
-        <div class="product-item" data-product="Kinky-Curly Knot Today"><span>Kinky-Curly Knot Today (detangler)</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
-        <div class="product-item" data-product="Camille Rose Curl Love Moisture Milk"><span>Camille Rose Curl Love Moisture Milk</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
-        <div class="product-item" data-product="Camille Rose Curl Maker"><span>Camille Rose Curl Maker</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
-        <div class="product-item" data-product="Camille Rose Honey Hydrate Leave-In"><span>Camille Rose Honey Hydrate Leave-In</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <input type="text" id="new-product" placeholder="Add a product..." style="flex:1;">
-        <button class="btn-sm accent" onclick="addProduct()">Add</button>
-      </div>
-    </div>
-    <div class="card"><div class="card-title">Hair log</div><div id="hair-log"><div class="log-empty">No entries yet.</div></div></div>
   </div>
 
   <div class="view-content" id="vc-hair-weekly">
@@ -2368,6 +2372,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div>
           <div class="card-title" style="margin:0;">&#x26A1; Morning activation ritual</div>
           <div style="font-size:11px;color:var(--muted);margin-top:3px;">5 steps · under 5 minutes · boosts energy &amp; focus</div>
+          <span id="activation-done-badge" style="display:none;font-size:11px;color:#6B9E78;margin-top:3px;">✅ Completed today</span>
         </div>
         <div id="activation-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">&#x203A;</div>
       </div>
@@ -2507,6 +2512,35 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
+    <!-- Mind check-in — consolidated -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleMindCheckin()">
+        <div class="card-title" style="margin:0;">&#x1F9E0; Mind check-in</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="event.stopPropagation();openPastMindLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
+          <span id="mind-checkin-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+        </div>
+      </div>
+      <div id="mind-checkin-body" style="display:none;margin-top:12px;">
+      <div class="fl">How are you feeling?</div>
+      <div class="tags" id="vibe-tags">
+        <button class="tag" onclick="tog(this)">Motivated</button><button class="tag" onclick="tog(this)">Overwhelmed</button><button class="tag" onclick="tog(this)">Grateful</button><button class="tag" onclick="tog(this)">Anxious</button><button class="tag" onclick="tog(this)">Grounded</button><button class="tag" onclick="tog(this)">In my power</button><button class="tag" onclick="tog(this)">Scattered</button>
+      </div>
+      <div class="stars-row" style="margin-top:10px;"><div class="stars-row-label">Energy</div><div class="stars" id="energy-stars"><span class="star" onclick="setStars('energy-stars',1)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',2)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',3)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',4)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',5)">&#x2605;</span></div></div>
+      <div class="stars-row"><div class="stars-row-label">Confidence</div><div class="stars" id="conf-stars"><span class="star" onclick="setStars('conf-stars',1)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',2)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',3)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',4)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',5)">&#x2605;</span></div></div>
+      <div class="stars-row"><div class="stars-row-label">Calm</div><div class="stars" id="stress-stars"><span class="star" onclick="setStars('stress-stars',1)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',2)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',3)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',4)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',5)">&#x2605;</span></div></div>
+      <div class="stars-row"><div class="stars-row-label">Body image</div><div class="stars" id="body-image-stars"><span class="star" onclick="setStars('body-image-stars',1)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',2)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',3)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',4)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',5)">&#x2605;</span></div></div>
+      <div class="fl" style="margin-top:10px;">Today's win</div>
+      <textarea id="win-note" rows="2" placeholder="Big or small — new low, wore something I love, survived the school morning..." oninput="saveMindDraft()"></textarea>
+      <div class="fl">Gratitude · 3 things</div>
+      <textarea id="gratitude" rows="3" placeholder="1. &#10;2. &#10;3. " oninput="saveMindDraft()"></textarea>
+      <button class="btn-primary" onclick="saveMind()">Log mood</button>
+      <button class="btn-ai" onclick="mindCoach()">Weekly mind &amp; mood reflection &#x2197;</button>
+      <div id="mind-coach-output" class="coach-response" style="display:none"></div>
+      <div class="toast-msg" id="mt">Saved!</div>
+      </div><!-- mind-checkin-body -->
+    </div>
+
     <!-- Daily Reflection Prompt -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -2552,30 +2586,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="wi-toast">Intention set!</div>
     </div>
 
-    <!-- Mind check-in — consolidated -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div class="card-title" style="margin:0;">&#x1F9E0; Mind check-in</div>
-        <button onclick="openPastMindLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
-      </div>
-      <div class="fl">How are you feeling?</div>
-      <div class="tags" id="vibe-tags">
-        <button class="tag" onclick="tog(this)">Motivated</button><button class="tag" onclick="tog(this)">Overwhelmed</button><button class="tag" onclick="tog(this)">Grateful</button><button class="tag" onclick="tog(this)">Anxious</button><button class="tag" onclick="tog(this)">Grounded</button><button class="tag" onclick="tog(this)">In my power</button><button class="tag" onclick="tog(this)">Scattered</button>
-      </div>
-      <div class="stars-row" style="margin-top:10px;"><div class="stars-row-label">Energy</div><div class="stars" id="energy-stars"><span class="star" onclick="setStars('energy-stars',1)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',2)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',3)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',4)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',5)">&#x2605;</span></div></div>
-      <div class="stars-row"><div class="stars-row-label">Confidence</div><div class="stars" id="conf-stars"><span class="star" onclick="setStars('conf-stars',1)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',2)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',3)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',4)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',5)">&#x2605;</span></div></div>
-      <div class="stars-row"><div class="stars-row-label">Stress</div><div class="stars" id="stress-stars"><span class="star" onclick="setStars('stress-stars',1)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',2)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',3)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',4)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',5)">&#x2605;</span></div></div>
-      <div class="stars-row"><div class="stars-row-label">Body image</div><div class="stars" id="body-image-stars"><span class="star" onclick="setStars('body-image-stars',1)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',2)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',3)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',4)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',5)">&#x2605;</span></div></div>
-      <div class="fl" style="margin-top:10px;">Today's win</div>
-      <textarea id="win-note" rows="2" placeholder="Big or small — new low, wore something I love, survived the school morning..."></textarea>
-      <div class="fl">Gratitude · 3 things</div>
-      <textarea id="gratitude" rows="3" placeholder="1. &#10;2. &#10;3. "></textarea>
-      <button class="btn-primary" onclick="saveMind()">Log mood</button>
-      <button class="btn-ai" onclick="mindCoach()">Weekly mind &amp; mood reflection &#x2197;</button>
-      <div id="mind-coach-output" class="coach-response" style="display:none"></div>
-      <div class="toast-msg" id="mt">Saved!</div>
-    </div>
-
 
   <div class="view-content" id="vc-mind-weekly">
     <div class="section-label">Mind · this week</div>
@@ -2603,8 +2613,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div style="text-align:center;padding:24px 0 8px;">
-  <button onclick="openAbout()" style="background:none;border:none;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Glow Dashboard v1.3 · About</button>
+
+<div style="text-align:center;padding:16px 0 8px;">
+  <button onclick="openAbout()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);opacity:0.7;">Glow Dashboard v2.0 · About</button>
 </div>
 
 </div><!-- scroll-area -->
@@ -2616,7 +2627,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;color:var(--text);">Glow Dashboard</div>
       <button onclick="closeAbout()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">×</button>
     </div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:4px;" id="about-version">Version 1.3 · Jun 9, 2026</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:4px;" id="about-version">Version 2.0 · Jun 11, 2026</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">A personal wellness PWA by Tonya Stone · Built with Claude</div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;">Data & Storage</div>
     <div style="font-size:12px;color:var(--text);margin-bottom:16px;line-height:1.6;">
@@ -2668,6 +2679,16 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Body Check-ins</div>
     </div>
     <div id="body-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="hair-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="document.getElementById('hair-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Hair Check-ins</div>
+    </div>
+    <div class="overlay-list"><div class="log-empty">Loading...</div></div>
   </div>
 </div>
 
@@ -2910,6 +2931,7 @@ async function boot(){
   loadCPAPCleanState();
   loadSleepAidState();
   buildDailyProgress();
+  restoreActivationState();
   tab('today');
 }
 
@@ -2956,7 +2978,7 @@ async function tab(id){
     }
   }
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); buildDailyProgress(); }
-  if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); }
+  if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); restoreMindDraft(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); }
   if(id==='skin'){ loadLatestSkinScan(); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
@@ -2985,7 +3007,7 @@ function applyView(){
 }
 
 // ── UI HELPERS ────────────────────────────────────────────────────────
-function tog(b){b.classList.toggle('on'); autoSaveCheckinState();}
+function tog(b){b.classList.toggle('on'); autoSaveCheckinState(); saveMindDraft();}
 
 function autoSaveCheckinState(){
   // Only auto-save if we're on the check-in form
@@ -3028,7 +3050,7 @@ function selectOutfitType(btn, type){
 function solo(gid,btn){document.getElementById(gid).querySelectorAll('.tag').forEach(t=>t.classList.remove('on'));btn.classList.add('on');}
 function soloQ(btn){document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function ts(id){document.getElementById(id).classList.toggle('on'); autoSaveCheckinState();}
-function setStars(id,n){document.getElementById(id).querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n));}
+function setStars(id,n){document.getElementById(id).querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n)); saveMindDraft();}
 function getStars(id){return document.getElementById(id).querySelectorAll('.on').length;}
 function gT(id){return Array.from(document.getElementById(id).querySelectorAll('.on')).map(b=>b.textContent.trim());}
 function showToast(msg,duration=2400){const t=document.getElementById('glow-toast');t.textContent=msg;t.style.display='block';clearTimeout(t._tid);t._tid=setTimeout(()=>t.style.display='none',duration);}
@@ -3216,9 +3238,12 @@ var DP_ITEMS = [
   ['🌿 Wellness','dp-meds',      'Medications taken',        'Rx meds · supplements',              null, 'health'],
   ['🌿 Wellness','dp-bodywater', 'Body water % entered',     'From Withings scale',                null, 'health'],
   ['🌿 Wellness','dp-water',     'Water goal met',           '64 oz · 8 glasses',                  null, 'health'],
+  ['✨ Skin',    'dp-skin-checkin','Skin check-in logged',     'Daily skin notes',                   null, 'skin'],
   ['✨ Skin',    'dp-skin-am',   'AM skin routine done',     'Cleanser · Serum · Vit C · SPF',     null, 'skin'],
   ['✨ Skin',    'dp-skin-pm',   'PM routine done',          'Musely · Olay Regenerist',           null, 'skin'],
+  ['✨ Skin',    'dp-musely-game','Musely avatar played',    'Evening skin game',                  null, 'skin'],
   ['❤️ Body',   'dp-body',      'Body check-in logged',     'Non-scale wins · measurements',      null, 'body'],
+  ['❤️ Body',   'dp-exercise',  'Exercise logged',          'Workout · Pilates · treadmill',      null, 'body'],
   ['👗 Style',   'dp-outfit',    'Outfit logged',            'My outfit · Inspo · DailyLook',      null, 'style'],
   ['💇 Hair',   'dp-hair',      'Hair check-in done',       'Products · style · condition',       null, 'hair'],
 ];
@@ -3324,6 +3349,9 @@ async function buildDailyProgress(){
 
   // Body check-in — logged today
   try { const bodies = await dbAll('bodies'); autoChecks['dp-body'] = bodies.some(e=>e.date===today); } catch(e){}
+
+  // Exercise — logged today (manual or CSV)
+  try { const exercises = await dbAll('exercises'); autoChecks['dp-exercise'] = exercises.some(e=>e.date===today); } catch(e){}
 
   // Body water — entered today
   try {
@@ -3595,7 +3623,7 @@ async function openPastMindLog(){
     return '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
       +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'+e.date+'</div>'
       +vibeFmt
-      +'<div style="margin-top:4px;">'+stars('Energy',e.energy)+stars('Confidence',e.conf)+stars('Stress',e.stress)+stars('Body',e.bodyImage)+'</div>'
+      +'<div style="margin-top:4px;">'+stars('Energy',e.energy)+stars('Confidence',e.conf)+stars('Calm',e.stress)+stars('Body',e.bodyImage)+'</div>'
       +winFmt+gratFmt
       +'</div>';
   }).join('');
@@ -3612,6 +3640,23 @@ function toggleActivation(){
   const open = body.style.display === 'none';
   body.style.display = open ? 'block' : 'none';
   chevron.style.transform = open ? 'rotate(90deg)' : '';
+  if(open) restoreActivationState();
+}
+
+function restoreActivationState(){
+  const manualState = getDPManualState();
+  if(manualState['dp-morning-activation']){
+    // Show completed badge on header (always, even when collapsed)
+    const badge = document.getElementById('activation-done-badge');
+    if(badge) badge.style.display = 'inline';
+    // Mark all steps done visually if body is open
+    ['act-breathe','act-ground','act-cool','act-move','act-march'].forEach(id=>{
+      const row = document.getElementById(id);
+      if(row) row.classList.add('done');
+    });
+    const msg = document.getElementById('act-complete-msg');
+    if(msg) msg.style.display = 'block';
+  }
 }
 
 function showActivationStep(widgetId){
@@ -3637,6 +3682,9 @@ function checkActivationComplete(){
     manualState['dp-morning-activation'] = true;
     saveDPManualState(manualState);
     buildDailyProgress();
+    // Show completed badge on card header
+    const badge = document.getElementById('activation-done-badge');
+    if(badge) badge.style.display = 'inline';
   }
 }
 
@@ -4509,9 +4557,23 @@ async function buildWeeklyTodayView(){
 }
 
 
-const APP_VERSION = '1.2';
-const APP_BUILD_DATE = 'Jun 6, 2026';
+const APP_VERSION = '2.0';
+const APP_BUILD_DATE = 'Jun 11, 2026';
 const CHANGELOG = [
+  { version: '2.0', date: 'Jun 11, 2026', changes: [
+    'Daily Progress card — 18 auto-checked items across all 7 pillars',
+    'Pillar completion rings — SVG progress arcs on every tab icon',
+    'Morning Activation Ritual — 5-step interactive breathe/ground/cool/move/march',
+    'Mind pillar overhaul — consolidated check-in, reflection prompt, weekly intention',
+    'Pillar reorder — Today · Mind · Sleep · Wellness · Skin · Body · Style · Hair',
+    'Health renamed to Wellness throughout',
+    'Sleep CPAP cleaning card — escalating reminders, med-row checkboxes',
+    'Skin routine — AM/PM med-row checkboxes with progress labels',
+    'Style Shopping List — plan looks, track items, mark as purchased',
+    '7 Pillars of Self-Care moved to Today tab',
+    'Collapsible forms across Body, Style, Hair pillars',
+    'Past check-ins overlays standardized across all pillars',
+  ]},
   { version: '1.3', date: 'Jun 9, 2026', changes: [
     'Health pillar redesign — collapsible cards, smart ordering',
     'BP classification with AHA Stage 1/2 guidelines (sys + dia)',
@@ -5222,6 +5284,78 @@ function toggleBodyLog(forceOpen){
   chevron.style.transform = open ? 'rotate(90deg)' : '';
 }
 
+function saveMindDraft(){
+  const today = new Date().toDateString();
+  const draft = {
+    date: today,
+    win: document.getElementById('win-note')?.value || '',
+    gratitude: document.getElementById('gratitude')?.value || '',
+    vibe: gT('vibe-tags'),
+    energy: getStars('energy-stars'),
+    conf: getStars('conf-stars'),
+    stress: getStars('stress-stars'),
+    bodyImage: getStars('body-image-stars'),
+  };
+  localStorage.setItem('glowMindDraft', JSON.stringify(draft));
+}
+
+function restoreMindDraft(){
+  try {
+    const raw = localStorage.getItem('glowMindDraft');
+    if(!raw) return;
+    const draft = JSON.parse(raw);
+    if(draft.date !== new Date().toDateString()){ localStorage.removeItem('glowMindDraft'); return; }
+    if(draft.win && document.getElementById('win-note')) document.getElementById('win-note').value = draft.win;
+    if(draft.gratitude && document.getElementById('gratitude')) document.getElementById('gratitude').value = draft.gratitude;
+    if(draft.vibe?.length){
+      document.getElementById('vibe-tags')?.querySelectorAll('.tag').forEach(t=>{
+        if(draft.vibe.includes(t.textContent)) t.classList.add('on');
+      });
+    }
+    if(draft.energy) setStars('energy-stars', draft.energy);
+    if(draft.conf) setStars('conf-stars', draft.conf);
+    if(draft.stress) setStars('stress-stars', draft.stress);
+    if(draft.bodyImage) setStars('body-image-stars', draft.bodyImage);
+  } catch(e){}
+}
+
+function toggleMindCheckin(forceOpen){
+  const body = document.getElementById('mind-checkin-body');
+  const arrow = document.getElementById('mind-checkin-arrow');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  if(arrow) arrow.textContent = open ? '▴' : '▾';
+}
+
+function toggleHairCheckin(forceOpen){
+  const body = document.getElementById('hair-checkin-body');
+  const arrow = document.getElementById('hair-checkin-arrow');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  if(arrow) arrow.textContent = open ? '▴' : '▾';
+}
+
+async function openHairLog(){
+  const overlay = document.getElementById('hair-log-overlay');
+  if(!overlay) return;
+  const entries = await dbAll('hairs');
+  const sorted = entries.slice().reverse();
+  if(!sorted.length){ overlay.querySelector('.overlay-list').innerHTML='<div class="log-empty">No hair check-ins yet.</div>'; }
+  else {
+    overlay.querySelector('.overlay-list').innerHTML = sorted.map(e=>`
+      <div class="log-item">
+        <div class="log-date">${e.date||''}</div>
+        <div style="font-size:13px;">${[...(e.products||[]),...(e.tags||[]),...(e.hcare||[])].join(' · ')||'—'}</div>
+        ${e.note?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">${e.note}</div>`:''}
+      </div>`).join('');
+  }
+  overlay.style.display='block';
+}
+
 async function saveBody(){
   const entry={type:'body',nsv:gT('nsv-tags'),note:document.getElementById('zep-note').value.trim(),waist:document.getElementById('waist').value,hips:document.getElementById('hips').value,date:nowStr()};
   await dbAdd('skins',entry);
@@ -5320,7 +5454,7 @@ async function saveHair(){
   syncToBlob('hairs');
   document.getElementById('hair-note').value='';
   ['hair-tags','hcare-tags','products-used-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
-  toast('ht');loadLogs();
+  toast('ht');loadLogs();toggleHairCheckin(false);buildDailyProgress();
 }
 async function saveMind(){
   const vibe=gT('vibe-tags');
@@ -5336,15 +5470,25 @@ async function saveMind(){
   const bodyImage=getStars('body-image-stars');
   if(!vibe.length && !win && !gratitude && !energy && !conf && !stress && !bodyImage) return;
   const mindEntry={vibe,selfcare,win,gratitude,intention,energy,conf,stress,bodyImage,date:nowStr()};
-  await dbAdd('minds',mindEntry);
-  syncToBlob('minds');
-  if(document.getElementById('win-note')) document.getElementById('win-note').value='';
-  if(document.getElementById('gratitude')) document.getElementById('gratitude').value='';
-  if(intentionEl) intentionEl.value='';
-  document.getElementById('vibe-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
-  selfcareEl?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
-  setStars('energy-stars',0);setStars('conf-stars',0);setStars('stress-stars',0);setStars('body-image-stars',0);
-  toast('mt');loadLogs();
+  try {
+    await dbAdd('minds',mindEntry);
+    syncToBlob('minds');
+    // Only clear form after confirmed save
+    if(document.getElementById('win-note')) document.getElementById('win-note').value='';
+    if(document.getElementById('gratitude')) document.getElementById('gratitude').value='';
+    if(intentionEl) intentionEl.value='';
+    document.getElementById('vibe-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    selfcareEl?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    setStars('energy-stars',0);setStars('conf-stars',0);setStars('stress-stars',0);setStars('body-image-stars',0);
+    toast('mt');
+    localStorage.removeItem('glowMindDraft');
+    loadLogs();
+    buildDailyProgress();
+    toggleMindCheckin(false);
+  } catch(e) {
+    alert('Could not save your entry. Please try again.');
+    console.error('saveMind error:', e);
+  }
 }
 async function saveReflection(){
   const text=document.getElementById('monthly-reflection').value.trim();if(!text)return;
@@ -5373,7 +5517,7 @@ async function loadLogs(){
   const minds=await dbAll('minds');
   renderLog('mind-log',minds,e=>{
     const gratFmt=e.gratitude?'\nGrateful: '+e.gratitude.split('\n').map(s=>s.replace(/^\d+\.\s*/,'')).filter(Boolean).join(', '):'';
-    return logItem(e.date,[...e.vibe,...(e.energy?['Energy '+'★'.repeat(e.energy)]:[]),...(e.conf?['Conf '+'★'.repeat(e.conf)]:[]),...(e.stress?['Stress '+'★'.repeat(e.stress)]:[])],e.win+gratFmt+(e.intention?'\nIntention: '+e.intention:''));
+    return logItem(e.date,[...e.vibe,...(e.energy?['Energy '+'★'.repeat(e.energy)]:[]),...(e.conf?['Conf '+'★'.repeat(e.conf)]:[]),...(e.stress?['Calm '+'★'.repeat(e.stress)]:[])],e.win+gratFmt+(e.intention?'\nIntention: '+e.intention:''));
   });
   const bps=await dbAll('bps');
   renderLog('bp-log',bps,e=>logItem(e.time?`${fmtOutfitDate(e.date)} · ${e.time}`:fmtOutfitDate(e.date),[e.sys+'/'+e.dia,e.pulse?'Pulse '+e.pulse:''],''));
@@ -9743,7 +9887,7 @@ async function updateUploadStatusBanner(){
 
     const innerBanner = bannerEl ? bannerEl.querySelector('div') : null;
     const dateStr = uploadDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    if(diffDays === 0){
+    if(diffDays <= 1){
       textEl.textContent = '✅ Apple Health data is current';
       if(dateEl) dateEl.textContent = uploadedAtStr ? uploadedAtStr : dateStr;
       if(innerBanner){ innerBanner.style.background='rgba(107,158,120,0.08)'; innerBanner.style.borderColor='rgba(107,158,120,0.3)'; }
@@ -9818,7 +9962,7 @@ async function updateBPBanners(){
     // Also check CSV BP data for today
     const csvBPs = await getCSVBPData();
     const todayCSVBP = csvBPs.find(b=>b.date===today&&b.sys&&b.dia);
-    const lastCSVBP = csvBPs.find(b=>b.sys&&b.dia);
+    const lastCSVBP = csvBPs.slice().reverse().find(b=>b.sys&&b.dia);
 
     // Use today's reading from either source
     const todayReading = todayBP?.sys ? todayBP : todayCSVBP;
