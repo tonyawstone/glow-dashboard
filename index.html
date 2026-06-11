@@ -3034,7 +3034,14 @@ async function tab(id){
   }
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); buildDailyProgress(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); restoreMindDraft(); loadIntentionHistory(); loadReflectionHistory(); }
-  if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); restoreHairDraft(); }
+  if(id==='hair'){
+    try { await loadLatestHairScan(); } catch(e){ console.warn('loadLatestHairScan error:',e); }
+    try { await loadHairGoalPhotos(); } catch(e){ console.warn('loadHairGoalPhotos error:',e); }
+    try { loadGoalNotes(); } catch(e){}
+    try { loadGoalLabels(); } catch(e){}
+    try { await loadCurrentHairPhoto(); } catch(e){ console.warn('loadCurrentHairPhoto error:',e); }
+    try { restoreHairDraft(); } catch(e){}
+  }
   if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
     const today = nowStr();
@@ -5664,18 +5671,28 @@ function toggleHairCheckin(forceOpen){
 async function openHairLog(){
   const overlay = document.getElementById('hair-log-overlay');
   if(!overlay) return;
-  const entries = await dbAll('hairs');
-  const sorted = entries.slice().reverse();
-  if(!sorted.length){ overlay.querySelector('.overlay-list').innerHTML='<div class="log-empty">No hair check-ins yet.</div>'; }
-  else {
-    overlay.querySelector('.overlay-list').innerHTML = sorted.map(e=>`
-      <div class="log-item">
-        <div class="log-date">${e.date||''}</div>
-        <div style="font-size:13px;">${[...(e.products||[]),...(e.tags||[]),...(e.hcare||[])].join(' · ')||'—'}</div>
-        ${e.note?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">${e.note}</div>`:''}
-      </div>`).join('');
-  }
   overlay.style.display='block';
+  const listEl = overlay.querySelector('.overlay-list');
+  if(!listEl) return;
+  listEl.innerHTML='<div class="log-empty">Loading...</div>';
+  try {
+    const entries = await dbAll('hairs');
+    const sorted = entries.slice().reverse();
+    if(!sorted.length){
+      listEl.innerHTML='<div class="log-empty">No hair check-ins yet.</div>';
+      return;
+    }
+    let html = '';
+    for(const e of sorted){
+      const tags = [...(e.prods||e.products||[]),...(e.hairT||e.tags||[]),...(e.care||e.hcare||[])].join(' · ')||'—';
+      const note = e.note ? '<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+e.note+'</div>' : '';
+      html += '<div class="log-item"><div class="log-date">'+(e.date||'')+'</div><div style="font-size:13px;">'+tags+'</div>'+note+'</div>';
+    }
+    listEl.innerHTML = html;
+  } catch(e){
+    listEl.innerHTML='<div class="log-empty">Could not load check-ins.</div>';
+    console.warn('openHairLog error:',e);
+  }
 }
 
 async function saveBody(){
