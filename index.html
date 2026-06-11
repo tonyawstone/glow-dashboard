@@ -6315,10 +6315,9 @@ async function buildBodyCompositionMetrics(){
 
   // Unified body stats card
   if(elStats){
-    const rev = [...rows].reverse();
-    const latestWeight = rev.find(r=>parseFloat(r.weight_lbs)>0);
-    const latestBMI = rev.find(r=>parseFloat(r.bmi)>0);
-    const latestFat = rev.find(r=>parseFloat(r.body_fat_pct)>0);
+    const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
+    const latestBMI = rows.find(r=>parseFloat(r.bmi)>0);
+    const latestFat = rows.find(r=>parseFloat(r.body_fat_pct)>0);
     const fmt = (d) => d ? safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
 
     // All-time low weight since Zepbound start (Oct 25, 2025)
@@ -6365,38 +6364,35 @@ async function buildBodyCompositionMetrics(){
     `;
   }
 
-  // Exercise stats strip — avg steps, active energy, exercise mins
+  // Exercise stats strip — today's activity per metric
   const elExStats = document.getElementById('exercise-stats-strip');
   if(elExStats){
-    const recent7 = [...rows].reverse().filter(r=>r.date!==nowStr()).slice(0,7);
-    const avgSteps = recent7.map(r=>parseInt(r.steps)||0).filter(v=>v>0);
-    const avg = avgSteps.length ? Math.round(avgSteps.reduce((a,b)=>a+b,0)/avgSteps.length) : null;
-    const avgCals = recent7.map(r=>parseInt(r.exercise_calories)||0).filter(v=>v>0);
-    const avgCal = avgCals.length ? Math.round(avgCals.reduce((a,b)=>a+b,0)/avgCals.length) : null;
-    const avgMins = recent7.map(r=>parseInt(r.exercise_minutes)||0).filter(v=>v>0);
-    const avgMin = avgMins.length ? Math.round(avgMins.reduce((a,b)=>a+b,0)/avgMins.length) : null;
-    const avgActive = recent7.map(r=>parseInt(r.active_energy_cal)||0).filter(v=>v>0);
-    const avgAct = avgActive.length ? Math.round(avgActive.reduce((a,b)=>a+b,0)/avgActive.length) : null;
+    const today = nowStr();
+    const todayRow = rows.find(r=>r.date===today);
+    const yestRow = rows.find(r=>r.date!==today);
+    const pick = (field) => {
+      if(todayRow && parseInt(todayRow[field])>0) return {val:parseInt(todayRow[field]), lbl:'Today'};
+      if(yestRow && parseInt(yestRow[field])>0) return {val:parseInt(yestRow[field]), lbl:'Yesterday'};
+      return {val:0, lbl:''};
+    };
+    const steps = pick('steps');
+    const active = pick('active_energy_cal');
+    const cals = pick('exercise_calories');
+    const mins = pick('exercise_minutes');
+    const tile = (data, label) => `
+      <div style="text-align:center;padding:8px;background:var(--warm);border-radius:8px;">
+        <div style="font-size:18px;font-weight:600;color:var(--text);">${data.val?data.val.toLocaleString():'—'}</div>
+        <div style="font-size:10px;color:var(--muted);">${label}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:1px;">${data.lbl}</div>
+      </div>`;
     elExStats.innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div style="text-align:center;padding:8px;background:var(--warm);border-radius:8px;">
-          <div style="font-size:18px;font-weight:600;color:var(--text);">${avg?avg.toLocaleString():'—'}</div>
-          <div style="font-size:10px;color:var(--muted);">Avg steps</div>
-        </div>
-        <div style="text-align:center;padding:8px;background:var(--warm);border-radius:8px;">
-          <div style="font-size:18px;font-weight:600;color:var(--text);">${avgAct?avgAct.toLocaleString():'—'}</div>
-          <div style="font-size:10px;color:var(--muted);">Active energy</div>
-        </div>
-        <div style="text-align:center;padding:8px;background:var(--warm);border-radius:8px;">
-          <div style="font-size:18px;font-weight:600;color:var(--text);">${avgCal||'—'}</div>
-          <div style="font-size:10px;color:var(--muted);">Cal burned</div>
-        </div>
-        <div style="text-align:center;padding:8px;background:var(--warm);border-radius:8px;">
-          <div style="font-size:18px;font-weight:600;color:var(--text);">${avgMin||'—'}</div>
-          <div style="font-size:10px;color:var(--muted);">Exercise min</div>
-        </div>
+        ${tile(steps,'Steps')}
+        ${tile(active,'Active energy')}
+        ${tile(cals,'Cal burned')}
+        ${tile(mins,'Exercise min')}
       </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:4px;text-align:center;">7-day averages from Apple Health</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;text-align:center;">Apple Health</div>
     `;
   }
 
