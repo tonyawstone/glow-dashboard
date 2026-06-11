@@ -6364,15 +6364,16 @@ async function buildBodyCompositionMetrics(){
     `;
   }
 
-  // Exercise stats strip — today's activity per metric
+  // Exercise stats strip — most recent data per metric
   const elExStats = document.getElementById('exercise-stats-strip');
   if(elExStats){
     const today = nowStr();
-    const todayRow = rows.find(r=>r.date===today);
-    const yestRow = rows.find(r=>r.date!==today);
+    const fmt = (d) => { if(!d) return ''; if(d===today) return 'Today'; const dt=safeDate(d); const yd=new Date(); yd.setDate(yd.getDate()-1); if(d===yd.toISOString().slice(0,10)) return 'Yesterday'; return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'}); };
     const pick = (field) => {
-      if(todayRow && parseInt(todayRow[field])>0) return {val:parseInt(todayRow[field]), lbl:'Today'};
-      if(yestRow && parseInt(yestRow[field])>0) return {val:parseInt(yestRow[field]), lbl:'Yesterday'};
+      for(const r of rows){
+        const v = parseInt(r[field]);
+        if(v > 0) return {val:v, lbl:fmt(r.date)};
+      }
       return {val:0, lbl:''};
     };
     const steps = pick('steps');
