@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Glow">
@@ -2712,7 +2712,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 </div>
 
 <!-- Check-in history overlay -->
-<div id="checkin-history-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+<div id="checkin-history-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeCheckinHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2727,7 +2727,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
 
 
-<div id="body-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+<div id="body-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('body-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2737,7 +2737,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="hair-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+<div id="hair-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('hair-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2747,7 +2747,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="exercise-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+<div id="exercise-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('exercise-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2757,7 +2757,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="skin-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+<div id="skin-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('skin-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2767,7 +2767,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="facial-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+<div id="facial-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('facial-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2777,7 +2777,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="musely-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+<div id="musely-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="document.getElementById('musely-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2787,7 +2787,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="sleep-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+<div id="sleep-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeSleepLogOverlay()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2797,7 +2797,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="mood-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+<div id="mood-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeMoodLogOverlay()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2834,7 +2834,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 </div>
 
 <!-- Coach history overlay -->
-<div id="coach-history-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+<div id="coach-history-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeCoachHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -2845,7 +2845,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<div id="glow-insights-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
+<div id="glow-insights-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top));">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeGlowInsights()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
@@ -3706,20 +3706,27 @@ async function openPastSleepLog(){
   const overlay = document.getElementById('sleep-log-overlay');
   const content = document.getElementById('sleep-log-overlay-content');
   overlay.style.display = 'block';
-  
-  const sleeps = await dbAll('sleeps');
-  if(!sleeps.length){ content.innerHTML='<div class="log-empty">No sleep entries yet.</div>'; return; }
-  const sorted = [...sleeps].reverse();
-  content.innerHTML = sorted.map(e=>{
-    const chips = [e.hrs+'h', e.quality, ...(e.energy||[])].filter(Boolean);
-    return '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
-      +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'+e.date+(e.bed?' · '+e.bed+'→'+e.wake:'')+'</div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">'
-      +chips.map(c=>'<span class="chip">'+c+'</span>').join('')
-      +'</div>'
-      +(e.note?'<div style="font-size:12px;color:var(--muted);">'+e.note+'</div>':'')
-      +'</div>';
-  }).join('');
+  content.innerHTML = '<div class="log-empty">Loading...</div>';
+  try {
+    const sleeps = await dbAll('sleeps');
+    if(!sleeps.length){ content.innerHTML='<div class="log-empty">No sleep entries yet.</div>'; return; }
+    const sorted = [...sleeps].reverse();
+    let html = '';
+    for(const e of sorted){
+      const chips = [e.hrs+'h', e.quality, ...(e.energy||[])].filter(Boolean);
+      html += '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+        +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'+e.date+(e.bed?' · '+e.bed+'→'+e.wake:'')+'</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">'
+        +chips.map(c=>'<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;">'+c+'</span>').join('')
+        +'</div>'
+        +(e.note?'<div style="font-size:12px;color:var(--muted);">'+e.note+'</div>':'')
+        +'</div>';
+    }
+    content.innerHTML = html;
+  } catch(err){
+    content.innerHTML='<div class="log-empty">Could not load entries.</div>';
+    console.warn('openPastSleepLog error:',err);
+  }
 }
 
 function closeSleepLogOverlay(){
@@ -3730,68 +3737,94 @@ function closeSleepLogOverlay(){
 async function openBodyLog(){
   const overlay = document.getElementById('body-log-overlay');
   const el = document.getElementById('body-log-overlay-content');
-  overlay.style.display='block'; 
-  const bodies = await dbAll('bodies');
-  if(!bodies.length){ el.innerHTML='<div class="log-empty">No body check-ins yet.</div>'; return; }
-  el.innerHTML = [...bodies].reverse().map(e=>'<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
-    +'<div style="font-size:12px;color:var(--muted);">'+e.date+'</div>'
-    +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
-    +[...(e.nsv||[])].map(c=>'<span class="chip">'+c+'</span>').join('')
-    +'</div>'
-    +((e.waist||e.hips)?'<div style="font-size:12px;color:var(--muted);margin-top:4px;">'+(e.waist?'Waist: '+e.waist+'" ':'')+(e.hips?'Hips: '+e.hips+'"':'')+'</div>':'')
-    +(e.note?'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+e.note+'</div>':'')
-    +'</div>').join('');
+  overlay.style.display='block';
+  el.innerHTML='<div class="log-empty">Loading...</div>';
+  try {
+    const bodies = await dbAll('bodies');
+    if(!bodies.length){ el.innerHTML='<div class="log-empty">No body check-ins yet.</div>'; return; }
+    let html='';
+    for(const e of [...bodies].reverse()){
+      html+='<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+        +'<div style="font-size:12px;color:var(--muted);">'+e.date+'</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
+        +[...(e.nsv||[])].map(c=>'<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;">'+c+'</span>').join('')
+        +'</div>'
+        +((e.waist||e.hips)?'<div style="font-size:12px;color:var(--muted);margin-top:4px;">'+(e.waist?'Waist: '+e.waist+'" ':'')+(e.hips?'Hips: '+e.hips+'"':'')+'</div>':'')
+        +(e.note?'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+e.note+'</div>':'')
+        +'</div>';
+    }
+    el.innerHTML=html;
+  } catch(err){ el.innerHTML='<div class="log-empty">Could not load entries.</div>'; console.warn(err); }
 }
 
 async function openExerciseLog(){
   const overlay = document.getElementById('exercise-log-overlay');
   const el = document.getElementById('exercise-log-overlay-content');
-  overlay.style.display='block'; 
-  const exs = await dbAll('exercises');
-  if(!exs.length){ el.innerHTML='<div class="log-empty">No exercise entries yet.</div>'; return; }
-  el.innerHTML = [...exs].reverse().map(e=>{
-    const types = [];
-    if(e.walk) types.push('Treadmill '+e.walk+'min');
-    if(e.pilates) types.push('Pilates '+e.pilates+'min');
-    if(e.strength) types.push('Strength '+e.strength+'min');
-    if(e.abs) types.push('Abs '+e.abs+'min');
-    if(e.yoga) types.push('Yoga '+e.yoga+'min');
-    if(e.other) types.push('Other '+e.other+'min');
-    return '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
-      +'<div style="font-size:12px;color:var(--muted);">'+e.date+(e.time?' · '+e.time:'')+(e.intensity?' · '+e.intensity:'')+'</div>'
-      +'<div style="font-size:13px;color:var(--text);margin-top:4px;">'+types.join(' · ')+'</div>'
-      +(e.note?'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+e.note+'</div>':'')
-      +'</div>';
-  }).join('');
+  overlay.style.display='block';
+  el.innerHTML='<div class="log-empty">Loading...</div>';
+  try {
+    const exs = await dbAll('exercises');
+    if(!exs.length){ el.innerHTML='<div class="log-empty">No exercise entries yet.</div>'; return; }
+    let html='';
+    for(const e of [...exs].reverse()){
+      const types=[];
+      if(e.walk) types.push('Treadmill '+e.walk+'min');
+      if(e.pilates) types.push('Pilates '+e.pilates+'min');
+      if(e.strength) types.push('Strength '+e.strength+'min');
+      if(e.abs) types.push('Abs '+e.abs+'min');
+      if(e.yoga) types.push('Yoga '+e.yoga+'min');
+      if(e.other) types.push('Other '+e.other+'min');
+      html+='<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+        +'<div style="font-size:12px;color:var(--muted);">'+e.date+(e.time?' · '+e.time:'')+(e.intensity?' · '+e.intensity:'')+'</div>'
+        +'<div style="font-size:13px;color:var(--text);margin-top:4px;">'+types.join(' · ')+'</div>'
+        +(e.note?'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+e.note+'</div>':'')
+        +'</div>';
+    }
+    el.innerHTML=html;
+  } catch(err){ el.innerHTML='<div class="log-empty">Could not load entries.</div>'; console.warn(err); }
 }
 
 async function openSkinLog(){
   const overlay = document.getElementById('skin-log-overlay');
   const el = document.getElementById('skin-log-overlay-content');
-  overlay.style.display='block'; 
-  const skins = await dbAll('skins');
-  const entries = skins.filter(s=>s.type==='checkin').reverse();
-  if(!entries.length){ el.innerHTML='<div class="log-empty">No skin check-ins yet.</div>'; return; }
-  el.innerHTML = entries.map(e=>'<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
-    +'<div style="font-size:12px;color:var(--muted);">'+e.date+'</div>'
-    +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
-    +[...( e.skinT||[]),...(e.concerns||[])].map(c=>'<span class="chip">'+c+'</span>').join('')
-    +'</div>'
-    +(e.derm?'<div style="font-size:12px;color:var(--muted);margin-top:4px;">'+e.derm+'</div>':'')
-    +'</div>').join('');
+  overlay.style.display='block';
+  el.innerHTML='<div class="log-empty">Loading...</div>';
+  try {
+    const skins = await dbAll('skins');
+    const entries = skins.filter(s=>s.type==='checkin').reverse();
+    if(!entries.length){ el.innerHTML='<div class="log-empty">No skin check-ins yet.</div>'; return; }
+    let html='';
+    for(const e of entries){
+      html+='<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+        +'<div style="font-size:12px;color:var(--muted);">'+e.date+'</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
+        +[...(e.skinT||[]),...(e.concerns||[])].map(c=>'<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;">'+c+'</span>').join('')
+        +'</div>'
+        +(e.derm?'<div style="font-size:12px;color:var(--muted);margin-top:4px;">'+e.derm+'</div>':'')
+        +'</div>';
+    }
+    el.innerHTML=html;
+  } catch(err){ el.innerHTML='<div class="log-empty">Could not load entries.</div>'; console.warn(err); }
 }
 
 async function openFacialLog(){
   const overlay = document.getElementById('facial-log-overlay');
   const el = document.getElementById('facial-log-overlay-content');
-  overlay.style.display='block'; 
-  const skins = await dbAll('skins');
-  const entries = skins.filter(s=>s.type==='facial').reverse();
-  if(!entries.length){ el.innerHTML='<div class="log-empty">No facial logs yet.</div>'; return; }
-  el.innerHTML = entries.map(e=>'<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
-    +'<div style="font-size:12px;color:var(--muted);">'+e.date+(e.next?' · Next: '+e.next:'')+'</div>'
-    +(e.notes?'<div style="font-size:13px;color:var(--text);margin-top:4px;">'+e.notes+'</div>':'')
-    +'</div>').join('');
+  overlay.style.display='block';
+  el.innerHTML='<div class="log-empty">Loading...</div>';
+  try {
+    const skins = await dbAll('skins');
+    const entries = skins.filter(s=>s.type==='facial').reverse();
+    if(!entries.length){ el.innerHTML='<div class="log-empty">No facial logs yet.</div>'; return; }
+    let html='';
+    for(const e of entries){
+      html+='<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+        +'<div style="font-size:12px;color:var(--muted);">'+e.date+(e.next?' · Next: '+e.next:'')+'</div>'
+        +(e.notes?'<div style="font-size:13px;color:var(--text);margin-top:4px;">'+e.notes+'</div>':'')
+        +'</div>';
+    }
+    el.innerHTML=html;
+  } catch(err){ el.innerHTML='<div class="log-empty">Could not load entries.</div>'; console.warn(err); }
 }
 
 function openMuselyLog(){
@@ -3828,22 +3861,26 @@ async function openPastMindLog(){
   const overlay = document.getElementById('mood-log-overlay');
   const content = document.getElementById('mood-log-overlay-content');
   overlay.style.display = 'block';
-  
-  const minds = await dbAll('minds');
-  if(!minds.length){ content.innerHTML='<div class="log-empty">No mood entries yet.</div>'; return; }
-  const sorted = [...minds].reverse();
-  content.innerHTML = sorted.map(e=>{
-    const gratFmt = e.gratitude ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Grateful: '+e.gratitude.split('\n').map(s=>s.replace(/^\d+\.\s*/,'')).filter(Boolean).join(', ')+'</div>' : '';
-    const winFmt = e.win ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Win: '+e.win+'</div>' : '';
-    const vibeFmt = e.vibe&&e.vibe.length ? '<div style="margin-top:6px;">'+e.vibe.map(v=>'<span class="chip">'+v+'</span>').join('')+'</div>' : '';
+  content.innerHTML='<div class="log-empty">Loading...</div>';
+  try {
+    const minds = await dbAll('minds');
+    if(!minds.length){ content.innerHTML='<div class="log-empty">No mood entries yet.</div>'; return; }
+    const chip = (t)=>'<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;margin:2px;">'+t+'</span>';
     const stars = (label, val) => val ? '<span style="font-size:11px;color:var(--muted);margin-right:8px;">'+label+' '+'★'.repeat(val)+'</span>' : '';
-    return '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
-      +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'+e.date+'</div>'
-      +vibeFmt
-      +'<div style="margin-top:4px;">'+stars('Energy',e.energy)+stars('Confidence',e.conf)+stars('Calm',e.stress)+stars('Body',e.bodyImage)+'</div>'
-      +winFmt+gratFmt
-      +'</div>';
-  }).join('');
+    let html='';
+    for(const e of [...minds].reverse()){
+      const gratFmt = e.gratitude ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Grateful: '+e.gratitude.split('\n').map(s=>s.replace(/^\d+\.\s*/,'')).filter(Boolean).join(', ')+'</div>' : '';
+      const winFmt = e.win ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;">Win: '+e.win+'</div>' : '';
+      const vibeFmt = e.vibe&&e.vibe.length ? '<div style="margin-top:6px;">'+e.vibe.map(v=>chip(v)).join('')+'</div>' : '';
+      html+='<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+        +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'+e.date+'</div>'
+        +vibeFmt
+        +'<div style="margin-top:4px;">'+stars('Energy',e.energy)+stars('Confidence',e.conf)+stars('Calm',e.stress)+stars('Body',e.bodyImage)+'</div>'
+        +winFmt+gratFmt
+        +'</div>';
+    }
+    content.innerHTML=html;
+  } catch(err){ content.innerHTML='<div class="log-empty">Could not load entries.</div>'; console.warn(err); }
 }
 
 function closeMoodLogOverlay(){
