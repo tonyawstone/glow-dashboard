@@ -9186,10 +9186,10 @@ async function buildHydrationStatus(){
     if(waterPct>=50){ statusIcon='💧'; statusTitle='Well hydrated'; statusColor='#27500A'; statusBg='#EAF3DE'; }
     else if(waterPct>=45){ statusIcon='💧'; statusTitle='Mildly low'; statusColor='#92400E'; statusBg='#FEF3C7'; }
     else { statusIcon='⚠️'; statusTitle='Dehydrated'; statusColor='#7F1D1D'; statusBg='#FEE2E2'; }
-    statusMsg = `Body water ${waterPct}% · ${waterDate}${diffStr} · Healthy range for women: 45–60%`;
+    statusMsg = `Body water ${waterPct}% · ${waterDate}${diffStr} · Healthy range: 45–60%`;
   } else {
-    statusIcon='⚠️'; statusTitle='No data entered'; statusColor='#92400E'; statusBg='#FEF3C7';
-    statusMsg = 'Step on your Withings scale, then enter the body water % from the Withings app above';
+    statusIcon='⚠️'; statusTitle='No data entered — enter from Withings app above'; statusColor='#92400E'; statusBg='#FEF3C7';
+    statusMsg = '';
   }
 
   el.innerHTML = `
@@ -9204,12 +9204,12 @@ async function buildHydrationStatus(){
     <div class="toast-msg" id="bw-toast">Saved!</div>
     <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:${statusBg};margin-bottom:6px;">
       <span style="font-size:18px;flex-shrink:0;">${statusIcon}</span>
-      <div style="font-size:12px;color:${statusColor};font-weight:500;">${statusTitle}${waterPct!==null?' · '+statusMsg:''}</div>
+      <div style="font-size:12px;color:${statusColor};font-weight:500;">${statusTitle}${statusMsg?' · '+statusMsg:''}</div>
     </div>
     ${watsonGoalPct?`
     <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--warm);border-radius:10px;font-size:12px;margin-bottom:6px;">
       <span style="font-size:16px;flex-shrink:0;">🎯</span>
-      <div><span style="font-weight:600;color:var(--text);">Your goal: ${watsonGoalPct}%</span> <span style="color:var(--muted);">· Watson formula · ${weightLbs?.toFixed(1)} lbs</span></div>
+      <div><span style="font-weight:600;color:var(--text);">Your goal: ${watsonGoalPct}%</span> <span style="color:var(--muted);">· Watson formula · ${weightLbs?.toFixed(1)} lbs · ${latestWeight?.date===today?'today':smartDate(latestWeight?.date)}</span></div>
     </div>`:''}
     <div id="body-water-7day"></div>
     <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--warm);border-radius:10px;font-size:12px;margin-top:6px;">
