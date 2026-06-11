@@ -3110,6 +3110,24 @@ function toggleDPItem(id, deepLink){
   buildDailyProgress(); // refresh counts
 }
 
+function updateTodayRing(score){
+  const btn = Array.from(document.querySelectorAll('.tnav')).find(b=>b.textContent.trim().startsWith('Today'));
+  if(!btn) return;
+  const wrapper = btn.querySelector('.pillar-ring');
+  if(!wrapper) return;
+  const pct = Math.min(100, Math.max(0, score));
+  const color = pct>=85?'#27500A':pct>=70?'#6B9E78':pct>=55?'#92400E':pct>0?'#7F1D1D':'rgba(0,0,0,0.12)';
+  const r=16, dash=2*Math.PI*r, offset=dash*(1-pct/100);
+  const iconClass = wrapper.querySelector('i')?.className||'ti ti-sun';
+  wrapper.innerHTML = '<svg width="36" height="36" style="position:absolute;top:0;left:0;pointer-events:none;">'
+    + '<circle cx="18" cy="18" r="'+r+'" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="2.5"/>'
+    + '<circle cx="18" cy="18" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="2.5"'
+    + ' stroke-dasharray="'+dash.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'"'
+    + ' stroke-linecap="round" transform="rotate(-90 18 18)"/>'
+    + '</svg>'
+    + '<i class="'+iconClass+'" aria-hidden="true" style="font-size:22px;position:relative;z-index:1;"></i>';
+}
+
 function updatePillarRings(checks){
   const pillarItems = {
     mind:    ['dp-mood'],
@@ -3120,6 +3138,23 @@ function updatePillarRings(checks){
     style:   ['dp-outfit'],
     hair:    ['dp-hair'],
   };
+
+  // Give Today tab the same wrapper size for alignment (no progress arc)
+  const todayBtn = Array.from(document.querySelectorAll('.tnav')).find(b=>b.textContent.trim().startsWith('Today'));
+  if(todayBtn && !todayBtn.querySelector('.pillar-ring')){
+    const todayIcon = todayBtn.querySelector('i');
+    if(todayIcon){
+      const wrapper = document.createElement('div');
+      wrapper.className = 'pillar-ring';
+      wrapper.style.cssText = 'position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin:0 auto;';
+      todayIcon.parentNode.insertBefore(wrapper, todayIcon);
+      wrapper.appendChild(todayIcon);
+      wrapper.innerHTML = '<svg width="36" height="36" style="position:absolute;top:0;left:0;pointer-events:none;">'
+        + '<circle cx="18" cy="18" r="16" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="2.5"/>'
+        + '</svg>'
+        + '<i class="' + todayIcon.className + '" aria-hidden="true" style="font-size:22px;position:relative;z-index:1;"></i>';
+    }
+  }
 
   Object.entries(pillarItems).forEach(([pillar, ids])=>{
     const done = ids.filter(id=>checks[id]).length;
@@ -8410,6 +8445,7 @@ async function calculateGlowScore(save=false) {
   realAge-=2; // Zepbound active weight loss bonus
   realAge=Math.max(35,Math.min(75,Math.round(realAge)));
 
+  window.glowScore = totalScore; updateTodayRing(totalScore);
   const scoreColor=totalScore>=85?'#27500A':totalScore>=70?'#6B9E78':totalScore>=55?'#92400E':'#7F1D1D';
   const scoreBg=totalScore>=85?'#EAF3DE':totalScore>=70?'rgba(107,158,120,0.15)':totalScore>=55?'#FEF3C7':'#FEE2E2';
   const scoreLabel=totalScore>=85?'Thriving':totalScore>=70?'Strong':totalScore>=55?'Building':'Needs attention';
@@ -8434,21 +8470,26 @@ async function calculateGlowScore(save=false) {
       <div class="glow-score-right">
         <div class="glow-real-age">${realAge} <span style="font-size:14px;font-weight:400;color:var(--muted);">biological age</span></div>
         <div class="glow-real-age-label">vs. your chronological age 54</div>
-        <div class="glow-score-date">${dateStr} · ${timeStr}</div>
+        <div class="glow-score-date">${dateStr} · ${timeStr} · <button onclick="calculateGlowScore(true)" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0;vertical-align:middle;" title="Recalculate score">&#x1F504;</button></div>
+        <div class="glow-score-trend" id="glow-score-trend" style="font-size:11px;color:var(--muted);font-style:italic;margin-top:3px;">Save your first score to track your trend.</div>
       </div>
     </div>
-    <div class="glow-pillar-scores">
-      ${pillars.map(p=>`
-        <div class="glow-pillar-item">
-          <div class="glow-pillar-name">${p.name}</div>
-          <div class="glow-pillar-bar-wrap"><div class="glow-pillar-bar" style="width:${(p.score/p.max)*100}%;background:${p.color};"></div></div>
-          <div class="glow-pillar-score">${p.score}/${p.max}</div>
-        </div>`).join('')}
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:10px;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.pillar-toggle\').textContent=this.nextElementSibling.style.display===\'none\'?\'\\u25be\':\'\\u25b4\';">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Pillar breakdown</div>
+      <span class="pillar-toggle" style="font-size:16px;color:var(--muted);">\u25be</span>
     </div>
-    <button class="glow-recalc-btn" onclick="calculateGlowScore(true)">🔄 Recalculate &amp; save</button>
-    <div class="glow-score-trend" id="glow-score-trend">Save your first score to start tracking your trend.</div>
-    <div style="text-align:center;margin-top:10px;">
-      <button onclick="goToHealthInsights()" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);text-decoration:underline;">See what's driving your score →</button>
+    <div style="display:none;">
+      <div class="glow-pillar-scores">
+        ${pillars.map(p=>`
+          <div class="glow-pillar-item">
+            <div class="glow-pillar-name">${p.name}</div>
+            <div class="glow-pillar-bar-wrap"><div class="glow-pillar-bar" style="width:${(p.score/p.max)*100}%;background:${p.color};"></div></div>
+            <div class="glow-pillar-score">${p.score}/${p.max}</div>
+          </div>`).join('')}
+      </div>
+      <div style="text-align:center;margin-top:10px;">
+        <button onclick="goToHealthInsights()" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);text-decoration:underline;">See what\'s driving your score \u2192</button>
+      </div>
     </div>
   `;
   loadScoreTrend();
@@ -10392,17 +10433,16 @@ function renderSavedScore(saved){
       <div class="glow-score-right">
         <div class="glow-real-age">${realAge} <span style="font-size:14px;font-weight:400;color:var(--muted);">biological age</span></div>
         <div class="glow-real-age-label">vs. your chronological age 54</div>
-        <div class="glow-score-date">Last saved ${savedDate} · tap 🔄 to update</div>
+        <div class="glow-score-date">${savedDate} · <button onclick="calculateGlowScore(true)" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0;vertical-align:middle;" title="Recalculate score">&#x1F504;</button></div>
+        <div class="glow-score-trend" id="glow-score-trend" style="font-size:11px;color:var(--muted);font-style:italic;margin-top:3px;">Loading trend...</div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:10px;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.pillar-toggle').textContent=this.nextElementSibling.style.display==='none'?'▾':'▴';">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-top:10px;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.pillar-toggle').textContent=this.nextElementSibling.style.display==='none'?'\u25be':'\u25b4';">
       <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Pillar breakdown</div>
-      <span class="pillar-toggle" style="font-size:16px;color:var(--muted);">▾</span>
+      <span class="pillar-toggle" style="font-size:16px;color:var(--muted);">\u25be</span>
     </div>
     <div style="display:none;">
       <div class="glow-pillar-scores">${pillarsHTML}</div>
-      <button class="glow-recalc-btn" onclick="calculateGlowScore(true)">🔄 Recalculate &amp; save</button>
-      <div class="glow-score-trend" id="glow-score-trend">Loading trend...</div>
     </div>
   `;
   loadScoreTrend();
