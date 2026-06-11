@@ -41,6 +41,8 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .tnav{border:none;background:transparent;padding:12px 2px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);font-family:var(--sans);border-bottom:2px solid transparent;}
 .tnav i{font-size:22px;}
 .tnav.on{color:var(--accent);border-bottom-color:var(--accent);}
+.tnav{position:relative;}
+.pillar-ring{pointer-events:none;}
 
 /* STAT STRIP */
 .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px;}
@@ -386,6 +388,16 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .affirmation-card{background:linear-gradient(135deg,var(--warm),#E8DDD0);border-radius:16px;padding:20px;border:0.5px solid var(--border);margin-bottom:14px;text-align:center;}
 .affirmation-text{font-family:var(--serif);font-size:22px;font-weight:300;color:var(--text);line-height:1.5;font-style:italic;}
 .affirmation-sub{font-size:11px;color:var(--muted);margin-top:8px;}
+
+.dp-section{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:12px 0 6px;}
+.dp-section:first-child{margin-top:0;}
+.dp-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);margin-bottom:5px;cursor:pointer;transition:all 0.15s;background:var(--card);}
+.dp-row.done{background:#EAF3DE;border-color:rgba(107,158,120,0.3);}
+.dp-row.done .dp-name{text-decoration:line-through;color:var(--muted);}
+.dp-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:transparent;flex-shrink:0;transition:all 0.15s;}
+.dp-row.done .dp-check{background:#6B9E78;border-color:#6B9E78;color:#fff;}
+.dp-name{font-size:13px;color:var(--text);flex:1;}
+.dp-note{font-size:11px;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -529,17 +541,20 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <button class="tag" onclick="tog(this)">Bloated</button>
           <button class="tag" onclick="tog(this)">Scattered</button>
         </div>
-        <div class="fl">Treatments & compliance</div>
-        <div class="toggle-row" onclick="ts('t-cpap')"><div><div class="tl">CPAP used last night</div><div class="ts">Sleep apnea</div></div><div class="tog" id="t-cpap"><div class="tok"></div></div></div>
-        <div class="toggle-row" onclick="ts('t-meds')"><div><div class="tl">Daily medications taken</div><div class="ts">Irbesartan · Metoprolol · Amlodipine · Osteo Biflex</div></div><div class="tog" id="t-meds"><div class="tok"></div></div></div>
-        <div class="toggle-row" onclick="ts('t-skin-am')"><div><div class="tl">AM skin routine done</div><div class="ts">Olay Cleanser · Serum · Vit C · SPF</div></div><div class="tog" id="t-skin-am"><div class="tok"></div></div></div>
-        <div class="toggle-row" onclick="ts('t-skin-pm')"><div><div class="tl">Last night's PM routine done</div><div class="ts">Musely (alt nights) · Olay Regenerist · done before bed</div></div><div class="tog" id="t-skin-pm"><div class="tok"></div></div></div>
-        <div class="toggle-row" onclick="ts('t-exercise')"><div><div class="tl">Exercised today</div><div class="ts">Walk · Pilates · Strength · Yoga · any movement</div></div><div class="tog" id="t-exercise"><div class="tok"></div></div></div>
         <div class="fl">Note for today</div>
         <textarea id="today-note" rows="2" placeholder="Outfit win, energy, anything on your mind..."></textarea>
         <button class="btn-primary" onclick="saveCheckin()">Save check-in</button>
         <div class="toast-msg" id="tt">Saved!</div>
       </div>
+    </div>
+
+    <!-- Daily Progress card -->
+    <div class="card" id="daily-progress-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="card-title" style="margin:0;">Daily progress</div>
+        <div id="dp-overall" style="font-size:12px;color:var(--muted);"></div>
+      </div>
+      <div id="daily-progress-list"></div>
     </div>
 
     <!-- Glow Score — pillar breakdown collapsible -->
@@ -2663,7 +2678,7 @@ async function tab(id){
   activeSec.classList.add('on');
   // Update nav
   document.querySelectorAll('.tnav').forEach(b=>b.classList.remove('on'));
-  const tabs=['today','style','sleep','body','health','skin','hair','mind'];
+  const tabs=['today','mind','sleep','health','skin','body','style','hair'];
   const navBtns=document.querySelectorAll('.tnav');
   const idx=tabs.indexOf(id);
   if(idx>=0) navBtns[idx].classList.add('on');
@@ -2686,7 +2701,7 @@ async function tab(id){
       if(myairLabel) myairLabel.textContent = `(${yest.toLocaleDateString('en-US',{month:'long',day:'numeric'})})`;
     }
   }
-  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); }
+  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); buildDailyProgress(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); }
   if(id==='skin'){ loadLatestSkinScan(); }
@@ -2896,7 +2911,7 @@ async function saveCheckin(){
   const btn = document.querySelector('[onclick="saveCheckin()"]');
   if(btn){ const orig=btn.textContent; btn.textContent='✅ Check-in saved!'; btn.style.background='#EAF3DE'; btn.style.borderColor='#6B9E78'; btn.style.color='#27500A'; setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; btn.style.borderColor=''; btn.style.color=''; },3000); }
 
-  toast('tt');loadLogs();
+  toast('tt');loadLogs();buildDailyProgress();
 }
 
 function loadCheckinState(){
@@ -2931,6 +2946,194 @@ function loadCheckinState(){
 }
 
 
+
+
+// ── DAILY PROGRESS ──────────────────────────────────────────────────────────
+
+const DP_ITEMS = [
+  // pillar, id, label, note, autoCheck fn (null = manual), deepLink tab
+  ['🧠 Mind',    'dp-mood',      'Mood logged',              'Vibe · energy · gratitude',          null, 'mind'],
+  ['😴 Sleep',   'dp-sleep-q',   'Sleep quality logged',     'Rate last night\u2019s sleep',            null, 'sleep'],
+  ['😴 Sleep',   'dp-myair',     'myAir data saved',         'CPAP · AHI · usage',                 null, 'sleep'],
+  ['🌿 Wellness','dp-meds',      'Medications taken',        'Rx meds · supplements',              null, 'health'],
+  ['🌿 Wellness','dp-bp',        'BP logged',                'Blood pressure reading',             null, 'health'],
+  ['🌿 Wellness','dp-cpap',      'CPAP used last night',     'Sleep apnea compliance',             null, 'sleep'],
+  ['🌿 Wellness','dp-water',     'Water goal met',           '8+ glasses today',                   null, 'health'],
+  ['✨ Skin',    'dp-skin-am',   'AM skin routine done',     'Cleanser · Serum · Vit C · SPF',     null, 'skin'],
+  ['✨ Skin',    'dp-skin-pm',   'PM routine done',          'Musely · Olay Regenerist',           null, 'skin'],
+  ['❤️ Body',   'dp-body',      'Body check-in logged',     'Non-scale wins · measurements',      null, 'body'],
+  ['❤️ Body',   'dp-bodywater', 'Body water % entered',     'From Withings scale',                null, 'health'],
+  ['👗 Style',   'dp-outfit',    'Outfit logged',            'My outfit · Inspo · DailyLook',      null, 'style'],
+  ['💇 Hair',   'dp-hair',      'Hair check-in done',       'Products · style · condition',       null, 'hair'],
+];
+
+// Manual items reset daily — keyed by date
+const DP_MANUAL_KEY = 'glowDailyProgress';
+
+function getDPManualState(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(DP_MANUAL_KEY)||'{}');
+    if(saved.date !== nowStr()) return {date: nowStr()}; // reset if new day
+    return saved;
+  } catch(e){ return {date: nowStr()}; }
+}
+
+function saveDPManualState(state){
+  localStorage.setItem(DP_MANUAL_KEY, JSON.stringify({...state, date: nowStr()}));
+}
+
+async function buildDailyProgress(){
+  const el = document.getElementById('daily-progress-list');
+  if(!el) return;
+
+  const today = nowStr();
+  const yesterday = yesterdayStr();
+  const manualState = getDPManualState();
+
+  // Auto-check conditions — read from existing data
+  const autoChecks = {};
+
+  // Mind — mood logged today
+  try { const minds = await dbAll('minds'); autoChecks['dp-mood'] = minds.some(e=>e.date===today); } catch(e){}
+
+  // Sleep — sleep quality logged for last night
+  try { const sleeps = await dbAll('sleeps'); autoChecks['dp-sleep-q'] = sleeps.some(e=>e.date===yesterday||e.date===today); } catch(e){}
+
+  // myAir — entry for last night
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=myair`);
+    if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+      autoChecks['dp-myair'] = data.some(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today);
+    }
+  } catch(e){}
+
+  // Meds — check localStorage
+  try {
+    const meds = JSON.parse(localStorage.getItem('glowMedsToday')||'{}');
+    const required = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo','med-rosuvastatin'];
+    autoChecks['dp-meds'] = meds.date===today && required.every(id=>meds[id]);
+  } catch(e){}
+
+  // BP — logged today
+  try { const bps = await dbAll('bps'); autoChecks['dp-bp'] = bps.some(e=>e.date===today||(e.time&&e.date===today)); } catch(e){}
+
+  // CPAP — manual (resets daily)
+  autoChecks['dp-cpap'] = manualState['dp-cpap']||false;
+
+  // Water — 8+ glasses today
+  try {
+    const water = await dbAll('water');
+    const todayW = water.filter(w=>w.date===today||w.date===new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})).pop();
+    autoChecks['dp-water'] = todayW && (todayW.glasses||0) >= (WATER_GOAL||8);
+  } catch(e){}
+
+  // Skin AM/PM — manual (resets daily)
+  autoChecks['dp-skin-am'] = manualState['dp-skin-am']||false;
+  autoChecks['dp-skin-pm'] = manualState['dp-skin-pm']||false;
+
+  // Body check-in — logged today
+  try { const bodies = await dbAll('bodies'); autoChecks['dp-body'] = bodies.some(e=>e.date===today); } catch(e){}
+
+  // Body water — entered today
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=body_water`);
+    if(res.ok){ const d=await res.json(); const hist=Array.isArray(d.data)?d.data:[];
+      autoChecks['dp-bodywater'] = hist.some(e=>e.date===today);
+    }
+  } catch(e){}
+
+  // Outfit — logged today
+  try { const outfits = await dbAll('outfits'); autoChecks['dp-outfit'] = outfits.some(e=>e.date===today&&e.type!=='Inspo'); } catch(e){}
+
+  // Hair — check-in logged today
+  try { const hairs = await dbAll('hairs'); autoChecks['dp-hair'] = hairs.some(e=>e.date===today); } catch(e){}
+
+  // Build HTML grouped by pillar
+  let currentPillar = '';
+  let html = '';
+  let total = 0; let done = 0;
+
+  DP_ITEMS.forEach(([pillar, id, label, note, , deepLink]) => {
+    const isDone = autoChecks[id]||false;
+    total++; if(isDone) done++;
+    if(pillar !== currentPillar){
+      currentPillar = pillar;
+      html += `<div class="dp-section">${pillar}</div>`;
+    }
+    html += `<div class="dp-row${isDone?' done':''}" id="${id}" onclick="toggleDPItem('${id}','${deepLink}')">
+      <div class="dp-check">✓</div>
+      <div style="flex:1;">
+        <div class="dp-name">${label}</div>
+        <div class="dp-note">${note}</div>
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+
+  // Overall progress
+  const overallEl = document.getElementById('dp-overall');
+  if(overallEl) overallEl.textContent = `${done}/${total} complete`;
+
+  // Update pillar ring indicators
+  updatePillarRings(autoChecks);
+}
+
+function toggleDPItem(id, deepLink){
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  // Auto-checked items navigate to pillar instead of manual toggle
+  const autoIds = ['dp-mood','dp-sleep-q','dp-myair','dp-meds','dp-bp','dp-water','dp-body','dp-bodywater','dp-outfit','dp-hair'];
+  if(autoIds.includes(id) && !el.classList.contains('done')){
+    // Navigate to the relevant pillar
+    if(deepLink) tab(deepLink);
+    return;
+  }
+
+  // Manual items toggle
+  el.classList.toggle('done');
+  const manualState = getDPManualState();
+  manualState[id] = el.classList.contains('done');
+  saveDPManualState(manualState);
+  buildDailyProgress(); // refresh counts
+}
+
+function updatePillarRings(checks){
+  // Group completion by pillar tab
+  const pillarItems = {
+    mind:    ['dp-mood'],
+    sleep:   ['dp-sleep-q','dp-myair','dp-cpap'],
+    health:  ['dp-meds','dp-bp','dp-water','dp-bodywater'],
+    skin:    ['dp-skin-am','dp-skin-pm'],
+    body:    ['dp-body'],
+    style:   ['dp-outfit'],
+    hair:    ['dp-hair'],
+  };
+
+  Object.entries(pillarItems).forEach(([pillar, ids])=>{
+    const done = ids.filter(id=>checks[id]).length;
+    const total = ids.length;
+    const pct = total ? Math.round(done/total*100) : 0;
+    const btn = document.querySelector(`.tnav[onclick="tab('${pillar}')"]`);
+    if(!btn) return;
+
+    // Remove existing ring
+    let ring = btn.querySelector('.pillar-ring');
+    if(!ring){ ring=document.createElement('div'); ring.className='pillar-ring'; btn.prepend(ring); }
+
+    const color = pct===100?'#6B9E78':pct>0?'#C4735A':'rgba(0,0,0,0.1)';
+    const dash = 2*Math.PI*8; // circumference for r=8
+    const offset = dash*(1-pct/100);
+    ring.innerHTML = `<svg width="20" height="20" style="position:absolute;top:4px;left:50%;transform:translateX(-50%);">
+      <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="2"/>
+      <circle cx="10" cy="10" r="8" fill="none" stroke="${color}" stroke-width="2"
+        stroke-dasharray="${dash.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
+        stroke-linecap="round" transform="rotate(-90 10 10)"/>
+    </svg>`;
+    ring.style.cssText='position:relative;width:20px;height:20px;display:block;margin:0 auto 2px;';
+  });
+}
 
 function toggleOutfitForm(forceOpen){
   const body = document.getElementById('outfit-form-body');
