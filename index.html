@@ -52,7 +52,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .stat-src{font-size:10px;color:var(--accent);margin-top:1px;}
 
 /* SCROLL */
-.scroll-area{flex:1;overflow-y:auto;padding:14px 16px 140px;-webkit-overflow-scrolling:touch;}
+.scroll-area{flex:1;overflow-y:auto;padding:14px 16px 160px;-webkit-overflow-scrolling:touch;}
 
 
 
@@ -2594,6 +2594,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="intention-weekly"><div class="log-empty">No intention set this week.</div></div>
     </div>
     <div class="card">
+      <div class="card-title">💭 Reflections this week</div>
+      <div id="reflection-log-weekly"><div class="log-empty">No reflections logged this week.</div></div>
+    </div>
+    <div class="card">
       <div class="card-title">7 pillars · this week</div>
       <div id="pillars-weekly"><div class="log-empty">Log daily to see your weekly pillar coverage.</div></div>
     </div>
@@ -2611,6 +2615,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="card-title">🎯 Intention words this month</div>
       <div id="intention-monthly"><div class="log-empty">No intentions logged yet.</div></div>
     </div>
+    <div class="card">
+      <div class="card-title">💭 Reflections this month</div>
+      <div id="reflection-log-monthly"><div class="log-empty">No reflections logged this month.</div></div>
+    </div>
     <div class="card"><div class="card-title">Monthly mood trend</div><div class="chart-wrap" id="wrap-mood-month-chart"></div></div>
     <div class="card"><div class="card-title">Monthly reflection</div><div id="monthly-mind-log"><div class="log-empty">No reflections yet.</div></div></div>
   </div>
@@ -2626,10 +2634,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
 </div>
 
 
-<div style="text-align:center;padding:16px 0 8px;">
-  <button onclick="openAbout()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);opacity:0.7;">Glow Dashboard v2.0 · About</button>
-</div>
-
 </div><!-- scroll-area -->
 
 <!-- About sheet -->
@@ -2637,7 +2641,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="guide-content" style="max-height:85vh;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;color:var(--text);">Glow Dashboard</div>
-      <button onclick="closeAbout()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">×</button>
+      <button onclick="document.getElementById('about-sheet').classList.remove('open')" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">×</button>
     </div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:4px;" id="about-version">Version 2.0 · Jun 11, 2026</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">A personal wellness PWA by Tonya Stone · Built with Claude</div>
@@ -2648,6 +2652,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div id="about-changelog"></div>
   </div>
+</div>
+
+<!-- About footer — fixed above bottom view bar -->
+<div style="position:fixed;bottom:calc(60px + max(12px,env(safe-area-inset-bottom)));left:50%;transform:translateX(-50%);width:100%;max-width:430px;text-align:center;z-index:199;pointer-events:none;">
+  <button onclick="openAbout()" style="pointer-events:all;background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);opacity:0.6;padding:4px 12px;">Glow Dashboard v2.0 · About</button>
 </div>
 
 <!-- BOTTOM VIEW TABS -->
@@ -2990,7 +2999,7 @@ async function tab(id){
     }
   }
   if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); buildDailyProgress(); }
-  if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); restoreMindDraft(); loadIntentionHistory(); }
+  if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); restoreMindDraft(); loadIntentionHistory(); loadReflectionHistory(); }
   if(id==='hair'){ loadLatestHairScan(); loadHairGoalPhotos(); loadGoalNotes(); loadGoalLabels(); loadCurrentHairPhoto(); restoreHairDraft(); }
   if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
@@ -3009,6 +3018,7 @@ function setView(v,btn){curView=v;document.querySelectorAll('.vtab').forEach(b=>
   if(curTab==='body'&&v!=='daily'){ buildBodyCompChartsForView(v); if(v==='weekly') buildWeeklyExercise(); if(v==='yearly') buildBodyYearlySummary(); }
   if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); buildSleepMyAirCombinedChart(); buildSleepStagesWeeklyChart(); }
   if(curTab==='sleep'&&v==='monthly') { buildMyAirCharts(); buildSleepMonthlyCalendar(); }
+  if(curTab==='mind'){ loadIntentionHistory(); loadReflectionHistory(); if(v==='weekly') loadPillarsToday(); }
 }
 function applyView(){
   const c=document.getElementById('s-'+curTab);if(!c)return;
@@ -3748,12 +3758,18 @@ function openMuselyLog(){
   }).join('');
 }
 
-function saveReflectionAnswer(){
+async function saveReflectionAnswer(){
   const answer = document.getElementById('reflection-answer')?.value.trim();
   if(!answer){ showToast('Write something first!'); return; }
+  const prompt = document.getElementById('reflection-prompt')?.textContent?.trim()||'';
+  // Save to localStorage for today's daily progress check
   localStorage.setItem('glowReflectionToday', JSON.stringify({date:nowStr(), answer}));
+  // Save permanently to IndexedDB reflections store
+  await dbAdd('reflections', {type:'daily', prompt, answer, date:nowStr()});
+  syncToBlob('reflections');
   showToast('Reflection saved ✓');
   buildDailyProgress();
+  loadReflectionHistory();
 }
 
 async function openPastMindLog(){
@@ -4807,7 +4823,6 @@ function openSleepScoreInfo(){
 }
 
 function openAbout(){
-  // Populate changelog
   const el = document.getElementById('about-changelog');
   if(el) el.innerHTML = CHANGELOG.map(v=>`
     <div style="margin-bottom:16px;">
@@ -4819,12 +4834,10 @@ function openAbout(){
     </div>
   `).join('');
   document.getElementById('about-sheet').classList.add('open');
-  document.body.style.overflow='hidden';
 }
 function closeAbout(ev){
-  if(ev&&ev.target!==document.getElementById('about-sheet')) return;
+  if(ev && ev.target !== document.getElementById('about-sheet')) return;
   document.getElementById('about-sheet').classList.remove('open');
-  document.body.style.overflow='';
 }
 
 const GUIDES = {
@@ -9422,11 +9435,21 @@ function loadReflectionPrompt(){
   const savedDate = localStorage.getItem('glowPromptDate');
   const savedIdx = localStorage.getItem('glowPromptIdx');
   const today = new Date().toDateString();
-  if(savedDate===today && savedIdx!==null){ el.textContent=REFLECTION_PROMPTS[parseInt(savedIdx)]; return; }
-  const dayOfYear = Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(1000*60*60*24));
-  const idx = dayOfYear%REFLECTION_PROMPTS.length;
-  el.textContent = REFLECTION_PROMPTS[idx];
-  localStorage.setItem('glowPromptDate',today); localStorage.setItem('glowPromptIdx',idx);
+  if(savedDate===today && savedIdx!==null){ el.textContent=REFLECTION_PROMPTS[parseInt(savedIdx)]; }
+  else {
+    const dayOfYear = Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(1000*60*60*24));
+    const idx = dayOfYear%REFLECTION_PROMPTS.length;
+    el.textContent = REFLECTION_PROMPTS[idx];
+    localStorage.setItem('glowPromptDate',today); localStorage.setItem('glowPromptIdx',idx);
+  }
+  // Restore today's answer if already saved
+  try {
+    const saved = JSON.parse(localStorage.getItem('glowReflectionToday')||'{}');
+    if(saved.date===nowStr() && saved.answer){
+      const ansEl = document.getElementById('reflection-answer');
+      if(ansEl) ansEl.value = saved.answer;
+    }
+  } catch(e){}
 }
 function newReflectionPrompt(){
   const el = document.getElementById('reflection-prompt'); if(!el) return;
@@ -9690,6 +9713,33 @@ async function loadIntentionHistory(){
     }
   }catch(e){}
 }
+
+async function loadReflectionHistory(){
+  try{
+    const all = await dbAll('reflections');
+    const daily = all.filter(e=>e.type==='daily').sort((a,b)=>b.date.localeCompare(a.date));
+    const weekStart = getWeekStart();
+    const thisMonth = new Date().toISOString().slice(0,7);
+
+    const fmt = e => `<div style="padding:10px 0;border-bottom:0.5px solid var(--border);">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${fmtOutfitDate(e.date)}</div>
+      ${e.prompt?`<div style="font-size:12px;color:var(--accent);font-style:italic;margin-bottom:4px;">"${e.prompt}"</div>`:''}
+      <div style="font-size:13px;color:var(--text);line-height:1.5;">${e.answer}</div>
+    </div>`;
+
+    const weekEl = document.getElementById('reflection-log-weekly');
+    if(weekEl){
+      const entries = daily.filter(e=>e.date>=weekStart);
+      weekEl.innerHTML = entries.length ? entries.map(fmt).join('') : '<div class="log-empty">No reflections this week.</div>';
+    }
+    const monthEl = document.getElementById('reflection-log-monthly');
+    if(monthEl){
+      const entries = daily.filter(e=>e.date.startsWith(thisMonth));
+      monthEl.innerHTML = entries.length ? entries.map(fmt).join('') : '<div class="log-empty">No reflections this month.</div>';
+    }
+  }catch(e){}
+}
+
 const CPAP_ITEMS = [
   { key:'mask_cushion',     label:'Mask cushion (F30i)',  days:30,  interval:'4–6 weeks' },
   { key:'mask_frame',       label:'Mask frame',           days:90,  interval:'3 months' },
