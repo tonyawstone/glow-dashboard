@@ -37,7 +37,6 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 /* 2-ROW PILLAR NAV */
 .fullscreen-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--cream);z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;box-sizing:border-box;}
 .fullscreen-overlay.open{display:block;}
-body.overlay-open{overflow:hidden;}
 .top-nav{display:grid;grid-template-columns:repeat(4,1fr);background:var(--cream);border-bottom:0.5px solid var(--border);border-top:0.5px solid var(--border);flex-shrink:0;margin-top:0;margin-bottom:0;}
 .top-nav-row2{grid-template-columns:repeat(4,1fr);margin-top:0;border-top:none;margin-bottom:0;}
 .tnav{border:none;background:transparent;padding:12px 2px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);font-family:var(--sans);border-bottom:2px solid transparent;}
@@ -3706,11 +3705,15 @@ function updatePillarRings(checks){
 function openOverlay(id){
   closeAllSheets();
   const el = document.getElementById(id);
-  if(el){ el.classList.add('open'); document.body.classList.add('overlay-open'); }
+  if(el){ el.classList.add('open'); document.body.style.overflow='hidden'; }
 }
 function closeOverlay(id){
   const el = document.getElementById(id);
-  if(el){ el.classList.remove('open'); document.body.classList.remove('overlay-open'); }
+  if(el){ el.classList.remove('open'); }
+  // Only remove overflow lock if no other overlays are open
+  if(!document.querySelector('.fullscreen-overlay.open')){
+    document.body.style.overflow='';
+  }
 }
 function closeAllOverlays(){
   document.querySelectorAll('.fullscreen-overlay').forEach(el=>el.classList.remove('open'));
