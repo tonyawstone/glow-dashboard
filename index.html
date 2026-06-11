@@ -1089,36 +1089,44 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
 
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="card-title" style="margin:0;">Sleep check-in</div><button onclick="openPastSleepLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button></div>
-      <div class="fl">Sleep quality</div>
-      <div class="quality-row" id="sq-tags">
-        <button class="qb" onclick="soloQ(this)">Awful</button><button class="qb" onclick="soloQ(this)">Poor</button><button class="qb" onclick="soloQ(this)">OK</button><button class="qb" onclick="soloQ(this)">Good</button><button class="qb" onclick="soloQ(this)">Great</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSleepCheckin()">
+        <div class="card-title" style="margin:0;">Sleep check-in</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="event.stopPropagation();openPastSleepLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
+          <span id="sleep-checkin-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+        </div>
       </div>
-      <div class="fl">Morning energy</div>
-      <div class="tags" id="energy-am-tags">
-        <button class="tag" onclick="tog(this)">Rested</button>
-        <button class="tag" onclick="tog(this)">Energized</button>
-        <button class="tag" onclick="tog(this)">Tired</button>
-        <button class="tag" onclick="tog(this)">Groggy</button>
-        <button class="tag" onclick="tog(this)">Foggy</button>
-        <button class="tag" onclick="tog(this)">Exhausted</button>
+      <div id="sleep-checkin-body" style="display:none;margin-top:12px;">
+        <div class="fl">Sleep quality</div>
+        <div class="quality-row" id="sq-tags">
+          <button class="qb" onclick="soloQ(this)">Awful</button><button class="qb" onclick="soloQ(this)">Poor</button><button class="qb" onclick="soloQ(this)">OK</button><button class="qb" onclick="soloQ(this)">Good</button><button class="qb" onclick="soloQ(this)">Great</button>
+        </div>
+        <div class="fl">Morning energy</div>
+        <div class="tags" id="energy-am-tags">
+          <button class="tag" onclick="tog(this)">Rested</button>
+          <button class="tag" onclick="tog(this)">Energized</button>
+          <button class="tag" onclick="tog(this)">Tired</button>
+          <button class="tag" onclick="tog(this)">Groggy</button>
+          <button class="tag" onclick="tog(this)">Foggy</button>
+          <button class="tag" onclick="tog(this)">Exhausted</button>
+        </div>
+        <div class="fl">Sleep aids taken last night</div>
+        <div class="med-row" id="t-melatonin" onclick="toggleSleepAid('t-melatonin')">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Melatonin</div><div class="med-note">Sleep onset support</div></div>
+        </div>
+        <div class="med-row" id="t-sleep-gummies" onclick="toggleSleepAid('t-sleep-gummies')" style="margin-bottom:8px;">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Sleep gummies</div><div class="med-note">CBD / magnesium / other</div></div>
+        </div>
+        <div class="fl">Notes</div>
+        <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..." oninput="saveSleepDraft()"></textarea>
+        <button class="btn-primary" onclick="saveSleep()">Log sleep</button>
+        <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px;">Saves to last night's date</div>
+        <button class="btn-ai" onclick="sleepCoach()">Sleep pattern analysis ↗</button>
+        <div id="sleep-coach-output" class="coach-response" style="display:none"></div>
+        <div class="toast-msg" id="slp-t">Saved!</div>
       </div>
-      <div class="fl">Sleep aids taken last night</div>
-      <div class="med-row" id="t-melatonin" onclick="toggleSleepAid('t-melatonin')">
-        <div class="med-check">&#x2713;</div>
-        <div class="med-info"><div class="med-name">Melatonin</div><div class="med-note">Sleep onset support</div></div>
-      </div>
-      <div class="med-row" id="t-sleep-gummies" onclick="toggleSleepAid('t-sleep-gummies')" style="margin-bottom:8px;">
-        <div class="med-check">&#x2713;</div>
-        <div class="med-info"><div class="med-name">Sleep gummies</div><div class="med-note">CBD / magnesium / other</div></div>
-      </div>
-      <div class="fl">Notes</div>
-      <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..." oninput="saveSleepDraft()"></textarea>
-      <button class="btn-primary" onclick="saveSleep()">Log sleep</button>
-      <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px;">Saves to last night's date</div>
-      <button class="btn-ai" onclick="sleepCoach()">Sleep pattern analysis ↗</button>
-      <div id="sleep-coach-output" class="coach-response" style="display:none"></div>
-      <div class="toast-msg" id="slp-t">Saved!</div>
     </div>
 
     <!-- CPAP Equipment -->
@@ -2698,7 +2706,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="body-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="document.getElementById('body-log-overlay').style.display='none';document.body.style.overflow='';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <button onclick="document.getElementById('body-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Body Check-ins</div>
     </div>
     <div id="body-log-overlay-content"><div class="log-empty">Loading...</div></div>
@@ -2718,7 +2726,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="exercise-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="document.getElementById('exercise-log-overlay').style.display='none';document.body.style.overflow='';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <button onclick="document.getElementById('exercise-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Exercise Log</div>
     </div>
     <div id="exercise-log-overlay-content"><div class="log-empty">Loading...</div></div>
@@ -2728,7 +2736,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="skin-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="document.getElementById('skin-log-overlay').style.display='none';document.body.style.overflow='';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <button onclick="document.getElementById('skin-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Skin Check-ins</div>
     </div>
     <div id="skin-log-overlay-content"><div class="log-empty">Loading...</div></div>
@@ -2738,7 +2746,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="facial-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="document.getElementById('facial-log-overlay').style.display='none';document.body.style.overflow='';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <button onclick="document.getElementById('facial-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Facial Log</div>
     </div>
     <div id="facial-log-overlay-content"><div class="log-empty">Loading...</div></div>
@@ -2748,7 +2756,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="musely-log-overlay" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:999;overflow-y:auto;">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="document.getElementById('musely-log-overlay').style.display='none';document.body.style.overflow='';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <button onclick="document.getElementById('musely-log-overlay').style.display='none';" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Musely Treatment Log</div>
     </div>
     <div id="musely-log-overlay-content"><div class="log-empty">Loading...</div></div>
@@ -3108,6 +3116,7 @@ function restoreSleepDraft(){
   if(d.quality) document.getElementById('sq-tags')?.querySelectorAll('.qb').forEach(b=>{ if(b.textContent.trim()===d.quality) b.classList.add('on'); });
   restoreTags('energy-am-tags', d.energy);
   if(d.note && document.getElementById('sleep-note')) document.getElementById('sleep-note').value = d.note;
+  toggleSleepCheckin(true);
 }
 
 // Body draft
@@ -3458,11 +3467,11 @@ async function buildDailyProgress(){
   // Auto-check conditions — read from existing data
   const autoChecks = {};
 
-  // Mind — morning activation
-  try { const ms=getDPManualState(); autoChecks['dp-activation']=ms['dp-morning-activation']||false; } catch(e){}
+  // Mind — morning activation (check IndexedDB for cross-device sync)
+  try { const checkins = await dbAll('checkins'); autoChecks['dp-activation'] = checkins.some(e=>e.type==='activation'&&e.date===today); } catch(e){}
 
-  // Mind — reflection prompt answered (reads from localStorage)
-  try { const ref=JSON.parse(localStorage.getItem('glowReflectionToday')||'{}'); autoChecks['dp-reflection']=ref.date===today&&ref.answer?.length>0; } catch(e){ autoChecks['dp-reflection']=false; }
+  // Mind — reflection prompt answered (check IndexedDB for cross-device sync)
+  try { const refs = await dbAll('reflections'); autoChecks['dp-reflection'] = refs.some(e=>e.type==='daily'&&e.date===today&&e.answer?.length>0); } catch(e){ autoChecks['dp-reflection']=false; }
 
   // Mind — mood logged today
   try { const minds = await dbAll('minds'); autoChecks['dp-mood'] = minds.some(e=>e.date===today); } catch(e){}
@@ -3501,15 +3510,22 @@ async function buildDailyProgress(){
 
   // Skin AM/PM — read from skin routine state (resets daily)
   // Also check Musely game
+  // Skin routine — check localStorage first, then Blob
   try {
-    const skinState = JSON.parse(localStorage.getItem('glowSkinRoutine')||'{}');
+    let skinState = JSON.parse(localStorage.getItem('glowSkinRoutine')||'{}');
+    if(skinState.date !== today){
+      // Try Blob for cross-device
+      const res = await fetch(`${BACKEND}/api/sync?pillar=skin_routine&t=${Date.now()}`);
+      if(res.ok){ const d=await res.json(); skinState=d.data||{}; }
+    }
     const skinToday = skinState.date === today;
     autoChecks['dp-skin-am'] = skinToday && ['r-cleanser','r-serum','r-vitc','r-spf'].every(id=>skinState[id]);
     autoChecks['dp-skin-pm'] = skinToday && (skinState['r-musely-aa']||skinState['r-musely-spot'])&&skinState['r-regen'];
     autoChecks['dp-musely-game'] = skinToday && skinState['r-musely-game']===true;
   } catch(e){
-    autoChecks['dp-skin-am'] = manualState['dp-skin-am']||false;
-    autoChecks['dp-skin-pm'] = manualState['dp-skin-pm']||false;
+    autoChecks['dp-skin-am'] = false;
+    autoChecks['dp-skin-pm'] = false;
+    autoChecks['dp-musely-game'] = false;
   }
 
   // Body check-in — logged today
@@ -3660,7 +3676,7 @@ async function openPastSleepLog(){
   const overlay = document.getElementById('sleep-log-overlay');
   const content = document.getElementById('sleep-log-overlay-content');
   overlay.style.display = 'block';
-  document.body.style.overflow = 'hidden';
+  
   const sleeps = await dbAll('sleeps');
   if(!sleeps.length){ content.innerHTML='<div class="log-empty">No sleep entries yet.</div>'; return; }
   const sorted = [...sleeps].reverse();
@@ -3678,13 +3694,13 @@ async function openPastSleepLog(){
 
 function closeSleepLogOverlay(){
   document.getElementById('sleep-log-overlay').style.display='none';
-  document.body.style.overflow='';
+  
 }
 
 async function openBodyLog(){
   const overlay = document.getElementById('body-log-overlay');
   const el = document.getElementById('body-log-overlay-content');
-  overlay.style.display='block'; document.body.style.overflow='hidden';
+  overlay.style.display='block'; 
   const bodies = await dbAll('bodies');
   if(!bodies.length){ el.innerHTML='<div class="log-empty">No body check-ins yet.</div>'; return; }
   el.innerHTML = [...bodies].reverse().map(e=>'<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
@@ -3700,7 +3716,7 @@ async function openBodyLog(){
 async function openExerciseLog(){
   const overlay = document.getElementById('exercise-log-overlay');
   const el = document.getElementById('exercise-log-overlay-content');
-  overlay.style.display='block'; document.body.style.overflow='hidden';
+  overlay.style.display='block'; 
   const exs = await dbAll('exercises');
   if(!exs.length){ el.innerHTML='<div class="log-empty">No exercise entries yet.</div>'; return; }
   el.innerHTML = [...exs].reverse().map(e=>{
@@ -3722,7 +3738,7 @@ async function openExerciseLog(){
 async function openSkinLog(){
   const overlay = document.getElementById('skin-log-overlay');
   const el = document.getElementById('skin-log-overlay-content');
-  overlay.style.display='block'; document.body.style.overflow='hidden';
+  overlay.style.display='block'; 
   const skins = await dbAll('skins');
   const entries = skins.filter(s=>s.type==='checkin').reverse();
   if(!entries.length){ el.innerHTML='<div class="log-empty">No skin check-ins yet.</div>'; return; }
@@ -3738,7 +3754,7 @@ async function openSkinLog(){
 async function openFacialLog(){
   const overlay = document.getElementById('facial-log-overlay');
   const el = document.getElementById('facial-log-overlay-content');
-  overlay.style.display='block'; document.body.style.overflow='hidden';
+  overlay.style.display='block'; 
   const skins = await dbAll('skins');
   const entries = skins.filter(s=>s.type==='facial').reverse();
   if(!entries.length){ el.innerHTML='<div class="log-empty">No facial logs yet.</div>'; return; }
@@ -3752,7 +3768,7 @@ function openMuselyLog(){
   const overlay = document.getElementById('musely-log-overlay');
   const content = document.getElementById('musely-log-overlay-content');
   overlay.style.display = 'block';
-  document.body.style.overflow = 'hidden';
+  
   const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
   if(!history.length){ content.innerHTML='<div class="log-empty">No Musely treatments logged yet.</div>'; return; }
   content.innerHTML = [...history].reverse().map(e=>{
@@ -3782,7 +3798,7 @@ async function openPastMindLog(){
   const overlay = document.getElementById('mood-log-overlay');
   const content = document.getElementById('mood-log-overlay-content');
   overlay.style.display = 'block';
-  document.body.style.overflow = 'hidden';
+  
   const minds = await dbAll('minds');
   if(!minds.length){ content.innerHTML='<div class="log-empty">No mood entries yet.</div>'; return; }
   const sorted = [...minds].reverse();
@@ -3802,7 +3818,7 @@ async function openPastMindLog(){
 
 function closeMoodLogOverlay(){
   document.getElementById('mood-log-overlay').style.display='none';
-  document.body.style.overflow='';
+  
 }
 
 function toggleActivation(){
@@ -3814,13 +3830,21 @@ function toggleActivation(){
   if(open) restoreActivationState();
 }
 
-function restoreActivationState(){
-  const manualState = getDPManualState();
-  if(manualState['dp-morning-activation']){
-    // Show completed badge on header (always, even when collapsed)
+async function restoreActivationState(){
+  const today = nowStr();
+  // Check IndexedDB first (cross-device), fall back to localStorage
+  let isComplete = false;
+  try {
+    const checkins = await dbAll('checkins');
+    isComplete = checkins.some(e=>e.type==='activation'&&e.date===today);
+  } catch(e){}
+  if(!isComplete){
+    const manualState = getDPManualState();
+    isComplete = manualState['dp-morning-activation']||false;
+  }
+  if(isComplete){
     const badge = document.getElementById('activation-done-badge');
     if(badge) badge.style.display = 'inline';
-    // Mark all steps done visually if body is open
     ['act-breathe','act-ground','act-cool','act-move','act-march'].forEach(id=>{
       const row = document.getElementById(id);
       if(row) row.classList.add('done');
@@ -3842,13 +3866,23 @@ function doneActivationStep(rowId, widgetId){
   checkActivationComplete();
 }
 
-function checkActivationComplete(){
+async function checkActivationComplete(){
   const steps = ['act-breathe','act-ground','act-cool','act-move','act-march'];
   const allDone = steps.every(id => document.getElementById(id)?.classList.contains('done'));
   const msg = document.getElementById('act-complete-msg');
   if(allDone && msg){
     msg.style.display = 'block';
-    // Update Daily Progress
+    // Save to IndexedDB for cross-device sync
+    const today = nowStr();
+    try {
+      const existing = await dbAll('checkins');
+      const alreadySaved = existing.some(e=>e.type==='activation'&&e.date===today);
+      if(!alreadySaved){
+        await dbAdd('checkins', {type:'activation', date:today, completedAt: new Date().toISOString()});
+        syncToBlob('checkins');
+      }
+    } catch(e){}
+    // Also keep localStorage for same-device instant restore
     const manualState = getDPManualState();
     manualState['dp-morning-activation'] = true;
     saveDPManualState(manualState);
@@ -4353,7 +4387,7 @@ async function openShoppingLightbox(id){
 
   _renderLightboxItems(entry, checkState);
   lb.style.display='block';
-  document.body.style.overflow='hidden';
+  
   const addBtn=document.getElementById('slb-add-btn');
   if(addBtn){ addBtn.onclick=null; addBtn.addEventListener('click', addShoppingItem); }
   const addInput=document.getElementById('slb-new-item');
@@ -4421,14 +4455,14 @@ async function completeShoppingLookFromLightbox(){
 
 function closeShoppingLightbox(){
   document.getElementById('shopping-lightbox').style.display='none';
-  document.body.style.overflow='';
+  
   _slbDate=null;
   if(shoppingViewOpen) renderShoppingList();
 }
 
 function goToShoppingList(){
   document.getElementById('shopping-lightbox').style.display='none';
-  document.body.style.overflow='';
+  
   _slbDate=null;
   // Ensure shopping view is open regardless of current state
   inspoViewOpen=false;
@@ -4825,7 +4859,7 @@ function openSleepScoreInfo(){
     </div>
   `;
   document.getElementById('guide-sheet').classList.add('open');
-  document.body.style.overflow='hidden';
+  
 }
 
 function openAbout(){
@@ -5107,13 +5141,13 @@ function openGuide(pillar){
   `).join('');
   const sheet = document.getElementById('guide-sheet');
   sheet.classList.add('open');
-  document.body.style.overflow='hidden';
+  
 }
 
 function closeGuide(ev){
   if(ev&&ev.target!==document.getElementById('guide-sheet')) return;
   document.getElementById('guide-sheet').classList.remove('open');
-  document.body.style.overflow='';
+  
 }
 async function updateOutfitNudge(){
   const nudge=document.getElementById('today-outfit-nudge');
@@ -5128,7 +5162,7 @@ async function updateOutfitNudge(){
 function openQuickLog(){
   const ol=document.getElementById('quick-log-overlay');
   ol.style.display='flex';
-  document.body.style.overflow='hidden';
+  
   // Reset
   document.getElementById('ql-desc').value='';
   const qlPhoto=document.getElementById('ql-photo');
@@ -5138,7 +5172,7 @@ function openQuickLog(){
 
 function closeQuickLog(){
   document.getElementById('quick-log-overlay').style.display='none';
-  document.body.style.overflow='';
+  
 }
 
 async function saveQuickLog(){
@@ -5325,13 +5359,13 @@ function openLightbox(e){
   starsEl.textContent=e.stars?'★'.repeat(e.stars):'';
 
   lb.classList.add('open');
-  document.body.style.overflow='hidden';
+  
 }
 
 function closeLightbox(ev){
   if(ev&&ev.target!==document.getElementById('outfit-lightbox')&&!ev.target.classList.contains('lightbox-close'))return;
   document.getElementById('outfit-lightbox').classList.remove('open');
-  document.body.style.overflow='';
+  
 }
 
 async function deleteOutfitFromLightbox(){
@@ -5401,7 +5435,7 @@ async function saveSleep(){
   document.getElementById('sleep-note').value='';
   ['cpap-tags','energy-am-tags'].forEach(id=>document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
-  toast('slp-t');loadLogs();
+  toast('slp-t');loadLogs();toggleSleepCheckin(false);
 }
 
 
@@ -5409,14 +5443,34 @@ var SKIN_STEPS_AM = ['r-cleanser','r-serum','r-vitc','r-spf','r-eye'];
 var SKIN_STEPS_PM = ['r-musely-aa','r-musely-spot','r-regen','r-musely-game'];
 var SKIN_STEPS_KEY = 'glowSkinRoutine';
 
-function loadSkinRoutineState(){
+async function loadSkinRoutineState(){
+  const today = nowStr();
+  // Try localStorage first (fast, same device)
   try {
     const saved = JSON.parse(localStorage.getItem(SKIN_STEPS_KEY)||'{}');
-    if(saved.date !== nowStr()){ localStorage.removeItem(SKIN_STEPS_KEY); return; }
-    [...SKIN_STEPS_AM, ...SKIN_STEPS_PM].forEach(id=>{
-      if(saved[id]) document.getElementById(id)?.classList.add('done');
-    });
-    updateSkinProgress();
+    if(saved.date === today){
+      [...SKIN_STEPS_AM, ...SKIN_STEPS_PM].forEach(id=>{
+        if(saved[id]) document.getElementById(id)?.classList.add('done');
+      });
+      updateSkinProgress();
+      return;
+    }
+  } catch(e){}
+  // Fall back to Blob (cross-device)
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=skin_routine&t=${Date.now()}`);
+    if(res.ok){
+      const d = await res.json();
+      const saved = d.data||{};
+      if(saved.date === today){
+        [...SKIN_STEPS_AM, ...SKIN_STEPS_PM].forEach(id=>{
+          if(saved[id]) document.getElementById(id)?.classList.add('done');
+        });
+        // Also write to localStorage for future fast loads
+        localStorage.setItem(SKIN_STEPS_KEY, JSON.stringify(saved));
+        updateSkinProgress();
+      }
+    }
   } catch(e){}
 }
 
@@ -5424,14 +5478,20 @@ function toggleSkinStep(id){
   const el = document.getElementById(id);
   if(!el) return;
   el.classList.toggle('done');
-  // Save state
   const state = { date: nowStr() };
   [...SKIN_STEPS_AM, ...SKIN_STEPS_PM].forEach(sid=>{
     state[sid] = document.getElementById(sid)?.classList.contains('done')||false;
   });
+  // Save to localStorage (fast) and Blob (cross-device)
   localStorage.setItem(SKIN_STEPS_KEY, JSON.stringify(state));
+  // Direct Blob write — skin_routine is a simple object, not an array
+  fetch(`${BACKEND}/api/sync`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({pillar:'skin_routine', data: state})
+  }).catch(e=>console.warn('skin_routine sync error:',e));
   updateSkinProgress();
-  buildDailyProgress(); // update the Today checklist
+  buildDailyProgress();
 }
 
 function updateSkinProgress(){
@@ -5495,6 +5555,16 @@ function restoreMindDraft(){
     if(draft.stress) setStars('stress-stars', draft.stress);
     if(draft.bodyImage) setStars('body-image-stars', draft.bodyImage);
   } catch(e){}
+}
+
+function toggleSleepCheckin(forceOpen){
+  const body = document.getElementById('sleep-checkin-body');
+  const arrow = document.getElementById('sleep-checkin-arrow');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  if(arrow) arrow.textContent = open ? '▴' : '▾';
 }
 
 function toggleMindCheckin(forceOpen){
@@ -9584,7 +9654,7 @@ function openPillarInfo(pillar){
     </div>
   `;
   document.getElementById('guide-sheet').classList.add('open');
-  document.body.style.overflow='hidden';
+  
 }
 
 const PILLAR_KEYS = ['physical','emotional','mental','social','spiritual','environmental','financial'];
@@ -10786,12 +10856,12 @@ function openGlowInsights(){
   const source = document.getElementById('health-insights-content');
   if(content && source) content.innerHTML = source.innerHTML || '<div class="log-empty">Tap "Calculate" on your Glow Score to generate insights first.</div>';
   overlay.style.display = 'block';
-  document.body.style.overflow = 'hidden';
+  
 }
 
 function closeGlowInsights(){
   document.getElementById('glow-insights-overlay').style.display = 'none';
-  document.body.style.overflow = '';
+  
 }
 
 function toggleCheckinForm(){
@@ -10815,7 +10885,7 @@ async function openCheckinHistory(){
   const overlay = document.getElementById('checkin-history-overlay');
   const content = document.getElementById('checkin-history-content');
   overlay.style.display = 'block';
-  document.body.style.overflow = 'hidden';
+  
   const checkins = await dbAll('checkins');
   if(!checkins.length){ content.innerHTML = '<div class="log-empty">No check-ins yet.</div>'; return; }
   content.innerHTML = checkins.slice().reverse().map(c => {
@@ -10833,7 +10903,7 @@ async function openCheckinHistory(){
 
 function closeCheckinHistory(){
   document.getElementById('checkin-history-overlay').style.display = 'none';
-  document.body.style.overflow = '';
+  
 }
 
 let _coachPage = 0;
@@ -10841,7 +10911,7 @@ async function openCoachHistory(){
   _coachPage = 0;
   const overlay = document.getElementById('coach-history-overlay');
   overlay.style.display = 'block';
-  document.body.style.overflow = 'hidden';
+  
   await renderCoachHistory();
 }
 
@@ -10874,7 +10944,7 @@ async function loadMoreCoach(){
 
 function closeCoachHistory(){
   document.getElementById('coach-history-overlay').style.display = 'none';
-  document.body.style.overflow = '';
+  
 }
 
 function triggerHairAnalysis(){
