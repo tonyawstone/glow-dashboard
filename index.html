@@ -10405,6 +10405,9 @@ function renderSavedScore(saved){
   const scoreLabel = totalScore>=85?'Thriving':totalScore>=70?'Strong':totalScore>=55?'Building':'Needs attention';
   const savedDate = new Date(saved.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
+  // Update Today ring — delay ensures ring wrapper exists after buildDailyProgress
+  if(!window.glowScore){ window.glowScore = totalScore; setTimeout(()=>updateTodayRing(totalScore), 600); }
+
   // Compact summary shown when collapsed
   if(summaryEl) summaryEl.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
