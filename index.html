@@ -1928,15 +1928,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="tags" id="concern-tags">
           <button class="tag" onclick="tog(this)">Hyperpigmentation</button><button class="tag" onclick="tog(this)">Fine lines</button><button class="tag" onclick="tog(this)">Texture</button><button class="tag" onclick="tog(this)">Pores</button><button class="tag" onclick="tog(this)">Redness</button>
         </div>
-        <div class="fl">Derm notes</div>
-        <textarea id="derm-note" rows="2" placeholder="Rx changes, appt notes..." oninput="saveSkinDraft()"></textarea>
         <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
           <div style="font-size:12px;color:var(--muted);">Logging for:</div>
           <input type="date" id="skin-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
         </div>
         <button class="btn-primary" onclick="saveSkin()">Log skin check-in</button>
-        <button class="btn-ai" onclick="dermCoach()">Derm prep questions &#x2197;</button>
-        <div id="derm-coach-output" class="coach-response" style="display:none"></div>
         <div class="toast-msg" id="skt">Saved!</div>
       </div>
     </div>
@@ -2012,6 +2008,18 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div id="skin-scan-status" style="display:none;margin-top:10px;padding:12px;border-radius:12px;font-size:13px;"></div>
       </div>
     </div>
+
+    <!-- Monthly photos — moved here, after weekly scan -->
+    <div class="card">
+      <div class="card-title">Monthly photos · May 2026</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Front · Left · Right · once per month</div>
+      <div class="photo-grid">
+        <div onclick="pickPhoto('skin-may26-front')" id="skin-may26-front" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Front</div></div>
+        <div onclick="pickPhoto('skin-may26-left')" id="skin-may26-left" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Left</div></div>
+        <div onclick="pickPhoto('skin-may26-right')" id="skin-may26-right" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Right</div></div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">Treatment start dates</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Track when each treatment began — used to measure improvement over time.</div>
@@ -2020,22 +2028,30 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toggle-row"><div><div class="tl">Olay Morning Routine</div><div class="ts" id="start-olay-display">Tap to set start date</div></div><input type="text" id="start-olay" placeholder="e.g. Mar 2024" style="width:110px;padding:6px 8px;font-size:12px;" onchange="saveStartDate('olay',this.value)"></div>
       <div class="toggle-row"><div><div class="tl">Facials (every 8 weeks)</div><div class="ts" id="start-facials-display">Tap to set start date</div></div><input type="text" id="start-facials" placeholder="e.g. Jun 2024" style="width:110px;padding:6px 8px;font-size:12px;" onchange="saveStartDate('facials',this.value)"></div>
     </div>
-    <div class="card">
-      <div class="fl">Next facial date</div>
-      <input type="text" id="next-facial" placeholder="e.g. July 5, 2026">
-      <div class="fl">Notes from last facial</div>
-      <textarea id="facial-notes" rows="2" placeholder="What was done, products, skin reaction..."></textarea>
-      <button class="btn-primary" onclick="saveFacial()">Save facial log</button>
-      <div class="toast-msg" id="ft">Saved!</div>
+
+    <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-title" style="margin:0;">Facial log</div><button onclick="openFacialLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button></div>
     </div>
-    <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-title" style="margin:0;">Log a facial</div><button onclick="openFacialLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button></div>
-    </div>
+
+    <!-- Derm prep — every 8 weeks -->
     <div class="card">
-      <div class="card-title">Monthly photos · May 2026</div>
-      <div class="photo-grid">
-        <div onclick="pickPhoto('skin-may26-front')" id="skin-may26-front" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Front</div></div>
-        <div onclick="pickPhoto('skin-may26-left')" id="skin-may26-left" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Left</div></div>
-        <div onclick="pickPhoto('skin-may26-right')" id="skin-may26-right" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Right</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleDermCard()">
+        <div>
+          <div class="card-title" style="margin:0;">🩺 Derm appointment prep</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Every 8 weeks · use before your visit</div>
+        </div>
+        <span id="derm-card-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+      </div>
+      <div id="derm-card-body" style="display:none;margin-top:12px;">
+        <div class="fl">Next facial date</div>
+        <input type="text" id="next-facial" placeholder="e.g. July 5, 2026">
+        <div class="fl">Notes from last facial</div>
+        <textarea id="facial-notes" rows="2" placeholder="What was done, products, skin reaction..."></textarea>
+        <div class="fl">Notes / questions for derm</div>
+        <textarea id="derm-note" rows="3" placeholder="Rx changes, skin reactions, questions to ask, things you've noticed since last visit..."></textarea>
+        <button class="btn-primary" onclick="saveFacial()">Save derm notes</button>
+        <button class="btn-ai" style="margin-top:8px;" onclick="dermCoach()">✨ Generate derm prep questions ↗</button>
+        <div id="derm-coach-output" class="coach-response" style="display:none"></div>
+        <div class="toast-msg" id="ft">Saved!</div>
       </div>
     </div>
   </div>
@@ -3150,7 +3166,6 @@ function saveSkinDraft(){
   savePillarDraft('skin',{
     skinT: getTags('skin-tags'),
     concerns: getTags('concern-tags'),
-    derm: document.getElementById('derm-note')?.value||'',
     musely_aa: document.getElementById('r-musely-aa')?.classList.contains('on')||false,
     musely_spot: document.getElementById('r-musely-spot')?.classList.contains('on')||false
   });
@@ -3159,7 +3174,6 @@ function restoreSkinDraft(){
   const d = getPillarDraft('skin'); if(!d) return;
   restoreTags('skin-tags', d.skinT);
   restoreTags('concern-tags', d.concerns);
-  if(d.derm && document.getElementById('derm-note')) document.getElementById('derm-note').value = d.derm;
   restoreCheckbox('r-musely-aa', d.musely_aa);
   restoreCheckbox('r-musely-spot', d.musely_spot);
   toggleSkinCheckin(true);
@@ -5590,6 +5604,16 @@ function toggleSkinAM(forceOpen){
 function toggleSkinPM(forceOpen){
   const body = document.getElementById('skin-pm-body');
   const arrow = document.getElementById('skin-pm-arrow');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  if(arrow) arrow.textContent = open ? '▴' : '▾';
+}
+
+function toggleDermCard(forceOpen){
+  const body = document.getElementById('derm-card-body');
+  const arrow = document.getElementById('derm-card-arrow');
   if(!body) return;
   const isOpen = body.style.display !== 'none';
   const open = forceOpen !== undefined ? forceOpen : !isOpen;
@@ -12072,7 +12096,7 @@ async function loadCoachingInsights() {
     if (!res.ok) return;
     const { data } = await res.json();
     if (!data) return;
-    // Restore last response for each coach output
+    // Restore last response for each coach output (regardless of date)
     Object.entries(data).forEach(([outputId, insight]) => {
       const el = document.getElementById(outputId);
       if (el && insight.text) {
@@ -12203,7 +12227,29 @@ Keep it warm, personal, and coach-like. 3-4 paragraphs max.`;
   }
 }
 
-{ callCoach('Skin','Based on my skincare routine, what questions should I bring to my next derm appointment?','derm-coach-output'); }
+async function dermCoach(){
+  // Gather recent skin check-ins (last 7 days)
+  const skins = await dbAll('skins');
+  const today = nowStr();
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+  const weekAgoStr = weekAgo.toISOString().slice(0,10);
+  const recentCheckins = skins.filter(e=>e.type==='checkin'&&e.date>=weekAgoStr)
+    .map(e=>`${e.date}: skin=[${(e.skinT||[]).join(',')}] concerns=[${(e.concerns||[]).join(',')}]`).join('\n');
+  // Routine completion today
+  const skinState = JSON.parse(localStorage.getItem('glowSkinRoutine')||'{}');
+  const skinToday = skinState.date === today;
+  const amDone = skinToday ? SKIN_STEPS_AM.filter(id=>skinState[id]).length : 0;
+  const pmDone = skinToday ? SKIN_STEPS_PM.filter(id=>skinState[id]).length : 0;
+  const logData = {
+    recentCheckins: recentCheckins || 'No recent check-ins',
+    amRoutineToday: `${amDone}/${SKIN_STEPS_AM.length} steps done`,
+    pmRoutineToday: `${pmDone}/${SKIN_STEPS_PM.length} steps done`,
+    muselyAA: skinState['r-musely-aa']||false,
+    muselySpot: skinState['r-musely-spot']||false,
+    dermNotes: document.getElementById('derm-note')?.value||''
+  };
+  callCoach('Skin','Based on my recent skin check-ins, routine completion, and Musely treatment schedule, what questions should I bring to my next derm appointment?','derm-coach-output', logData);
+}
 function hairCoach(){ callCoach('Hair','I am growing my hair from chin to collarbone length. What should I focus on for healthy growth?','hair-coach-output'); }
 function mindCoach(){ callCoach('Mind','Give me an honest encouraging weekly reflection on my overall wellness journey.','mind-coach-output'); }
 
