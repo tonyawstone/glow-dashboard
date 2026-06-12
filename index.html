@@ -4396,6 +4396,7 @@ async function saveOutfit(){
   if(photoSlot){photoSlot.innerHTML='<i class="ti ti-camera" aria-hidden="true"></i>';}
   await renderLookbook();
   await updateOutfitNudge();
+  buildDailyProgress();
   const isInspo=outfitEntry.src==='Inspo'||outfitEntry.src==='DailyLook';
   if(isInspo){
     // Switch to inspo view so they can see it landed there
