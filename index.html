@@ -787,7 +787,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 
   <div class="view-content on" id="vc-style-daily">
-    <div class="section-label">Style & Wardrobe <button class="guide-btn" onclick="openGuide('style')">?</button></div>
+    <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;">Style & Wardrobe <button class="guide-btn" onclick="openGuide('style')">?</button><button onclick="repairOutfitPhotos()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--sans);padding:0;">Sync photos →</button></div>
 
     <!-- Planned look reminder -->
     <div id="planned-look-banner" style="display:none;background:var(--warm);border-radius:12px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">
@@ -1723,10 +1723,16 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Medications & Vitamins -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleMedsForm()">
-        <div class="card-title" style="margin:0;">💊 Medications & supplements · daily</div>
-        <button id="meds-form-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="card-title" style="margin:0;">💊 Medications & supplements · daily</div>
+          <div id="meds-form-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+        </div>
+        <div id="meds-header-status" style="font-size:11px;color:var(--muted);"></div>
       </div>
-      <div id="meds-progress" style="margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--warm);font-size:12px;color:var(--muted);">Tap to log today's medications</div>
+      <!-- Saved state cards — always visible outside collapsible -->
+      <div id="meds-am-saved" style="display:none;margin-top:10px;"></div>
+      <div id="meds-afternoon-saved" style="display:none;margin-top:6px;"></div>
+      <div id="meds-pm-saved" style="display:none;margin-top:6px;"></div>
       <!-- Collapsible checklist -->
       <div id="meds-form-body" style="display:none;margin-top:12px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
@@ -3521,13 +3527,12 @@ async function syncToBlob(store) {
       });
       if(!exists) merged.push(entry);
     }
-    // For outfits/skins/hairs — strip base64 photos to keep payload small
-    // Photos are stored separately via Blob upload; keep URLs only
+    // For outfits/skins/hairs — strip base64 photos only, keep Blob URLs
     let payload = merged;
     if(['outfits','skins','hairs'].includes(store)){
       payload = merged.map(e=>{
         if(e.photo && e.photo.startsWith('data:')){ return {...e, photo:''}; }
-        return e;
+        return e; // keep Blob URLs (https://...) intact
       });
     }
     await fetch(`${BACKEND}/api/sync`, {
@@ -4419,6 +4424,41 @@ function outfitCardHTML(e, slotId){
       ${e.notes?`<div style="font-size:11px;color:var(--muted);margin-top:5px;font-style:italic;">"${e.notes}"</div>`:''}
     </div>
   </div>`;
+}
+
+async function repairOutfitPhotos(){
+  // Upload any base64 outfit photos to Blob storage and update the entry with the URL
+  // Call once to fix existing entries that have base64 photos
+  try{
+    const outfits = await dbAll('outfits');
+    let repaired = 0;
+    for(const entry of outfits){
+      if(entry.photo && entry.photo.startsWith('data:') && entry.id){
+        try{
+          // Upload to Blob storage
+          const slotId = 'outfit-'+entry.id;
+          const res = await fetch(`${BACKEND}/api/upload-photo`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({slotId, dataUrl:entry.photo})
+          });
+          if(res.ok){
+            const {url} = await res.json();
+            // Update entry with Blob URL
+            entry.photo = url;
+            await dbUpdate('outfits', entry);
+            repaired++;
+          }
+        }catch(e){}
+      }
+    }
+    if(repaired > 0){
+      syncToBlob('outfits');
+      showToast(`✓ ${repaired} outfit photo${repaired>1?'s':''} synced cross-device`);
+    } else {
+      showToast('Outfit photos already up to date');
+    }
+  }catch(e){ showToast('Could not repair photos'); }
 }
 
 async function renderLookbook(){
@@ -12326,61 +12366,102 @@ function toggleMed(id){
   updateMedsProgress();
 }
 
-function updateMedsProgress(){
-  const allMeds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo',
-    'med-multivitamin','med-biotin','med-vitc','med-collagen','med-superbeets',
-    'med-rosuvastatin','med-miralax','med-melatonin-eve','med-sleep-gummies-eve'];
-  const AM_MEDS = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo'];
-  const PM_MEDS = ['med-rosuvastatin'];
-  const required = [...AM_MEDS, ...PM_MEDS];
-  const done = allMeds.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
-  const reqDone = required.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
-  const amDone = AM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
-  const pmDone = PM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
-  const el = document.getElementById('meds-progress');
-  const btn = document.getElementById('meds-save-btn');
+const AM_MEDS = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo'];
+const AM_SUPPLEMENTS = ['med-multivitamin','med-biotin','med-vitc'];
+const AFTERNOON_MEDS = ['med-collagen','med-superbeets'];
+const PM_MEDS = ['med-rosuvastatin'];
+const ALL_MEDS = [...AM_MEDS,...AM_SUPPLEMENTS,...AFTERNOON_MEDS,'med-rosuvastatin','med-miralax','med-melatonin-eve','med-sleep-gummies-eve'];
 
-  // Auto-save state to localStorage on every tap
-  const state = { date: nowStr() };
-  allMeds.forEach(id=>{ state[id] = document.getElementById(id)?.classList.contains('done')||false; });
+function showMedsSavedCard(sectionId, label, items, editFn){
+  const el = document.getElementById(sectionId);
+  if(!el) return;
+  const chips = items.map(id=>{
+    const name = document.getElementById(id)?.querySelector('.med-name')?.textContent||id;
+    return `<span style="background:#EAF3DE;border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;color:#27500A;">${name}</span>`;
+  }).join('');
+  el.style.display='block';
+  el.innerHTML=`<div style="background:#EAF3DE;border-top:2px solid #6B9E78;border-radius:12px;padding:10px 12px;">
+    <div style="font-size:11px;color:#27500A;font-weight:600;margin-bottom:6px;">${label} ✓ <button onclick="${editFn}()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+    <div>${chips}</div>
+  </div>`;
+}
+
+async function saveMedsToBlob(){
+  const logDate = document.getElementById('meds-log-date')?.value || nowStr();
+  const state = { date: logDate, isoDate: new Date().toISOString() };
+  ALL_MEDS.forEach(id=>{ state[id] = document.getElementById(id)?.classList.contains('done')||false; });
   localStorage.setItem('glowMedsToday', JSON.stringify(state));
+  // Save to meds_log Blob
+  try{
+    const existing = await fetch(`${BACKEND}/api/sync?pillar=meds_log&t=${Date.now()}`)
+      .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
+    const idx = existing.findIndex(e=>e.date===state.date);
+    if(idx>=0) existing[idx]=state; else existing.push(state);
+    await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'meds_log',data:existing})});
+  }catch(e){}
+}
 
-  if(reqDone === required.length){
-    if(el){ el.innerHTML='✅ All Rx meds taken today' + (done > required.length ? ` · ${done - required.length} supplements also logged`:''); el.style.color='#27500A'; el.style.background='#EAF3DE'; }
-    if(btn) btn.style.display='block';
-  } else {
-    if(el){ el.innerHTML=`${reqDone}/${required.length} Rx meds taken · ${done} total logged today`; el.style.color='var(--muted)'; el.style.background='var(--warm)'; }
-    if(btn) btn.style.display = amDone || pmDone ? 'block' : 'none';
+function updateMedsProgress(){
+  const amRxDone = AM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
+  const amSuppDone = AM_SUPPLEMENTS.every(id=>document.getElementById(id)?.classList.contains('done'));
+  const amAllDone = amRxDone && amSuppDone;
+  const afternoonDone = AFTERNOON_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
+  const pmDone = PM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
+
+  // Save to Blob on every tap — never lose partial progress
+  saveMedsToBlob();
+
+  // Show saved state cards when sections complete
+  if(amAllDone){
+    showMedsSavedCard('meds-am-saved','☀️ AM meds & supplements',[...AM_MEDS,...AM_SUPPLEMENTS],'editMedsAM');
+    // Auto-collapse if all sections done
+    if(afternoonDone && pmDone){ const b=document.getElementById('meds-form-body'); if(b) b.style.display='none'; const c=document.getElementById('meds-form-chevron'); if(c) c.style.transform=''; }
+  } else if(amRxDone){
+    // Rx done but not supplements yet — show partial saved card
+    showMedsSavedCard('meds-am-saved','☀️ AM Rx meds ✓ (supplements pending)',AM_MEDS,'editMedsAM');
   }
-  // Update DP checklist immediately when AM or PM meds complete
-  if(amDone || pmDone) buildDailyProgress();
+
+  if(afternoonDone){
+    showMedsSavedCard('meds-afternoon-saved','☕ Afternoon supplements',AFTERNOON_MEDS,'editMedsAfternoon');
+  }
+
+  if(pmDone){
+    showMedsSavedCard('meds-pm-saved','🌙 PM meds',PM_MEDS,'editMedsPM');
+  }
+
+  // Update header status
+  const statusEl = document.getElementById('meds-header-status');
+  if(statusEl){
+    const sections = [amRxDone?'AM':'', afternoonDone?'PM':'', pmDone?'Evening':''].filter(Boolean);
+    statusEl.textContent = sections.length ? sections.join(' · ')+' ✓' : '';
+    statusEl.style.color = sections.length === 3 ? '#6B9E78' : 'var(--muted)';
+  }
+
+  // Trigger DP for AM Rx and PM
+  if(amRxDone || pmDone) buildDailyProgress();
+}
+
+function editMedsAM(){
+  const el=document.getElementById('meds-am-saved'); if(el) el.style.display='none';
+  const b=document.getElementById('meds-form-body'); if(b){b.style.display='block'; const c=document.getElementById('meds-form-chevron'); if(c) c.style.transform='rotate(90deg)';}
+}
+function editMedsAfternoon(){
+  const el=document.getElementById('meds-afternoon-saved'); if(el) el.style.display='none';
+  const b=document.getElementById('meds-form-body'); if(b){b.style.display='block'; const c=document.getElementById('meds-form-chevron'); if(c) c.style.transform='rotate(90deg)';}
+}
+function editMedsPM(){
+  const el=document.getElementById('meds-pm-saved'); if(el) el.style.display='none';
+  const b=document.getElementById('meds-form-body'); if(b){b.style.display='block'; const c=document.getElementById('meds-form-chevron'); if(c) c.style.transform='rotate(90deg)';}
 }
 
 async function saveMedsChecklist(){
-  const allMeds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo',
-    'med-multivitamin','med-biotin','med-vitc','med-collagen','med-superbeets',
-    'med-rosuvastatin','med-miralax','med-melatonin-eve','med-sleep-gummies-eve'];
-  const logDate = document.getElementById('meds-log-date')?.value || nowStr();
-  const state = { date: logDate, isoDate: new Date().toISOString() };
-  allMeds.forEach(id=>{ state[id] = document.getElementById(id)?.classList.contains('done')||false; });
-  localStorage.setItem('glowMedsToday', JSON.stringify(state));
-
-  // Log to Blob for history
-  const existing = await fetch(`${BACKEND}/api/sync?pillar=meds_log`)
-    .then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
-  const idx = existing.findIndex(e=>e.date===state.date);
-  if(idx>=0) existing[idx]=state; else existing.push(state);
-  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'meds_log',data:existing})}).catch(()=>{});
-
+  await saveMedsToBlob();
   const btn = document.getElementById('meds-save-btn');
   if(btn){ btn.textContent='✅ Logged for today!'; btn.style.background='#EAF3DE'; btn.style.borderColor='#6B9E78'; btn.style.color='#27500A'; setTimeout(()=>{ btn.textContent='✅ Log all Rx meds taken today'; btn.style.background=''; btn.style.borderColor=''; btn.style.color=''; },3000); }
   toast('meds-toast');
 }
 
 async function loadMedsChecklist(){
-  const allMeds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo',
-    'med-multivitamin','med-biotin','med-vitc','med-collagen','med-superbeets',
-    'med-rosuvastatin','med-miralax','med-melatonin-eve','med-sleep-gummies-eve'];
   let state = null;
   // Try localStorage first (same device, fast)
   try{
@@ -12398,7 +12479,7 @@ async function loadMedsChecklist(){
     }catch(e){}
   }
   if(!state) return;
-  allMeds.forEach(id=>{ if(state[id]) document.getElementById(id)?.classList.add('done'); });
+  ALL_MEDS.forEach(id=>{ if(state[id]) document.getElementById(id)?.classList.add('done'); });
   updateMedsProgress();
 }
 
@@ -12694,10 +12775,10 @@ function toggleBPForm(){
 
 function toggleMedsForm(){
   const body = document.getElementById('meds-form-body');
-  const btn = document.getElementById('meds-form-toggle');
+  const chevron = document.getElementById('meds-form-chevron');
   const open = body.style.display === 'none';
   body.style.display = open ? 'block' : 'none';
-  if(btn) btn.textContent = open ? '▴' : '▾';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
   if(open){
     loadMedsChecklist();
     const d = document.getElementById('meds-log-date');
