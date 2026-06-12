@@ -3646,7 +3646,14 @@ async function buildDailyProgress(){
   try {
     const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
     const sleeps = await dbAll('sleeps');
-    autoChecks['dp-sleep-checkin'] = sleeps.some(e=>e.date===yesterday||e.date===today);
+    let sleepFound = sleeps.some(e=>e.date===yesterday||e.date===today);
+    if(!sleepFound){
+      const res = await fetch(`${BACKEND}/api/sync?pillar=sleeps&t=${Date.now()}`);
+      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+        sleepFound = data.some(e=>e.date===yesterday||e.date===today);
+      }
+    }
+    autoChecks['dp-sleep-checkin'] = sleepFound;
   } catch(e){}
 
   // CPAP used + myAir — read from Blob directly (most reliable)
@@ -11162,7 +11169,7 @@ async function saveMyAirLog(){
   const ahi = parseFloat(document.getElementById('myair-ahi').value)||null;
   const sealLmin = parseFloat(document.getElementById('myair-seal-lmin').value)||null;
   const onoff = parseInt(document.getElementById('myair-onoff').value)||null;
-  if(!hours && !ahi && sealLmin==null && onoff==null) return;
+  if(!hours && !ahi && sealLmin==null && onoff==null && !_cpapUsed) return;
 
   const cpapUsed = _cpapUsed;
   const cpapDuration = cpapUsed ? (document.querySelector('#cpap-duration-tags .tag.on')?.textContent||'') : '';
