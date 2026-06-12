@@ -1059,6 +1059,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
   </div>
   <div class="view-content" id="vc-style-closet">
+    <!-- Picking mode banner — shown when opened from weekly planner -->
+    <div id="closet-pick-banner" style="display:none;background:var(--accent);color:#fff;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:11px;opacity:0.85;">Picking for</div>
+        <div id="closet-pick-label" style="font-size:13px;font-weight:600;"></div>
+      </div>
+      <button onclick="cancelClosetPick()" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 10px;font-size:12px;color:#fff;cursor:pointer;">✕ Cancel</button>
+    </div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 8px;">
       <div class="section-label" style="margin:0;">👗 My Closet</div>
     </div>
@@ -1077,31 +1085,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
     <div id="closet-grid" class="outfit-grid"></div>
-  </div>
-
-  <!-- Closet picker overlay (used by weekly planner) -->
-  <div id="closet-picker-overlay" class="fullscreen-overlay">
-    <div style="padding:16px;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-        <button onclick="closeClosetPicker()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-        <div style="font-family:var(--serif);font-size:20px;font-weight:300;" id="closet-picker-title">Pick an outfit</div>
-      </div>
-      <!-- Filter bar in picker -->
-      <div style="overflow-x:auto;white-space:nowrap;margin-bottom:12px;">
-        <div style="display:inline-flex;gap:6px;">
-          <button class="tag on" id="picker-filter-all" onclick="filterClosetPicker('all',this)" style="white-space:nowrap;">All</button>
-          <button class="tag" onclick="filterClosetPicker('Work',this)" style="white-space:nowrap;">Work</button>
-          <button class="tag" onclick="filterClosetPicker('Weekend',this)" style="white-space:nowrap;">Weekend</button>
-          <button class="tag" onclick="filterClosetPicker('Casual',this)" style="white-space:nowrap;">Casual</button>
-          <button class="tag" onclick="filterClosetPicker('Event',this)" style="white-space:nowrap;">Event</button>
-          <button class="tag" onclick="filterClosetPicker('Date night',this)" style="white-space:nowrap;">Date night</button>
-          <button class="tag" onclick="filterClosetPicker('Church',this)" style="white-space:nowrap;">Church</button>
-          <button class="tag" onclick="filterClosetPicker('Polished',this)" style="white-space:nowrap;">Polished</button>
-          <button class="tag" onclick="filterClosetPicker('Chic',this)" style="white-space:nowrap;">Chic</button>
-        </div>
-      </div>
-      <div id="closet-picker-grid" class="outfit-grid"></div>
-    </div>
   </div>
 
   <div class="view-content" id="vc-style-shopping">
@@ -3057,7 +3040,7 @@ async function boot(){
   const od=document.getElementById('outfit-date');if(od)od.value=nowStr();
   updateOutfitNudge();
   buildBodyChart();
-  syncAllFromBlob();
+  await syncAllFromBlob();
   loadCoachingInsights();
   loadSavedScore();
   loadTodayWater();
@@ -3427,10 +3410,10 @@ async function loadFromBlob(store) {
     if (!data || !data.length) return;
     // Merge with local — add any entries not already in IndexedDB
     const local = await dbAll(store);
-    const localDates = new Set(local.map(e => e.date + (e.sys||'') + (e.mood||'')));
+    const localDates = new Set(local.map(e => (e.type||'') + e.date + (e.sys||'') + (e.mood||'')));
     let added = 0;
     for (const entry of data) {
-      const key = entry.date + (entry.sys||'') + (entry.mood||'');
+      const key = (entry.type||'') + entry.date + (entry.sys||'') + (entry.mood||'');
       if (!localDates.has(key)) {
         await dbAdd(store, entry);
         added++;
@@ -4398,20 +4381,21 @@ async function renderCloset(filter){
   }
   // Check recent wear dates (within 14 days)
   const now=new Date(); const cutoff=new Date(now-14*86400000);
+  window._closetMap=sorted;
   grid.innerHTML=sorted.map((e,i)=>{
     const worn=safeDate(e.date);
     const recentWarn=worn&&worn>cutoff;
     const daysAgo=worn?Math.round((now-worn)/86400000):null;
-    return `<div class="outfit-card" style="position:relative;cursor:pointer;" onclick="selectFromCloset(${i},'${e.date||e.id||i}')">
+    const tapFn=_pickerDay ? `pickOutfitForDayIdx(${i})` : `selectFromCloset(${i})`;
+    return `<div class="outfit-card" style="position:relative;cursor:pointer;" onclick="${tapFn}">
       ${e.photo?`<img src="${e.photo}" class="outfit-thumb" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'">`
         :'<div style="width:100%;aspect-ratio:4/5;border-radius:10px;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:28px;">👗</div>'}
       ${recentWarn?`<div style="position:absolute;top:4px;right:4px;background:rgba(196,115,90,0.9);color:#fff;font-size:10px;padding:2px 6px;border-radius:8px;">⚠️ ${daysAgo}d ago</div>`:''}
+      ${_pickerDay?'<div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:10px;color:#fff;background:rgba(0,0,0,0.35);padding:2px;">Tap to pick</div>':''}
       <div style="font-size:11px;color:var(--muted);margin-top:4px;">${e.date||''}</div>
       ${e.desc?`<div style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.desc}</div>`:''}
     </div>`;
   }).join('');
-  // Store map for picker
-  window._closetMap=sorted;
 }
 
 function filterCloset(f,btn){
@@ -4425,63 +4409,53 @@ var _pickerDay=null, _pickerFilter='all';
 
 function openClosetPicker(dayKey, dayLabel){
   _pickerDay=dayKey;
-  document.getElementById('closet-picker-title').textContent='Pick a look for '+dayLabel;
-  document.querySelectorAll('#closet-picker-overlay .tag').forEach(b=>b.classList.remove('on'));
-  document.getElementById('picker-filter-all').classList.add('on');
-  renderClosetPicker('all');
-  openOverlay('closet-picker-overlay');
+  // Show picking mode banner inside closet view
+  const banner=document.getElementById('closet-pick-banner');
+  const lbl=document.getElementById('closet-pick-label');
+  if(banner) banner.style.display='flex';
+  if(lbl) lbl.textContent=dayLabel;
+  // Navigate to My Closet view (same as tapping the button)
+  if(!closetViewOpen) toggleClosetView();
+  else renderCloset(_closetFilter);
 }
 
-function closeClosetPicker(){
-  closeOverlay('closet-picker-overlay');
+function cancelClosetPick(){
+  _pickerDay=null;
+  const banner=document.getElementById('closet-pick-banner');
+  if(banner) banner.style.display='none';
+  // Return to weekly planner
+  if(closetViewOpen) toggleClosetView();
+  const weekBtn=document.querySelector('.vtab[onclick*="weekly"]');
+  if(weekBtn) setView('weekly',weekBtn);
 }
 
-async function renderClosetPicker(filter){
-  _pickerFilter=filter||'all';
-  const grid=document.getElementById('closet-picker-grid');
-  if(!grid) return;
-  if(!_closetOutfits.length) _closetOutfits=await dbAll('outfits');
-  const myOutfits=_closetOutfits.filter(e=>e.src==='My outfit'||(!e.src&&e.photo));
-  const filtered=_pickerFilter==='all'?myOutfits:myOutfits.filter(e=>
-    (e.occ||[]).includes(_pickerFilter)||(e.vibe||[]).includes(_pickerFilter));
-  const sorted=[...filtered].sort((a,b)=>b.date>a.date?1:-1);
-  const now=new Date(); const cutoff=new Date(now-14*86400000);
-  if(!sorted.length){
-    grid.innerHTML='<div class="lookbook-empty" style="grid-column:1/-1">No outfits to pick from yet — log some looks tagged "My outfit"!</div>';
-    return;
-  }
-  grid.innerHTML=sorted.map((e,i)=>{
-    const worn=safeDate(e.date);
-    const recentWarn=worn&&worn>cutoff;
-    const daysAgo=worn?Math.round((now-worn)/86400000):null;
-    return `<div class="outfit-card" style="cursor:pointer;" onclick="pickOutfitForDay('${e.date||i}','${(e.desc||'').replace(/'/g,'&apos;')}','${e.photo||''}')">
-      ${e.photo?`<img src="${e.photo}" class="outfit-thumb" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px;border:3px solid transparent;" onerror="this.style.display='none'">`
-        :'<div style="width:100%;aspect-ratio:4/5;border-radius:10px;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:28px;">👗</div>'}
-      ${recentWarn?`<div style="background:rgba(196,115,90,0.15);border-radius:6px;padding:2px 6px;margin-top:3px;font-size:10px;color:var(--accent);">⚠️ Worn ${daysAgo} days ago</div>`:''}
-      <div style="font-size:11px;color:var(--muted);margin-top:3px;">${e.date||''}</div>
-      ${e.desc?`<div style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.desc}</div>`:''}
-    </div>`;
-  }).join('');
-  window._closetMap=sorted;
-}
+function closeClosetPicker(){ cancelClosetPick(); }
+async function renderClosetPicker(filter){ await renderCloset(filter); }
+function filterClosetPicker(f,btn){ filterCloset(f,btn); }
 
-function filterClosetPicker(f,btn){
-  document.querySelectorAll('#closet-picker-overlay .tag').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  renderClosetPicker(f);
+function pickOutfitForDayIdx(idx){
+  const e=window._closetMap&&window._closetMap[idx];
+  if(!e||!_pickerDay) return;
+  pickOutfitForDay(e.date||idx, e.desc||'', e.photo||'');
 }
 
 function pickOutfitForDay(outfitKey, desc, photo){
   if(!_pickerDay) return;
   window._weekPlan=window._weekPlan||{};
   window._weekPlan[_pickerDay]={outfitKey, desc, photo};
-  closeClosetPicker();
+  // Hide banner, close closet, return to weekly planner
+  _pickerDay=null;
+  const banner=document.getElementById('closet-pick-banner');
+  if(banner) banner.style.display='none';
+  if(closetViewOpen) toggleClosetView();
+  const weekBtn=document.querySelector('.vtab[onclick*="weekly"]');
+  if(weekBtn) setView('weekly',weekBtn);
   renderWeekPlannerDays();
+  showToast('✓ Look added to your week plan');
 }
 
 function selectFromCloset(idx, key){
-  // Future: open detail view. For now just a toast.
-  showToast('Tap "Plan your week" in Style → Weekly to plan this look 💡');
+  showToast('Switch to Weekly tab and tap a day to plan this look 💡');
 }
 
 // ── WEEKLY OUTFIT PLANNER ─────────────────────────────────────────────
