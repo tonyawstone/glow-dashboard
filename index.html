@@ -2739,6 +2739,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
       </div>
       <div id="mind-checkin-body" style="display:none;margin-top:12px;">
+      <!-- Logged-today summary (shown after save) -->
+      <div id="mind-logged-summary" style="display:none;"></div>
+      <div id="mind-checkin-fields">
       <div class="fl">How are you feeling?</div>
       <div class="tags" id="vibe-tags">
         <button class="tag" onclick="tog(this)">Motivated</button><button class="tag" onclick="tog(this)">Overwhelmed</button><button class="tag" onclick="tog(this)">Grateful</button><button class="tag" onclick="tog(this)">Anxious</button><button class="tag" onclick="tog(this)">Grounded</button><button class="tag" onclick="tog(this)">In my power</button><button class="tag" onclick="tog(this)">Scattered</button>
@@ -2755,6 +2758,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button class="btn-ai" onclick="mindCoach()">Weekly mind &amp; mood reflection &#x2197;</button>
       <div id="mind-coach-output" class="coach-response" style="display:none"></div>
       <div class="toast-msg" id="mt">Saved!</div>
+      </div><!-- mind-checkin-fields -->
       </div><!-- mind-checkin-body -->
     </div>
 
@@ -2767,6 +2771,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="reflection-prompt" style="font-size:14px;color:var(--text);line-height:1.5;padding:4px 0 12px;font-style:italic;"></div>
       <textarea id="reflection-answer" rows="3" placeholder="Write your thoughts here..."></textarea>
       <button onclick="saveReflectionAnswer()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);margin-top:6px;">Save reflection</button>
+      <!-- Saved reflection display -->
+      <div id="reflection-saved-view" style="display:none;margin-top:10px;background:var(--warm);border-radius:10px;padding:10px 12px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Saved today ✓</div>
+        <div id="reflection-saved-text" style="font-size:13px;color:var(--text);line-height:1.5;white-space:pre-wrap;"></div>
+        <button onclick="editReflectionAnswer()" style="margin-top:8px;padding:4px 10px;border-radius:12px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Edit</button>
+      </div>
       <!-- Checkboxes -->
       <div class="med-row" id="journaled-today" onclick="toggleMindHabitCheck('journaled-today')" style="margin-top:10px;">
         <div class="med-check">&#x2713;</div>
@@ -2781,6 +2791,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <a href="javascript:void(0)" onclick="openDayOne()" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">📖 Open Day One</a>
         <a href="javascript:void(0)" onclick="window.location.href='shortcuts://run-shortcut?name=OpenWellspoken'" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">🗣 Wellspoken</a>
       </div>
+    </div>
+
+    <!-- Recent reflections log -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="card-title" style="margin:0;">Recent reflections</div>
+      </div>
+      <div id="reflection-log-daily" style="margin-top:8px;"><div class="log-empty">No reflections yet.</div></div>
     </div>
 
     <!-- Weekly Intention -->
@@ -3033,7 +3051,6 @@ async function boot(){
   loadReflectionPrompt();
   loadPillarsToday();
   loadWeekIntention();
-  loadCheckinState();
   await loadAllPhotos();
   await loadLogs();
   renderLookbook();
@@ -3041,6 +3058,7 @@ async function boot(){
   updateOutfitNudge();
   buildBodyChart();
   await syncAllFromBlob();
+  loadCheckinState();
   loadCoachingInsights();
   loadSavedScore();
   loadTodayWater();
@@ -3458,23 +3476,32 @@ async function saveCheckin(){
   toast('tt');loadLogs();buildDailyProgress();
 }
 
-function loadCheckinState(){
-  const saved = localStorage.getItem('glowCheckinState');
-  if(!saved) return;
+async function loadCheckinState(){
   try {
-    const state = JSON.parse(saved);
-    // Only restore if saved today
-    if(state.date !== nowStr()){ localStorage.removeItem('glowCheckinState'); return; }
-
+    // Try IndexedDB first (synced from Blob)
+    let state = null;
+    const checkins = await dbAll('checkins');
+    // Regular checkin (not activation) for today
+    const todayCheckin = checkins.find(e=>e.date===nowStr()&&e.type!=='activation');
+    if(todayCheckin){
+      state = todayCheckin;
+    } else {
+      // Fall back to localStorage for same-device draft state
+      const saved = localStorage.getItem('glowCheckinState');
+      if(saved){
+        const parsed = JSON.parse(saved);
+        if(parsed.date === nowStr()) state = parsed;
+        else localStorage.removeItem('glowCheckinState');
+      }
+    }
+    if(!state) return;
     // Restore mood tags
     if(state.mood?.length){
       document.querySelectorAll('#mood-tags .tag').forEach(t=>{
         if(state.mood.includes(t.textContent)) t.classList.add('on');
       });
     }
-    // Restore note
-    if(state.note) document.getElementById('today-note').value = state.note;
-    // Restore toggles
+    if(state.note) { const el=document.getElementById('today-note'); if(el) el.value=state.note; }
     if(state.cpap) document.getElementById('t-cpap')?.classList.add('on');
     if(state.meds) document.getElementById('t-meds')?.classList.add('on');
     if(state.exercise) document.getElementById('t-exercise')?.classList.add('on');
@@ -3482,10 +3509,8 @@ function loadCheckinState(){
     if(state.sleepGummies) document.getElementById('t-sleep-gummies')?.classList.add('on');
     if(state.skinAM) document.getElementById('t-skin-am')?.classList.add('on');
     if(state.skinPM) document.getElementById('t-skin-pm')?.classList.add('on');
-
-    // Show subtle "already checked in today" indicator
     const btn = document.querySelector('[onclick="saveCheckin()"]');
-    if(btn){ btn.textContent='✅ Update check-in'; }
+    if(btn) btn.textContent='✅ Update check-in';
   } catch(e){}
 }
 
@@ -3941,17 +3966,41 @@ function openMuselyLog(){
 }
 
 async function saveReflectionAnswer(){
-  const answer = document.getElementById('reflection-answer')?.value.trim();
+  const ansEl = document.getElementById('reflection-answer');
+  const answer = ansEl?.value.trim();
   if(!answer){ showToast('Write something first!'); return; }
   const prompt = document.getElementById('reflection-prompt')?.textContent?.trim()||'';
-  // Save to localStorage for today's daily progress check
-  localStorage.setItem('glowReflectionToday', JSON.stringify({date:nowStr(), answer}));
-  // Save permanently to IndexedDB reflections store
-  await dbAdd('reflections', {type:'daily', prompt, answer, date:nowStr()});
+  // Save permanently to IndexedDB — remove any existing entry for today first
+  const existing = await dbAll('reflections');
+  const todayEntry = existing.find(e=>e.type==='daily'&&e.date===nowStr());
+  if(!todayEntry){
+    await dbAdd('reflections', {type:'daily', prompt, answer, date:nowStr()});
+  }
   syncToBlob('reflections');
   showToast('Reflection saved ✓');
+  showReflectionSavedView(answer);
   buildDailyProgress();
   loadReflectionHistory();
+}
+
+function showReflectionSavedView(answer){
+  const textarea = document.getElementById('reflection-answer');
+  const saveBtn = textarea?.nextElementSibling;
+  const savedView = document.getElementById('reflection-saved-view');
+  const savedText = document.getElementById('reflection-saved-text');
+  if(textarea) textarea.style.display='none';
+  if(saveBtn && saveBtn.tagName==='BUTTON') saveBtn.style.display='none';
+  if(savedView) savedView.style.display='block';
+  if(savedText) savedText.textContent=answer;
+}
+
+function editReflectionAnswer(){
+  const textarea = document.getElementById('reflection-answer');
+  const saveBtn = textarea?.nextElementSibling;
+  const savedView = document.getElementById('reflection-saved-view');
+  if(textarea){ textarea.style.display=''; textarea.focus(); }
+  if(saveBtn && saveBtn.tagName==='BUTTON') saveBtn.style.display='';
+  if(savedView) savedView.style.display='none';
 }
 
 async function openPastMindLog(){
@@ -3997,16 +4046,29 @@ function toggleActivation(){
 
 async function restoreActivationState(){
   const today = nowStr();
-  // Check IndexedDB first (cross-device), fall back to localStorage
   let isComplete = false;
   try {
+    // Check IndexedDB first (populated from Blob during boot)
     const checkins = await dbAll('checkins');
     isComplete = checkins.some(e=>e.type==='activation'&&e.date===today);
+    // If not found locally, fetch directly from Blob as fallback
+    if(!isComplete){
+      const res = await fetch(`${BACKEND}/api/sync?pillar=checkins&t=${Date.now()}`);
+      if(res.ok){
+        const d = await res.json();
+        const blobData = Array.isArray(d.data)?d.data:[];
+        isComplete = blobData.some(e=>e.type==='activation'&&e.date===today);
+        // If found in Blob but not local, add to IndexedDB
+        if(isComplete){
+          const alreadyLocal = checkins.some(e=>e.type==='activation'&&e.date===today);
+          if(!alreadyLocal){
+            const entry = blobData.find(e=>e.type==='activation'&&e.date===today);
+            if(entry) await dbAdd('checkins', entry);
+          }
+        }
+      }
+    }
   } catch(e){}
-  if(!isComplete){
-    const manualState = getDPManualState();
-    isComplete = manualState['dp-morning-activation']||false;
-  }
   if(isComplete){
     const badge = document.getElementById('activation-done-badge');
     if(badge) badge.style.display = 'inline';
@@ -6150,8 +6212,16 @@ function saveMindDraft(){
   localStorage.setItem('glowMindDraft', JSON.stringify(draft));
 }
 
-function restoreMindDraft(){
+async function restoreMindDraft(){
   try {
+    // First check IndexedDB (synced from Blob) for today's entry
+    const minds = await dbAll('minds');
+    const todayEntry = minds.find(e=>e.date===nowStr());
+    if(todayEntry){
+      showMindLoggedSummary(todayEntry);
+      return;
+    }
+    // No saved entry — restore in-progress draft from localStorage
     const raw = localStorage.getItem('glowMindDraft');
     if(!raw) return;
     const draft = JSON.parse(raw);
@@ -6168,6 +6238,50 @@ function restoreMindDraft(){
     if(draft.stress) setStars('stress-stars', draft.stress);
     if(draft.bodyImage) setStars('body-image-stars', draft.bodyImage);
   } catch(e){}
+}
+
+function showMindLoggedSummary(e){
+  const summary = document.getElementById('mind-logged-summary');
+  const fields = document.getElementById('mind-checkin-fields');
+  if(!summary||!fields) return;
+  const stars = n => n ? '★'.repeat(n)+'☆'.repeat(5-n) : '—';
+  const chips = arr => (arr||[]).map(v=>`<span style="background:var(--warm);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
+  summary.style.display='block';
+  summary.innerHTML=`
+    <div style="background:var(--warm);border-radius:12px;padding:12px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Mood logged today ✓ <button onclick="editMindEntry()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+      ${(e.vibe||[]).length?`<div style="margin-bottom:8px;">${chips(e.vibe)}</div>`:''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;margin-bottom:8px;">
+        ${e.energy?`<div>Energy <span style="color:var(--accent);">${stars(e.energy)}</span></div>`:''}
+        ${e.conf?`<div>Confidence <span style="color:var(--accent);">${stars(e.conf)}</span></div>`:''}
+        ${e.stress?`<div>Calm <span style="color:var(--accent);">${stars(e.stress)}</span></div>`:''}
+        ${e.bodyImage?`<div>Body image <span style="color:var(--accent);">${stars(e.bodyImage)}</span></div>`:''}
+      </div>
+      ${e.win?`<div style="font-size:12px;margin-bottom:4px;"><strong>Win:</strong> ${e.win}</div>`:''}
+      ${e.gratitude?`<div style="font-size:12px;"><strong>Grateful for:</strong> ${e.gratitude.split('\n').filter(Boolean).join(' · ')}</div>`:''}
+    </div>`;
+  fields.style.display='none';
+}
+
+async function editMindEntry(){
+  const summary = document.getElementById('mind-logged-summary');
+  const fields = document.getElementById('mind-checkin-fields');
+  if(summary) summary.style.display='none';
+  if(fields) fields.style.display='';
+  // Restore saved values from IndexedDB
+  try{
+    const minds = await dbAll('minds');
+    const e = minds.find(m=>m.date===nowStr());
+    if(e){
+      if(e.win && document.getElementById('win-note')) document.getElementById('win-note').value=e.win;
+      if(e.gratitude && document.getElementById('gratitude')) document.getElementById('gratitude').value=e.gratitude;
+      if(e.vibe?.length) document.getElementById('vibe-tags')?.querySelectorAll('.tag').forEach(t=>{if(e.vibe.includes(t.textContent))t.classList.add('on');});
+      if(e.energy) setStars('energy-stars',e.energy);
+      if(e.conf) setStars('conf-stars',e.conf);
+      if(e.stress) setStars('stress-stars',e.stress);
+      if(e.bodyImage) setStars('body-image-stars',e.bodyImage);
+    }
+  }catch(err){}
 }
 
 function toggleSkinAM(forceOpen){
@@ -6405,7 +6519,8 @@ async function saveMind(){
   try {
     await dbAdd('minds',mindEntry);
     syncToBlob('minds');
-    // Only clear form after confirmed save
+    localStorage.removeItem('glowMindDraft');
+    // Clear form
     if(document.getElementById('win-note')) document.getElementById('win-note').value='';
     if(document.getElementById('gratitude')) document.getElementById('gratitude').value='';
     if(intentionEl) intentionEl.value='';
@@ -10262,7 +10377,7 @@ function loadDailyAffirmation(){
   const dayOfYear = Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/(1000*60*60*24));
   el.textContent = `"${AFFIRMATIONS[dayOfYear%AFFIRMATIONS.length]}"`;
 }
-function loadReflectionPrompt(){
+async function loadReflectionPrompt(){
   const el = document.getElementById('reflection-prompt'); if(!el) return;
   const savedDate = localStorage.getItem('glowPromptDate');
   const savedIdx = localStorage.getItem('glowPromptIdx');
@@ -10274,12 +10389,14 @@ function loadReflectionPrompt(){
     el.textContent = REFLECTION_PROMPTS[idx];
     localStorage.setItem('glowPromptDate',today); localStorage.setItem('glowPromptIdx',idx);
   }
-  // Restore today's answer if already saved
+  // Restore today's answer if already saved — read from IndexedDB
   try {
-    const saved = JSON.parse(localStorage.getItem('glowReflectionToday')||'{}');
-    if(saved.date===nowStr() && saved.answer){
+    const all = await dbAll('reflections');
+    const todayEntry = all.find(e=>e.type==='daily'&&e.date===nowStr());
+    if(todayEntry?.answer){
       const ansEl = document.getElementById('reflection-answer');
-      if(ansEl) ansEl.value = saved.answer;
+      if(ansEl) ansEl.value = todayEntry.answer;
+      showReflectionSavedView(todayEntry.answer);
     }
   } catch(e){}
 }
@@ -10556,8 +10673,15 @@ async function loadReflectionHistory(){
     const fmt = e => `<div style="padding:10px 0;border-bottom:0.5px solid var(--border);">
       <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${fmtOutfitDate(e.date)}</div>
       ${e.prompt?`<div style="font-size:12px;color:var(--accent);font-style:italic;margin-bottom:4px;">"${e.prompt}"</div>`:''}
-      <div style="font-size:13px;color:var(--text);line-height:1.5;">${e.answer}</div>
+      <div style="font-size:13px;color:var(--text);line-height:1.5;white-space:pre-wrap;">${e.answer}</div>
     </div>`;
+
+    // Daily — show last 5
+    const dailyEl = document.getElementById('reflection-log-daily');
+    if(dailyEl){
+      const recent = daily.slice(0,5);
+      dailyEl.innerHTML = recent.length ? recent.map(fmt).join('') : '<div class="log-empty">No reflections yet.</div>';
+    }
 
     const weekEl = document.getElementById('reflection-log-weekly');
     if(weekEl){
