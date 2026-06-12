@@ -3880,7 +3880,9 @@ async function openPastSleepLog(){
     for(const e of sorted){
       const chips = [e.hrs+'h', e.quality, ...(e.energy||[])].filter(Boolean);
       html += '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
-        +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'+e.date+(e.bed?' · '+e.bed+'→'+e.wake:'')+'</div>'
+        +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'
+        +(e.date ? 'Night of '+new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) : e.date)
+        +(e.bed?' · '+e.bed+'→'+e.wake:'')+'</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">'
         +chips.map(c=>'<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;">'+c+'</span>').join('')
         +'</div>'
@@ -6134,8 +6136,10 @@ function toggleSleepAid(id){
 }
 
 async function saveSleep(){
-  const cpap=gT('cpap-tags'),quality=document.getElementById('sq-tags').querySelector('.on')?.textContent||'';
-  const energy=gT('energy-am-tags'),note=document.getElementById('sleep-note').value.trim();
+  const quality=document.getElementById('sq-tags')?.querySelector('.on')?.textContent||'';
+  const energy=gT('energy-am-tags'),note=document.getElementById('sleep-note')?.value.trim()||'';
+
+  if(!quality && !energy.length && !note){ showToast('Select a sleep quality rating first'); return; }
 
   const bed = document.getElementById('csv-bedtime')?.textContent||'';
   const wake = document.getElementById('csv-waketime')?.textContent||'';
@@ -6148,25 +6152,28 @@ async function saveSleep(){
     if(bm!==null&&wm!==null){ let diff=wm-bm; if(diff<0)diff+=1440; hrs=(diff/60).toFixed(1); }
   }
 
-  if(hrs!=='—'){ document.getElementById('sleep-display').textContent=hrs+'h'; document.getElementById('s-sleep-h').textContent=hrs+'h'; }
+  if(hrs!=='—'){ const sd=document.getElementById('sleep-display'); if(sd) sd.textContent=hrs+'h'; const sh=document.getElementById('s-sleep-h'); if(sh) sh.textContent=hrs+'h'; }
 
   const sleepDate = new Date(Date.now()-86400000).toISOString().slice(0,10);
   const melatonin = document.getElementById('t-melatonin')?.classList.contains('done')||false;
   const sleepGummies = document.getElementById('t-sleep-gummies')?.classList.contains('done')||false;
-  const sleepEntry={hrs,bed,wake,cpap:cpap[0]||'',quality,energy,note,melatonin,sleepGummies,date:sleepDate};
-  await dbAdd('sleeps',sleepEntry);
-  syncToBlob('sleeps');
-  // Clear form
-  document.getElementById('sleep-note').value='';
-  ['cpap-tags','energy-am-tags'].forEach(id=>document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
-  document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
-  toast('slp-t');
-  loadLogs();
-  toggleSleepCheckin(false);
-  showSleepCheckinSaved(sleepEntry);
-  buildDailyProgress();
+  const sleepEntry={hrs,bed,wake,quality,energy,note,melatonin,sleepGummies,date:sleepDate};
+  try{
+    await dbAdd('sleeps',sleepEntry);
+    syncToBlob('sleeps');
+    if(document.getElementById('sleep-note')) document.getElementById('sleep-note').value='';
+    document.getElementById('energy-am-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('sq-tags')?.querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
+    toast('slp-t');
+    loadLogs();
+    toggleSleepCheckin(false);
+    showSleepCheckinSaved(sleepEntry);
+    buildDailyProgress();
+  }catch(err){
+    console.error('saveSleep error:',err);
+    showToast('Could not save — please try again');
+  }
 }
-
 
 var SKIN_STEPS_AM = ['r-cleanser','r-serum','r-vitc','r-spf','r-eye'];
 var SKIN_STEPS_PM = ['r-musely-aa','r-musely-spot','r-regen','r-musely-game'];
@@ -6423,12 +6430,17 @@ function showSleepCheckinSaved(e){
   const saved = document.getElementById('sleep-checkin-saved');
   if(!saved) return;
   const chips = arr => (arr||[]).filter(Boolean).map(v=>`<span style="background:var(--warm);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
+  // Format date as "Night of Mon Jun 11"
+  const dateLabel = e.date
+    ? 'Night of '+new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})
+    : 'Last night';
   saved.style.display='block';
   saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Sleep logged for last night ✓ <button onclick="editSleepCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${dateLabel} ✓ <button onclick="editSleepCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
     ${e.quality?`<div style="font-size:14px;font-weight:500;color:var(--accent);margin-bottom:6px;">${e.quality}</div>`:''}
     ${e.hrs&&e.hrs!=='—'?`<div style="font-size:12px;margin-bottom:4px;">⏱ ${e.hrs}h sleep</div>`:''}
     ${(e.energy||[]).length?`<div style="margin-bottom:4px;">${chips(e.energy)}</div>`:''}
+    ${e.melatonin||e.sleepGummies?`<div style="font-size:12px;color:var(--muted);margin-top:4px;">${[e.melatonin?'Melatonin':'',e.sleepGummies?'Sleep gummies':''].filter(Boolean).join(' · ')}</div>`:''}
     ${e.note?`<div style="font-size:12px;color:var(--muted);margin-top:4px;">${e.note}</div>`:''}
   </div>`;
 }
@@ -11197,6 +11209,37 @@ async function saveMyAirLog(){
   loadMyAirLastLogged();
   updateMyAirCardSummary();
   buildDailyProgress();
+}
+
+var _cpapUsed = false;
+
+function toggleCPAPUsed(){
+  _cpapUsed = !_cpapUsed;
+  const check = document.getElementById('cpap-used-check');
+  const dur = document.getElementById('cpap-duration-row');
+  if(check){
+    check.style.background = _cpapUsed ? 'var(--accent)' : 'transparent';
+    check.textContent = _cpapUsed ? '✓' : '';
+    check.style.color = '#fff';
+  }
+  if(dur) dur.style.display = _cpapUsed ? 'block' : 'none';
+}
+
+function restoreCPAPUsedState(cpapUsed, cpapDuration){
+  _cpapUsed = !!cpapUsed;
+  const check = document.getElementById('cpap-used-check');
+  const dur = document.getElementById('cpap-duration-row');
+  if(check){
+    check.style.background = _cpapUsed ? 'var(--accent)' : 'transparent';
+    check.textContent = _cpapUsed ? '✓' : '';
+    check.style.color = '#fff';
+  }
+  if(dur) dur.style.display = _cpapUsed ? 'block' : 'none';
+  if(_cpapUsed && cpapDuration){
+    document.querySelectorAll('#cpap-duration-tags .tag').forEach(t=>{
+      t.classList.toggle('on', t.textContent===cpapDuration);
+    });
+  }
 }
 
 function openMyAirCard(){
