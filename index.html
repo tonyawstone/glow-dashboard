@@ -1469,6 +1469,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <button onclick="openBodyLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
       </div>
+      <div id="body-log-saved" style="display:none;margin-top:10px;"></div>
       <div id="body-log-body" style="display:none;margin-top:12px;">
         <div class="fl">Non-scale wins</div>
         <div class="tags" id="nsv-tags">
@@ -2146,6 +2147,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div style="font-size:12px;color:var(--muted);">Logging for:</div>
           <input type="date" id="skin-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
         </div>
+        <div class="fl">Notes</div>
+        <textarea id="skin-note" rows="2" placeholder="How does your skin feel today? Any changes, reactions, concerns..." oninput="saveSkinDraft()"></textarea>
         <button class="btn-primary" onclick="saveSkin()">Log skin check-in</button>
         <div class="toast-msg" id="skt">Saved!</div>
       </div>
@@ -3159,7 +3162,7 @@ async function tab(id){
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
-  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); }
+  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); loadWardrobePlanLog(); loadTodayPlannedLook(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') { 
@@ -6241,10 +6244,10 @@ async function loadSkinRoutineState(){
     if(saved[id]) document.getElementById(id)?.classList.add('done');
   });
   updateSkinProgress(); // this now handles saved views + collapse when complete
-  // If incomplete, open the card so user can finish
+  // Only auto-open if partially complete (in progress) — fully complete stays collapsed
   const amDone = SKIN_STEPS_AM.filter(id=>saved[id]).length;
   const pmDone = SKIN_STEPS_PM.filter(id=>saved[id]).length;
-  if(amDone > 0 && amDone < 4) toggleSkinAM(true);
+  if(amDone > 0 && amDone < SKIN_STEPS_AM.length) toggleSkinAM(true);
   if(pmDone > 0 && pmDone < SKIN_STEPS_PM.length) toggleSkinPM(true);
   // Also restore skin check-in saved state
   restoreSkinCheckinState();
@@ -6275,17 +6278,14 @@ function updateSkinProgress(){
   const pmDone = SKIN_STEPS_PM.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
   const amEl = document.getElementById('skin-am-progress');
   const pmEl = document.getElementById('skin-pm-progress');
-  const amComplete = amDone >= 4; // 4 core steps = complete
+  const amComplete = amDone === SKIN_STEPS_AM.length;
   const pmComplete = pmDone === SKIN_STEPS_PM.length;
   if(amEl) amEl.textContent = amComplete ? '✅ Complete' : amDone+'/'+SKIN_STEPS_AM.length+' done';
   if(amEl) amEl.style.color = amComplete ? '#6B9E78' : 'var(--muted)';
   if(pmEl) pmEl.textContent = pmComplete ? '✅ Complete' : pmDone+'/'+SKIN_STEPS_PM.length+' done';
   if(pmEl) pmEl.style.color = pmComplete ? '#6B9E78' : 'var(--muted)';
-  // Show saved state when complete, collapse card
-  if(amComplete){
-    showSkinAMSavedView();
-    toggleSkinAM(false);
-  }
+  // Show saved state when complete but DON'T auto-collapse — user closes manually
+  if(amComplete) showSkinAMSavedView();
   if(pmComplete){
     showSkinPMSavedView();
     toggleSkinPM(false);
@@ -6306,10 +6306,44 @@ function toggleDailyProgress(forceOpen){
 function toggleBodyLog(forceOpen){
   const body = document.getElementById('body-log-body');
   const chevron = document.getElementById('body-log-chevron');
+  if(!body) return;
   const isOpen = body.style.display !== 'none';
   const open = forceOpen !== undefined ? forceOpen : !isOpen;
   body.style.display = open ? 'block' : 'none';
-  chevron.style.transform = open ? 'rotate(90deg)' : '';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
+}
+
+function showBodyCheckinSaved(e){
+  const saved = document.getElementById('body-log-saved');
+  if(!saved) return;
+  const chips = arr => (arr||[]).filter(Boolean).map(v=>`<span style="background:var(--warm);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
+  saved.style.display='block';
+  saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${fmtOutfitDate(e.date)} ✓ <button onclick="editBodyCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+    ${(e.nsv||[]).length?`<div style="margin-bottom:6px;">${chips(e.nsv)}</div>`:''}
+    ${(e.waist||e.hips)?`<div style="font-size:12px;margin-bottom:4px;">${[e.waist?'Waist: '+e.waist+'"':'',e.hips?'Hips: '+e.hips+'"':''].filter(Boolean).join(' · ')}</div>`:''}
+    ${e.note?`<div style="font-size:12px;color:var(--muted);">${e.note}</div>`:''}
+  </div>`;
+}
+
+function editBodyCheckin(){
+  toggleBodyLog(true);
+}
+
+async function restoreBodyCheckinState(){
+  try{
+    const today = nowStr();
+    let entry = null;
+    const bodies = await dbAll('bodies');
+    entry = bodies.filter(e=>e.type==='body'&&e.date===today).pop();
+    if(!entry){
+      const res = await fetch(`${BACKEND}/api/sync?pillar=bodies&t=${Date.now()}`);
+      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+        entry = data.filter(e=>e.type==='body'&&e.date===today).pop();
+      }
+    }
+    if(entry) showBodyCheckinSaved(entry);
+  }catch(e){}
 }
 
 function saveMindDraft(){
@@ -6428,7 +6462,9 @@ function showSkinCheckinSaved(e){
   saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
     <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${dateLabel} ✓ <button onclick="editSkinCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
     ${(e.skinT||[]).length?`<div style="margin-bottom:6px;">${chips(e.skinT)}</div>`:''}
-    ${(e.concerns||[]).length?`<div style="font-size:12px;color:var(--muted);">${e.concerns.join(' · ')}</div>`:''}
+    ${(e.concerns||[]).length?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${e.concerns.join(' · ')}</div>`:''}
+    ${e.note?`<div style="font-size:12px;color:var(--muted);">${e.note}</div>`:''}
+    ${e.derm?`<div style="font-size:12px;color:var(--muted);margin-top:4px;">Derm: ${e.derm}</div>`:''}
   </div>`;
 }
 
@@ -6648,10 +6684,28 @@ async function openHairLog(){
 }
 
 async function saveBody(){
-  const entry={type:'body',nsv:gT('nsv-tags'),note:document.getElementById('zep-note').value.trim(),waist:document.getElementById('waist').value,hips:document.getElementById('hips').value,date:nowStr()};
-  await dbAdd('bodies',entry);
-  syncToBlob('bodies');
-  toast('bt');toggleBodyLog(false);loadLogs();
+  const nsv=gT('nsv-tags');
+  const note=document.getElementById('zep-note')?.value.trim()||'';
+  const waist=document.getElementById('waist')?.value||'';
+  const hips=document.getElementById('hips')?.value||'';
+  if(!nsv.length && !note && !waist && !hips){ showToast('Add at least one entry first'); return; }
+  const entry={type:'body',nsv,note,waist,hips,date:nowStr()};
+  try{
+    await dbAdd('bodies',entry);
+    syncToBlob('bodies');
+    document.getElementById('zep-note').value='';
+    document.getElementById('waist').value='';
+    document.getElementById('hips').value='';
+    document.getElementById('nsv-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    toast('bt');
+    toggleBodyLog(false);
+    showBodyCheckinSaved(entry);
+    loadLogs();
+    buildDailyProgress();
+  }catch(err){
+    console.error('saveBody error:',err);
+    showToast('Could not save — please try again');
+  }
 }
 async function saveExercise(){
   const walk=document.getElementById('ex-walk').value;
@@ -6732,10 +6786,12 @@ async function saveSkin(){
   const musely_aa=document.getElementById('r-musely-aa').classList.contains('on');
   const musely_spot=document.getElementById('r-musely-spot').classList.contains('on');
   const dateVal = document.getElementById('skin-log-date')?.value||nowStr();
-  const skinEntry={type:'checkin',skinT,concerns,derm,musely_aa,musely_spot,date:dateVal};
+  const note=document.getElementById('skin-note')?.value.trim()||'';
+  const skinEntry={type:'checkin',skinT,concerns,derm,note,musely_aa,musely_spot,date:dateVal};
   await dbAdd('skins',skinEntry);
   syncToBlob('skins');
   if(document.getElementById('derm-note')) document.getElementById('derm-note').value='';
+  if(document.getElementById('skin-note')) document.getElementById('skin-note').value='';
   ['skin-tags','concern-tags'].forEach(id=>document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   toast('skt');
   loadLogs();
@@ -10109,45 +10165,53 @@ async function buildHydrationStatus(){
   const el = document.getElementById('hydration-status');
   if(!el) return;
 
-  // Get manually entered body water % (from Withings app)
   const saved = JSON.parse(localStorage.getItem('glowBodyWater')||'{}');
   const waterPct = saved.pct ? parseFloat(saved.pct) : null;
   const waterDate = saved.date ? safeDate(saved.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
 
-  // Get latest weight from CSV (use last known if today missing)
   const rows = await getCSVRows();
   const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
   const weightLbs = latestWeight ? parseFloat(latestWeight.weight_lbs) : null;
   const weightKg = weightLbs ? weightLbs / 2.20462 : null;
 
-  // Watson formula for women (height 157.48 cm)
-  const HEIGHT_CM = 157.48; // 62 inches
+  const HEIGHT_CM = 157.48;
   const watsonGoalPct = weightKg
     ? Math.round(((-2.097 + (0.1069 * HEIGHT_CM) + (0.2466 * weightKg)) / weightKg) * 1000) / 10
     : null;
 
-  // Get today's water intake
-  const water = await dbAll('water');
-  const today = nowStr();
-  const todayEntry = water.filter(w=>w.date===today).pop();
-  const todayGlasses = todayEntry?.glasses || 0;
+  // Get history from Blob
+  let entries = [];
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=body_water&t=${Date.now()}`);
+    if(res.ok){ const {data} = await res.json();
+      entries = Array.isArray(data) ? data : (data?.pct ? [data] : []);
+      entries = entries.filter(e=>e.pct&&e.date).sort((a,b)=>b.date.localeCompare(a.date));
+    }
+  } catch(e){}
 
-  // Determine status
-  let statusIcon, statusTitle, statusColor, statusBg, statusMsg;
-  if(waterPct!==null){
-    const diff = watsonGoalPct ? (waterPct - watsonGoalPct).toFixed(1) : null;
-    const diffStr = diff ? ` · ${diff>0?'+':''}${diff}% vs goal` : '';
-    if(waterPct>=50){ statusIcon='💧'; statusTitle='Well hydrated'; statusColor='#27500A'; statusBg='#EAF3DE'; }
-    else if(waterPct>=45){ statusIcon='💧'; statusTitle='Mildly low'; statusColor='#92400E'; statusBg='#FEF3C7'; }
-    else { statusIcon='⚠️'; statusTitle='Dehydrated'; statusColor='#7F1D1D'; statusBg='#FEE2E2'; }
-    statusMsg = `Body water ${waterPct}% · ${waterDate}${diffStr} · Healthy range: 45–60%`;
-  } else {
-    statusIcon='⚠️'; statusTitle='No data entered — enter from Withings app above'; statusColor='#92400E'; statusBg='#FEF3C7';
-    statusMsg = '';
-  }
+  const recent2 = entries.slice(0,2);
+  const recent7 = entries.slice(0,7);
+  const avg2 = recent2.length ? recent2.reduce((a,b)=>a+parseFloat(b.pct),0)/recent2.length : null;
+  const avg7 = recent7.length ? recent7.reduce((a,b)=>a+parseFloat(b.pct),0)/recent7.length : null;
+
+  // Color relative to personal goal, not arbitrary 50% threshold
+  const goalColor = (pct) => {
+    if(!watsonGoalPct || pct===null) return {c:'var(--muted)',bg:'var(--warm)'};
+    if(pct >= watsonGoalPct) return {c:'#27500A', bg:'#EAF3DE'};
+    if(pct >= watsonGoalPct - 2) return {c:'#92400E', bg:'#FEF3C7'};
+    return {c:'#7F1D1D', bg:'#FEE2E2'};
+  };
+
+  const todayC = goalColor(waterPct);
+  const avg2C = goalColor(avg2);
+
+  const metGoal = watsonGoalPct && waterPct >= watsonGoalPct;
+  const exceeded = watsonGoalPct && waterPct > watsonGoalPct;
+  const celebMsg = exceeded ? `🎉 Exceeded goal by +${(waterPct-watsonGoalPct).toFixed(1)}%!`
+    : metGoal ? `✅ Goal met today!` : '';
 
   el.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
       <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenWithings'" style="padding:5px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">📱 Open Withings</button>
       <input type="number" id="body-water-input" placeholder="e.g. 52.3" step="0.1" min="30" max="75"
         value="${waterPct||''}"
@@ -10156,56 +10220,49 @@ async function buildHydrationStatus(){
       <button onclick="saveBodyWater()" style="padding:6px 12px;border-radius:8px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);">Save</button>
     </div>
     <div class="toast-msg" id="bw-toast">Saved!</div>
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:${statusBg};margin-bottom:6px;">
-      <span style="font-size:18px;flex-shrink:0;">${statusIcon}</span>
-      <div style="font-size:12px;color:${statusColor};font-weight:500;">${statusTitle}${statusMsg?' · '+statusMsg:''}</div>
-    </div>
-    ${watsonGoalPct?`
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--warm);border-radius:10px;font-size:12px;margin-bottom:6px;">
-      <span style="font-size:16px;flex-shrink:0;">🎯</span>
-      <div><span style="font-weight:600;color:var(--text);">Your goal: ${watsonGoalPct}%</span> <span style="color:var(--muted);">· Watson formula · ${weightLbs?.toFixed(1)} lbs · ${latestWeight?.date===today?'today':smartDate(latestWeight?.date)}</span></div>
-    </div>`:''}
-    <div id="body-water-7day"></div>
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--warm);border-radius:10px;font-size:12px;margin-top:6px;">
+
+    ${watsonGoalPct ? `
+    <div style="background:var(--warm);border-radius:12px;padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Your personal goal</div>
+        <div style="font-size:11px;color:var(--muted);">${weightLbs?.toFixed(1)} lbs · Watson formula</div>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:8px;">
+        <div style="font-size:36px;font-weight:700;color:var(--accent);">${watsonGoalPct}%</div>
+        <div style="font-size:13px;color:var(--muted);">body water target</div>
+      </div>
+      ${celebMsg ? `<div style="margin-top:6px;font-size:14px;font-weight:600;color:#27500A;">${celebMsg}</div>` : ''}
+    </div>` : ''}
+
+    ${waterPct !== null ? `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div style="background:${todayC.bg};border-radius:12px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:${todayC.c};font-weight:600;margin-bottom:4px;">Today · ${waterDate||'—'}</div>
+        <div style="font-size:30px;font-weight:700;color:${todayC.c};">${waterPct}%</div>
+        <div style="font-size:11px;color:${todayC.c};margin-top:3px;">${watsonGoalPct ? (waterPct>=watsonGoalPct ? '✅ Goal met' : '⬆️ '+(watsonGoalPct-waterPct).toFixed(1)+'% to go') : 'range 45–60%'}</div>
+      </div>
+      ${avg2 !== null ? `
+      <div style="background:${avg2C.bg};border-radius:12px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:${avg2C.c};font-weight:600;margin-bottom:4px;">${recent2.length}-day avg</div>
+        <div style="font-size:30px;font-weight:700;color:${avg2C.c};">${avg2.toFixed(1)}%</div>
+        <div style="font-size:11px;color:${avg2C.c};margin-top:3px;">${watsonGoalPct ? (avg2>=watsonGoalPct ? '✅ Above goal' : '⬆️ '+(watsonGoalPct-avg2).toFixed(1)+'% to goal') : 'range 45–60%'}</div>
+      </div>` : ''}
+    </div>` :
+    `<div style="padding:10px;text-align:center;font-size:12px;color:var(--muted);">Enter today\'s body water % from the Withings app above</div>`}
+
+    ${avg7 !== null ? `
+    <div style="background:var(--warm);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--muted);margin-bottom:6px;">
+      📊 7-day avg: <strong style="color:var(--text);">${avg7.toFixed(1)}%</strong>
+      ${watsonGoalPct ? (avg7>=watsonGoalPct
+        ? ` · <span style="color:#27500A;font-weight:600;">✅ Consistently above goal</span>`
+        : ` · <span style="color:#92400E;">${(watsonGoalPct-avg7).toFixed(1)}% below goal on average</span>`) : ''}
+    </div>` : ''}
+
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--warm);border-radius:10px;font-size:12px;">
       <span style="font-size:16px;flex-shrink:0;">🫙</span>
       <div style="color:var(--muted);line-height:1.5;"><strong style="color:var(--text);">Zepbound + HCTZ note:</strong> GLP-1 medications and your HCTZ diuretic increase fluid loss. Aim for 80–100 oz daily.</div>
     </div>
   `;
-  // 7-day body water average from manually saved entries
-  const bw7El = document.getElementById('body-water-7day');
-  if(bw7El){
-    try {
-      const res = await fetch(`${BACKEND}/api/sync?pillar=body_water`);
-      if(res.ok){
-        const {data} = await res.json();
-        // data could be array of {pct, date} or single entry
-        const entries = Array.isArray(data) ? data : (data?.pct ? [data] : []);
-        const recent = entries
-          .filter(e=>e.pct&&e.date)
-          .sort((a,b)=>b.date.localeCompare(a.date))
-          .slice(0,7);
-        if(recent.length){
-          const avg7 = recent.reduce((a,b)=>a+parseFloat(b.pct),0)/recent.length;
-          const color = avg7>=50?'#27500A':avg7>=45?'#92400E':'#7F1D1D';
-          const bg = avg7>=50?'#EAF3DE':avg7>=45?'#FEF3C7':'#FEE2E2';
-          const status = avg7>=50?'Well hydrated':avg7>=45?'Mildly low':'Dehydrated ⚠️';
-          bw7El.innerHTML = `
-            <div style="display:flex;gap:8px;margin-top:6px;">
-              <div class="snapshot-item" style="flex:1;background:${bg};border-radius:10px;padding:10px;">
-                <div class="snapshot-label">Body water · ${recent.length}-day avg</div>
-                <div class="snapshot-val" style="color:${color};">${avg7.toFixed(1)}%</div>
-                <div class="snapshot-sub" style="color:${color};">${status}</div>
-              </div>
-              <div class="snapshot-item" style="flex:1;">
-                <div class="snapshot-label">Healthy range</div>
-                <div class="snapshot-val" style="font-size:16px;">45–60%</div>
-                <div class="snapshot-sub">women · aim for 50%+</div>
-              </div>
-            </div>`;
-        }
-      }
-    } catch(e){}
-  }
 }
 
 async function buildWaterWeekChart(){
@@ -11472,7 +11529,16 @@ function showMyAirSavedView(entry){
   </div>`;
 }
 
-function editMyAirEntry(){ toggleMyAirCard(); }
+function editMyAirEntry(){
+  // Hide saved summary while editing
+  const savedView = document.getElementById('myair-saved-view');
+  if(savedView) savedView.style.display='none';
+  // Open the card
+  const body = document.getElementById('myair-card-body');
+  const chevron = document.getElementById('myair-card-chevron');
+  if(body) body.style.display='block';
+  if(chevron) chevron.style.transform='rotate(90deg)';
+}
 async function loadMyAirState(){
   // Default date picker to yesterday
   const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
