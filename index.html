@@ -3521,12 +3521,21 @@ async function syncToBlob(store) {
       });
       if(!exists) merged.push(entry);
     }
+    // For outfits/skins/hairs — strip base64 photos to keep payload small
+    // Photos are stored separately via Blob upload; keep URLs only
+    let payload = merged;
+    if(['outfits','skins','hairs'].includes(store)){
+      payload = merged.map(e=>{
+        if(e.photo && e.photo.startsWith('data:')){ return {...e, photo:''}; }
+        return e;
+      });
+    }
     await fetch(`${BACKEND}/api/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pillar: store, data: merged })
+      body: JSON.stringify({ pillar: store, data: payload })
     });
-    console.log(`✅ Blob sync OK: ${store} (${merged.length} entries)`);
+    console.log(`✅ Blob sync OK: ${store} (${payload.length} entries)`);
   } catch (err) {
     console.warn(`Blob sync error (${store}):`, err.message);
   }
@@ -4343,10 +4352,17 @@ async function saveOutfit(){
   const desc=document.getElementById('outfit-desc').value.trim();if(!desc)return;
   const dateInput=document.getElementById('outfit-date');
   const outfitDate=dateInput.value||nowStr();
-  // Grab photo if one was selected into 'outfit-new' slot
+  // Grab photo — prefer Blob URL over base64 to keep sync payload small
   let photo='';
   const photoSlot=document.getElementById('outfit-new');
-  if(photoSlot){const img=photoSlot.querySelector('img');if(img)photo=img.src;}
+  if(photoSlot){
+    const img=photoSlot.querySelector('img');
+    if(img){
+      // Try Blob URL first (uploaded in background)
+      const blobUrlRecord = await dbGetPhoto('outfit-new-bloburl').catch(()=>null);
+      photo = blobUrlRecord || img.src;
+    }
+  }
   const outfitEntry={
     desc,
     occ:gT('occ-tags'),
