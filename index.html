@@ -3117,10 +3117,13 @@ async function boot(){
   loadMyAirState();
   loadCPAPCleanState();
   loadSleepAidState();
-  buildDailyProgress();
+  await buildDailyProgress();
   restoreActivationState();
   await restoreSleepCheckinState();
   tab('today');
+  // Re-run DP after short delay — Blob fetches inside buildDailyProgress
+  // may not have completed on first pass if IndexedDB was empty
+  setTimeout(()=>buildDailyProgress(), 2000);
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
@@ -3630,76 +3633,54 @@ async function buildDailyProgress(){
   const today = nowStr();
   const yesterday = yesterdayStr();
   const manualState = getDPManualState();
-
-  // Auto-check conditions — read from existing data
   const autoChecks = {};
 
-  // Mind — morning activation (check IndexedDB for cross-device sync)
-  try { const checkins = await dbAll('checkins'); autoChecks['dp-activation'] = checkins.some(e=>e.type==='activation'&&e.date===today); } catch(e){}
+  // Fetch all data sources in parallel for speed
+  const [
+    checkins, refs, minds, sleeps, bps,
+    sleepBlob, myairEntry, bpBlob, medsBlob
+  ] = await Promise.all([
+    dbAll('checkins').catch(()=>[]),
+    dbAll('reflections').catch(()=>[]),
+    dbAll('minds').catch(()=>[]),
+    dbAll('sleeps').catch(()=>[]),
+    dbAll('bps').catch(()=>[]),
+    fetch(`${BACKEND}/api/sync?pillar=sleeps&t=${Date.now()}`).then(r=>r.ok?r.json():null).catch(()=>null),
+    getMyAirEntryForLastNight().catch(()=>null),
+    fetch(`${BACKEND}/api/sync?pillar=bps&t=${Date.now()}`).then(r=>r.ok?r.json():null).catch(()=>null),
+    fetch(`${BACKEND}/api/sync?pillar=meds_log&t=${Date.now()}`).then(r=>r.ok?r.json():null).catch(()=>null),
+  ]);
 
-  // Mind — reflection prompt answered (check IndexedDB for cross-device sync)
-  try { const refs = await dbAll('reflections'); autoChecks['dp-reflection'] = refs.some(e=>e.type==='daily'&&e.date===today&&e.answer?.length>0); } catch(e){ autoChecks['dp-reflection']=false; }
+  // Mind
+  autoChecks['dp-activation'] = checkins.some(e=>e.type==='activation'&&e.date===today);
+  autoChecks['dp-reflection'] = refs.some(e=>e.type==='daily'&&e.date===today&&e.answer?.length>0);
+  autoChecks['dp-mood'] = minds.some(e=>e.date===today);
 
-  // Mind — mood logged today
-  try { const minds = await dbAll('minds'); autoChecks['dp-mood'] = minds.some(e=>e.date===today); } catch(e){}
+  // Sleep check-in (IndexedDB + Blob)
+  const sleepBlobData = Array.isArray(sleepBlob?.data) ? sleepBlob.data : [];
+  autoChecks['dp-sleep-checkin'] =
+    sleeps.some(e=>e.date===yesterday||e.date===today) ||
+    sleepBlobData.some(e=>e.date===yesterday||e.date===today);
 
-  // Sleep check-in logged for last night
-  try {
-    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
-    const sleeps = await dbAll('sleeps');
-    let sleepFound = sleeps.some(e=>e.date===yesterday||e.date===today);
-    if(!sleepFound){
-      const res = await fetch(`${BACKEND}/api/sync?pillar=sleeps&t=${Date.now()}`);
-      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
-        sleepFound = data.some(e=>e.date===yesterday||e.date===today);
-      }
-    }
-    autoChecks['dp-sleep-checkin'] = sleepFound;
-  } catch(e){}
+  // myAir + CPAP
+  autoChecks['dp-myair'] = !!myairEntry;
+  autoChecks['dp-cpap'] = !!(myairEntry?.cpapUsed);
 
-  // CPAP used + myAir — read from Blob directly (most reliable)
-  try {
-    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
-    const entry = await getMyAirEntryForLastNight();
-    autoChecks['dp-myair'] = !!entry;
-    autoChecks['dp-cpap'] = !!(entry && entry.cpapUsed);
-  } catch(e){}
+  // BP (IndexedDB + Blob)
+  const bpBlobData = Array.isArray(bpBlob?.data) ? bpBlob.data : [];
+  autoChecks['dp-bp'] =
+    bps.some(e=>e.date===today) ||
+    bpBlobData.some(e=>e.date===today);
 
-  // BP — logged today, with Blob fallback
-  try {
-    const bps = await dbAll('bps');
-    let bpFound = bps.some(e=>e.date===today);
-    if(!bpFound){
-      const res = await fetch(`${BACKEND}/api/sync?pillar=bps&t=${Date.now()}`);
-      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
-        bpFound = data.some(e=>e.date===today);
-      }
-    }
-    autoChecks['dp-bp'] = bpFound;
-  } catch(e){}
-
-  // Meds AM + PM — read from meds_log Blob (cross-device)
-  try {
-    const AM_MEDS = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo'];
-    const PM_MEDS = ['med-rosuvastatin'];
-    // Check DOM state first (same device, already checked off)
-    const amDone = AM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
-    const pmDone = PM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
-    if(amDone) autoChecks['dp-meds-am'] = true;
-    if(pmDone) autoChecks['dp-meds-pm'] = true;
-    // Fall back to Blob meds_log for cross-device
-    if(!amDone || !pmDone){
-      const res = await fetch(`${BACKEND}/api/sync?pillar=meds_log&t=${Date.now()}`);
-      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
-        const entry = data.find(e=>e.date===today);
-        if(entry){
-          if(!amDone) autoChecks['dp-meds-am'] = AM_MEDS.every(id=>entry[id]);
-          if(!pmDone) autoChecks['dp-meds-pm'] = PM_MEDS.every(id=>entry[id]);
-        }
-      }
-    }
-  } catch(e){}
-
+  // Meds AM + PM (DOM + Blob)
+  const AM_MEDS = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo'];
+  const PM_MEDS = ['med-rosuvastatin'];
+  const amDOM = AM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
+  const pmDOM = PM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
+  const medsBlobData = Array.isArray(medsBlob?.data) ? medsBlob.data : [];
+  const medsEntry = medsBlobData.find(e=>e.date===today);
+  autoChecks['dp-meds-am'] = amDOM || !!(medsEntry && AM_MEDS.every(id=>medsEntry[id]));
+  autoChecks['dp-meds-pm'] = pmDOM || !!(medsEntry && PM_MEDS.every(id=>medsEntry[id]));
 
   // Water — 8+ glasses today
   try {
@@ -12879,7 +12860,8 @@ function renderSavedScore(saved){
   const savedDate = new Date(saved.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
   // Update Today ring — delay ensures ring wrapper exists after buildDailyProgress
-  if(!window.glowScore){ window.glowScore = totalScore; setTimeout(()=>updateTodayRing(totalScore), 600); }
+  window.glowScore = totalScore;
+  setTimeout(()=>updateTodayRing(totalScore), 600);
 
   // Compact summary shown when collapsed
   if(summaryEl) summaryEl.innerHTML = `
