@@ -3659,7 +3659,7 @@ async function buildDailyProgress(){
   // Fetch all data sources in parallel for speed
   const [
     checkins, refs, minds, sleeps, bps,
-    sleepBlob, myairEntry, bpBlob, medsBlob, skinRoutineBlob
+    sleepBlob, myairEntry, bpBlob, medsBlob, skinRoutineBlob, csvBPData
   ] = await Promise.all([
     dbAll('checkins').catch(()=>[]),
     dbAll('reflections').catch(()=>[]),
@@ -3671,6 +3671,7 @@ async function buildDailyProgress(){
     fetch(`${BACKEND}/api/sync?pillar=bps&t=${Date.now()}`).then(r=>r.ok?r.json():null).catch(()=>null),
     fetch(`${BACKEND}/api/sync?pillar=meds_log&t=${Date.now()}`).then(r=>r.ok?r.json():null).catch(()=>null),
     fetch(`${BACKEND}/api/sync?pillar=skin_routine&t=${Date.now()}`).then(r=>r.ok?r.json():null).catch(()=>null),
+    getCSVBPData().catch(()=>[]),
   ]);
 
   // Mind
@@ -3688,11 +3689,11 @@ async function buildDailyProgress(){
   autoChecks['dp-myair'] = !!myairEntry;
   autoChecks['dp-cpap'] = !!(myairEntry?.cpapUsed);
 
-  // BP (IndexedDB + Blob)
-  const bpBlobData = Array.isArray(bpBlob?.data) ? bpBlob.data : [];
+  // BP — CSV is primary source (Apple Health auto-sync), manual log as fallback
   autoChecks['dp-bp'] =
+    (Array.isArray(csvBPData) && csvBPData.some(e=>e.date===today)) ||
     bps.some(e=>e.date===today) ||
-    bpBlobData.some(e=>e.date===today);
+    (Array.isArray(bpBlob?.data) && bpBlob.data.some(e=>e.date===today));
 
   // Meds AM + PM (DOM + Blob)
   const AM_MEDS = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo'];
@@ -11604,24 +11605,28 @@ async function loadTodaySleepFromCSV(){
 async function updateBPBanners(){
   try {
     const today = nowStr();
-    let bps = await dbAll('bps');
-    // If no today reading in IndexedDB, fetch from Blob
-    const hasTodayLocal = bps.some(b=>b.date===today&&b.sys&&b.dia);
-    if(!hasTodayLocal){
-      const res = await fetch(`${BACKEND}/api/sync?pillar=bps&t=${Date.now()}`);
-      if(res.ok){ const d=await res.json(); if(Array.isArray(d.data)&&d.data.length) bps=d.data; }
-    }
-    const todayBP = bps.filter(b=>b.date===today).pop();
-    const lastBP = bps.slice().reverse().find(b=>b.sys&&b.dia);
 
-    // Also check CSV BP data for today
+    // CSV is primary source — Apple Health auto-syncs BP from device
     const csvBPs = await getCSVBPData();
     const todayCSVBP = csvBPs.find(b=>b.date===today&&b.sys&&b.dia);
     const lastCSVBP = csvBPs.slice().reverse().find(b=>b.sys&&b.dia);
 
-    // Use today's reading from either source
-    const todayReading = todayBP?.sys ? todayBP : todayCSVBP;
-    const lastReading = lastBP || lastCSVBP;
+    // Manual log is fallback only (doctor visits, etc.)
+    let manualBPs = [];
+    if(!lastCSVBP){
+      let bps = await dbAll('bps');
+      if(!bps.length){
+        const res = await fetch(`${BACKEND}/api/sync?pillar=bps&t=${Date.now()}`);
+        if(res.ok){ const d=await res.json(); if(Array.isArray(d.data)) bps=d.data; }
+      }
+      manualBPs = bps;
+    }
+    const todayManual = manualBPs.filter(b=>b.date===today&&b.sys&&b.dia).pop();
+    const lastManual = manualBPs.slice().reverse().find(b=>b.sys&&b.dia);
+
+    // Use CSV first, manual only if no CSV data
+    const todayReading = todayCSVBP || todayManual || null;
+    const lastReading = lastCSVBP || lastManual || null;
 
     // Today pillar banners
     const todayBanner = document.getElementById('today-bp-banner');
