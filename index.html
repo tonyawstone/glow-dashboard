@@ -1101,7 +1101,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ SLEEP ═══════════════ -->
 <div id="s-sleep" class="sec">
   <div class="view-content on" id="vc-sleep-daily">
-    <div class="section-label">Sleep & Energy <button class="guide-btn" onclick="openGuide('sleep')">?</button></div>
+    <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;">Sleep & Energy <button class="guide-btn" onclick="openGuide('sleep')">?</button><button class="pill-btn" onclick="openPastSleepLog()" style="font-size:12px;">Past check-ins ↗</button></div>
     <div class="card">
       <div class="card-title">Apple Health · sleep data</div>
       <!-- Last night's hours — prominently shown -->
@@ -1130,19 +1130,83 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <a href="javascript:void(0)" onclick="openWithings()" class="ext-link" style="margin-top:10px;"><i class="ti ti-external-link" aria-hidden="true"></i>Open Withings · see your Sleep Score</a>
     </div>
     <div class="card">
-      <div class="card-title">😴 ResMed myAir · nightly log & CPAP compliance</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSleepCheckin()">
+        <div class="card-title" style="margin:0;">😴 Sleep check-in</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="event.stopPropagation();openPastSleepLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
+          <div id="sleep-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+        </div>
+      </div>
+      <!-- Saved state -->
+      <div id="sleep-checkin-saved" style="display:none;margin-top:10px;"></div>
+      <div id="sleep-checkin-body" style="display:none;margin-top:12px;">
+        <div class="fl">Sleep quality</div>
+        <div class="quality-row" id="sq-tags">
+          <button class="qb" onclick="soloQ(this)">Awful</button><button class="qb" onclick="soloQ(this)">Poor</button><button class="qb" onclick="soloQ(this)">OK</button><button class="qb" onclick="soloQ(this)">Good</button><button class="qb" onclick="soloQ(this)">Great</button>
+        </div>
+        <div class="fl">Morning energy</div>
+        <div class="tags" id="energy-am-tags">
+          <button class="tag" onclick="tog(this)">Rested</button>
+          <button class="tag" onclick="tog(this)">Energized</button>
+          <button class="tag" onclick="tog(this)">Tired</button>
+          <button class="tag" onclick="tog(this)">Groggy</button>
+          <button class="tag" onclick="tog(this)">Foggy</button>
+          <button class="tag" onclick="tog(this)">Exhausted</button>
+        </div>
+        <div class="fl">Sleep aids taken last night</div>
+        <div class="med-row" id="t-melatonin" onclick="toggleSleepAid('t-melatonin')">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Melatonin</div><div class="med-note">Sleep onset support</div></div>
+        </div>
+        <div class="med-row" id="t-sleep-gummies" onclick="toggleSleepAid('t-sleep-gummies')" style="margin-bottom:8px;">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Sleep gummies</div><div class="med-note">CBD / magnesium / other</div></div>
+        </div>
+        <div class="fl">Notes</div>
+        <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..." oninput="saveSleepDraft()"></textarea>
+        <button class="btn-primary" onclick="saveSleep()">Log sleep</button>
+        <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px;">Saves to last night's date</div>
+        <button class="btn-ai" onclick="sleepCoach()">Sleep pattern analysis ↗</button>
+        <div id="sleep-coach-output" class="coach-response" style="display:none"></div>
+        <div class="toast-msg" id="slp-t">Saved!</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleMyAirCard()">
+        <div class="card-title" style="margin:0;">😴 ResMed myAir</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;color:var(--muted);" id="myair-card-summary"></span>
+          <div id="myair-card-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+        </div>
+      </div>
+      <div id="myair-card-body" style="display:none;margin-top:12px;">
+      <!-- Saved state -->
+      <div id="myair-saved-view" style="display:none;margin-bottom:12px;"></div>
+      <div id="myair-input-fields">
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Enter raw values from your machine — scores calculated automatically</div>
 
-      <!-- CPAP compliance grouped here -->
-      <div class="fl">CPAP compliance last night</div>
-      <div class="tags" id="cpap-tags">
-        <button class="tag" onclick="solo('cpap-tags',this)">Full night (4+ hrs)</button>
-        <button class="tag" onclick="solo('cpap-tags',this)">3–4 hrs</button>
-        <button class="tag" onclick="solo('cpap-tags',this)">1–3 hrs</button>
-        <button class="tag" onclick="solo('cpap-tags',this)">Forgot</button>
-        <button class="tag" onclick="solo('cpap-tags',this)">Didn't use</button>
+      <!-- CPAP used checkbox + duration -->
+      <div id="cpap-used-row" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--warm);margin-bottom:14px;cursor:pointer;" onclick="toggleCPAPUsed()">
+        <div id="cpap-used-check" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--accent);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;transition:background 0.15s;"></div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:500;">Used CPAP last night</div>
+          <div style="font-size:11px;color:var(--muted);">Medicare requires 4+ hrs · 70% of nights</div>
+        </div>
       </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:14px;">Medicare requires 4+ hrs/night · 70% of nights for compliance</div>
+      <!-- Duration range — shown when CPAP used is checked -->
+      <div id="cpap-duration-row" style="display:none;margin-bottom:14px;">
+        <div class="fl">Hours used</div>
+        <div class="tags" id="cpap-duration-tags" style="flex-wrap:wrap;">
+          <button class="tag" onclick="solo('cpap-duration-tags',this)">1–3 hrs</button>
+          <button class="tag" onclick="solo('cpap-duration-tags',this)">3–4 hrs</button>
+          <button class="tag" onclick="solo('cpap-duration-tags',this)">4–5 hrs</button>
+          <button class="tag" onclick="solo('cpap-duration-tags',this)">5–6 hrs</button>
+          <button class="tag" onclick="solo('cpap-duration-tags',this)">6–7 hrs</button>
+          <button class="tag" onclick="solo('cpap-duration-tags',this)">7–8 hrs</button>
+          <button class="tag" onclick="solo('cpap-duration-tags',this)">8h+</button>
+        </div>
+      </div>
 
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <div style="font-size:13px;font-weight:500;color:var(--text);">Last night's data <span id="myair-date-label" style="color:var(--muted);font-weight:400;"></span></div>
@@ -1244,49 +1308,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button class="btn-primary" style="margin-top:0;" onclick="saveMyAirLog()">Save myAir data</button>
       <div class="toast-msg" id="myair-toast">Saved!</div>
       <div id="myair-last-logged" style="margin-top:14px;"></div>
-    </div>
-
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSleepCheckin()">
-        <div class="card-title" style="margin:0;">😴 Sleep check-in</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button onclick="event.stopPropagation();openPastSleepLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
-          <div id="sleep-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
-        </div>
-      </div>
-      <!-- Saved state -->
-      <div id="sleep-checkin-saved" style="display:none;margin-top:10px;"></div>
-      <div id="sleep-checkin-body" style="display:none;margin-top:12px;">
-        <div class="fl">Sleep quality</div>
-        <div class="quality-row" id="sq-tags">
-          <button class="qb" onclick="soloQ(this)">Awful</button><button class="qb" onclick="soloQ(this)">Poor</button><button class="qb" onclick="soloQ(this)">OK</button><button class="qb" onclick="soloQ(this)">Good</button><button class="qb" onclick="soloQ(this)">Great</button>
-        </div>
-        <div class="fl">Morning energy</div>
-        <div class="tags" id="energy-am-tags">
-          <button class="tag" onclick="tog(this)">Rested</button>
-          <button class="tag" onclick="tog(this)">Energized</button>
-          <button class="tag" onclick="tog(this)">Tired</button>
-          <button class="tag" onclick="tog(this)">Groggy</button>
-          <button class="tag" onclick="tog(this)">Foggy</button>
-          <button class="tag" onclick="tog(this)">Exhausted</button>
-        </div>
-        <div class="fl">Sleep aids taken last night</div>
-        <div class="med-row" id="t-melatonin" onclick="toggleSleepAid('t-melatonin')">
-          <div class="med-check">&#x2713;</div>
-          <div class="med-info"><div class="med-name">Melatonin</div><div class="med-note">Sleep onset support</div></div>
-        </div>
-        <div class="med-row" id="t-sleep-gummies" onclick="toggleSleepAid('t-sleep-gummies')" style="margin-bottom:8px;">
-          <div class="med-check">&#x2713;</div>
-          <div class="med-info"><div class="med-name">Sleep gummies</div><div class="med-note">CBD / magnesium / other</div></div>
-        </div>
-        <div class="fl">Notes</div>
-        <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..." oninput="saveSleepDraft()"></textarea>
-        <button class="btn-primary" onclick="saveSleep()">Log sleep</button>
-        <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px;">Saves to last night's date</div>
-        <button class="btn-ai" onclick="sleepCoach()">Sleep pattern analysis ↗</button>
-        <div id="sleep-coach-output" class="coach-response" style="display:none"></div>
-        <div class="toast-msg" id="slp-t">Saved!</div>
-      </div>
+      </div><!-- myair-input-fields -->
+      </div><!-- myair-card-body -->
     </div>
 
     <!-- CPAP Equipment -->
@@ -3034,10 +3057,10 @@ async function getRealAge(){
 
 // ── DB ────────────────────────────────────────────────────────────────
 let db;
-const req=indexedDB.open('GlowDashboard',5);
+const req=indexedDB.open('GlowDashboard',6);
 req.onupgradeneeded=e=>{
   db=e.target.result;
-  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries','water','intentions'].forEach(s=>{
+  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries','water','intentions','myair'].forEach(s=>{
     if(!db.objectStoreNames.contains(s)) db.createObjectStore(s,{keyPath:'id',autoIncrement:true});
   });
   if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});
@@ -3131,7 +3154,7 @@ async function tab(id){
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); loadWardrobePlanLog(); loadTodayPlannedLook(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') { 
-    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState();
+    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary();
     // Default myAir date to yesterday — CPAP data is always for last night
     const myairDate = document.getElementById('myair-date');
     const myairLabel = document.getElementById('myair-date-label');
@@ -3548,8 +3571,9 @@ var DP_ITEMS = [
   ['🧠 Mind',    'dp-activation','Morning activation',       '5-step energy ritual',               null, 'mind'],
   ['🧠 Mind',    'dp-reflection','Reflection prompt answered','Journal · DayOne · prompt',           null, 'mind'],
   ['🧠 Mind',    'dp-mood',      'Mood logged',              'Vibe · energy · gratitude · wins',   null, 'mind'],
-  ['😴 Sleep',   'dp-sleep-q',   'Sleep data recorded',      'Withings · last night',              null, 'sleep'],
-  ['😴 Sleep',   'dp-myair',     'myAir data saved',         'CPAP · AHI · usage',                 null, 'sleep'],
+  ['😴 Sleep',   'dp-sleep-checkin', 'Sleep check-in logged',    'Quality · energy · notes',           null, 'sleep'],
+  ['😴 Sleep',   'dp-cpap',          'CPAP used last night',     'Usage hours logged',                 null, 'sleep'],
+  ['😴 Sleep',   'dp-myair',         'myAir data saved',         'AHI · seal · on/off events',         null, 'sleep'],
   ['🌿 Wellness','dp-bp',        'BP logged',                'Blood pressure reading',             null, 'health'],
   ['🌿 Wellness','dp-meds',      'Medications taken',        'Rx meds · supplements',              null, 'health'],
   ['🌿 Wellness','dp-bodywater', 'Body water % entered',     'From Withings scale',                null, 'health'],
@@ -3618,25 +3642,19 @@ async function buildDailyProgress(){
   // Mind — mood logged today
   try { const minds = await dbAll('minds'); autoChecks['dp-mood'] = minds.some(e=>e.date===today); } catch(e){}
 
-  // Sleep — check-in logged for last night
+  // Sleep check-in logged for last night
   try {
     const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
     const sleeps = await dbAll('sleeps');
-    autoChecks['dp-sleep-q'] = sleeps.some(e=>e.date===yesterday||e.date===today);
+    autoChecks['dp-sleep-checkin'] = sleeps.some(e=>e.date===yesterday||e.date===today);
   } catch(e){}
 
-  // myAir — check IndexedDB (synced from Blob on boot)
+  // CPAP used + myAir — read from Blob directly (most reliable)
   try {
-    const myairData = await dbAll('myair').catch(()=>[]);
-    if(myairData.length){
-      autoChecks['dp-myair'] = myairData.some(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today);
-    } else {
-      // Fall back to direct Blob fetch
-      const res = await fetch(`${BACKEND}/api/sync?pillar=myair&t=${Date.now()}`);
-      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
-        autoChecks['dp-myair'] = data.some(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today);
-      }
-    }
+    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    const entry = await getMyAirEntryForLastNight();
+    autoChecks['dp-myair'] = !!entry;
+    autoChecks['dp-cpap'] = !!(entry && entry.cpapUsed);
   } catch(e){}
 
   // Meds — check localStorage
@@ -3758,7 +3776,7 @@ function updateTodayRing(score){
 function updatePillarRings(checks){
   const pillarItems = {
     mind:    ['dp-activation','dp-reflection','dp-mood'],
-    sleep:   ['dp-sleep-q','dp-myair'],
+    sleep:   ['dp-sleep-checkin','dp-cpap','dp-myair'],
     health:  ['dp-bp','dp-meds','dp-bodywater','dp-water'],
     skin:    ['dp-skin-checkin','dp-skin-am','dp-skin-pm','dp-musely-game'],
     body:    ['dp-body','dp-exercise'],
@@ -6082,16 +6100,26 @@ async function saveBoxSummary(){
   toast('bxt');
 }
 
-var SLEEP_AIDS_KEY = 'glowSleepAids';
+var SLEEP_AIDS_KEY = 'glowSleepAids'; // kept for toggleSleepAid draft only
 
-function loadSleepAidState(){
-  try {
+async function loadSleepAidState(){
+  try{
+    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    const sleeps = await dbAll('sleeps');
+    const entry = sleeps.find(e=>e.date===yesterday||e.date===nowStr());
+    if(entry){
+      if(entry.melatonin) document.getElementById('t-melatonin')?.classList.add('done');
+      if(entry.sleepGummies) document.getElementById('t-sleep-gummies')?.classList.add('done');
+      return;
+    }
+    // Fall back to localStorage draft (same-device, not-yet-saved)
     const saved = JSON.parse(localStorage.getItem(SLEEP_AIDS_KEY)||'{}');
-    if(saved.date !== yesterdayStr()){ localStorage.removeItem(SLEEP_AIDS_KEY); return; }
-    ['t-melatonin','t-sleep-gummies'].forEach(id=>{
-      if(saved[id]) document.getElementById(id)?.classList.add('done');
-    });
-  } catch(e){}
+    if(saved.date === yesterdayStr()){
+      ['t-melatonin','t-sleep-gummies'].forEach(id=>{
+        if(saved[id]) document.getElementById(id)?.classList.add('done');
+      });
+    }
+  }catch(e){}
 }
 
 function toggleSleepAid(id){
@@ -6123,7 +6151,9 @@ async function saveSleep(){
   if(hrs!=='—'){ document.getElementById('sleep-display').textContent=hrs+'h'; document.getElementById('s-sleep-h').textContent=hrs+'h'; }
 
   const sleepDate = new Date(Date.now()-86400000).toISOString().slice(0,10);
-  const sleepEntry={hrs,bed,wake,cpap:cpap[0]||'',quality,energy,note,date:sleepDate};
+  const melatonin = document.getElementById('t-melatonin')?.classList.contains('done')||false;
+  const sleepGummies = document.getElementById('t-sleep-gummies')?.classList.contains('done')||false;
+  const sleepEntry={hrs,bed,wake,cpap:cpap[0]||'',quality,energy,note,melatonin,sleepGummies,date:sleepDate};
   await dbAdd('sleeps',sleepEntry);
   syncToBlob('sleeps');
   // Clear form
@@ -11113,6 +11143,9 @@ async function saveMyAirLog(){
   const onoff = parseInt(document.getElementById('myair-onoff').value)||null;
   if(!hours && !ahi && sealLmin==null && onoff==null) return;
 
+  const cpapUsed = _cpapUsed;
+  const cpapDuration = cpapUsed ? (document.querySelector('#cpap-duration-tags .tag.on')?.textContent||'') : '';
+
   const usageScore = calcUsageScore(hours);
   const ahiScore = calcAHIScore(ahi);
   const sealScore = calcSealScore(sealLmin);
@@ -11120,7 +11153,6 @@ async function saveMyAirLog(){
   const score = (usageScore||0) + (ahiScore||0) + (sealScore||0) + (onoffScore||0);
 
   const datePickerEl = document.getElementById('myair-date');
-  // Use local date string, not UTC
   const yesterdayStr = new Date(Date.now()-86400000).toISOString().slice(0,10);
   const isoStr = datePickerEl?.value || yesterdayStr;
   const logDate = new Date(isoStr+'T12:00:00');
@@ -11128,17 +11160,20 @@ async function saveMyAirLog(){
 
   const entry = {
     date: dateStr, isoDate: isoStr,
-    hours, ahi, sealLmin, onoff, // raw values
-    usageScore, sealScore, onoffScore, ahiScore, // calculated
-    seal: sealScore, // legacy alias for charts
-    score // total
+    cpapUsed, cpapDuration,
+    hours, ahi, sealLmin, onoff,
+    usageScore, sealScore, onoffScore, ahiScore,
+    seal: sealScore,
+    score
   };
 
   const statusEl = document.getElementById('myair-status');
   if(statusEl){
     const color = score>=90?'#27500A':score>=70?'#92400E':'#7F1D1D';
     const label = score>=90?'Excellent!':score>=70?'Good night':'Needs attention';
-    statusEl.innerHTML = `<span style="color:${color};font-weight:600;">${label}</span> · ${score}/100${ahi!=null?` · AHI ${ahi}${ahi<1?' ✅ Excellent':ahi<5?' ✅ Normal':' ⚠️ Elevated'}`:''}`;
+    statusEl.innerHTML = `<span style="color:${color};font-weight:600;">${label}</span> · ${score}/100`
+      + (ahi!=null?` · AHI ${ahi}${ahi<1?' ✅ Excellent':ahi<5?' ✅ Normal':' ⚠️ Elevated'}`:'')
+      + (cpapUsed && cpapDuration?` · CPAP ${cpapDuration}`:'');
   }
 
   const existing = await fetch(`${BACKEND}/api/sync?pillar=myair`).then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
@@ -11149,53 +11184,104 @@ async function saveMyAirLog(){
 
   await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'myair',data:existing})});
   toast('myair-toast');
-
-  // Persist values to localStorage — stay visible until next day or overwritten
-  localStorage.setItem('glowMyAirState', JSON.stringify({
-    date: isoStr,
-    hours, ahi: document.getElementById('myair-ahi').value,
-    sealLmin: document.getElementById('myair-seal-lmin').value,
-    onoff: document.getElementById('myair-onoff').value,
-    usageScore, ahiScore, sealScore, onoffScore, score
-  }));
+  showMyAirSavedView(entry);
   loadMyAirLastLogged();
+  updateMyAirCardSummary();
+  buildDailyProgress();
 }
 
-function loadMyAirState(){
-  // Always default date picker to yesterday (myAir data is always last night)
+var _myairCardOpen = false;
+function toggleMyAirCard(){
+  _myairCardOpen = !_myairCardOpen;
+  const body = document.getElementById('myair-card-body');
+  const chevron = document.getElementById('myair-card-chevron');
+  if(body) body.style.display = _myairCardOpen ? 'block' : 'none';
+  if(chevron) chevron.style.transform = _myairCardOpen ? 'rotate(90deg)' : '';
+}
+
+async function updateMyAirCardSummary(){
+  const el = document.getElementById('myair-card-summary');
+  if(!el) return;
+  try{
+    const entry = await getMyAirEntryForLastNight();
+    if(!entry){ el.textContent=''; return; }
+    const parts=[];
+    if(entry.cpapUsed && entry.cpapDuration) parts.push(entry.cpapDuration);
+    if(entry.score) parts.push(entry.score+'/100');
+    el.textContent = parts.length ? parts.join(' · ') : 'Logged ✓';
+    showMyAirSavedView(entry);
+  }catch(e){ el.textContent=''; }
+}
+
+async function getMyAirEntryForLastNight(){
+  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const today = nowStr();
+  try{
+    const local = await dbAll('myair').catch(()=>[]);
+    const entry = local.find(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today);
+    if(entry) return entry;
+  }catch(e){}
+  try{
+    const res = await fetch(`${BACKEND}/api/sync?pillar=myair&t=${Date.now()}`);
+    if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+      return data.find(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today)||null;
+    }
+  }catch(e){}
+  return null;
+}
+
+function showMyAirSavedView(entry){
+  const savedView = document.getElementById('myair-saved-view');
+  const inputFields = document.getElementById('myair-input-fields');
+  if(!savedView||!inputFields) return;
+  const score = entry.score||0;
+  const scoreColor = score>=90?'#27500A':score>=70?'#92400E':'#7F1D1D';
+  savedView.style.display='block';
+  savedView.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">myAir logged for last night ✓ <button onclick="editMyAirEntry()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-bottom:6px;">
+      ${entry.cpapUsed?`<div>✅ CPAP used${entry.cpapDuration?' · '+entry.cpapDuration:''}</div>`:'<div>❌ CPAP not used</div>'}
+      ${entry.hours?`<div>⏱ ${entry.hours} hrs usage</div>`:''}
+      ${entry.ahi!=null?`<div>AHI ${entry.ahi}${entry.ahi<5?' ✅':' ⚠️'}</div>`:''}
+      ${score?`<div style="color:${scoreColor};font-weight:600;">Score ${score}/100</div>`:''}
+    </div>
+  </div>`;
+  inputFields.style.display='none';
+}
+
+function editMyAirEntry(){
+  const savedView = document.getElementById('myair-saved-view');
+  const inputFields = document.getElementById('myair-input-fields');
+  if(savedView) savedView.style.display='none';
+  if(inputFields) inputFields.style.display='';
+}
+async function loadMyAirState(){
+  // Default date picker to yesterday
   const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
   const dateEl = document.getElementById('myair-date');
-  if(dateEl){ dateEl.max = new Date(Date.now()-86400000).toISOString().slice(0,10); } // never allow future dates
-  if(dateEl && !dateEl.value) {
+  if(dateEl){ dateEl.max = yesterday; }
+  if(dateEl && !dateEl.value){
     dateEl.value = yesterday;
     const labelEl = document.getElementById('myair-date-label');
     if(labelEl){ const d=new Date(yesterday+'T12:00:00'); labelEl.textContent='('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')'; }
   }
-
-  const saved = localStorage.getItem('glowMyAirState');
-  if(!saved) return;
-  try {
-    const state = JSON.parse(saved);
-    const today = new Date().toISOString().slice(0,10);
-    if(state.date !== today && state.date !== yesterday){ localStorage.removeItem('glowMyAirState'); return; }
-
-    // Restore date
-    if(state.date && dateEl) {
-      dateEl.value = state.date;
-      const labelEl = document.getElementById('myair-date-label');
-      if(labelEl){ const d=new Date(state.date+'T12:00:00'); labelEl.textContent='('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')'; }
-    }
-
-    // Restore raw input values
-    if(state.hours){ const el=document.getElementById('myair-hours'); if(el) el.value=state.hours; }
-    if(state.ahi){ const el=document.getElementById('myair-ahi'); if(el) el.value=state.ahi; }
-    if(state.sealLmin){ const el=document.getElementById('myair-seal-lmin'); if(el) el.value=state.sealLmin; }
-    if(state.onoff){ const el=document.getElementById('myair-onoff'); if(el) el.value=state.onoff; }
-
-    // Restore calculated scores
+  // Read from Blob — no localStorage
+  try{
+    const entry = await getMyAirEntryForLastNight();
+    if(!entry) return;
+    // Restore input values for editing
+    if(entry.hours){ const el=document.getElementById('myair-hours'); if(el) el.value=entry.hours; }
+    if(entry.ahi){ const el=document.getElementById('myair-ahi'); if(el) el.value=entry.ahi; }
+    if(entry.sealLmin){ const el=document.getElementById('myair-seal-lmin'); if(el) el.value=entry.sealLmin; }
+    if(entry.onoff){ const el=document.getElementById('myair-onoff'); if(el) el.value=entry.onoff; }
+    if(entry.cpapUsed !== undefined) restoreCPAPUsedState(entry.cpapUsed, entry.cpapDuration||'');
     calcMyAirScores();
-  } catch(e){}
+    // Show saved state view
+    showMyAirSavedView(entry);
+    updateMyAirCardSummary();
+  }catch(e){}
 }
+
 
 async function updateUploadStatusBanner(){
   const textEl = document.getElementById('upload-status-text');
