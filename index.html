@@ -1722,12 +1722,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Medications & Vitamins -->
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleMedsForm()">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="card-title" style="margin:0;">💊 Medications & supplements · daily</div>
-          <div id="meds-form-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+      <div style="cursor:pointer;" onclick="toggleMedsForm()">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="card-title" style="margin:0;">💊 Medications & supplements · daily</div>
+            <div id="meds-form-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+          </div>
         </div>
-        <div id="meds-header-status" style="font-size:11px;color:var(--muted);"></div>
+        <div id="meds-header-status" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
       </div>
       <!-- Saved state cards — always visible outside collapsible -->
       <div id="meds-am-saved" style="display:none;margin-top:10px;"></div>
@@ -10570,25 +10572,23 @@ async function buildBodyWaterWeekChart(){
   });
 }
 
-function saveBodyWater(){
+async function saveBodyWater(){
   const pct = parseFloat(document.getElementById('body-water-input')?.value);
   if(!pct||pct<30||pct>75){ alert('Please enter a valid body water % (30–75)'); return; }
   const entry = { pct, date: nowStr() };
   localStorage.setItem('glowBodyWater', JSON.stringify(entry));
-  // Save to history array in Blob
-  fetch(`${BACKEND}/api/sync?pillar=body_water`)
-    .then(r=>r.json())
-    .then(d=>{
-      const history = Array.isArray(d.data) ? d.data : (d.data?.pct ? [d.data] : []);
-      // Replace today's entry if exists, otherwise append
-      const idx = history.findIndex(e=>e.date===nowStr());
-      if(idx>=0) history[idx] = entry; else history.push(entry);
-      fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({pillar:'body_water',data:history})});
-    }).catch(()=>{
-      fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({pillar:'body_water',data:[entry]})});
-    });
+  try {
+    const r = await fetch(`${BACKEND}/api/sync?pillar=body_water`);
+    const d = await r.json();
+    const history = Array.isArray(d.data) ? d.data : (d.data?.pct ? [d.data] : []);
+    const idx = history.findIndex(e=>e.date===nowStr());
+    if(idx>=0) history[idx] = entry; else history.push(entry);
+    await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pillar:'body_water',data:history})});
+  } catch(e) {
+    await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pillar:'body_water',data:[entry]})});
+  }
   toast('bw-toast');
   buildHydrationStatus();
 }
@@ -12433,7 +12433,7 @@ function updateMedsProgress(){
   // Update header status
   const statusEl = document.getElementById('meds-header-status');
   if(statusEl){
-    const sections = [amRxDone?'AM':'', afternoonDone?'PM':'', pmDone?'Evening':''].filter(Boolean);
+    const sections = [amRxDone?'AM':'', afternoonDone?'Afternoon':'', pmDone?'PM':''].filter(Boolean);
     statusEl.textContent = sections.length ? sections.join(' · ')+' ✓' : '';
     statusEl.style.color = sections.length === 3 ? '#6B9E78' : 'var(--muted)';
   }
