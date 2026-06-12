@@ -3119,7 +3119,7 @@ async function boot(){
   loadSleepAidState();
   buildDailyProgress();
   restoreActivationState();
-  restoreSleepCheckinState();
+  await restoreSleepCheckinState();
   tab('today');
 }
 
@@ -3575,7 +3575,8 @@ var DP_ITEMS = [
   ['😴 Sleep',   'dp-cpap',          'CPAP used last night',     'Usage hours logged',                 null, 'sleep'],
   ['😴 Sleep',   'dp-myair',         'myAir data saved',         'AHI · seal · on/off events',         null, 'sleep'],
   ['🌿 Wellness','dp-bp',        'BP logged',                'Blood pressure reading',             null, 'health'],
-  ['🌿 Wellness','dp-meds',      'Medications taken',        'Rx meds · supplements',              null, 'health'],
+  ['🌿 Wellness','dp-meds-am',   'AM meds taken',            'Irbesartan · Metoprolol · Amlodipine · Osteo Biflex', null, 'health'],
+  ['🌿 Wellness','dp-meds-pm',   'PM meds taken',            'Rosuvastatin',                       null, 'health'],
   ['🌿 Wellness','dp-bodywater', 'Body water % entered',     'From Withings scale',                null, 'health'],
   ['🌿 Wellness','dp-water',     'Water goal met',           '64 oz · 8 glasses',                  null, 'health'],
   ['✨ Skin',    'dp-skin-checkin','Skin check-in logged',     'Daily skin notes',                   null, 'skin'],
@@ -3664,15 +3665,40 @@ async function buildDailyProgress(){
     autoChecks['dp-cpap'] = !!(entry && entry.cpapUsed);
   } catch(e){}
 
-  // Meds — check localStorage
+  // BP — logged today, with Blob fallback
   try {
-    const meds = JSON.parse(localStorage.getItem('glowMedsToday')||'{}');
-    const required = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo','med-rosuvastatin'];
-    autoChecks['dp-meds'] = meds.date===today && required.every(id=>meds[id]);
+    const bps = await dbAll('bps');
+    let bpFound = bps.some(e=>e.date===today);
+    if(!bpFound){
+      const res = await fetch(`${BACKEND}/api/sync?pillar=bps&t=${Date.now()}`);
+      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+        bpFound = data.some(e=>e.date===today);
+      }
+    }
+    autoChecks['dp-bp'] = bpFound;
   } catch(e){}
 
-  // BP — logged today
-  try { const bps = await dbAll('bps'); autoChecks['dp-bp'] = bps.some(e=>e.date===today||(e.time&&e.date===today)); } catch(e){}
+  // Meds AM + PM — read from meds_log Blob (cross-device)
+  try {
+    const AM_MEDS = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo'];
+    const PM_MEDS = ['med-rosuvastatin'];
+    // Check DOM state first (same device, already checked off)
+    const amDone = AM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
+    const pmDone = PM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
+    if(amDone) autoChecks['dp-meds-am'] = true;
+    if(pmDone) autoChecks['dp-meds-pm'] = true;
+    // Fall back to Blob meds_log for cross-device
+    if(!amDone || !pmDone){
+      const res = await fetch(`${BACKEND}/api/sync?pillar=meds_log&t=${Date.now()}`);
+      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+        const entry = data.find(e=>e.date===today);
+        if(entry){
+          if(!amDone) autoChecks['dp-meds-am'] = AM_MEDS.every(id=>entry[id]);
+          if(!pmDone) autoChecks['dp-meds-pm'] = PM_MEDS.every(id=>entry[id]);
+        }
+      }
+    }
+  } catch(e){}
 
 
   // Water — 8+ glasses today
@@ -3784,7 +3810,7 @@ function updatePillarRings(checks){
   const pillarItems = {
     mind:    ['dp-activation','dp-reflection','dp-mood'],
     sleep:   ['dp-sleep-checkin','dp-cpap','dp-myair'],
-    health:  ['dp-bp','dp-meds','dp-bodywater','dp-water'],
+    health:  ['dp-bp','dp-meds-am','dp-meds-pm','dp-bodywater','dp-water'],
     skin:    ['dp-skin-checkin','dp-skin-am','dp-skin-pm','dp-musely-game'],
     body:    ['dp-body','dp-exercise'],
     style:   ['dp-outfit'],
@@ -6459,21 +6485,27 @@ function editSleepCheckin(){
 async function restoreSleepCheckinState(){
   try{
     const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
-    // Try IndexedDB first
+    const today = nowStr();
     let entry = null;
+    // Try IndexedDB first
     const sleeps = await dbAll('sleeps');
-    entry = sleeps.find(e=>e.date===yesterday||e.date===nowStr());
+    if(sleeps.length){
+      // Prefer last night, fall back to most recent
+      entry = sleeps.find(e=>e.date===yesterday||e.date===today);
+      if(!entry) entry = [...sleeps].sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+    }
     // Fall back to Blob directly
     if(!entry){
       const res = await fetch(`${BACKEND}/api/sync?pillar=sleeps&t=${Date.now()}`);
       if(res.ok){
         const d = await res.json();
         const data = Array.isArray(d.data)?d.data:[];
-        entry = data.find(e=>e.date===yesterday||e.date===nowStr());
+        entry = data.find(e=>e.date===yesterday||e.date===today);
+        if(!entry && data.length) entry = [...data].sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
       }
     }
     if(entry) showSleepCheckinSaved(entry);
-  }catch(e){}
+  }catch(e){ console.warn('restoreSleepCheckinState error:',e); }
 }
 
 function toggleMindCheckin(forceOpen){
@@ -11967,9 +11999,13 @@ function updateMedsProgress(){
   const allMeds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo',
     'med-multivitamin','med-biotin','med-vitc','med-collagen','med-superbeets',
     'med-rosuvastatin','med-miralax','med-melatonin-eve','med-sleep-gummies-eve'];
-  const required = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo','med-rosuvastatin'];
+  const AM_MEDS = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo'];
+  const PM_MEDS = ['med-rosuvastatin'];
+  const required = [...AM_MEDS, ...PM_MEDS];
   const done = allMeds.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
   const reqDone = required.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
+  const amDone = AM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
+  const pmDone = PM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
   const el = document.getElementById('meds-progress');
   const btn = document.getElementById('meds-save-btn');
 
@@ -11983,8 +12019,10 @@ function updateMedsProgress(){
     if(btn) btn.style.display='block';
   } else {
     if(el){ el.innerHTML=`${reqDone}/${required.length} Rx meds taken · ${done} total logged today`; el.style.color='var(--muted)'; el.style.background='var(--warm)'; }
-    if(btn) btn.style.display='none';
+    if(btn) btn.style.display = amDone || pmDone ? 'block' : 'none';
   }
+  // Update DP checklist immediately when AM or PM meds complete
+  if(amDone || pmDone) buildDailyProgress();
 }
 
 async function saveMedsChecklist(){
@@ -12008,18 +12046,29 @@ async function saveMedsChecklist(){
   toast('meds-toast');
 }
 
-function loadMedsChecklist(){
-  const saved = localStorage.getItem('glowMedsToday');
-  if(!saved) return;
-  try {
-    const state = JSON.parse(saved);
-    if(state.date !== nowStr()){ localStorage.removeItem('glowMedsToday'); return; }
-    Object.keys(state).forEach(key=>{
-      if(key==='date'||key==='isoDate') return;
-      if(state[key]) document.getElementById(key)?.classList.add('done');
-    });
-    updateMedsProgress(); // restores button state and counter
-  } catch(e){}
+async function loadMedsChecklist(){
+  const allMeds = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo',
+    'med-multivitamin','med-biotin','med-vitc','med-collagen','med-superbeets',
+    'med-rosuvastatin','med-miralax','med-melatonin-eve','med-sleep-gummies-eve'];
+  let state = null;
+  // Try localStorage first (same device, fast)
+  try{
+    const saved = localStorage.getItem('glowMedsToday');
+    if(saved){ const parsed=JSON.parse(saved); if(parsed.date===nowStr()) state=parsed; }
+  }catch(e){}
+  // Fall back to Blob meds_log (cross-device)
+  if(!state){
+    try{
+      const res = await fetch(`${BACKEND}/api/sync?pillar=meds_log&t=${Date.now()}`);
+      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+        const entry = data.find(e=>e.date===nowStr());
+        if(entry) state=entry;
+      }
+    }catch(e){}
+  }
+  if(!state) return;
+  allMeds.forEach(id=>{ if(state[id]) document.getElementById(id)?.classList.add('done'); });
+  updateMedsProgress();
 }
 
 
