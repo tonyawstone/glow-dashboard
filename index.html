@@ -1131,10 +1131,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSleepCheckin()">
-        <div class="card-title" style="margin:0;">😴 Sleep check-in</div>
-        <div id="sleep-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="card-title" style="margin:0;">😴 Sleep check-in</div>
+          <div id="sleep-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+        </div>
+        <button onclick="event.stopPropagation();openPastSleepLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
       </div>
-      <button onclick="openPastSleepLog()" class="pill-btn" style="margin-top:6px;">Past check-ins ↗</button>
       <!-- Saved state — always visible, outside collapsible -->
       <div id="sleep-checkin-saved" style="display:none;margin-top:10px;"></div>
       <div id="sleep-checkin-body" style="display:none;margin-top:12px;">
@@ -1172,13 +1174,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleMyAirCard()">
-        <div class="card-title" style="margin:0;">😴 ResMed myAir</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:11px;color:var(--muted);" id="myair-card-summary"></span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="card-title" style="margin:0;">😴 ResMed myAir</div>
           <div id="myair-card-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
+        <button onclick="event.stopPropagation();openMyAirLogOverlay()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past entries</button>
       </div>
-      <button onclick="openMyAirLogOverlay()" class="pill-btn" style="margin-top:6px;">Past entries ↗</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;" id="myair-card-summary"></div>
       <!-- Saved state — always visible, outside collapsible -->
       <div id="myair-saved-view" style="display:none;margin-top:10px;"></div>
       <div id="myair-card-body" style="display:none;margin-top:12px;">
@@ -6438,8 +6440,19 @@ function editSleepCheckin(){
 async function restoreSleepCheckinState(){
   try{
     const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    // Try IndexedDB first
+    let entry = null;
     const sleeps = await dbAll('sleeps');
-    const entry = sleeps.find(e=>e.date===yesterday||e.date===nowStr());
+    entry = sleeps.find(e=>e.date===yesterday||e.date===nowStr());
+    // Fall back to Blob directly
+    if(!entry){
+      const res = await fetch(`${BACKEND}/api/sync?pillar=sleeps&t=${Date.now()}`);
+      if(res.ok){
+        const d = await res.json();
+        const data = Array.isArray(d.data)?d.data:[];
+        entry = data.find(e=>e.date===yesterday||e.date===nowStr());
+      }
+    }
     if(entry) showSleepCheckinSaved(entry);
   }catch(e){}
 }
@@ -11207,16 +11220,46 @@ async function updateMyAirCardSummary(){
   const el = document.getElementById('myair-card-summary');
   if(!el) return;
   try{
-    const entry = await getMyAirEntryForLastNight();
+    const entry = await getMostRecentMyAirEntry();
     if(!entry){ el.textContent=''; return; }
     const parts=[];
     if(entry.cpapUsed && entry.cpapDuration) parts.push(entry.cpapDuration);
     if(entry.score) parts.push(entry.score+'/100');
+    if(entry.ahi!=null) parts.push('AHI '+entry.ahi);
     el.textContent = parts.length ? parts.join(' · ') : 'Logged ✓';
     showMyAirSavedView(entry);
   }catch(e){ el.textContent=''; }
 }
 
+async function getMostRecentMyAirEntry(){
+  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const today = nowStr();
+  try{
+    // Try IndexedDB first — get last night's or most recent
+    const local = await dbAll('myair').catch(()=>[]);
+    if(local.length){
+      // Prefer last night, fall back to most recent
+      const lastNight = local.find(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today);
+      if(lastNight) return lastNight;
+      return [...local].sort((a,b)=>(b.isoDate||'').localeCompare(a.isoDate||''))[0];
+    }
+  }catch(e){}
+  // Fall back to Blob
+  try{
+    const res = await fetch(`${BACKEND}/api/sync?pillar=myair&t=${Date.now()}`);
+    if(res.ok){
+      const d=await res.json();
+      const data=Array.isArray(d.data)?d.data:[];
+      if(!data.length) return null;
+      const lastNight = data.find(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today);
+      if(lastNight) return lastNight;
+      return [...data].sort((a,b)=>(b.isoDate||'').localeCompare(a.isoDate||''))[0];
+    }
+  }catch(e){}
+  return null;
+}
+
+// Keep old name as alias for DP checks that need last-night specifically
 async function getMyAirEntryForLastNight(){
   const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
   const today = nowStr();
@@ -11239,9 +11282,10 @@ function showMyAirSavedView(entry){
   if(!savedView) return;
   const score = entry.score||0;
   const scoreColor = score>=90?'#27500A':score>=70?'#92400E':'#7F1D1D';
+  const dateLabel = entry.isoDate ? 'Night of '+new Date(entry.isoDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : entry.date||'Last night';
   savedView.style.display='block';
   savedView.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">myAir logged for last night ✓ <button onclick="toggleMyAirCard()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${dateLabel} ✓ <button onclick="toggleMyAirCard()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-bottom:6px;">
       ${entry.cpapUsed?`<div>✅ CPAP used${entry.cpapDuration?' · '+entry.cpapDuration:''}</div>`:'<div>❌ CPAP not used</div>'}
       ${entry.hours?`<div>⏱ ${entry.hours} hrs usage</div>`:''}
@@ -11262,19 +11306,18 @@ async function loadMyAirState(){
     const labelEl = document.getElementById('myair-date-label');
     if(labelEl){ const d=new Date(yesterday+'T12:00:00'); labelEl.textContent='('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')'; }
   }
-  // Read from Blob — no localStorage
+  // Load most recent entry and show saved state — no localStorage
   try{
-    const entry = await getMyAirEntryForLastNight();
+    const entry = await getMostRecentMyAirEntry();
     if(!entry) return;
-    // Restore input values for editing
+    // Pre-fill input values for when user opens to edit
     if(entry.hours){ const el=document.getElementById('myair-hours'); if(el) el.value=entry.hours; }
-    if(entry.ahi){ const el=document.getElementById('myair-ahi'); if(el) el.value=entry.ahi; }
-    if(entry.sealLmin){ const el=document.getElementById('myair-seal-lmin'); if(el) el.value=entry.sealLmin; }
-    if(entry.onoff){ const el=document.getElementById('myair-onoff'); if(el) el.value=entry.onoff; }
+    if(entry.ahi!=null){ const el=document.getElementById('myair-ahi'); if(el) el.value=entry.ahi; }
+    if(entry.sealLmin!=null){ const el=document.getElementById('myair-seal-lmin'); if(el) el.value=entry.sealLmin; }
+    if(entry.onoff!=null){ const el=document.getElementById('myair-onoff'); if(el) el.value=entry.onoff; }
     if(entry.cpapUsed !== undefined) restoreCPAPUsedState(entry.cpapUsed, entry.cpapDuration||'');
     calcMyAirScores();
-    // Show saved state view
-    openMyAirCard();
+    // Show saved summary — card stays collapsed
     showMyAirSavedView(entry);
     updateMyAirCardSummary();
   }catch(e){}
