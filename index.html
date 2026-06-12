@@ -468,6 +468,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <span>👗 No outfit logged today — tap to snap &amp; log</span>
       <span style="font-size:16px;">📷</span>
     </div>
+    <!-- Exercise nudge banner -->
+    <div id="exercise-nudge-banner" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;cursor:pointer;align-items:center;justify-content:space-between;" onclick="tab('body')">
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);">💪 Workout not logged yet today</div>
+        <div style="font-size:11px;color:var(--muted);">Goal: 40 min treadmill · 20 min Pilates · Log it →</div>
+      </div>
+      <span style="font-size:18px;color:var(--muted);">›</span>
+    </div>
     <!-- Mind habits nudge banner -->
     <div id="mind-habits-banner" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;overflow:hidden;">
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;">
@@ -1491,24 +1499,53 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Exercise check-in — collapsible -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;" onclick="toggleExerciseCheckin()">
+        <div style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;" onclick="toggleExerciseCheckin()">
           <div class="card-title" style="margin:0;">Exercise check-in</div>
-          <span id="exercise-checkin-arrow" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</span>
+          <div id="exercise-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
         <button onclick="openExerciseLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
       </div>
+      <!-- Saved state — always visible -->
+      <div id="exercise-checkin-saved" style="display:none;margin-top:10px;"></div>
       <div id="exercise-checkin-body" style="display:none;margin-top:12px;">
+        <!-- Quick accountability checkboxes — Treadmill + Pilates -->
+        <div style="background:var(--warm);border-radius:12px;padding:12px;margin-bottom:12px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Today's workout goals · 60 min total</div>
+          <!-- Treadmill -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div id="ex-treadmill-check" onclick="toggleExerciseBox('treadmill')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--accent);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;cursor:pointer;transition:background 0.15s;"></div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:500;">Treadmill</div>
+              <div style="font-size:11px;color:var(--muted);">Goal: 40 min</div>
+            </div>
+            <input type="number" id="ex-treadmill-min" placeholder="min" min="0" max="180"
+              style="width:60px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;"
+              oninput="onExerciseMinInput('treadmill')">
+          </div>
+          <!-- Pilates -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div id="ex-pilates-check" onclick="toggleExerciseBox('pilates')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--accent);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;cursor:pointer;transition:background 0.15s;"></div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:500;">Pilates</div>
+              <div style="font-size:11px;color:var(--muted);">Goal: 20 min</div>
+            </div>
+            <input type="number" id="ex-pilates-min" placeholder="min" min="0" max="180"
+              style="width:60px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;"
+              oninput="onExerciseMinInput('pilates')">
+          </div>
+          <!-- Progress note -->
+          <div id="exercise-goal-note" style="font-size:12px;color:var(--muted);margin-bottom:8px;"></div>
+          <button class="btn-primary" onclick="saveExerciseCheckin()" style="width:100%;">Save workout ✓</button>
+          <div class="toast-msg" id="exc-toast">Workout saved! 💪</div>
+        </div>
         <div id="exercise-stats-strip"><div class="log-empty" style="font-size:12px;">Upload CSV to see activity data.</div></div>
         <div id="exercise-today-status" style="margin:8px 0;"></div>
         <div style="border-top:0.5px solid var(--border);margin-top:10px;padding-top:10px;">
           <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleManualExercise()">
-            <div style="font-size:12px;font-weight:500;color:var(--text);">✏️ Log manually</div>
+            <div style="font-size:12px;font-weight:500;color:var(--text);">✏️ Log other exercise</div>
             <span id="manual-exercise-arrow" style="font-size:14px;color:var(--muted);">▾</span>
           </div>
           <div id="manual-exercise-body" style="display:none;margin-top:10px;">
-            <div id="exercise-goal-display" style="padding:0 0 8px;font-size:12px;color:var(--muted);">
-              Weekly targets: Pilates 2×/wk · Treadmill 3×/wk · Stretching daily
-            </div>
             <div style="display:flex;gap:6px;margin-bottom:8px;">
               <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">AM</button>
               <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">PM</button>
@@ -3132,6 +3169,7 @@ async function boot(){
   await buildDailyProgress();
   restoreActivationState();
   await restoreSleepCheckinState();
+  await restoreExerciseCheckinState();
   tab('today');
 }
 
@@ -3162,7 +3200,7 @@ async function tab(id){
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
-  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); }
+  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); loadWardrobePlanLog(); loadTodayPlannedLook(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') { 
@@ -3177,7 +3215,7 @@ async function tab(id){
       if(myairLabel) myairLabel.textContent = `(${yest.toLocaleDateString('en-US',{month:'long',day:'numeric'})})`;
     }
   }
-  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); buildDailyProgress(); loadWeekIntention(); }
+  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); buildDailyProgress(); loadWeekIntention(); restoreExerciseCheckinState(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); restoreMindDraft(); loadIntentionHistory(); loadReflectionHistory(); }
   if(id==='hair'){
     try { await loadLatestHairScan(); } catch(e){ console.warn('loadLatestHairScan error:',e); }
@@ -3738,7 +3776,16 @@ async function buildDailyProgress(){
   try { const bodies = await dbAll('bodies'); autoChecks['dp-body'] = bodies.some(e=>e.date===today); } catch(e){}
 
   // Exercise — logged today (manual or CSV)
-  try { const exercises = await dbAll('exercises'); autoChecks['dp-exercise'] = exercises.some(e=>e.date===today); } catch(e){}
+  // Exercise — check exercise_checkin Blob first (accountability checkboxes), then exercises store
+  try {
+    // Fast check: in-memory state
+    if(_exChecked.treadmill || _exChecked.pilates){ autoChecks['dp-exercise'] = true; }
+    else {
+      const exRes = await fetch(`${BACKEND}/api/sync?pillar=exercise_checkin&t=${Date.now()}`);
+      if(exRes.ok){ const d=await exRes.json(); autoChecks['dp-exercise'] = !!(d.data?.date===today); }
+      else { const exercises = await dbAll('exercises'); autoChecks['dp-exercise'] = exercises.some(e=>e.date===today); }
+    }
+  } catch(e){}
 
   // Body water — entered today
   try {
@@ -6546,12 +6593,100 @@ function toggleManualExercise(forceOpen){
 
 function toggleExerciseCheckin(forceOpen){
   const body = document.getElementById('exercise-checkin-body');
-  const arrow = document.getElementById('exercise-checkin-arrow');
+  const chevron = document.getElementById('exercise-checkin-chevron');
   if(!body) return;
   const isOpen = body.style.display !== 'none';
   const open = forceOpen !== undefined ? forceOpen : !isOpen;
   body.style.display = open ? 'block' : 'none';
-  if(arrow) arrow.style.transform = open ? 'rotate(90deg)' : '';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
+}
+
+// Exercise accountability checkboxes
+var _exChecked = { treadmill: false, pilates: false };
+const EX_GOALS = { treadmill: 40, pilates: 20 };
+
+function toggleExerciseBox(type){
+  _exChecked[type] = !_exChecked[type];
+  const check = document.getElementById('ex-'+type+'-check');
+  if(check){ check.style.background=_exChecked[type]?'var(--accent)':'transparent'; check.textContent=_exChecked[type]?'✓':''; check.style.color='#fff'; }
+  updateExerciseGoalNote();
+}
+
+function onExerciseMinInput(type){
+  const val=parseInt(document.getElementById('ex-'+type+'-min')?.value)||0;
+  if(val>0&&!_exChecked[type]){ _exChecked[type]=true; const check=document.getElementById('ex-'+type+'-check'); if(check){check.style.background='var(--accent)';check.textContent='✓';check.style.color='#fff';} }
+  updateExerciseGoalNote();
+}
+
+function updateExerciseGoalNote(){
+  const note=document.getElementById('exercise-goal-note'); if(!note) return;
+  const tMin=parseInt(document.getElementById('ex-treadmill-min')?.value)||0;
+  const pMin=parseInt(document.getElementById('ex-pilates-min')?.value)||0;
+  const total=tMin+pMin; const goalTotal=EX_GOALS.treadmill+EX_GOALS.pilates;
+  const parts=[];
+  if(_exChecked.treadmill) parts.push('Treadmill'+(tMin>0?' '+tMin+'/'+EX_GOALS.treadmill+' min':''));
+  if(_exChecked.pilates) parts.push('Pilates'+(pMin>0?' '+pMin+'/'+EX_GOALS.pilates+' min':''));
+  if(!parts.length){note.textContent='';return;}
+  const pct=Math.min(100,Math.round(total/goalTotal*100));
+  const color=pct>=100?'#27500A':pct>=50?'#92400E':'var(--muted)';
+  note.innerHTML='<span style="color:'+color+';">'+parts.join(' · ')+' · '+total+'/'+goalTotal+' min total'+(pct>=100?' 🎉 Goal met!':'')+'</span>';
+}
+
+async function saveExerciseCheckin(){
+  const tMin=parseInt(document.getElementById('ex-treadmill-min')?.value)||0;
+  const pMin=parseInt(document.getElementById('ex-pilates-min')?.value)||0;
+  if(!_exChecked.treadmill&&!_exChecked.pilates){showToast('Check at least one workout first');return;}
+  const entry={type:'checkin',date:nowStr(),treadmill:_exChecked.treadmill,treadmillMin:tMin,pilates:_exChecked.pilates,pilatesMin:pMin,totalMin:tMin+pMin,goalMet:(tMin+pMin)>=(EX_GOALS.treadmill+EX_GOALS.pilates)};
+  await dbAdd('exercises',entry);
+  syncToBlob('exercises');
+  await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'exercise_checkin',data:entry})});
+  toast('exc-toast');
+  toggleExerciseCheckin(false);
+  showExerciseCheckinSaved(entry);
+  updateExerciseNudgeBanner();
+  buildDailyProgress();
+}
+
+function showExerciseCheckinSaved(e){
+  const saved=document.getElementById('exercise-checkin-saved'); if(!saved) return;
+  const tCheck=e.treadmill?'✅ Treadmill'+(e.treadmillMin?' · '+e.treadmillMin+' min':''):'';
+  const pCheck=e.pilates?'✅ Pilates'+(e.pilatesMin?' · '+e.pilatesMin+' min':''):'';
+  const total=(e.treadmillMin||0)+(e.pilatesMin||0); const goalTotal=EX_GOALS.treadmill+EX_GOALS.pilates;
+  const goalMet=total>=goalTotal;
+  saved.style.display='block';
+  saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Workout logged ${fmtOutfitDate(e.date)} ✓ <button onclick="editExerciseCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+    ${tCheck?'<div style="font-size:13px;margin-bottom:4px;">'+tCheck+'</div>':''}
+    ${pCheck?'<div style="font-size:13px;margin-bottom:4px;">'+pCheck+'</div>':''}
+    ${total>0?'<div style="font-size:12px;color:var(--muted);margin-top:4px;">'+total+'/'+goalTotal+' min total'+(goalMet?' · <span style="color:#27500A;font-weight:600;">🎉 Goal met!</span>':'')+'</div>':''}
+  </div>`;
+}
+
+function editExerciseCheckin(){ toggleExerciseCheckin(true); }
+
+async function restoreExerciseCheckinState(){
+  try{
+    const today=nowStr();
+    const res=await fetch(`${BACKEND}/api/sync?pillar=exercise_checkin&t=${Date.now()}`);
+    if(res.ok){
+      const d=await res.json(); const entry=d.data;
+      if(entry&&entry.date===today){
+        _exChecked.treadmill=!!entry.treadmill; _exChecked.pilates=!!entry.pilates;
+        if(entry.treadmillMin){const el=document.getElementById('ex-treadmill-min');if(el)el.value=entry.treadmillMin;}
+        if(entry.pilatesMin){const el=document.getElementById('ex-pilates-min');if(el)el.value=entry.pilatesMin;}
+        ['treadmill','pilates'].forEach(t=>{const check=document.getElementById('ex-'+t+'-check');if(check&&_exChecked[t]){check.style.background='var(--accent)';check.textContent='✓';check.style.color='#fff';}});
+        showExerciseCheckinSaved(entry);
+        updateExerciseNudgeBanner();
+        return;
+      }
+    }
+    updateExerciseNudgeBanner();
+  }catch(e){updateExerciseNudgeBanner();}
+}
+
+function updateExerciseNudgeBanner(){
+  const banner=document.getElementById('exercise-nudge-banner'); if(!banner) return;
+  banner.style.display=(_exChecked.treadmill||_exChecked.pilates)?'none':'flex';
 }
 
 function toggleDermCard(forceOpen){
