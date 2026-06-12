@@ -11607,9 +11607,10 @@ async function updateBPBanners(){
     const today = nowStr();
 
     // CSV is primary source — Apple Health auto-syncs BP from device
+    // NOTE: getCSVBPData returns newest-first — never reverse before .find()
     const csvBPs = await getCSVBPData();
     const todayCSVBP = csvBPs.find(b=>b.date===today&&b.sys&&b.dia);
-    const lastCSVBP = csvBPs.slice().reverse().find(b=>b.sys&&b.dia);
+    const lastCSVBP = csvBPs.find(b=>b.sys&&b.dia); // newest first — first match is most recent
 
     // Manual log is fallback only (doctor visits, etc.)
     let manualBPs = [];
