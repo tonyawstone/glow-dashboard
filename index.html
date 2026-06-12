@@ -3463,14 +3463,29 @@ const BACKEND = 'https://glow-dashboard-backend.vercel.app';
 
 async function syncToBlob(store) {
   try {
-    // Get all current records from IndexedDB for this store
-    const data = await dbAll(store);
+    const local = await dbAll(store);
+    // Fetch existing Blob data first to avoid overwriting from other devices
+    let blobData = [];
+    try {
+      const res = await fetch(`${BACKEND}/api/sync?pillar=${store}&t=${Date.now()}`);
+      if(res.ok){ const d=await res.json(); blobData=Array.isArray(d.data)?d.data:[]; }
+    } catch(e){}
+    // Merge: blob entries + local entries, dedup by id or date+type key
+    const merged = [...blobData];
+    for(const entry of local){
+      const key = entry.id || ((entry.type||'')+(entry.date||'')+(entry.sys||'')+(entry.mood||'')+(entry.isoDate||''));
+      const exists = merged.some(e=>{
+        const ek = e.id || ((e.type||'')+(e.date||'')+(e.sys||'')+(e.mood||'')+(e.isoDate||''));
+        return ek === key;
+      });
+      if(!exists) merged.push(entry);
+    }
     await fetch(`${BACKEND}/api/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pillar: store, data })
+      body: JSON.stringify({ pillar: store, data: merged })
     });
-    console.log(`✅ Blob sync OK: ${store}`);
+    console.log(`✅ Blob sync OK: ${store} (${merged.length} entries)`);
   } catch (err) {
     console.warn(`Blob sync error (${store}):`, err.message);
   }
@@ -3663,13 +3678,13 @@ async function buildDailyProgress(){
   autoChecks['dp-reflection'] = refs.some(e=>e.type==='daily'&&e.date===today&&e.answer?.length>0);
   autoChecks['dp-mood'] = minds.some(e=>e.date===today);
 
-  // Sleep check-in (IndexedDB + Blob)
+  // Sleep check-in (last night only = yesterday)
   const sleepBlobData = Array.isArray(sleepBlob?.data) ? sleepBlob.data : [];
   autoChecks['dp-sleep-checkin'] =
-    sleeps.some(e=>e.date===yesterday||e.date===today) ||
-    sleepBlobData.some(e=>e.date===yesterday||e.date===today);
+    sleeps.some(e=>e.date===yesterday) ||
+    sleepBlobData.some(e=>e.date===yesterday);
 
-  // myAir + CPAP
+  // myAir + CPAP (last night only)
   autoChecks['dp-myair'] = !!myairEntry;
   autoChecks['dp-cpap'] = !!(myairEntry?.cpapUsed);
 
@@ -3901,7 +3916,7 @@ async function openPastSleepLog(){
       const chips = [e.hrs+'h', e.quality, ...(e.energy||[])].filter(Boolean);
       html += '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
         +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'
-        +(e.date ? 'Night of '+new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) : e.date)
+        +(e.date ? (()=>{ const d=safeDate(e.date); return d&&!isNaN(d)?'Night of '+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}):e.date; })() : 'Unknown')
         +(e.bed?' · '+e.bed+'→'+e.wake:'')+'</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">'
         +chips.map(c=>'<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;">'+c+'</span>').join('')
@@ -6537,9 +6552,11 @@ function showSleepCheckinSaved(e){
   if(!saved) return;
   const chips = arr => (arr||[]).filter(Boolean).map(v=>`<span style="background:var(--warm);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
   // Format date as "Night of Mon Jun 11"
-  const dateLabel = e.date
-    ? 'Night of '+new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})
-    : 'Last night';
+  let dateLabel = 'Last night';
+  if(e.date){
+    const d = safeDate(e.date);
+    dateLabel = d && !isNaN(d) ? 'Night of '+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : 'Last night';
+  }
   saved.style.display='block';
   saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
     <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${dateLabel} ✓ <button onclick="editSleepCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
@@ -11380,7 +11397,7 @@ async function updateMyAirCardSummary(){
   const el = document.getElementById('myair-card-summary');
   if(!el) return;
   try{
-    const entry = await getMostRecentMyAirEntry();
+    const entry = await getMyAirEntryForLastNight();
     if(!entry){ el.textContent=''; return; }
     const parts=[];
     if(entry.cpapUsed && entry.cpapDuration) parts.push(entry.cpapDuration);
@@ -11422,16 +11439,15 @@ async function getMostRecentMyAirEntry(){
 // Keep old name as alias for DP checks that need last-night specifically
 async function getMyAirEntryForLastNight(){
   const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
-  const today = nowStr();
   try{
     const local = await dbAll('myair').catch(()=>[]);
-    const entry = local.find(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today);
+    const entry = local.find(e=>(e.isoDate||'').slice(0,10)===yesterday);
     if(entry) return entry;
   }catch(e){}
   try{
     const res = await fetch(`${BACKEND}/api/sync?pillar=myair&t=${Date.now()}`);
     if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
-      return data.find(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today)||null;
+      return data.find(e=>(e.isoDate||'').slice(0,10)===yesterday)||null;
     }
   }catch(e){}
   return null;
@@ -11466,21 +11482,26 @@ async function loadMyAirState(){
     const labelEl = document.getElementById('myair-date-label');
     if(labelEl){ const d=new Date(yesterday+'T12:00:00'); labelEl.textContent='('+d.toLocaleDateString('en-US',{month:'long',day:'numeric'})+')'; }
   }
-  // Load most recent entry and show saved state — no localStorage
+  // Only show saved state for last night — clears automatically at midnight
+  const savedView = document.getElementById('myair-saved-view');
   try{
-    const entry = await getMostRecentMyAirEntry();
-    if(!entry) return;
-    // Pre-fill input values for when user opens to edit
+    const entry = await getMyAirEntryForLastNight();
+    if(!entry){
+      // No entry for last night — clear saved view, show fresh form
+      if(savedView) savedView.style.display='none';
+      _cpapUsed = false;
+      return;
+    }
+    // Pre-fill inputs for editing
     if(entry.hours){ const el=document.getElementById('myair-hours'); if(el) el.value=entry.hours; }
     if(entry.ahi!=null){ const el=document.getElementById('myair-ahi'); if(el) el.value=entry.ahi; }
     if(entry.sealLmin!=null){ const el=document.getElementById('myair-seal-lmin'); if(el) el.value=entry.sealLmin; }
     if(entry.onoff!=null){ const el=document.getElementById('myair-onoff'); if(el) el.value=entry.onoff; }
     if(entry.cpapUsed !== undefined) restoreCPAPUsedState(entry.cpapUsed, entry.cpapDuration||'');
     calcMyAirScores();
-    // Show saved summary — card stays collapsed
     showMyAirSavedView(entry);
     updateMyAirCardSummary();
-  }catch(e){}
+  }catch(e){ if(savedView) savedView.style.display='none'; }
 }
 
 
@@ -11582,8 +11603,14 @@ async function loadTodaySleepFromCSV(){
 }
 async function updateBPBanners(){
   try {
-    const bps = await dbAll('bps');
     const today = nowStr();
+    let bps = await dbAll('bps');
+    // If no today reading in IndexedDB, fetch from Blob
+    const hasTodayLocal = bps.some(b=>b.date===today&&b.sys&&b.dia);
+    if(!hasTodayLocal){
+      const res = await fetch(`${BACKEND}/api/sync?pillar=bps&t=${Date.now()}`);
+      if(res.ok){ const d=await res.json(); if(Array.isArray(d.data)&&d.data.length) bps=d.data; }
+    }
     const todayBP = bps.filter(b=>b.date===today).pop();
     const lastBP = bps.slice().reverse().find(b=>b.sys&&b.dia);
 
@@ -11959,7 +11986,8 @@ async function loadMyAirLastLogged(){
       ${recent.map((e,i)=>{
         // Always use isoDate for consistent formatting
         const iso = (e.isoDate||'').slice(0,10);
-        const dateLabel = iso ? 'Night of '+new Date(iso+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) : e.date||'Unknown date';
+        const d = iso ? safeDate(iso) : null;
+        const dateLabel = d && !isNaN(d) ? 'Night of '+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) : e.date||'Unknown date';
         const scoreColor = e.score>=90?'#27500A':e.score>=70?'#92400E':'#7F1D1D';
         const realIdx = data.length - 1 - i;
         return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);">
