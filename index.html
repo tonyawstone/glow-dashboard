@@ -1248,12 +1248,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSleepCheckin()">
-        <div class="card-title" style="margin:0;">Sleep check-in</div>
+        <div class="card-title" style="margin:0;">😴 Sleep check-in</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <button onclick="event.stopPropagation();openPastSleepLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
-          <span id="sleep-checkin-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+          <div id="sleep-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
       </div>
+      <!-- Saved state -->
+      <div id="sleep-checkin-saved" style="display:none;margin-top:10px;"></div>
       <div id="sleep-checkin-body" style="display:none;margin-top:12px;">
         <div class="fl">Sleep quality</div>
         <div class="quality-row" id="sq-tags">
@@ -3094,6 +3096,7 @@ async function boot(){
   loadSleepAidState();
   buildDailyProgress();
   restoreActivationState();
+  restoreSleepCheckinState();
   tab('today');
 }
 
@@ -3128,7 +3131,7 @@ async function tab(id){
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); loadWardrobePlanLog(); loadTodayPlannedLook(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') { 
-    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft();
+    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState();
     // Default myAir date to yesterday — CPAP data is always for last night
     const myairDate = document.getElementById('myair-date');
     const myairLabel = document.getElementById('myair-date-label');
@@ -3465,7 +3468,7 @@ async function loadFromBlob(store) {
 }
 
 async function syncAllFromBlob() {
-  const stores = ['checkins','bps','sleeps','skins','hairs','minds','outfits','exercises','labs','wardrobeplans','boxsummaries','reflections','water'];
+  const stores = ['checkins','bps','sleeps','skins','hairs','minds','outfits','exercises','labs','wardrobeplans','boxsummaries','reflections','water','myair','intentions'];
   await Promise.all(stores.map(s => loadFromBlob(s)));
   await loadLogs();
   console.log('✅ All data synced from Blob');
@@ -3545,9 +3548,8 @@ var DP_ITEMS = [
   ['🧠 Mind',    'dp-activation','Morning activation',       '5-step energy ritual',               null, 'mind'],
   ['🧠 Mind',    'dp-reflection','Reflection prompt answered','Journal · DayOne · prompt',           null, 'mind'],
   ['🧠 Mind',    'dp-mood',      'Mood logged',              'Vibe · energy · gratitude · wins',   null, 'mind'],
-  ['😴 Sleep',   'dp-sleep-q',   'Sleep quality logged',     'Rate last night\u2019s sleep',            null, 'sleep'],
+  ['😴 Sleep',   'dp-sleep-q',   'Sleep data recorded',      'Withings · last night',              null, 'sleep'],
   ['😴 Sleep',   'dp-myair',     'myAir data saved',         'CPAP · AHI · usage',                 null, 'sleep'],
-  ['😴 Sleep',   'dp-cpap',      'CPAP used last night',     'Auto-checks from myAir entry',       null, 'sleep'],
   ['🌿 Wellness','dp-bp',        'BP logged',                'Blood pressure reading',             null, 'health'],
   ['🌿 Wellness','dp-meds',      'Medications taken',        'Rx meds · supplements',              null, 'health'],
   ['🌿 Wellness','dp-bodywater', 'Body water % entered',     'From Withings scale',                null, 'health'],
@@ -3616,14 +3618,24 @@ async function buildDailyProgress(){
   // Mind — mood logged today
   try { const minds = await dbAll('minds'); autoChecks['dp-mood'] = minds.some(e=>e.date===today); } catch(e){}
 
-  // Sleep — sleep quality logged for last night
-  try { const sleeps = await dbAll('sleeps'); autoChecks['dp-sleep-q'] = sleeps.some(e=>e.date===yesterday||e.date===today); } catch(e){}
-
-  // myAir — entry for last night
+  // Sleep — check-in logged for last night
   try {
-    const res = await fetch(`${BACKEND}/api/sync?pillar=myair`);
-    if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
-      autoChecks['dp-myair'] = data.some(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today);
+    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    const sleeps = await dbAll('sleeps');
+    autoChecks['dp-sleep-q'] = sleeps.some(e=>e.date===yesterday||e.date===today);
+  } catch(e){}
+
+  // myAir — check IndexedDB (synced from Blob on boot)
+  try {
+    const myairData = await dbAll('myair').catch(()=>[]);
+    if(myairData.length){
+      autoChecks['dp-myair'] = myairData.some(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today);
+    } else {
+      // Fall back to direct Blob fetch
+      const res = await fetch(`${BACKEND}/api/sync?pillar=myair&t=${Date.now()}`);
+      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+        autoChecks['dp-myair'] = data.some(e=>(e.isoDate||'').slice(0,10)===yesterday||(e.isoDate||'').slice(0,10)===today);
+      }
     }
   } catch(e){}
 
@@ -3746,7 +3758,7 @@ function updateTodayRing(score){
 function updatePillarRings(checks){
   const pillarItems = {
     mind:    ['dp-activation','dp-reflection','dp-mood'],
-    sleep:   ['dp-sleep-q','dp-myair','dp-cpap'],
+    sleep:   ['dp-sleep-q','dp-myair'],
     health:  ['dp-bp','dp-meds','dp-bodywater','dp-water'],
     skin:    ['dp-skin-checkin','dp-skin-am','dp-skin-pm','dp-musely-game'],
     body:    ['dp-body','dp-exercise'],
@@ -6097,15 +6109,12 @@ async function saveSleep(){
   const cpap=gT('cpap-tags'),quality=document.getElementById('sq-tags').querySelector('.on')?.textContent||'';
   const energy=gT('energy-am-tags'),note=document.getElementById('sleep-note').value.trim();
 
-  // Get bedtime/wake from CSV display (populated from Apple Health)
   const bed = document.getElementById('csv-bedtime')?.textContent||'';
   const wake = document.getElementById('csv-waketime')?.textContent||'';
   const csvHrs = document.getElementById('csv-sleephrs')?.textContent||'';
 
-  // Calculate hours from displayed times or use CSV hours
   let hrs = csvHrs.replace('h','').trim() || '—';
   if(bed && wake && bed!=='—' && wake!=='—'){
-    // Parse 12hr format back to calculate
     const parseT = t => { const m=t.match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m)return null; let h=parseInt(m[1]); if(m[3].toUpperCase()==='PM'&&h!==12)h+=12; if(m[3].toUpperCase()==='AM'&&h===12)h=0; return h*60+parseInt(m[2]); };
     const bm=parseT(bed),wm=parseT(wake);
     if(bm!==null&&wm!==null){ let diff=wm-bm; if(diff<0)diff+=1440; hrs=(diff/60).toFixed(1); }
@@ -6117,10 +6126,15 @@ async function saveSleep(){
   const sleepEntry={hrs,bed,wake,cpap:cpap[0]||'',quality,energy,note,date:sleepDate};
   await dbAdd('sleeps',sleepEntry);
   syncToBlob('sleeps');
+  // Clear form
   document.getElementById('sleep-note').value='';
   ['cpap-tags','energy-am-tags'].forEach(id=>document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
   document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
-  toast('slp-t');loadLogs();toggleSleepCheckin(false);
+  toast('slp-t');
+  loadLogs();
+  toggleSleepCheckin(false);
+  showSleepCheckinSaved(sleepEntry);
+  buildDailyProgress();
 }
 
 
@@ -6367,12 +6381,41 @@ function toggleSkinCheckin(forceOpen){
 
 function toggleSleepCheckin(forceOpen){
   const body = document.getElementById('sleep-checkin-body');
-  const arrow = document.getElementById('sleep-checkin-arrow');
+  const chevron = document.getElementById('sleep-checkin-chevron');
   if(!body) return;
   const isOpen = body.style.display !== 'none';
   const open = forceOpen !== undefined ? forceOpen : !isOpen;
   body.style.display = open ? 'block' : 'none';
-  if(arrow) arrow.textContent = open ? '▴' : '▾';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
+}
+
+function showSleepCheckinSaved(e){
+  const saved = document.getElementById('sleep-checkin-saved');
+  if(!saved) return;
+  const chips = arr => (arr||[]).filter(Boolean).map(v=>`<span style="background:var(--warm);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
+  saved.style.display='block';
+  saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Sleep logged for last night ✓ <button onclick="editSleepCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+    ${e.quality?`<div style="font-size:14px;font-weight:500;color:var(--accent);margin-bottom:6px;">${e.quality}</div>`:''}
+    ${e.hrs&&e.hrs!=='—'?`<div style="font-size:12px;margin-bottom:4px;">⏱ ${e.hrs}h sleep</div>`:''}
+    ${(e.energy||[]).length?`<div style="margin-bottom:4px;">${chips(e.energy)}</div>`:''}
+    ${e.note?`<div style="font-size:12px;color:var(--muted);margin-top:4px;">${e.note}</div>`:''}
+  </div>`;
+}
+
+function editSleepCheckin(){
+  const saved = document.getElementById('sleep-checkin-saved');
+  if(saved) saved.style.display='none';
+  toggleSleepCheckin(true);
+}
+
+async function restoreSleepCheckinState(){
+  try{
+    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    const sleeps = await dbAll('sleeps');
+    const entry = sleeps.find(e=>e.date===yesterday||e.date===nowStr());
+    if(entry) showSleepCheckinSaved(entry);
+  }catch(e){}
 }
 
 function toggleMindCheckin(forceOpen){
