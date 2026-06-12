@@ -3105,10 +3105,10 @@ async function getRealAge(){
 
 // ── DB ────────────────────────────────────────────────────────────────
 let db;
-const req=indexedDB.open('GlowDashboard',6);
+const req=indexedDB.open('GlowDashboard',7);
 req.onupgradeneeded=e=>{
   db=e.target.result;
-  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries','water','intentions','myair'].forEach(s=>{
+  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries','water','intentions','myair','bodies'].forEach(s=>{
     if(!db.objectStoreNames.contains(s)) db.createObjectStore(s,{keyPath:'id',autoIncrement:true});
   });
   if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});
@@ -3556,7 +3556,7 @@ async function loadFromBlob(store) {
 }
 
 async function syncAllFromBlob() {
-  const stores = ['checkins','bps','sleeps','skins','hairs','minds','outfits','exercises','labs','wardrobeplans','boxsummaries','reflections','water','myair','intentions'];
+  const stores = ['checkins','bps','sleeps','skins','hairs','minds','outfits','exercises','labs','wardrobeplans','boxsummaries','reflections','water','myair','intentions','bodies'];
   await Promise.all(stores.map(s => loadFromBlob(s)));
   await loadLogs();
   console.log('✅ All data synced from Blob');
@@ -3994,20 +3994,22 @@ async function openBodyLog(){
   openOverlay(overlay.id);
   el.innerHTML='<div class="log-empty">Loading...</div>';
   try {
-    const bodies = await dbAll('bodies');
-    if(!bodies.length){ el.innerHTML='<div class="log-empty">No body check-ins yet.</div>'; return; }
-    let html='';
-    for(const e of [...bodies].reverse()){
-      html+='<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
-        +'<div style="font-size:12px;color:var(--muted);">'+e.date+'</div>'
-        +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
-        +[...(e.nsv||[])].map(c=>'<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;">'+c+'</span>').join('')
-        +'</div>'
-        +((e.waist||e.hips)?'<div style="font-size:12px;color:var(--muted);margin-top:4px;">'+(e.waist?'Waist: '+e.waist+'" ':'')+(e.hips?'Hips: '+e.hips+'"':'')+'</div>':'')
-        +(e.note?'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+e.note+'</div>':'')
-        +'</div>';
+    let bodies = await dbAll('bodies');
+    // Blob fallback if IndexedDB empty
+    if(!bodies.length){
+      const res = await fetch(`${BACKEND}/api/sync?pillar=bodies&t=${Date.now()}`);
+      if(res.ok){ const d=await res.json(); bodies=Array.isArray(d.data)?d.data:[]; }
     }
-    el.innerHTML=html;
+    const entries = bodies.filter(e=>e.type==='body').sort((a,b)=>b.date.localeCompare(a.date));
+    if(!entries.length){ el.innerHTML='<div class="log-empty">No body check-ins yet.</div>'; return; }
+    el.innerHTML=entries.map(e=>'<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
+      +'<div style="font-size:12px;color:var(--muted);">'+fmtOutfitDate(e.date)+'</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
+      +[...(e.nsv||[])].map(c=>'<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;">'+c+'</span>').join('')
+      +'</div>'
+      +((e.waist||e.hips)?'<div style="font-size:12px;color:var(--muted);margin-top:4px;">'+(e.waist?'Waist: '+e.waist+'" ':' ')+(e.hips?'Hips: '+e.hips+'"':'')+'</div>':'')
+      +(e.note?'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+e.note+'</div>':'')
+      +'</div>').join('');
   } catch(err){ el.innerHTML='<div class="log-empty">Could not load entries.</div>'; console.warn(err); }
 }
 
