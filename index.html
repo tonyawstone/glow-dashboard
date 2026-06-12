@@ -1101,7 +1101,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ SLEEP ═══════════════ -->
 <div id="s-sleep" class="sec">
   <div class="view-content on" id="vc-sleep-daily">
-    <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;">Sleep & Energy <button class="guide-btn" onclick="openGuide('sleep')">?</button><button class="pill-btn" onclick="openPastSleepLog()" style="font-size:12px;">Past check-ins ↗</button></div>
+    <div class="section-label">Sleep & Energy <button class="guide-btn" onclick="openGuide('sleep')">?</button></div>
     <div class="card">
       <div class="card-title">Apple Health · sleep data</div>
       <!-- Last night's hours — prominently shown -->
@@ -1132,12 +1132,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSleepCheckin()">
         <div class="card-title" style="margin:0;">😴 Sleep check-in</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button onclick="event.stopPropagation();openPastSleepLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
-          <div id="sleep-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
-        </div>
+        <div id="sleep-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
       </div>
-      <!-- Saved state -->
+      <button onclick="openPastSleepLog()" class="pill-btn" style="margin-top:6px;">Past check-ins ↗</button>
+      <!-- Saved state — always visible, outside collapsible -->
       <div id="sleep-checkin-saved" style="display:none;margin-top:10px;"></div>
       <div id="sleep-checkin-body" style="display:none;margin-top:12px;">
         <div class="fl">Sleep quality</div>
@@ -1180,9 +1178,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div id="myair-card-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
       </div>
+      <button onclick="openMyAirLogOverlay()" class="pill-btn" style="margin-top:6px;">Past entries ↗</button>
+      <!-- Saved state — always visible, outside collapsible -->
+      <div id="myair-saved-view" style="display:none;margin-top:10px;"></div>
       <div id="myair-card-body" style="display:none;margin-top:12px;">
-      <!-- Saved state -->
-      <div id="myair-saved-view" style="display:none;margin-bottom:12px;"></div>
       <div id="myair-input-fields">
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Enter raw values from your machine — scores calculated automatically</div>
 
@@ -1307,7 +1306,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="myair-status" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>
       <button class="btn-primary" style="margin-top:0;" onclick="saveMyAirLog()">Save myAir data</button>
       <div class="toast-msg" id="myair-toast">Saved!</div>
-      <div id="myair-last-logged" style="margin-top:14px;"></div>
       </div><!-- myair-input-fields -->
       </div><!-- myair-card-body -->
     </div>
@@ -6434,8 +6432,6 @@ function showSleepCheckinSaved(e){
 }
 
 function editSleepCheckin(){
-  const saved = document.getElementById('sleep-checkin-saved');
-  if(saved) saved.style.display='none';
   toggleSleepCheckin(true);
 }
 
@@ -11190,13 +11186,21 @@ async function saveMyAirLog(){
   buildDailyProgress();
 }
 
-var _myairCardOpen = false;
-function toggleMyAirCard(){
-  _myairCardOpen = !_myairCardOpen;
+function openMyAirCard(){
   const body = document.getElementById('myair-card-body');
   const chevron = document.getElementById('myair-card-chevron');
-  if(body) body.style.display = _myairCardOpen ? 'block' : 'none';
-  if(chevron) chevron.style.transform = _myairCardOpen ? 'rotate(90deg)' : '';
+  if(body) body.style.display = 'block';
+  if(chevron) chevron.style.transform = 'rotate(90deg)';
+}
+
+function toggleMyAirCard(){
+  const body = document.getElementById('myair-card-body');
+  const chevron = document.getElementById('myair-card-chevron');
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  const open = !isOpen;
+  body.style.display = open ? 'block' : 'none';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
 }
 
 async function updateMyAirCardSummary(){
@@ -11232,13 +11236,12 @@ async function getMyAirEntryForLastNight(){
 
 function showMyAirSavedView(entry){
   const savedView = document.getElementById('myair-saved-view');
-  const inputFields = document.getElementById('myair-input-fields');
-  if(!savedView||!inputFields) return;
+  if(!savedView) return;
   const score = entry.score||0;
   const scoreColor = score>=90?'#27500A':score>=70?'#92400E':'#7F1D1D';
   savedView.style.display='block';
   savedView.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">myAir logged for last night ✓ <button onclick="editMyAirEntry()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">myAir logged for last night ✓ <button onclick="toggleMyAirCard()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-bottom:6px;">
       ${entry.cpapUsed?`<div>✅ CPAP used${entry.cpapDuration?' · '+entry.cpapDuration:''}</div>`:'<div>❌ CPAP not used</div>'}
       ${entry.hours?`<div>⏱ ${entry.hours} hrs usage</div>`:''}
@@ -11246,15 +11249,9 @@ function showMyAirSavedView(entry){
       ${score?`<div style="color:${scoreColor};font-weight:600;">Score ${score}/100</div>`:''}
     </div>
   </div>`;
-  inputFields.style.display='none';
 }
 
-function editMyAirEntry(){
-  const savedView = document.getElementById('myair-saved-view');
-  const inputFields = document.getElementById('myair-input-fields');
-  if(savedView) savedView.style.display='none';
-  if(inputFields) inputFields.style.display='';
-}
+function editMyAirEntry(){ toggleMyAirCard(); }
 async function loadMyAirState(){
   // Default date picker to yesterday
   const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
@@ -11277,6 +11274,7 @@ async function loadMyAirState(){
     if(entry.cpapUsed !== undefined) restoreCPAPUsedState(entry.cpapUsed, entry.cpapDuration||'');
     calcMyAirScores();
     // Show saved state view
+    openMyAirCard();
     showMyAirSavedView(entry);
     updateMyAirCardSummary();
   }catch(e){}
@@ -11735,8 +11733,16 @@ function calcMyAirScores(){
   }
 }
 
+async function openMyAirLogOverlay(){
+  openOverlay('myair-log-overlay');
+  const el = document.getElementById('myair-log-overlay-content');
+  if(!el) return;
+  el.innerHTML='<div class="log-empty">Loading...</div>';
+  await loadMyAirLastLogged();
+}
+
 async function loadMyAirLastLogged(){
-  const el = document.getElementById('myair-last-logged');
+  const el = document.getElementById('myair-log-overlay-content');
   if(!el) return;
   try {
     const res = await fetch(`${BACKEND}/api/sync?pillar=myair`);
@@ -13468,6 +13474,16 @@ async function weeklyMindInsight(){
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Sleep Logs</div>
     </div>
     <div id="sleep-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="myair-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('myair-log-overlay')" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">myAir History</div>
+    </div>
+    <div id="myair-log-overlay-content"><div class="log-empty">Loading...</div></div>
   </div>
 </div>
 
