@@ -3434,7 +3434,7 @@ function nowStr(d){
 }
 function yesterdayStr(){ return new Date(Date.now()-86400000).toISOString().slice(0,10); }
 // Steps & exercise from CSV always use yesterday's complete data, not today's partial data
-function getStepsRow(rows){ return rows.find(r=>r.date===yesterdayStr()&&parseInt(r.steps)>0) || [...rows].reverse().find(r=>parseInt(r.steps)>0); }
+function getStepsRow(rows){ return rows.find(r=>r.date===yesterdayStr()&&parseInt(r.steps)>0) || rows.find(r=>parseInt(r.steps)>0); }
 function getExerciseRows(rows, sinceDate){ return rows.filter(r=>r.date!==nowStr()&&(r.exercise_types||parseInt(r.exercise_minutes)>0)&&(!sinceDate||r.date>=sinceDate)); }
 function logItem(date,chips,note){return`<div class="log-item"><div class="log-date">${date}</div><div class="chips">${chips.filter(Boolean).map(c=>'<span class="chip">'+c+'</span>').join('')}</div>${note?'<div class="log-note">'+note.replace(/\n/g,'<br>')+'</div>':''}</div>`;}
 function renderLog(id,items,fn){
@@ -7938,8 +7938,8 @@ async function buildSleepAppleMetrics(){
   const fmt = d => safeDate(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
   const dataDate = fmt(latest.date);
 
-  // Populate bedtime/wake display from CSV
-  const withTimes = withSleep.find(r=>r.bedtime||r.waketime);
+  // Populate bedtime/wake display from the same row as latest sleep data
+  const withTimes = latest; // always use the most recent night's row
   const bedtimeEl = document.getElementById('csv-bedtime');
   const wakeEl = document.getElementById('csv-waketime');
   const hrsEl = document.getElementById('csv-sleephrs');
