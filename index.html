@@ -500,6 +500,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="affirmation-sub">Your daily affirmation</div>
     </div>
 
+    <!-- Weekly intention word strip -->
+    <div id="today-intention-strip" style="margin-bottom:14px;">
+      <!-- Populated by loadWeekIntention() — shows word or prompt to set one -->
+    </div>
+
     <!-- Glow Score — right after affirmation -->
     <div class="card health-score-card" id="health-score-card">
       <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -2732,10 +2737,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Mind check-in — consolidated -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleMindCheckin()">
-        <div class="card-title" style="margin:0;">&#x1F9E0; Mind check-in</div>
+        <div class="card-title" style="margin:0;">🧠 Mind check-in</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <button onclick="event.stopPropagation();openPastMindLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
-          <span id="mind-checkin-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+          <div id="mind-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
       </div>
       <div id="mind-checkin-body" style="display:none;margin-top:12px;">
@@ -2803,22 +2808,38 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Weekly Intention -->
     <div class="card">
-      <div class="card-title">🎯 Weekly intention word</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">One word to carry through this week</div>
-      <div id="week-intention-display" style="font-size:28px;font-weight:700;color:var(--accent);text-align:center;padding:10px 0;"></div>
-      <input type="text" id="week-intention-input" placeholder="e.g. Strength · Patience · Joy · Glow · Bold">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;" id="intention-suggestions">
-        <button class="tag" onclick="setIntentionWord('Strength')">Strength</button>
-        <button class="tag" onclick="setIntentionWord('Patience')">Patience</button>
-        <button class="tag" onclick="setIntentionWord('Joy')">Joy</button>
-        <button class="tag" onclick="setIntentionWord('Glow')">Glow</button>
-        <button class="tag" onclick="setIntentionWord('Bold')">Bold</button>
-        <button class="tag" onclick="setIntentionWord('Grace')">Grace</button>
-        <button class="tag" onclick="setIntentionWord('Peace')">Peace</button>
-        <button class="tag" onclick="setIntentionWord('Power')">Power</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div class="card-title" style="margin:0;">🎯 Weekly intention word</div>
+        <div id="intention-edit-btn" style="display:none;">
+          <button onclick="editWeekIntention()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Edit</button>
+        </div>
       </div>
-      <button class="btn-primary" style="margin-top:12px;" onclick="saveWeekIntention()">Set this week's word</button>
-      <div class="toast-msg" id="wi-toast">Intention set!</div>
+      <!-- Saved state — shown when word is set -->
+      <div id="intention-set-view" style="display:none;text-align:center;padding:10px 0 6px;">
+        <div id="week-intention-display" style="font-size:40px;font-weight:700;color:var(--accent);letter-spacing:-1px;"></div>
+        <div id="intention-set-meta" style="font-size:11px;color:var(--muted);margin-top:4px;"></div>
+      </div>
+      <!-- Input state — shown when no word set or editing -->
+      <div id="intention-input-view">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">One word to carry through this week · resets every Monday</div>
+        <input type="text" id="week-intention-input" placeholder="e.g. Strength · Patience · Joy · Glow · Bold">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;" id="intention-suggestions">
+          <button class="tag" onclick="setIntentionWord('Strength')">Strength</button>
+          <button class="tag" onclick="setIntentionWord('Patience')">Patience</button>
+          <button class="tag" onclick="setIntentionWord('Joy')">Joy</button>
+          <button class="tag" onclick="setIntentionWord('Glow')">Glow</button>
+          <button class="tag" onclick="setIntentionWord('Bold')">Bold</button>
+          <button class="tag" onclick="setIntentionWord('Grace')">Grace</button>
+          <button class="tag" onclick="setIntentionWord('Peace')">Peace</button>
+          <button class="tag" onclick="setIntentionWord('Power')">Power</button>
+          <button class="tag" onclick="setIntentionWord('Focus')">Focus</button>
+          <button class="tag" onclick="setIntentionWord('Trust')">Trust</button>
+          <button class="tag" onclick="setIntentionWord('Courage')">Courage</button>
+          <button class="tag" onclick="setIntentionWord('Presence')">Presence</button>
+        </div>
+        <button class="btn-primary" style="margin-top:12px;" onclick="saveWeekIntention()">Set this week's word</button>
+        <div class="toast-msg" id="wi-toast">Intention set! ✨</div>
+      </div>
     </div>
   </div><!-- close vc-mind-daily -->
 
@@ -3118,7 +3139,7 @@ async function tab(id){
       if(myairLabel) myairLabel.textContent = `(${yest.toLocaleDateString('en-US',{month:'long',day:'numeric'})})`;
     }
   }
-  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); buildDailyProgress(); }
+  if(id==='today'){ loadCheckinState(); updateUploadStatusBanner(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); buildDailyProgress(); loadWeekIntention(); }
   if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); restoreMindDraft(); loadIntentionHistory(); loadReflectionHistory(); }
   if(id==='hair'){
     try { await loadLatestHairScan(); } catch(e){ console.warn('loadLatestHairScan error:',e); }
@@ -6356,12 +6377,12 @@ function toggleSleepCheckin(forceOpen){
 
 function toggleMindCheckin(forceOpen){
   const body = document.getElementById('mind-checkin-body');
-  const arrow = document.getElementById('mind-checkin-arrow');
+  const chevron = document.getElementById('mind-checkin-chevron');
   if(!body) return;
   const isOpen = body.style.display !== 'none';
   const open = forceOpen !== undefined ? forceOpen : !isOpen;
   body.style.display = open ? 'block' : 'none';
-  if(arrow) arrow.textContent = open ? '▴' : '▾';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
 }
 
 function toggleHairCheckin(forceOpen){
@@ -10576,60 +10597,109 @@ function loadPillarsToday(){
     updatePillarsStatus();
   }catch(e){}
 }
-function setIntentionWord(word){const input=document.getElementById('week-intention-input');if(input)input.value=word;}
+function setIntentionWord(word){const input=document.getElementById('week-intention-input');if(input){input.value=word;}}
 function getWeekStart(){
+  // Sunday-based week start — used for reflection/mood weekly filters
   const d = new Date(); d.setHours(0,0,0,0);
-  d.setDate(d.getDate() - d.getDay()); // Sunday
+  d.setDate(d.getDate() - d.getDay()); // 0=Sun
+  return d.toISOString().slice(0,10);
+}
+function getMondayWeekStart(){
+  // Monday-based week start — used for intention word (resets each Monday)
+  const d = new Date(); d.setHours(0,0,0,0);
+  const day = d.getDay(); // 0=Sun,1=Mon
+  const diff = day===0 ? 6 : day-1;
+  d.setDate(d.getDate()-diff);
   return d.toISOString().slice(0,10);
 }
 async function saveWeekIntention(){
   const word=document.getElementById('week-intention-input')?.value?.trim(); if(!word) return;
-  const weekStart = getWeekStart();
-  // Upsert — remove existing entry for this week then add fresh
+  const weekStart = getMondayWeekStart();
   const existing = await dbAll('intentions');
   const thisWeek = existing.find(e=>e.weekStart===weekStart);
   if(thisWeek) await dbDelete('intentions', thisWeek.id);
   await dbAdd('intentions',{word, weekStart, date:nowStr()});
   syncToBlob('intentions');
-  const display=document.getElementById('week-intention-display');
-  if(display) display.textContent=word;
-  localStorage.setItem('glowWeekIntention',JSON.stringify({word,weekStart}));
   toast('wi-toast');
+  showIntentionSetView(word, nowStr());
+  renderTodayIntentionStrip(word, nowStr());
   loadIntentionHistory();
 }
+
+function showIntentionSetView(word, dateSet){
+  const setView = document.getElementById('intention-set-view');
+  const inputView = document.getElementById('intention-input-view');
+  const editBtn = document.getElementById('intention-edit-btn');
+  const display = document.getElementById('week-intention-display');
+  const meta = document.getElementById('intention-set-meta');
+  if(setView) setView.style.display='block';
+  if(inputView) inputView.style.display='none';
+  if(editBtn) editBtn.style.display='block';
+  if(display) display.textContent=word;
+  if(meta) meta.textContent='Set '+fmtOutfitDate(dateSet)+' · resets Monday';
+}
+
+function editWeekIntention(){
+  const setView = document.getElementById('intention-set-view');
+  const inputView = document.getElementById('intention-input-view');
+  const editBtn = document.getElementById('intention-edit-btn');
+  if(setView) setView.style.display='none';
+  if(inputView) inputView.style.display='';
+  if(editBtn) editBtn.style.display='none';
+}
+
+function renderTodayIntentionStrip(word, dateSet){
+  const strip = document.getElementById('today-intention-strip');
+  if(!strip) return;
+  if(!word){
+    // Prompt to set — gentle nudge
+    strip.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="tab('mind')">
+      <div>
+        <div style="font-size:11px;color:var(--muted);">This week's intention</div>
+        <div style="font-size:13px;color:var(--accent);">Set your word for the week ✨</div>
+      </div>
+      <div style="font-size:18px;color:var(--muted);">›</div>
+    </div>`;
+    return;
+  }
+  const weekStart=getMondayWeekStart();
+  strip.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">This week's word</div>
+      <div style="font-size:22px;font-weight:700;color:var(--accent);letter-spacing:-0.5px;">${word}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">Week of ${weekStart}</div>
+    </div>
+    <button onclick="tab('mind')" style="background:none;border:0.5px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Change</button>
+  </div>`;
+}
+
 async function loadWeekIntention(){
-  const weekStart = getWeekStart();
-  // Try localStorage first (fast)
+  const weekStart = getMondayWeekStart();
   try{
-    const saved = localStorage.getItem('glowWeekIntention');
-    if(saved){
-      const {word, weekStart:savedWeek} = JSON.parse(saved);
-      if(savedWeek===weekStart && word){
-        const display=document.getElementById('week-intention-display'); if(display) display.textContent=word;
-        const input=document.getElementById('week-intention-input'); if(input) input.value=word;
-        return;
-      } else {
-        localStorage.removeItem('glowWeekIntention'); // stale — new week
-      }
-    }
-  }catch(e){}
-  // Fall back to IndexedDB
-  try{
+    // Always read from IndexedDB (synced from Blob)
     const all = await dbAll('intentions');
     const thisWeek = all.find(e=>e.weekStart===weekStart);
     if(thisWeek){
-      const display=document.getElementById('week-intention-display'); if(display) display.textContent=thisWeek.word;
-      const input=document.getElementById('week-intention-input'); if(input) input.value=thisWeek.word;
-      localStorage.setItem('glowWeekIntention',JSON.stringify({word:thisWeek.word,weekStart}));
+      showIntentionSetView(thisWeek.word, thisWeek.date||thisWeek.weekStart);
+      renderTodayIntentionStrip(thisWeek.word, thisWeek.date||thisWeek.weekStart);
+      return;
     }
   }catch(e){}
+  // No word set this week — show prompt
+  const inputView = document.getElementById('intention-input-view');
+  const setView = document.getElementById('intention-set-view');
+  const editBtn = document.getElementById('intention-edit-btn');
+  if(inputView) inputView.style.display='';
+  if(setView) setView.style.display='none';
+  if(editBtn) editBtn.style.display='none';
+  renderTodayIntentionStrip(null, null);
 }
 
 async function loadIntentionHistory(){
   try{
     const all = await dbAll('intentions');
     const sorted = [...all].sort((a,b)=>b.weekStart.localeCompare(a.weekStart));
-    const weekStart = getWeekStart();
+    const weekStart = getMondayWeekStart();
     const now = new Date();
     const thisMonth = now.toISOString().slice(0,7);
     const thisYear = now.getFullYear().toString();
@@ -10666,7 +10736,12 @@ async function loadIntentionHistory(){
 async function loadReflectionHistory(){
   try{
     const all = await dbAll('reflections');
-    const daily = all.filter(e=>e.type==='daily').sort((a,b)=>b.date.localeCompare(a.date));
+    // Deduplicate by date — keep most recent entry per date
+    const seen = new Map();
+    all.filter(e=>e.type==='daily').sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+      seen.set(e.date, e); // later entries overwrite earlier ones for same date
+    });
+    const daily = [...seen.values()].sort((a,b)=>b.date.localeCompare(a.date));
     const weekStart = getWeekStart();
     const thisMonth = new Date().toISOString().slice(0,7);
 
@@ -10676,7 +10751,7 @@ async function loadReflectionHistory(){
       <div style="font-size:13px;color:var(--text);line-height:1.5;white-space:pre-wrap;">${e.answer}</div>
     </div>`;
 
-    // Daily — show last 5
+    // Daily — show last 5 unique dates
     const dailyEl = document.getElementById('reflection-log-daily');
     if(dailyEl){
       const recent = daily.slice(0,5);
