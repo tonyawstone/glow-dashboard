@@ -2125,12 +2125,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Skin check-in — collapsible, first card -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinCheckin()">
-        <div class="card-title" style="margin:0;">Skin check-in</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button onclick="event.stopPropagation();openSkinLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
-          <span id="skin-checkin-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="card-title" style="margin:0;">✨ Skin check-in</div>
+          <div id="skin-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
+        <button onclick="event.stopPropagation();openSkinLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
       </div>
+      <!-- Saved state — always visible -->
+      <div id="skin-checkin-saved" style="display:none;margin-top:10px;"></div>
       <div id="skin-checkin-body" style="display:none;margin-top:12px;">
         <div class="fl">Skin today</div>
         <div class="tags" id="skin-tags">
@@ -2152,12 +2154,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Morning routine — collapsible with counter -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinAM()">
-        <div class="card-title" style="margin:0;">Morning routine</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div id="skin-am-progress" style="font-size:12px;color:var(--muted);"></div>
-          <span id="skin-am-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="card-title" style="margin:0;">☀️ Morning routine</div>
+          <div id="skin-am-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
+        <div id="skin-am-progress" style="font-size:12px;color:var(--muted);"></div>
       </div>
+      <!-- Saved state — always visible -->
+      <div id="skin-am-saved" style="display:none;margin-top:10px;"></div>
       <div id="skin-am-body" style="display:none;margin-top:12px;">
         <div class="med-row" id="r-cleanser" onclick="toggleSkinStep('r-cleanser')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Facial Cleanser</div><div class="med-note">Advanced Deep Clean</div></div></div>
         <div class="med-row" id="r-serum" onclick="toggleSkinStep('r-serum')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Serum</div></div></div>
@@ -2170,13 +2174,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Evening routine — collapsible with counter -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinPM()">
-        <div class="card-title" style="margin:0;">Evening routine</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="card-title" style="margin:0;">🌙 Evening routine</div>
+          <div id="skin-pm-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+        </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <div id="skin-pm-progress" style="font-size:12px;color:var(--muted);"></div>
           <button onclick="event.stopPropagation();openMuselyLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
-          <span id="skin-pm-arrow" style="font-size:16px;color:var(--muted);">▾</span>
         </div>
       </div>
+      <!-- Saved state — always visible -->
+      <div id="skin-pm-saved" style="display:none;margin-top:10px;"></div>
       <div id="skin-pm-body" style="display:none;margin-top:12px;">
         <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Tonight's Musely treatment</div>
         <div class="med-row" id="r-musely-aa" onclick="selectMuselyCheck('aa')" style="margin-bottom:5px;">
@@ -3117,13 +3125,11 @@ async function boot(){
   loadMyAirState();
   loadCPAPCleanState();
   loadSleepAidState();
+  await loadMedsChecklist();
   await buildDailyProgress();
   restoreActivationState();
   await restoreSleepCheckinState();
   tab('today');
-  // Re-run DP after short delay — Blob fetches inside buildDailyProgress
-  // may not have completed on first pass if IndexedDB was empty
-  setTimeout(()=>buildDailyProgress(), 2000);
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────
@@ -3638,7 +3644,7 @@ async function buildDailyProgress(){
   // Fetch all data sources in parallel for speed
   const [
     checkins, refs, minds, sleeps, bps,
-    sleepBlob, myairEntry, bpBlob, medsBlob
+    sleepBlob, myairEntry, bpBlob, medsBlob, skinRoutineBlob
   ] = await Promise.all([
     dbAll('checkins').catch(()=>[]),
     dbAll('reflections').catch(()=>[]),
@@ -3649,6 +3655,7 @@ async function buildDailyProgress(){
     getMyAirEntryForLastNight().catch(()=>null),
     fetch(`${BACKEND}/api/sync?pillar=bps&t=${Date.now()}`).then(r=>r.ok?r.json():null).catch(()=>null),
     fetch(`${BACKEND}/api/sync?pillar=meds_log&t=${Date.now()}`).then(r=>r.ok?r.json():null).catch(()=>null),
+    fetch(`${BACKEND}/api/sync?pillar=skin_routine&t=${Date.now()}`).then(r=>r.ok?r.json():null).catch(()=>null),
   ]);
 
   // Mind
@@ -3692,20 +3699,16 @@ async function buildDailyProgress(){
   // Skin check-in — auto-checks when skin entry saved today
   try { const skins = await dbAll('skins'); autoChecks['dp-skin-checkin'] = skins.some(e=>e.type==='checkin'&&e.date===today); } catch(e){}
 
-  // Skin AM/PM — read from skin routine state (resets daily)
-  // Also check Musely game
-  // Skin routine — check localStorage first, then Blob
+  // Skin AM/PM — read from Blob skin_routine (cross-device)
   try {
-    let skinState = JSON.parse(localStorage.getItem('glowSkinRoutine')||'{}');
-    if(skinState.date !== today){
-      // Try Blob for cross-device
-      const res = await fetch(`${BACKEND}/api/sync?pillar=skin_routine&t=${Date.now()}`);
-      if(res.ok){ const d=await res.json(); skinState=d.data||{}; }
-    }
+    const skinState = skinRoutineBlob?.data || {};
+    const amDom = ['r-cleanser','r-serum','r-vitc','r-spf'].every(id=>document.getElementById(id)?.classList.contains('done'));
+    const pmDom = (document.getElementById('r-musely-aa')?.classList.contains('done')||document.getElementById('r-musely-spot')?.classList.contains('done'))
+      && document.getElementById('r-regen')?.classList.contains('done');
     const skinToday = skinState.date === today;
-    autoChecks['dp-skin-am'] = skinToday && ['r-cleanser','r-serum','r-vitc','r-spf'].every(id=>skinState[id]);
-    autoChecks['dp-skin-pm'] = skinToday && (skinState['r-musely-aa']||skinState['r-musely-spot'])&&skinState['r-regen'];
-    autoChecks['dp-musely-game'] = skinToday && skinState['r-musely-game']===true;
+    autoChecks['dp-skin-am'] = amDom || (skinToday && ['r-cleanser','r-serum','r-vitc','r-spf'].every(id=>skinState[id]));
+    autoChecks['dp-skin-pm'] = pmDom || (skinToday && (skinState['r-musely-aa']||skinState['r-musely-spot'])&&skinState['r-regen']);
+    autoChecks['dp-musely-game'] = document.getElementById('r-musely-game')?.classList.contains('done') || (skinToday && skinState['r-musely-game']===true);
   } catch(e){
     autoChecks['dp-skin-am'] = false;
     autoChecks['dp-skin-pm'] = false;
@@ -3761,6 +3764,9 @@ async function buildDailyProgress(){
 
   // Update pillar ring indicators
   updatePillarRings(autoChecks);
+
+  // Re-apply Today ring score (pillar ring update recreates the wrapper)
+  if(window.glowScore) updateTodayRing(window.glowScore);
 }
 
 function toggleDPItem(id, deepLink){
@@ -6195,40 +6201,37 @@ var SKIN_STEPS_KEY = 'glowSkinRoutine';
 
 async function loadSkinRoutineState(){
   const today = nowStr();
+  let saved = null;
   // Try localStorage first (fast, same device)
   try {
-    const saved = JSON.parse(localStorage.getItem(SKIN_STEPS_KEY)||'{}');
-    if(saved.date === today){
-      [...SKIN_STEPS_AM, ...SKIN_STEPS_PM].forEach(id=>{
-        if(saved[id]) document.getElementById(id)?.classList.add('done');
-      });
-      updateSkinProgress();
-      if(SKIN_STEPS_AM.some(id=>saved[id])) toggleSkinAM(true);
-      if(SKIN_STEPS_PM.some(id=>saved[id])) toggleSkinPM(true);
-      return;
-    }
+    const ls = JSON.parse(localStorage.getItem(SKIN_STEPS_KEY)||'{}');
+    if(ls.date === today) saved = ls;
   } catch(e){}
   // Fall back to Blob (cross-device)
-  try {
-    const res = await fetch(`${BACKEND}/api/sync?pillar=skin_routine&t=${Date.now()}`);
-    if(res.ok){
-      const d = await res.json();
-      const saved = d.data||{};
-      if(saved.date === today){
-        [...SKIN_STEPS_AM, ...SKIN_STEPS_PM].forEach(id=>{
-          if(saved[id]) document.getElementById(id)?.classList.add('done');
-        });
-        // Also write to localStorage for future fast loads
-        localStorage.setItem(SKIN_STEPS_KEY, JSON.stringify(saved));
-        updateSkinProgress();
-        // Auto-open routines if any steps done
-        const amDone = SKIN_STEPS_AM.some(id=>saved[id]);
-        const pmDone = SKIN_STEPS_PM.some(id=>saved[id]);
-        if(amDone) toggleSkinAM(true);
-        if(pmDone) toggleSkinPM(true);
+  if(!saved){
+    try {
+      const res = await fetch(`${BACKEND}/api/sync?pillar=skin_routine&t=${Date.now()}`);
+      if(res.ok){
+        const d = await res.json();
+        if(d.data?.date === today){
+          saved = d.data;
+          localStorage.setItem(SKIN_STEPS_KEY, JSON.stringify(saved));
+        }
       }
-    }
-  } catch(e){}
+    } catch(e){}
+  }
+  if(!saved) return;
+  [...SKIN_STEPS_AM, ...SKIN_STEPS_PM].forEach(id=>{
+    if(saved[id]) document.getElementById(id)?.classList.add('done');
+  });
+  updateSkinProgress(); // this now handles saved views + collapse when complete
+  // If incomplete, open the card so user can finish
+  const amDone = SKIN_STEPS_AM.filter(id=>saved[id]).length;
+  const pmDone = SKIN_STEPS_PM.filter(id=>saved[id]).length;
+  if(amDone > 0 && amDone < 4) toggleSkinAM(true);
+  if(pmDone > 0 && pmDone < SKIN_STEPS_PM.length) toggleSkinPM(true);
+  // Also restore skin check-in saved state
+  restoreSkinCheckinState();
 }
 
 function toggleSkinStep(id){
@@ -6256,12 +6259,22 @@ function updateSkinProgress(){
   const pmDone = SKIN_STEPS_PM.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
   const amEl = document.getElementById('skin-am-progress');
   const pmEl = document.getElementById('skin-pm-progress');
-  const amComplete = amDone === SKIN_STEPS_AM.length;
+  const amComplete = amDone >= 4; // 4 core steps = complete
   const pmComplete = pmDone === SKIN_STEPS_PM.length;
   if(amEl) amEl.textContent = amComplete ? '✅ Complete' : amDone+'/'+SKIN_STEPS_AM.length+' done';
   if(amEl) amEl.style.color = amComplete ? '#6B9E78' : 'var(--muted)';
   if(pmEl) pmEl.textContent = pmComplete ? '✅ Complete' : pmDone+'/'+SKIN_STEPS_PM.length+' done';
   if(pmEl) pmEl.style.color = pmComplete ? '#6B9E78' : 'var(--muted)';
+  // Show saved state when complete, collapse card
+  if(amComplete){
+    showSkinAMSavedView();
+    toggleSkinAM(false);
+  }
+  if(pmComplete){
+    showSkinPMSavedView();
+    toggleSkinPM(false);
+  }
+  buildDailyProgress();
 }
 
 function toggleDailyProgress(forceOpen){
@@ -6372,22 +6385,101 @@ async function editMindEntry(){
 
 function toggleSkinAM(forceOpen){
   const body = document.getElementById('skin-am-body');
-  const arrow = document.getElementById('skin-am-arrow');
+  const chevron = document.getElementById('skin-am-chevron');
   if(!body) return;
   const isOpen = body.style.display !== 'none';
   const open = forceOpen !== undefined ? forceOpen : !isOpen;
   body.style.display = open ? 'block' : 'none';
-  if(arrow) arrow.textContent = open ? '▴' : '▾';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
 }
 
 function toggleSkinPM(forceOpen){
   const body = document.getElementById('skin-pm-body');
-  const arrow = document.getElementById('skin-pm-arrow');
+  const chevron = document.getElementById('skin-pm-chevron');
   if(!body) return;
   const isOpen = body.style.display !== 'none';
   const open = forceOpen !== undefined ? forceOpen : !isOpen;
   body.style.display = open ? 'block' : 'none';
-  if(arrow) arrow.textContent = open ? '▴' : '▾';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
+}
+
+function showSkinCheckinSaved(e){
+  const saved = document.getElementById('skin-checkin-saved');
+  if(!saved) return;
+  const chips = arr => (arr||[]).filter(Boolean).map(v=>`<span style="background:var(--warm);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
+  const dateLabel = e.date ? fmtOutfitDate(e.date) : 'Today';
+  saved.style.display='block';
+  saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${dateLabel} ✓ <button onclick="editSkinCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+    ${(e.skinT||[]).length?`<div style="margin-bottom:6px;">${chips(e.skinT)}</div>`:''}
+    ${(e.concerns||[]).length?`<div style="font-size:12px;color:var(--muted);">${e.concerns.join(' · ')}</div>`:''}
+  </div>`;
+}
+
+function editSkinCheckin(){
+  toggleSkinCheckin(true);
+}
+
+async function restoreSkinCheckinState(){
+  try{
+    const today = nowStr();
+    let entry = null;
+    const skins = await dbAll('skins');
+    entry = skins.find(e=>e.type==='checkin'&&e.date===today);
+    if(!entry){
+      const res = await fetch(`${BACKEND}/api/sync?pillar=skins&t=${Date.now()}`);
+      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+        entry = data.find(e=>e.type==='checkin'&&e.date===today);
+        if(!entry && data.filter(e=>e.type==='checkin').length){
+          entry = [...data.filter(e=>e.type==='checkin')].sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+        }
+      }
+    }
+    if(entry) showSkinCheckinSaved(entry);
+  }catch(e){}
+}
+
+function showSkinAMSavedView(steps){
+  const saved = document.getElementById('skin-am-saved');
+  if(!saved) return;
+  const AM_LABELS = {'r-cleanser':'Cleanser','r-serum':'Super Serum','r-vitc':'Vit C','r-spf':'SPF','r-eye':'Eye mask'};
+  const done = (steps||SKIN_STEPS_AM).filter(id=>document.getElementById(id)?.classList.contains('done'));
+  const allDone = done.length >= 4; // 4 core steps
+  if(!allDone){ saved.style.display='none'; return; }
+  saved.style.display='block';
+  saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:10px 12px;">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">☀️ AM routine ✓ <button onclick="editSkinAM()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+    <div style="font-size:12px;">${done.map(id=>AM_LABELS[id]||id).join(' · ')}</div>
+  </div>`;
+}
+
+function editSkinAM(){
+  const saved = document.getElementById('skin-am-saved');
+  if(saved) saved.style.display='none';
+  toggleSkinAM(true);
+}
+
+function showSkinPMSavedView(){
+  const saved = document.getElementById('skin-pm-saved');
+  if(!saved) return;
+  const maa = document.getElementById('r-musely-aa')?.classList.contains('done');
+  const mspot = document.getElementById('r-musely-spot')?.classList.contains('done');
+  const regen = document.getElementById('r-regen')?.classList.contains('done');
+  const game = document.getElementById('r-musely-game')?.classList.contains('done');
+  const hasPM = maa||mspot||regen;
+  if(!hasPM){ saved.style.display='none'; return; }
+  const treatment = maa?'Anti-Aging Cream':mspot?'Spot Treatment':'';
+  saved.style.display='block';
+  saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:10px 12px;">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">🌙 PM routine ✓ <button onclick="editSkinPM()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
+    <div style="font-size:12px;">${[treatment,regen?'Olay Regenerist':'',game?'Avatar game ✓':''].filter(Boolean).join(' · ')}</div>
+  </div>`;
+}
+
+function editSkinPM(){
+  const saved = document.getElementById('skin-pm-saved');
+  if(saved) saved.style.display='none';
+  toggleSkinPM(true);
 }
 
 function toggleManualExercise(forceOpen){
@@ -6422,12 +6514,12 @@ function toggleDermCard(forceOpen){
 
 function toggleSkinCheckin(forceOpen){
   const body = document.getElementById('skin-checkin-body');
-  const arrow = document.getElementById('skin-checkin-arrow');
+  const chevron = document.getElementById('skin-checkin-chevron');
   if(!body) return;
   const isOpen = body.style.display !== 'none';
   const open = forceOpen !== undefined ? forceOpen : !isOpen;
   body.style.display = open ? 'block' : 'none';
-  if(arrow) arrow.textContent = open ? '▴' : '▾';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
 }
 
 function toggleSleepCheckin(forceOpen){
@@ -6618,15 +6710,20 @@ async function saveFacial(){
   toast('ft');
 }
 async function saveSkin(){
-  const skinT=gT('skin-tags'),concerns=gT('concern-tags'),derm=document.getElementById('derm-note').value.trim();
+  const skinT=gT('skin-tags'),concerns=gT('concern-tags'),derm=document.getElementById('derm-note')?.value.trim()||'';
   const musely_aa=document.getElementById('r-musely-aa').classList.contains('on');
   const musely_spot=document.getElementById('r-musely-spot').classList.contains('on');
-  const skinEntry={type:'checkin',skinT,concerns,derm,musely_aa,musely_spot,date:document.getElementById('skin-log-date')?.value||nowStr()};
+  const dateVal = document.getElementById('skin-log-date')?.value||nowStr();
+  const skinEntry={type:'checkin',skinT,concerns,derm,musely_aa,musely_spot,date:dateVal};
   await dbAdd('skins',skinEntry);
   syncToBlob('skins');
-  document.getElementById('derm-note').value='';
-  ['skin-tags','concern-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
-  toast('skt');loadLogs();toggleSkinCheckin(false);
+  if(document.getElementById('derm-note')) document.getElementById('derm-note').value='';
+  ['skin-tags','concern-tags'].forEach(id=>document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
+  toast('skt');
+  loadLogs();
+  toggleSkinCheckin(false);
+  showSkinCheckinSaved(skinEntry);
+  buildDailyProgress();
 }
 async function saveHair(){
   const hairT=gT('hair-tags'),care=gT('hcare-tags'),prods=gT('products-used-tags'),note=document.getElementById('hair-note').value.trim();
