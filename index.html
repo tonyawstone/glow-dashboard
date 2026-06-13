@@ -4739,11 +4739,19 @@ function outfitCardHTML(e, slotId){
 
 async function deleteOutfit(ts){
   if(!confirm('Delete this look? This cannot be undone.')) return;
-  // Try deleting by ts first, then by id
   const all = await dbAll('outfits');
   const entry = all.find(e => e.ts === ts || e.id === ts);
   if(entry && entry.id) await dbDelete('outfits', entry.id);
-  syncToBlob('outfits');
+  // Write remaining entries directly to Blob (bypass merge so deletion sticks)
+  const remaining = await dbAll('outfits');
+  const payload = remaining.map(e => e.photo && e.photo.startsWith('data:') ? {...e, photo:''} : e);
+  try {
+    await fetch(`${BACKEND}/api/sync`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({pillar:'outfits', data: payload})
+    });
+  } catch(e){}
   await renderLookbook();
   if(curView==='monthly') renderStyleCalendar();
 }
