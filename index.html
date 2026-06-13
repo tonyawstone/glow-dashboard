@@ -498,12 +498,48 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- ═══════════════ TODAY ═══════════════ -->
 <div id="s-today" class="sec on">
   <div class="view-content on" id="vc-today-daily">
-    <div id="upload-status-banner" style="display:none;align-items:center;gap:8px;margin-bottom:6px;">
-      <div style="flex:1;display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);font-size:11px;color:var(--muted);">
-        <div id="upload-status-text">⏳ Checking last upload...</div>
-        <div id="upload-status-date" style="color:var(--muted);font-weight:400;font-size:11px;"></div>
+
+    <!-- 3-COLUMN TOP ROW -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+
+      <!-- Auto Data Updates card -->
+      <div class="card" style="padding:14px;margin-bottom:0;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <i class="ti ti-refresh" style="font-size:14px;color:var(--accent);" aria-hidden="true"></i>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Auto Data</div>
+        </div>
+        <div id="auto-data-status-text" style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px;">Checking...</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">BP + Weight →<br>Apple Health</div>
+        <div id="auto-data-status-date" style="font-size:10px;color:var(--muted);margin-bottom:8px;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div id="auto-data-badge" style="font-size:11px;padding:3px 8px;border-radius:10px;border:0.5px solid var(--border);color:var(--muted);background:var(--warm);">Checking...</div>
+          <i class="ti ti-device-watch" style="font-size:22px;color:var(--muted);opacity:0.4;" aria-hidden="true"></i>
+        </div>
       </div>
-      <button class="guide-btn" onclick="openGuide('today')">?</button>
+
+      <!-- Today's Reminders card -->
+      <div class="card" style="padding:14px;margin-bottom:0;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <i class="ti ti-bell" style="font-size:14px;color:var(--accent);" aria-hidden="true"></i>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Reminders</div>
+        </div>
+        <div id="today-reminders-list" style="font-size:12px;">
+          <div style="color:var(--muted);">Loading...</div>
+        </div>
+        <button onclick="toggleDailyProgress()" style="margin-top:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">View all →</button>
+      </div>
+
+      <!-- Glow Score card (moved here) -->
+      <div class="card" style="padding:14px;margin-bottom:0;" id="health-score-card">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <i class="ti ti-sparkles" style="font-size:14px;color:var(--accent);" aria-hidden="true"></i>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Glow Score</div>
+          <button class="guide-btn" onclick="openGuide('score')" style="margin-left:auto;">?</button>
+        </div>
+        <div id="health-score-content"><div class="log-empty" style="font-size:11px;">Calculating...</div></div>
+        <button onclick="openGlowInsights()" style="margin-top:6px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">See full breakdown →</button>
+      </div>
+
     </div>
     <!-- BP last reading / reminder -->
     <div id="today-bp-banner" style="display:none;padding:5px 12px;border-radius:8px;background:transparent;border:0.5px solid var(--border);margin-bottom:6px;align-items:center;justify-content:space-between;">
@@ -565,20 +601,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Weekly intention word strip -->
     <div id="today-intention-strip" style="margin-bottom:14px;">
       <!-- Populated by loadWeekIntention() — shows word or prompt to set one -->
-    </div>
-
-    <!-- Glow Score — right after affirmation -->
-    <div class="card health-score-card" id="health-score-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div class="card-title" style="margin:0;">Your Glow Score</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <button class="guide-btn" onclick="openGuide('score')" style="flex-shrink:0;">?</button>
-        </div>
-      </div>
-      <div id="health-score-content">
-        <div class="log-empty">Calculating your score...</div>
-      </div>
-      <button onclick="openGlowInsights()" style="width:100%;margin-top:10px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">✨ What's driving my score?</button>
     </div>
 
     <!-- Daily check-in — collapsible -->
@@ -3983,6 +4005,41 @@ async function buildDailyProgress(){
 
   // Re-apply Today ring score (pillar ring update recreates the wrapper)
   if(window.glowScore) updateTodayRing(window.glowScore);
+
+  // Update Today's Reminders card
+  buildTodayReminders(autoChecks);
+}
+
+function buildTodayReminders(checks){
+  const el = document.getElementById('today-reminders-list');
+  if(!el) return;
+
+  // Key reminders to show — ordered by priority
+  const REMINDERS = [
+    { id:'dp-bp',           label:'Check BP' },
+    { id:'dp-body',         label:'Log weight' },
+    { id:'dp-sleep-checkin',label:'Sleep check-in' },
+    { id:'dp-meds-am',      label:'AM meds & supplements' },
+    { id:'dp-skin-am',      label:'AM skin routine' },
+    { id:'dp-exercise',     label:'Workout' },
+    { id:'dp-meds-pm',      label:'PM meds' },
+    { id:'dp-skin-pm',      label:'PM skin routine' },
+  ];
+
+  // Show top 5 — unchecked first, then checked
+  const unchecked = REMINDERS.filter(r=>!checks[r.id]);
+  const checked = REMINDERS.filter(r=>checks[r.id]);
+  const display = [...unchecked, ...checked].slice(0,5);
+
+  el.innerHTML = display.map(r=>{
+    const done = checks[r.id];
+    return `<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">
+      <div style="width:16px;height:16px;border-radius:50%;border:1.5px solid ${done?'#6B9E78':'var(--border)'};background:${done?'#6B9E78':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        ${done?'<svg width="10" height="10" viewBox="0 0 10 10"><polyline points="2,5 4,7 8,3" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>':''}
+      </div>
+      <span style="font-size:12px;color:${done?'var(--muted)':'var(--text)'};${done?'text-decoration:line-through;':''}">${r.label}</span>
+    </div>`;
+  }).join('');
 }
 
 function toggleDPItem(id, deepLink){
@@ -12034,49 +12091,43 @@ async function loadMyAirState(){
 
 
 async function updateUploadStatusBanner(){
-  const textEl = document.getElementById('upload-status-text');
-  const dateEl = document.getElementById('upload-status-date');
-  const bannerEl = document.getElementById('upload-status-banner');
+  const textEl = document.getElementById('auto-data-status-text');
+  const dateEl = document.getElementById('auto-data-status-date');
+  const badgeEl = document.getElementById('auto-data-badge');
   if(!textEl) return;
   try {
     const rows = await getCSVRows();
     if(!rows.length){
-      if(bannerEl) bannerEl.style.display='none';
+      if(textEl) textEl.textContent = 'No data yet';
+      if(badgeEl){ badgeEl.textContent='Upload needed'; }
       return;
     }
-    if(bannerEl) bannerEl.style.display='flex';
     const latest = rows[0];
     const uploadDate = safeDate(latest.date);
     const today = new Date();
     const diffDays = Math.floor((today - uploadDate)/(1000*60*60*24));
 
-    // Get uploadedAt from Blob
     let uploadedAtStr = '';
     try {
       const r = await fetch(`${BACKEND}/api/health-data`);
       if(r.ok){ const {uploadedAt} = await r.json(); if(uploadedAt){
         const ua = new Date(uploadedAt);
-        const uaDateLabel = smartDate(nowStr(ua));
         const uaTime = ua.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});
-        uploadedAtStr = `${uaDateLabel} · ${uaTime}`;
+        uploadedAtStr = `Last synced ${uaTime}`;
       }}
     } catch(e){}
 
-    const innerBanner = bannerEl ? bannerEl.querySelector('div') : null;
-    const dateStr = uploadDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     if(diffDays <= 1){
-      textEl.textContent = '✅ Apple Health data is current';
-      if(dateEl) dateEl.textContent = uploadedAtStr ? uploadedAtStr : dateStr;
-      if(innerBanner){ innerBanner.style.background='rgba(107,158,120,0.08)'; innerBanner.style.borderColor='rgba(107,158,120,0.3)'; }
+      if(textEl){ textEl.textContent = 'Up to date ✓'; textEl.style.color='#27500A'; }
+      if(dateEl) dateEl.textContent = uploadedAtStr;
+      if(badgeEl){ badgeEl.textContent='✓ Current'; badgeEl.style.background='rgba(107,158,120,0.1)'; badgeEl.style.borderColor='rgba(107,158,120,0.3)'; badgeEl.style.color='#27500A'; }
     } else {
-      textEl.textContent = '🛑 Need to upload Apple Health data';
-      if(dateEl) dateEl.textContent = `Last upload ${uploadDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;
-      if(innerBanner){ innerBanner.style.background=''; innerBanner.style.borderColor='var(--border)'; }
+      if(textEl){ textEl.textContent = 'Upload needed'; textEl.style.color='var(--rose)'; }
+      if(dateEl) dateEl.textContent = `Last: ${uploadDate.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+      if(badgeEl){ badgeEl.textContent='🛑 Outdated'; badgeEl.style.color='var(--muted)'; }
     }
   } catch(e){
-    console.error('updateUploadStatusBanner error:', e);
-    if(bannerEl) bannerEl.style.display='flex';
-    if(textEl) textEl.textContent = '🕐 Upload for today';
+    if(textEl){ textEl.textContent = 'Upload for today'; textEl.style.color='var(--muted)'; }
   }
 }
 
