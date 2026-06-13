@@ -10212,16 +10212,17 @@ async function openWaterLog(){
       if(res.ok){ const {data}=await res.json(); bodyWater = Array.isArray(data)?data:(data?.pct?[data]:[]); }
     } catch(e){}
     
-    // Combine and sort by date
-    const allDates = new Set([...water.map(w=>w.date), ...bodyWater.map(b=>b.date)]);
-    const sorted = [...allDates].sort().reverse();
+    // Combine and sort by date — normalize all to YYYY-MM-DD first
+    const toISO = d => { try { return nowStr(safeDate(d)); } catch(e){ return d; } };
+    const allDates = new Set([...water.map(w=>toISO(w.date)), ...bodyWater.map(b=>toISO(b.date))]);
+    const sorted = [...allDates].filter(Boolean).sort().reverse();
     if(!sorted.length){ el.innerHTML='<div class="log-empty">No logs yet.</div>'; return; }
     
     let html = '';
     for(const date of sorted){
       const d = safeDate(date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-      const w = water.find(e=>e.date===date);
-      const bw = bodyWater.find(e=>e.date===date);
+      const w = water.find(e=>toISO(e.date)===date);
+      const bw = bodyWater.find(e=>toISO(e.date)===date);
       html += '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">';
       html += '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'+d+'</div>';
       if(w){
