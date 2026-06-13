@@ -576,6 +576,18 @@ textarea:focus,input:focus{border-color:var(--accent);}
           </div>
         </div>
 
+        <!-- Outfit nudge card -->
+        <div id="today-outfit-nudge" style="display:none;padding:12px;border-radius:var(--radius);background:var(--card);border:0.5px solid var(--border);margin-bottom:0;cursor:pointer;" onclick="openQuickLog()">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:15px;line-height:1;flex-shrink:0;">👗</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;font-weight:500;color:var(--text);">No outfit logged</div>
+              <div style="font-size:10px;color:var(--muted);">Tap to snap &amp; log →</div>
+            </div>
+            <span style="font-size:14px;flex-shrink:0;">📷</span>
+          </div>
+        </div>
+
         <!-- Take a Moment card -->
         <div class="card" style="padding:12px;margin-bottom:0;" id="mind-habits-banner">
           <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;">
@@ -601,11 +613,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
       </div>
     </div>
-    <!-- Outfit nudge -->
-    <div id="today-outfit-nudge" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;cursor:pointer;font-size:12px;color:var(--muted);align-items:center;justify-content:space-between;" onclick="openQuickLog()">
-      <span>👗 No outfit logged today — tap to snap &amp; log</span>
-      <span style="font-size:16px;">📷</span>
-    </div>
+
     <div class="stat-strip" style="grid-template-columns:repeat(3,1fr);">
       <div class="stat-tile" style="cursor:pointer;" onclick="tab('sleep')">
         <div style="width:36px;height:36px;border-radius:50%;background:var(--warm);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">
@@ -6399,7 +6407,7 @@ async function updateOutfitNudge(){
   if(hr<8){nudge.style.display='none';return;} // too early
   const outfits=await dbAll('outfits');
   const todayWorn=(outfits||[]).filter(e=>e.date===nowStr()&&e.src==='My outfit');
-  nudge.style.display=todayWorn.length>0?'none':'flex';
+  nudge.style.display=todayWorn.length>0?'none':'block';
 }
 
 function openQuickLog(){
@@ -12197,21 +12205,33 @@ async function updateUploadStatusBanner(){
     const diffDays = Math.floor((today - uploadDate)/(1000*60*60*24));
 
     let uploadedAtStr = '';
+    let uploadedAtDate = null;
     try {
-      const r = await fetch(`${BACKEND}/api/health-data`);
+      const r = await fetch(`${BACKEND}/api/health-data?t=${Date.now()}`);
       if(r.ok){ const {uploadedAt} = await r.json(); if(uploadedAt){
-        const ua = new Date(uploadedAt);
-        const uaTime = ua.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});
-        uploadedAtStr = `Last synced ${uaTime}`;
+        uploadedAtDate = new Date(uploadedAt);
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const uaTime = uploadedAtDate.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:tz});
+        const uaDate = uploadedAtDate.toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:tz});
+        // Only show time-only if it was actually uploaded today
+        const uaDay = uploadedAtDate.toLocaleDateString('en-US',{timeZone:tz});
+        const todayDay = today.toLocaleDateString('en-US',{timeZone:tz});
+        uploadedAtStr = uaDay === todayDay ? `Last synced ${uaTime}` : `Last synced ${uaDate} · ${uaTime}`;
       }}
     } catch(e){}
 
-    if(diffDays <= 1){
+    if(diffDays === 0){
+      // Data is from today — fully current
       if(textEl){ textEl.textContent = 'Up to date ✓'; textEl.style.color='#27500A'; }
       if(dateEl) dateEl.textContent = uploadedAtStr;
       if(badgeEl){ badgeEl.textContent='✓ Current'; badgeEl.style.background='rgba(107,158,120,0.1)'; badgeEl.style.borderColor='rgba(107,158,120,0.3)'; badgeEl.style.color='#27500A'; }
       const exportCheck = document.getElementById('gs-export-check');
       if(exportCheck){ exportCheck.style.background='#6B9E78'; exportCheck.style.borderColor='#6B9E78'; exportCheck.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10"><polyline points="2,5 4,7 8,3" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>'; }
+    } else if(diffDays === 1){
+      // Yesterday's data — show amber, prompt morning upload
+      if(textEl){ textEl.textContent = 'Yesterday\'s data'; textEl.style.color='#8B6914'; }
+      if(dateEl) dateEl.textContent = uploadedAtStr || `Last: ${uploadDate.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+      if(badgeEl){ badgeEl.textContent='↑ Upload for today'; badgeEl.style.background='rgba(196,115,90,0.08)'; badgeEl.style.borderColor='rgba(196,115,90,0.3)'; badgeEl.style.color='#8B4513'; }
     } else {
       if(textEl){ textEl.textContent = 'Upload needed'; textEl.style.color='var(--rose)'; }
       if(dateEl) dateEl.textContent = `Last: ${uploadDate.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
