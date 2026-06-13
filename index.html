@@ -10365,9 +10365,22 @@ async function buildHydrationStatus(){
   const el = document.getElementById('hydration-status');
   if(!el) return;
 
+  // Get history from Blob
+  let entries = [];
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=body_water&t=${Date.now()}`);
+    if(res.ok){ const {data} = await res.json();
+      entries = Array.isArray(data) ? data : (data?.pct ? [data] : []);
+      entries = entries.filter(e=>e.pct&&e.date).sort((a,b)=>b.date.localeCompare(a.date));
+    }
+  } catch(e){}
+
+  // If localStorage has no entry, fall back to most recent Blob entry
   const saved = JSON.parse(localStorage.getItem('glowBodyWater')||'{}');
-  const waterPct = saved.pct ? parseFloat(saved.pct) : null;
-  const waterDate = saved.date ? safeDate(saved.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
+  const blobToday = entries.find(e=>e.date===nowStr()) || entries[0] || null;
+  const waterPct = saved.pct ? parseFloat(saved.pct) : (blobToday ? parseFloat(blobToday.pct) : null);
+  const waterDate = saved.date ? safeDate(saved.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})
+    : (blobToday?.date ? safeDate(blobToday.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null);
 
   const rows = await getCSVRows();
   const latestWeight = rows.find(r=>parseFloat(r.weight_lbs)>0);
@@ -10378,16 +10391,6 @@ async function buildHydrationStatus(){
   const watsonGoalPct = weightKg
     ? Math.round(((-2.097 + (0.1069 * HEIGHT_CM) + (0.2466 * weightKg)) / weightKg) * 1000) / 10
     : null;
-
-  // Get history from Blob
-  let entries = [];
-  try {
-    const res = await fetch(`${BACKEND}/api/sync?pillar=body_water&t=${Date.now()}`);
-    if(res.ok){ const {data} = await res.json();
-      entries = Array.isArray(data) ? data : (data?.pct ? [data] : []);
-      entries = entries.filter(e=>e.pct&&e.date).sort((a,b)=>b.date.localeCompare(a.date));
-    }
-  } catch(e){}
 
   const recent2 = entries.slice(0,2);
   const recent7 = entries.slice(0,7);
