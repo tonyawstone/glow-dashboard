@@ -4084,9 +4084,11 @@ async function buildDailyProgress(){
       <div style="display:flex;align-items:center;gap:10px;padding:9px 0;cursor:pointer;" onclick="toggleDPPillar('${pillarId}')">
         <i class="ti ${meta.icon}" style="font-size:16px;color:var(--accent);flex-shrink:0;width:18px;text-align:center;"></i>
         <span style="flex:1;font-size:13px;color:var(--text);font-weight:500;">${PILLAR_NAMES[pillar]}</span>
-        <span style="font-size:10px;color:var(--muted);margin-right:6px;">${itemsDone}/${items.length}</span>
-        <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid ${allDone?'#6B9E78':'var(--border)'};background:${allDone?'#6B9E78':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          ${allDone?'<svg width="10" height="10" viewBox="0 0 10 10"><polyline points="2,5 4,7 8,3" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>':''}
+        <div style="display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0;">
+          <div style="width:16px;height:16px;border-radius:50%;border:1.5px solid ${allDone?'#6B9E78':'var(--border)'};background:${allDone?'#6B9E78':'transparent'};display:flex;align-items:center;justify-content:center;">
+            ${allDone?'<svg width="8" height="8" viewBox="0 0 10 10"><polyline points="2,5 4,7 8,3" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>':''}
+          </div>
+          <span style="font-size:9px;color:var(--muted);">${itemsDone}/${items.length}</span>
         </div>
       </div>
       <div id="${pillarId}" style="display:none;padding-bottom:8px;">
