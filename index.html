@@ -633,75 +633,121 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="stat-src" id="sw-weight-change" style="color:#27500A;font-size:10px;"></div>
       </div>
     </div>
-    <div class="affirmation-card">
-      <div class="affirmation-text" id="daily-affirmation"></div>
-      <div class="affirmation-sub">Your daily affirmation</div>
-    </div>
+    <!-- ROW: Today's Check-In + Today's Progress side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
 
-    <!-- Weekly intention word strip -->
-    <div id="today-intention-strip" style="margin-bottom:14px;">
-      <!-- Populated by loadWeekIntention() — shows word or prompt to set one -->
-    </div>
-
-    <!-- Daily check-in — collapsible -->
-    <div class="card" id="checkin-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleCheckinForm()">
-        <div class="card-title" style="margin:0;">Daily check-in</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button onclick="event.stopPropagation();openCheckinHistory()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
+      <!-- Today's Check-In -->
+      <div class="card" id="checkin-card" style="margin-bottom:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:10px;" onclick="toggleCheckinForm()">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-heart" style="font-size:14px;color:var(--accent);"></i>
+            <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Today's Check-In</div>
+          </div>
           <button id="checkin-form-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
         </div>
-      </div>
-      <div id="checkin-form-body" style="display:none;margin-top:12px;">
-        <div class="fl">How are you feeling?</div>
-        <div class="tags" id="mood-tags">
-          <button class="tag" onclick="tog(this)">Calm</button>
-          <button class="tag" onclick="tog(this)">Happy</button>
-          <button class="tag" onclick="tog(this)">Joyful</button>
-          <button class="tag" onclick="tog(this)">Excited</button>
-          <button class="tag" onclick="tog(this)">Grateful</button>
-          <button class="tag" onclick="tog(this)">Energized</button>
-          <button class="tag" onclick="tog(this)">Focused</button>
-          <button class="tag" onclick="tog(this)">Motivated</button>
-          <button class="tag" onclick="tog(this)">Confident</button>
-          <button class="tag" onclick="tog(this)">Strong</button>
-          <button class="tag" onclick="tog(this)">Fierce</button>
-          <button class="tag" onclick="tog(this)">Fearless</button>
-          <button class="tag" onclick="tog(this)">Beautiful</button>
-          <button class="tag" onclick="tog(this)">Pretty</button>
-          <button class="tag" onclick="tog(this)">Fashionable</button>
-          <button class="tag" onclick="tog(this)">Playful</button>
-          <button class="tag" onclick="tog(this)">Glowing</button>
-          <button class="tag" onclick="tog(this)">Successful</button>
-          <button class="tag" onclick="tog(this)">Insightful</button>
-          <button class="tag" onclick="tog(this)">Patient</button>
-          <button class="tag" onclick="tog(this)">Grounded</button>
-          <button class="tag" onclick="tog(this)">Tired</button>
-          <button class="tag" onclick="tog(this)">Stressed</button>
-          <button class="tag" onclick="tog(this)">Overwhelmed</button>
-          <button class="tag" onclick="tog(this)">Frustrated</button>
-          <button class="tag" onclick="tog(this)">Sad</button>
-          <button class="tag" onclick="tog(this)">Anxious</button>
-          <button class="tag" onclick="tog(this)">Bloated</button>
-          <button class="tag" onclick="tog(this)">Scattered</button>
+        <div id="checkin-form-body" style="display:none;">
+          <!-- Mood faces — SVG line art -->
+          <div style="display:flex;justify-content:space-between;margin-bottom:12px;" id="mood-faces">
+            <!-- Very sad -->
+            <button onclick="selectMoodFace(1,this)" data-face="1" style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+                <circle cx="13" cy="13" r="11"/>
+                <circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+                <circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+                <path d="M9 18c1-2 7-2 8 0"/>
+              </svg>
+            </button>
+            <!-- Sad -->
+            <button onclick="selectMoodFace(2,this)" data-face="2" style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+                <circle cx="13" cy="13" r="11"/>
+                <circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+                <circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+                <path d="M9.5 17.5c1-1.5 5.5-1.5 7 0"/>
+              </svg>
+            </button>
+            <!-- Neutral -->
+            <button onclick="selectMoodFace(3,this)" data-face="3" style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+                <circle cx="13" cy="13" r="11"/>
+                <circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+                <circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+                <path d="M9.5 16.5h7"/>
+              </svg>
+            </button>
+            <!-- Happy -->
+            <button onclick="selectMoodFace(4,this)" data-face="4" style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+                <circle cx="13" cy="13" r="11"/>
+                <circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+                <circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+                <path d="M9.5 15.5c1 1.5 5.5 1.5 7 0"/>
+              </svg>
+            </button>
+            <!-- Very happy -->
+            <button onclick="selectMoodFace(5,this)" data-face="5" style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+                <circle cx="13" cy="13" r="11"/>
+                <circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+                <circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+                <path d="M9 15c1 2.5 7 2.5 8 0"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Mood tags — curated, smaller -->
+          <div class="tags" id="mood-tags" style="gap:5px;">
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Calm</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Happy</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Grateful</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Energized</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Focused</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Confident</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Grounded</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Fierce</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Fearless</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Beautiful</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Glowing</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Tired</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Stressed</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Overwhelmed</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Anxious</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Sad</button>
+          </div>
+          <textarea id="today-note" rows="2" placeholder="Anything on your mind..." style="margin-top:10px;"></textarea>
+          <button class="btn-primary" onclick="saveCheckin()" style="margin-top:8px;">Save check-in</button>
+          <button onclick="event.stopPropagation();openCheckinHistory()" style="background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:4px 0;font-family:var(--sans);">Past check-ins →</button>
+          <div class="toast-msg" id="tt">Saved!</div>
         </div>
-        <div class="fl">Note for today</div>
-        <textarea id="today-note" rows="2" placeholder="Outfit win, energy, anything on your mind..."></textarea>
-        <button class="btn-primary" onclick="saveCheckin()">Save check-in</button>
-        <div class="toast-msg" id="tt">Saved!</div>
+      </div>
+
+      <!-- Today's Progress -->
+      <div class="card" id="daily-progress-card" style="margin-bottom:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:10px;" onclick="toggleDailyProgress()">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-circle-check" style="font-size:14px;color:var(--accent);"></i>
+            <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Today's Progress</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div id="dp-overall" style="font-size:12px;color:var(--muted);"></div>
+            <span id="dp-chevron" style="font-size:16px;color:var(--muted);">▾</span>
+          </div>
+        </div>
+        <div id="daily-progress-list" style="display:none;margin-top:4px;"></div>
+      </div>
+
+    </div>
+
+    <!-- ROW: Affirmation + Intention side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="affirmation-card" style="margin-bottom:0;">
+        <div class="affirmation-text" id="daily-affirmation"></div>
+        <div class="affirmation-sub">Your daily affirmation</div>
+      </div>
+      <div id="today-intention-strip" style="margin-bottom:0;">
+        <!-- Populated by loadWeekIntention() -->
       </div>
     </div>
 
-    <!-- Daily Progress card -->
-    <div class="card" id="daily-progress-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleDailyProgress()">
-        <div class="card-title" style="margin:0;">Daily progress</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div id="dp-overall" style="font-size:12px;color:var(--muted);"></div>
-          <span id="dp-chevron" style="font-size:16px;color:var(--muted);">▾</span>
-        </div>
-      </div>
-      <div id="daily-progress-list" style="display:none;margin-top:12px;"></div>
     </div>
 
     <!-- 7 Pillars weekly self-care -->
@@ -3783,7 +3829,7 @@ async function saveCheckin(){
   const skinAM=document.getElementById('t-skin-am')?.classList.contains('on')||false;
   const skinPM=document.getElementById('t-skin-pm')?.classList.contains('on')||false;
   const timeStr = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-  const entry={mood,note,cpap,meds,exercise,melatonin,sleepGummies,skinAM,skinPM,date:nowStr(),time:timeStr};
+  const entry={mood,note,cpap,meds,exercise,melatonin,sleepGummies,skinAM,skinPM,moodFace:window._selectedMoodFace||null,date:nowStr(),time:timeStr};
   await dbAdd('checkins',entry);
   syncToBlob('checkins');
 
@@ -12898,6 +12944,18 @@ function openGlowInsights(){
 function closeGlowInsights(){
   document.getElementById('glow-insights-overlay').classList.remove('open');document.body.classList.remove('overlay-open');
   
+}
+
+function selectMoodFace(val, btn){
+  document.querySelectorAll('#mood-faces button').forEach(b=>{
+    b.style.borderColor='var(--border)';
+    b.style.background='transparent';
+    b.querySelector('svg').style.color='var(--muted)';
+  });
+  btn.style.borderColor='var(--accent)';
+  btn.style.background='rgba(160,120,80,0.1)';
+  btn.querySelector('svg').style.color='var(--accent)';
+  window._selectedMoodFace = val;
 }
 
 function toggleCheckinForm(){
