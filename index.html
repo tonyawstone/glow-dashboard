@@ -499,37 +499,52 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="s-today" class="sec on">
   <div class="view-content on" id="vc-today-daily">
 
-    <!-- 3-COLUMN TOP ROW -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+    <!-- ROW 1: Auto Data (wider) + Get Started -->
+    <div style="display:grid;grid-template-columns:3fr 2fr;gap:10px;margin-bottom:10px;">
 
-      <!-- Auto Data Updates card -->
+      <!-- Auto Data Updates -->
       <div class="card" style="padding:14px;margin-bottom:0;">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
           <i class="ti ti-refresh" style="font-size:14px;color:var(--accent);" aria-hidden="true"></i>
           <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Auto Data</div>
         </div>
         <div id="auto-data-status-text" style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px;">Checking...</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">BP + Weight →<br>Apple Health</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">BP + Weight → Apple Health</div>
         <div id="auto-data-status-date" style="font-size:10px;color:var(--muted);margin-bottom:8px;"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <div id="auto-data-badge" style="font-size:11px;padding:3px 8px;border-radius:10px;border:0.5px solid var(--border);color:var(--muted);background:var(--warm);">Checking...</div>
-          <i class="ti ti-device-watch" style="font-size:22px;color:var(--muted);opacity:0.4;" aria-hidden="true"></i>
+          <i class="ti ti-device-watch" style="font-size:24px;color:var(--muted);opacity:0.3;" aria-hidden="true"></i>
         </div>
       </div>
 
-      <!-- Today's Reminders card -->
+      <!-- Get Started -->
       <div class="card" style="padding:14px;margin-bottom:0;">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-          <i class="ti ti-bell" style="font-size:14px;color:var(--accent);" aria-hidden="true"></i>
-          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Reminders</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <i class="ti ti-circle-check" style="font-size:14px;color:var(--accent);" aria-hidden="true"></i>
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Get Started</div>
         </div>
-        <div id="today-reminders-list" style="font-size:12px;">
-          <div style="color:var(--muted);">Loading...</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="tab('health');setTimeout(()=>document.getElementById('bp-entry-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)">
+            <div id="gs-bp-check" style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;"></div>
+            <span style="font-size:12px;color:var(--text);">Check BP</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="window.location.href='shortcuts://run-shortcut?name=OpenWithings'">
+            <div id="gs-weight-check" style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;"></div>
+            <span style="font-size:12px;color:var(--text);">Check weight</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="tab('health');setTimeout(()=>document.getElementById('csv-upload-section')?.scrollIntoView({behavior:'smooth',block:'start'}),300)">
+            <div id="gs-export-check" style="width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;"></div>
+            <span style="font-size:12px;color:var(--text);">Export Apple Health</span>
+          </div>
         </div>
-        <button onclick="toggleDailyProgress()" style="margin-top:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">View all →</button>
       </div>
 
-      <!-- Glow Score card (moved here) -->
+    </div>
+
+    <!-- ROW 2: Glow Score + BP & Take a Moment stacked -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+
+      <!-- Glow Score -->
       <div class="card" style="padding:14px;margin-bottom:0;" id="health-score-card">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
           <i class="ti ti-sparkles" style="font-size:14px;color:var(--accent);" aria-hidden="true"></i>
@@ -540,18 +555,37 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button onclick="openGlowInsights()" style="margin-top:6px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">See full breakdown →</button>
       </div>
 
-    </div>
-    <!-- BP last reading / reminder -->
-    <div id="today-bp-banner" style="display:none;padding:5px 12px;border-radius:8px;background:transparent;border:0.5px solid var(--border);margin-bottom:6px;align-items:center;justify-content:space-between;">
-      <div style="font-size:11px;color:var(--muted);">❤️ Last BP reading</div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span class="bp-status-label" style="font-size:14px;"></span>
-        <span id="today-bp-value" style="font-size:13px;font-weight:500;color:var(--muted);"></span>
-        <span id="today-bp-date" style="font-size:11px;color:var(--muted);opacity:0.7;"></span>
+      <!-- BP + Take a Moment stacked -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+
+        <!-- BP card -->
+        <div class="card" style="padding:12px;margin-bottom:0;">
+          <div id="today-bp-banner" style="display:none;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:2px;">❤️ Last BP reading</div>
+            <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+              <span class="bp-status-label" style="font-size:13px;"></span>
+              <span id="today-bp-value" style="font-size:12px;font-weight:500;color:var(--text);"></span>
+              <span id="today-bp-date" style="font-size:10px;color:var(--muted);"></span>
+            </div>
+          </div>
+          <div id="today-bp-reminder" style="display:none;cursor:pointer;font-size:12px;color:var(--muted);" onclick="tab('health');setTimeout(()=>document.getElementById('bp-entry-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)">
+            ❤️ No BP today — tap to log
+          </div>
+        </div>
+
+        <!-- Take a Moment card -->
+        <div class="card" style="padding:12px;margin-bottom:0;" id="mind-habits-banner">
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;">
+            <span style="font-size:15px;line-height:1;flex-shrink:0;">🧘🏽‍♀️</span>
+            <span style="font-size:11px;color:var(--muted);flex:1;min-width:0;">Take a moment</span>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <button id="mind-journal-btn" onclick="mindHabitTap('journal')" style="flex:1;padding:5px 4px;border-radius:20px;border:0.5px solid var(--border);background:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:var(--sans);color:var(--muted);">Journal</button>
+            <button id="mind-wellspoken-btn" onclick="mindHabitTap('wellspoken')" style="flex:1;padding:5px 4px;border-radius:20px;border:0.5px solid var(--border);background:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:var(--sans);color:var(--muted);">Wellspoken</button>
+          </div>
+        </div>
+
       </div>
-    </div>
-    <div id="today-bp-reminder" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:6px;cursor:pointer;font-size:12px;color:var(--muted);" onclick="tab('health');setTimeout(()=>document.getElementById('bp-entry-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)">
-      ❤️ No BP reading today — tap to log
     </div>
     <!-- Outfit nudge -->
     <div id="today-outfit-nudge" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:10px;cursor:pointer;font-size:12px;color:var(--muted);align-items:center;justify-content:space-between;" onclick="openQuickLog()">
@@ -565,15 +599,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="font-size:11px;color:var(--muted);">Goal: 40 min treadmill · 20 min Pilates · Log it →</div>
       </div>
       <span style="font-size:18px;color:var(--muted);">›</span>
-    </div>
-    <!-- Mind habits nudge banner -->
-    <div id="mind-habits-banner" style="display:none;padding:7px 12px;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);margin-bottom:8px;overflow:hidden;">
-      <div style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;">
-        <span style="font-size:15px;line-height:1;flex-shrink:0;">🧘🏽‍♀️</span>
-        <span style="font-size:11px;color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Take a moment · nourish your mind</span>
-        <button id="mind-journal-btn" onclick="mindHabitTap('journal')" style="padding:3px 8px;border-radius:20px;border:0.5px solid var(--border);background:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:var(--sans);color:var(--muted);white-space:nowrap;flex-shrink:0;">Journal</button>
-        <button id="mind-wellspoken-btn" onclick="mindHabitTap('wellspoken')" style="padding:3px 8px;border-radius:20px;border:0.5px solid var(--border);background:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:var(--sans);color:var(--muted);white-space:nowrap;flex-shrink:0;">Wellspoken</button>
-      </div>
     </div>
     <div class="stat-strip">
       <div class="stat-tile" style="cursor:pointer;" onclick="tab('body')"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
@@ -4011,35 +4036,17 @@ async function buildDailyProgress(){
 }
 
 function buildTodayReminders(checks){
-  const el = document.getElementById('today-reminders-list');
-  if(!el) return;
-
-  // Key reminders to show — ordered by priority
-  const REMINDERS = [
-    { id:'dp-bp',           label:'Check BP' },
-    { id:'dp-body',         label:'Log weight' },
-    { id:'dp-sleep-checkin',label:'Sleep check-in' },
-    { id:'dp-meds-am',      label:'AM meds & supplements' },
-    { id:'dp-skin-am',      label:'AM skin routine' },
-    { id:'dp-exercise',     label:'Workout' },
-    { id:'dp-meds-pm',      label:'PM meds' },
-    { id:'dp-skin-pm',      label:'PM skin routine' },
-  ];
-
-  // Show top 5 — unchecked first, then checked
-  const unchecked = REMINDERS.filter(r=>!checks[r.id]);
-  const checked = REMINDERS.filter(r=>checks[r.id]);
-  const display = [...unchecked, ...checked].slice(0,5);
-
-  el.innerHTML = display.map(r=>{
-    const done = checks[r.id];
-    return `<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">
-      <div style="width:16px;height:16px;border-radius:50%;border:1.5px solid ${done?'#6B9E78':'var(--border)'};background:${done?'#6B9E78':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        ${done?'<svg width="10" height="10" viewBox="0 0 10 10"><polyline points="2,5 4,7 8,3" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>':''}
-      </div>
-      <span style="font-size:12px;color:${done?'var(--muted)':'var(--text)'};${done?'text-decoration:line-through;':''}">${r.label}</span>
-    </div>`;
-  }).join('');
+  // Update Get Started checklist
+  const setCheck = (id, done) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.style.background = done ? '#6B9E78' : 'transparent';
+    el.style.borderColor = done ? '#6B9E78' : 'var(--border)';
+    el.innerHTML = done ? '<svg width="10" height="10" viewBox="0 0 10 10"><polyline points="2,5 4,7 8,3" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>' : '';
+  };
+  setCheck('gs-bp-check', checks['dp-bp']);
+  setCheck('gs-weight-check', checks['dp-body']);
+  setCheck('gs-export-check', checks['dp-activation'] || (document.getElementById('auto-data-status-text')?.textContent?.includes('✓')));
 }
 
 function toggleDPItem(id, deepLink){
@@ -12121,6 +12128,8 @@ async function updateUploadStatusBanner(){
       if(textEl){ textEl.textContent = 'Up to date ✓'; textEl.style.color='#27500A'; }
       if(dateEl) dateEl.textContent = uploadedAtStr;
       if(badgeEl){ badgeEl.textContent='✓ Current'; badgeEl.style.background='rgba(107,158,120,0.1)'; badgeEl.style.borderColor='rgba(107,158,120,0.3)'; badgeEl.style.color='#27500A'; }
+      const exportCheck = document.getElementById('gs-export-check');
+      if(exportCheck){ exportCheck.style.background='#6B9E78'; exportCheck.style.borderColor='#6B9E78'; exportCheck.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10"><polyline points="2,5 4,7 8,3" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>'; }
     } else {
       if(textEl){ textEl.textContent = 'Upload needed'; textEl.style.color='var(--rose)'; }
       if(dateEl) dateEl.textContent = `Last: ${uploadDate.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
@@ -12214,7 +12223,7 @@ async function updateBPBanners(){
     const todayDate = document.getElementById('today-bp-date');
 
     if(todayReading && todayReading.sys){
-      if(todayBanner) todayBanner.style.display='flex';
+      if(todayBanner) todayBanner.style.display='block';
       if(todayReminder) todayReminder.style.display='none';
       if(todayVal) todayVal.textContent = `${todayReading.sys}/${todayReading.dia}`;
       const fmtBPTime = (t) => {
