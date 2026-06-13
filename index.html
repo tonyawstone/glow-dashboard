@@ -638,12 +638,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
       <!-- Today's Check-In -->
       <div class="card" id="checkin-card" style="margin-bottom:0;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <i class="ti ti-heart" style="font-size:14px;color:var(--accent);"></i>
-            <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Today's Check-In</div>
-          </div>
-          <button onclick="openCheckinHistory()" style="background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <i class="ti ti-heart" style="font-size:14px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Today's Check-In</div>
         </div>
         <div id="checkin-form-body">
           <!-- Mood faces — SVG line art -->
@@ -698,20 +695,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div class="tags" id="mood-tags" style="gap:5px;">
             <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Calm</button>
             <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Happy</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Sad</button>
             <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Grateful</button>
             <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Energized</button>
             <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Focused</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Confident</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Grounded</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Fierce</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Stressed</button>
             <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Fearless</button>
             <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Beautiful</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Glowing</button>
             <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Tired</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Stressed</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Confident</button>
             <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Overwhelmed</button>
             <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Anxious</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Sad</button>
           </div>
           <textarea id="today-note" rows="2" placeholder="Anything on your mind..." style="margin-top:10px;"></textarea>
           <button onclick="saveCheckin()" style="margin-top:8px;padding:6px 14px;border-radius:20px;background:var(--accent);border:none;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Save</button>
@@ -722,14 +716,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
       <!-- Today's Progress -->
       <div class="card" id="daily-progress-card" style="margin-bottom:0;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <i class="ti ti-circle-check" style="font-size:14px;color:var(--accent);"></i>
-            <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Today's Progress</div>
-          </div>
-          <div id="dp-overall" style="font-size:13px;font-weight:600;color:var(--text);"></div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+          <i class="ti ti-circle-check" style="font-size:14px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Today's Progress</div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Complete your daily check-ins</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;color:var(--muted);">Complete your daily check-ins</div>
+          <div id="dp-overall" style="font-size:11px;color:var(--muted);white-space:nowrap;"></div>
+        </div>
         <div id="daily-progress-list"></div>
         <button onclick="openDPOverlay()" style="background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:4px 0;font-family:var(--sans);display:flex;align-items:center;gap:3px;margin-top:6px;">View all <span style="font-size:13px;">›</span></button>
       </div>
