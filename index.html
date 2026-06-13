@@ -60,9 +60,9 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 /* HERO SETTINGS BTN */
 .hero-settings-btn{position:absolute;top:12px;right:12px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:4px;}
 /* TIME TABS ROW (moved to top) */
-.time-tabs-bar{background:var(--cream);padding:8px 16px;display:flex;gap:6px;flex-shrink:0;}
-.time-tabs-bar .vtab{flex:1;font-size:13px;padding:8px 0;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;border-radius:18px;font-family:var(--sans);}
-.time-tabs-bar .vtab.on{background:var(--warm);color:var(--accent);border-color:var(--accent);font-weight:500;}
+.time-tabs-bar{background:var(--cream);padding:6px 16px 8px;display:flex;gap:6px;flex-shrink:0;}
+.time-tabs-bar .vtab{flex:1;font-size:13px;padding:5px 0;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;border-radius:18px;font-family:var(--sans);}
+.time-tabs-bar .vtab.on{background:var(--accent);color:var(--cream);border-color:var(--accent);font-weight:500;}
 
 /* BOTTOM NAV BAR */
 .bottom-nav{background:var(--cream);border-top:0.5px solid var(--border);padding:6px 0 max(10px,env(safe-area-inset-bottom));display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:200;}
@@ -448,14 +448,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
 </div>
 
-<!-- TIME TABS (shown on all pages, just below header) -->
-<div class="time-tabs-bar" id="time-tabs-bar">
-  <button class="vtab on" onclick="setView('daily',this)">Daily</button>
-  <button class="vtab" onclick="setView('weekly',this)">Weekly</button>
-  <button class="vtab" onclick="setView('monthly',this)">Monthly</button>
-  <button class="vtab" onclick="setView('yearly',this)">Yearly</button>
-</div>
-
 <!-- HERO -->
 <div class="hero-wrap" id="hero-wrap">
   <div class="hero">
@@ -489,6 +481,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <button class="tnav" onclick="tab('style')"><i class="ti ti-shirt" aria-hidden="true"></i>Style</button>
     <button class="tnav" onclick="tab('hair')"><i class="ti ti-scissors" aria-hidden="true"></i>Hair</button>
   </div>
+</div>
+
+<!-- TIME TABS (shown on all pages, just below header) -->
+<div class="time-tabs-bar" id="time-tabs-bar">
+  <button class="vtab on" onclick="setView('daily',this)">Daily</button>
+  <button class="vtab" onclick="setView('weekly',this)">Weekly</button>
+  <button class="vtab" onclick="setView('monthly',this)">Monthly</button>
+  <button class="vtab" onclick="setView('yearly',this)">Yearly</button>
 </div>
 
 <div class="scroll-area" id="main-scroll">
