@@ -3644,7 +3644,7 @@ async function syncToBlob(store) {
     // Merge: blob entries + local entries, dedup by id or date+type key
     const merged = [...blobData];
     for(const entry of local){
-      const outfitKey = e => e.ts ? String(e.ts) : e.date+(e.src||'')+(e.photo||'').slice(-30)+(e.desc||'').slice(0,20);
+      const outfitKey = e => e.ts ? String(e.ts) : e.date+(e.src||'')+(e.desc||'').slice(0,20);
       const key = store==='outfits' ? outfitKey(entry) : (entry.id || ((entry.type||'')+(entry.date||'')+(entry.sys||'')+(entry.mood||'')+(entry.isoDate||'')));
       const exists = merged.some(e=>{
         const ek = store==='outfits' ? outfitKey(e) : (e.id || ((e.type||'')+(e.date||'')+(e.sys||'')+(e.mood||'')+(e.isoDate||'')));
@@ -3680,19 +3680,27 @@ async function loadFromBlob(store) {
     // Merge with local — add any entries not already in IndexedDB
     const local = await dbAll(store);
     const entryKey = (e) => {
-      if(store === 'outfits') return e.ts ? String(e.ts) : e.date + (e.src||'') + (e.photo||'').slice(-30) + (e.desc||'').slice(0,20);
+      if(store === 'outfits') return e.ts ? String(e.ts) : e.date + (e.src||'') + (e.desc||'').slice(0,20);
       return (e.type||'') + e.date + (e.sys||'') + (e.mood||'') + (e.isoDate||'');
     };
-    const localKeys = new Set(local.map(entryKey));
-    let added = 0;
+    const localMap = {};
+    local.forEach(e => { localMap[entryKey(e)] = e; });
+    let added = 0, updated = 0;
     for (const entry of data) {
-      if (!localKeys.has(entryKey(entry))) {
+      const key = entryKey(entry);
+      const existing = localMap[key];
+      if (!existing) {
         const {id, ...entryWithoutId} = entry;
         await dbAdd(store, entryWithoutId);
         added++;
+      } else if (store === 'outfits' && entry.photo && entry.photo.startsWith('https://') && (!existing.photo || existing.photo.startsWith('data:'))) {
+        // Blob has a photo URL but local entry is missing it or has base64 — update local
+        existing.photo = entry.photo;
+        await dbUpdate('outfits', existing);
+        updated++;
       }
     }
-    if (added > 0) console.log(`✅ Loaded ${added} new entries from Blob: ${store}`);
+    if (added > 0 || updated > 0) console.log(`✅ Blob sync: ${store} +${added} new, ${updated} photo updates`);
   } catch (err) {
     console.warn(`Blob load error (${store}):`, err.message);
   }
@@ -4769,8 +4777,19 @@ async function renderLookbook(){
   const grid=document.getElementById('lookbook-grid');
   const card=document.getElementById('lookbook-card');
 
-  const worn=(outfits||[]).filter(e=>e.src==='My outfit'||(!e.src&&e.keep!=='Inspo only'));
-  const inspo=(outfits||[]).filter(e=>e.src==='Inspo'||e.src==='DailyLook'||(e.src!=='My outfit'&&e.keep==='Inspo only'));
+  // Deduplicate by ts (timestamp) to prevent sync duplicates
+  const dedup = (arr) => {
+    const seen = new Set();
+    return arr.filter(e => {
+      const key = e.ts || (e.date + '_' + (e.desc||''));
+      if(seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
+  const worn=dedup((outfits||[]).filter(e=>e.src==='My outfit'||(!e.src&&e.keep!=='Inspo only')));
+  const inspo=dedup((outfits||[]).filter(e=>e.src==='Inspo'||e.src==='DailyLook'||(e.src!=='My outfit'&&e.keep==='Inspo only')));
 
   // Your Looks — worn only
   if(grid){
