@@ -4730,15 +4730,25 @@ async function saveOutfit(){
   const desc=document.getElementById('outfit-desc').value.trim();if(!desc)return;
   const dateInput=document.getElementById('outfit-date');
   const outfitDate=dateInput.value||nowStr();
-  // Grab photo — prefer Blob URL over base64 to keep sync payload small
+  // Grab photo — upload to Blob first, fall back to base64 if upload fails
   let photo='';
   const photoSlot=document.getElementById('outfit-new');
   if(photoSlot){
     const img=photoSlot.querySelector('img');
-    if(img){
-      // Try Blob URL first (uploaded in background)
-      const blobUrlRecord = await dbGetPhoto('outfit-new-bloburl').catch(()=>null);
-      photo = blobUrlRecord || img.src;
+    if(img && img.src && img.src.startsWith('data:')){
+      // Upload base64 to Blob immediately
+      try {
+        const slotId = 'outfit-' + Date.now();
+        const res = await fetch(`${BACKEND}/api/upload-photo`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({slotId, dataUrl: img.src})
+        });
+        if(res.ok){ const {url} = await res.json(); photo = url; }
+        else { photo = img.src; }
+      } catch(e){ photo = img.src; }
+    } else if(img && img.src && img.src.startsWith('https://')){
+      photo = img.src; // already a Blob URL
     }
   }
   const outfitEntry={
