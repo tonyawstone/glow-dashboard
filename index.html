@@ -25,7 +25,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 
 /* HERO WRAP */
 .hero-wrap{flex-shrink:0;padding:14px 16px 12px;background:var(--cream);}
-.hero{background:linear-gradient(135deg,var(--warm),#E8DDD0);border-radius:20px;padding:16px;border:0.5px solid var(--border);display:flex;gap:14px;align-items:center;}
+.hero{background:linear-gradient(135deg,var(--warm),#E8DDD0);border-radius:20px;padding:16px;border:0.5px solid var(--border);display:flex;gap:14px;align-items:center;position:relative;}
 .hero-avatar{width:80px;height:92px;border-radius:40px 40px 8px 8px;overflow:hidden;flex-shrink:0;border:2px solid rgba(160,120,80,0.3);background:var(--warm);position:relative;cursor:pointer;}
 .hero-avatar img{width:100%;height:100%;object-fit:cover;object-position:center 15%;position:absolute;top:0;left:0;display:none;}
 .hero-icon-fallback{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
@@ -45,7 +45,20 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .tnav{position:relative;}
 .pillar-ring{pointer-events:none;flex-shrink:0;}
 
-/* STAT STRIP */
+/* COMPACT PILLAR HEADER */
+.compact-header{display:none;flex-shrink:0;padding:10px 16px 0;background:var(--cream);}
+.compact-header.on{display:block;}
+.compact-header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.compact-wordmark{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);letter-spacing:0.01em;}
+.compact-wordmark sup{font-size:11px;color:var(--accent);vertical-align:super;line-height:0;}
+.compact-page-title{font-family:var(--serif);font-size:17px;font-weight:400;color:var(--text);text-align:center;flex:1;margin:0 8px;}
+.compact-settings-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:4px;display:flex;align-items:center;justify-content:center;}
+.compact-nav{display:grid;grid-template-columns:repeat(8,1fr);background:var(--cream);border-bottom:0.5px solid var(--border);border-top:0.5px solid var(--border);}
+.compact-nav .tnav{font-size:10px;padding:8px 2px 7px;gap:2px;}
+.compact-nav .tnav i{font-size:18px;}
+
+/* HERO SETTINGS BTN */
+.hero-settings-btn{position:absolute;top:12px;right:12px;background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:4px;}
 .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px;}
 .stat-tile{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;}
 .stat-val{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);}
@@ -404,9 +417,29 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <body>
 <div class="shell">
 
+<!-- COMPACT PILLAR HEADER (shown on pillar pages) -->
+<div class="compact-header" id="compact-header">
+  <div class="compact-header-bar">
+    <div class="compact-wordmark">Glow<sup>✦</sup></div>
+    <div class="compact-page-title" id="compact-page-title"></div>
+    <button class="compact-settings-btn" onclick="openSettings()"><i class="ti ti-settings" aria-hidden="true"></i></button>
+  </div>
+  <div class="compact-nav">
+    <button class="tnav" onclick="tab('today')"><i class="ti ti-sun" aria-hidden="true"></i>Today</button>
+    <button class="tnav" onclick="tab('mind')"><i class="ti ti-brain" aria-hidden="true"></i>Mind</button>
+    <button class="tnav" onclick="tab('sleep')"><i class="ti ti-moon" aria-hidden="true"></i>Sleep</button>
+    <button class="tnav" onclick="tab('health')"><i class="ti ti-heart-rate-monitor" aria-hidden="true"></i>Wellness</button>
+    <button class="tnav" onclick="tab('skin')"><i class="ti ti-sparkles" aria-hidden="true"></i>Skin</button>
+    <button class="tnav" onclick="tab('body')"><i class="ti ti-trending-down" aria-hidden="true"></i>Body</button>
+    <button class="tnav" onclick="tab('style')"><i class="ti ti-shirt" aria-hidden="true"></i>Style</button>
+    <button class="tnav" onclick="tab('hair')"><i class="ti ti-scissors" aria-hidden="true"></i>Hair</button>
+  </div>
+</div>
+
 <!-- HERO -->
-<div class="hero-wrap">
+<div class="hero-wrap" id="hero-wrap">
   <div class="hero">
+    <button class="hero-settings-btn" onclick="openSettings()"><i class="ti ti-settings" aria-hidden="true"></i></button>
     <div class="hero-avatar" onclick="pickPhoto('hero')" id="hero-avatar-wrap">
       <img id="hero-img" src="" alt="Tonya">
       <div class="hero-icon-fallback" id="hero-fallback">
@@ -423,7 +456,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 </div>
 
 <!-- 2-ROW PILLAR NAV -->
-<div class="pillar-nav">
+<div class="pillar-nav" id="pillar-nav">
   <div class="top-nav">
     <button class="tnav" onclick="tab('today')"><i class="ti ti-sun" aria-hidden="true"></i>Today</button>
     <button class="tnav" onclick="tab('mind')"><i class="ti ti-brain" aria-hidden="true"></i>Mind</button>
@@ -3193,6 +3226,19 @@ let curTab='today',curView='daily',inspoViewOpen=false,shoppingViewOpen=false;
 async function tab(id){
   curTab=id;
   curView='daily';
+
+  // Header swap — Today = full hero, pillars = compact
+  const PILLAR_TITLES = {
+    today:'Today', mind:'Mind & Mood', sleep:'Sleep Journey',
+    health:'Wellness', skin:'Skin Journey', body:'Body & Zepbound',
+    style:'Style & Wardrobe', hair:'Hair Growth Journey'
+  };
+  const isToday = id==='today';
+  document.getElementById('hero-wrap').style.display = isToday ? '' : 'none';
+  document.getElementById('pillar-nav').style.display = isToday ? '' : 'none';
+  const compactHeader = document.getElementById('compact-header');
+  if(isToday){ compactHeader.classList.remove('on'); }
+  else { compactHeader.classList.add('on'); document.getElementById('compact-page-title').textContent = PILLAR_TITLES[id]||''; }
   const scroll=document.getElementById('main-scroll');
   const activeSec=document.getElementById('s-'+id);
   // Hide all sections
@@ -3205,12 +3251,11 @@ async function tab(id){
     scroll.insertBefore(activeSec, scroll.firstChild);
   }
   activeSec.classList.add('on');
-  // Update nav
+  // Update nav active state — works for both old 2-row nav and compact nav
   document.querySelectorAll('.tnav').forEach(b=>b.classList.remove('on'));
   const tabs=['today','mind','sleep','health','skin','body','style','hair'];
-  const navBtns=document.querySelectorAll('.tnav');
   const idx=tabs.indexOf(id);
-  if(idx>=0) navBtns[idx].classList.add('on');
+  if(idx>=0) document.querySelectorAll('.tnav').forEach(b=>{ if(b.textContent.trim().toLowerCase().startsWith(tabs[idx]==='health'?'wellness':tabs[idx])) b.classList.add('on'); });
   scroll.scrollTop=0;
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.vtab')[0].classList.add('on');
@@ -5747,6 +5792,8 @@ function openSleepScoreInfo(){
   document.getElementById('guide-sheet').classList.add('open');
   
 }
+
+function openSettings(){ openAbout(); }
 
 function openAbout(){
   const el = document.getElementById('about-changelog');
