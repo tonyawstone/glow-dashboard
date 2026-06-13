@@ -7664,18 +7664,18 @@ function makeChart(id,type,labels,datasets,opts={}){
 }
 
 let activeChart='journey';
-function switchChart(id,btn){
+async function switchChart(id,btn){
   activeChart=id;
   document.querySelectorAll('.chart-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   document.querySelectorAll('.chart-panel').forEach(p=>p.classList.remove('on'));
   document.getElementById('cpanel-'+id).classList.add('on');
-  if(id==='journey')buildJourneyChart();
-  if(id==='recent')buildRecentChart();
+  if(id==='journey') await buildJourneyChart();
+  if(id==='recent') await buildRecentChart();
   if(id==='milestones')buildMilestones();
 }
 
-function buildBodyChart(){
+async function buildBodyChart(){
   // Create canvases dynamically if they don't exist yet
   ['body-chart-journey','body-chart-recent'].forEach(id=>{
     const wrap=document.getElementById('wrap-'+id);
@@ -7685,35 +7685,90 @@ function buildBodyChart(){
       wrap.appendChild(c);
     }
   });
-  buildJourneyChart();
+  await buildJourneyChart();
   buildMilestones();
 }
 
-function buildJourneyChart(){
-  const labels=['2015-03','2015-08','2016-01','2016-06','2016-11','2017-03','2017-09','2017-10','2018-01','2018-05','2018-09','2019-01','2019-05','2019-11','2020-03','2020-07','2020-10','2021-01','2021-05','2021-10','2022-03','2022-06','2022-09','2022-10','2023-03','2023-08','2023-10','2024-01','2024-04','2024-08','2024-09','2024-10','2025-01','2025-05','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
-  const vals=[169.8,175,176.9,178.4,177.2,178.1,171.7,172.5,178.8,181.5,180.1,181.2,181.3,185.9,185.1,193.6,196.2,196.5,192.8,191.5,192,187.2,181.8,181.6,184.5,185.2,194.3,196.5,194.6,200.8,200.6,202.6,198,198.2,199.8,194.9,189.2,183.8,180.5,177.1,173.7,171.7];
-  makeChart('body-chart-journey','line',labels,[{data:vals,borderColor:'#A07850',borderWidth:1.5,pointRadius:vals.map((v,i)=>i===vals.length-1||v===Math.max(...vals)?5:2),pointBackgroundColor:vals.map((v,i)=>i===vals.length-1?'#6B9E78':v===Math.max(...vals)?'#C4735A':'#A07850'),tension:0.3,fill:{target:'origin',above:'rgba(160,120,80,0.05)'}}],{min:160,max:215,unit:' lb'});
+async function buildJourneyChart(){
+  const rows = await getCSVRows();
+  const weightRows = rows.filter(r=>parseFloat(r.weight_lbs)>0);
+  if(!weightRows.length){
+    const wrap=document.getElementById('wrap-body-chart-journey');
+    if(wrap) wrap.innerHTML='<div class="log-empty">Upload CSV to see weight journey.</div>';
+    return;
+  }
+  // Group by month — monthly averages across full history
+  const monthGroups={};
+  weightRows.forEach(r=>{
+    const d=safeDate(r.date);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if(!monthGroups[key]){monthGroups[key]={vals:[],label:d.toLocaleDateString('en-US',{month:'short',year:'2-digit'})};}
+    monthGroups[key].vals.push(parseFloat(r.weight_lbs));
+  });
+  const months=Object.keys(monthGroups).sort();
+  const labels=months.map(k=>monthGroups[k].label);
+  const vals=months.map(k=>parseFloat((monthGroups[k].vals.reduce((a,b)=>a+b,0)/monthGroups[k].vals.length).toFixed(1)));
+  const maxVal=Math.max(...vals);
+  const minVal=Math.min(...vals);
+  const zepIdx=months.indexOf('2025-10');
+  makeChart('body-chart-journey','line',labels,[{
+    data:vals,
+    borderWidth:1.5,
+    pointRadius:vals.map((v,i)=>i===vals.length-1||v===maxVal?5:2),
+    pointBackgroundColor:vals.map((v,i)=>i===vals.length-1?'#6B9E78':v===maxVal?'#C4735A':'#A07850'),
+    tension:0.3,
+    fill:{target:'origin',above:'rgba(160,120,80,0.05)'},
+    segment:{borderColor:ctx=>zepIdx>=0&&ctx.p0DataIndex>=zepIdx?'#6B9E78':'#A07850'}
+  }],{min:Math.floor(minVal-5),max:Math.ceil(maxVal+5),unit:' lb'});
 }
 
-function buildRecentChart(){
-  const goalWeight=parseFloat(document.getElementById('goal-weight')?.value)||null;
-  const aLabels=['Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26'];
-  const aVals=[201.4,194.9,189.2,183.8,180.5,177.1,173.7,170.7];
-  const labels=[...aLabels];
-  const datasets=[{label:'Actual',data:aVals,borderColor:'#6B9E78',borderWidth:2,pointRadius:aVals.map((_,i)=>i===0||i===aVals.length-1?5:3),pointBackgroundColor:aVals.map((_,i)=>i===0?'#C4735A':i===aVals.length-1?'#A07850':'#6B9E78'),tension:0.35,fill:{target:'origin',above:'rgba(107,158,120,0.07)'}}];
-  const dynamicMin=goalWeight?Math.min(goalWeight-15,155):155;
-  if(goalWeight&&goalWeight<170.7){
-    const monthlyLoss=4.4,months=Math.ceil((170.7-goalWeight)/monthlyLoss);
+async function buildRecentChart(){
+  const goalWeight = parseFloat(document.getElementById('goal-weight')?.value)||null;
+
+  // Pull Zepbound-era weights from CSV (Oct 2025 onward)
+  const rows = await getCSVRows();
+  const zepStart = '2025-10-25';
+  const weightRows = rows
+    .filter(r=>parseFloat(r.weight_lbs)>0 && r.date>=zepStart)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+
+  // Group by month for a clean monthly-avg line
+  const monthGroups = {};
+  weightRows.forEach(r=>{
+    const d = safeDate(r.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if(!monthGroups[key]) monthGroups[key] = {vals:[], label:d.toLocaleDateString('en-US',{month:'short',year:'2-digit'})};
+    monthGroups[key].vals.push(parseFloat(r.weight_lbs));
+  });
+  const months = Object.keys(monthGroups).sort();
+  const aLabels = months.map(k=>monthGroups[k].label);
+  const aVals = months.map(k=>parseFloat((monthGroups[k].vals.reduce((a,b)=>a+b,0)/monthGroups[k].vals.length).toFixed(1)));
+
+  // Fallback to hardcoded if CSV has no data yet
+  const useLabels = aLabels.length>=2 ? aLabels : ['Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26'];
+  const useVals   = aVals.length>=2   ? aVals   : [201.4,194.9,189.2,183.8,180.5,177.1,173.7,170.7];
+
+  const latestVal = useVals[useVals.length-1];
+  const labels = [...useLabels];
+  const datasets = [{
+    label:'Actual',data:useVals,borderColor:'#6B9E78',borderWidth:2,
+    pointRadius:useVals.map((_,i)=>i===0||i===useVals.length-1?5:3),
+    pointBackgroundColor:useVals.map((_,i)=>i===0?'#C4735A':i===useVals.length-1?'#A07850':'#6B9E78'),
+    tension:0.35,fill:{target:'origin',above:'rgba(107,158,120,0.07)'}
+  }];
+  const dynamicMin = goalWeight ? Math.min(goalWeight-15,155) : Math.floor(latestVal-20);
+  if(goalWeight && goalWeight < latestVal){
+    const monthlyLoss = 4.4, months = Math.ceil((latestVal-goalWeight)/monthlyLoss);
     const fNames=['Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26','Dec 26','Jan 27','Feb 27','Mar 27','Apr 27','May 27','Jun 27','Jul 27','Aug 27'];
-    const fVals=[170.7];
-    for(let i=0;i<Math.min(months,14);i++) fVals.push(+(Math.max(goalWeight,170.7-(i+1)*monthlyLoss)).toFixed(1));
+    const fVals=[latestVal];
+    for(let i=0;i<Math.min(months,14);i++) fVals.push(+(Math.max(goalWeight,latestVal-(i+1)*monthlyLoss)).toFixed(1));
     labels.push(...fNames.slice(0,fVals.length-1));
-    datasets.push({label:'Projected',data:[...Array(aVals.length-1).fill(null),...fVals],borderColor:'#A07850',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.35,fill:false});
+    datasets.push({label:'Projected',data:[...Array(useVals.length-1).fill(null),...fVals],borderColor:'#A07850',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.35,fill:false});
     document.getElementById('forecast-info').textContent=`At ~4.4 lbs/month you'll reach ${goalWeight} lbs in ~${months} months (around ${fNames[months-1]||'later'}).`;
   } else {
     document.getElementById('forecast-info').textContent='Set a goal weight below to see your projected timeline.';
   }
-  makeChart('body-chart-recent','line',labels,datasets,{min:dynamicMin,max:210,unit:' lb'});
+  makeChart('body-chart-recent','line',labels,datasets,{min:dynamicMin,max:Math.ceil(useVals[0]+5),unit:' lb'});
 }
 
 function buildMilestones(){
@@ -7731,7 +7786,7 @@ function buildMilestones(){
   if(gw&&gw<160) milestones.push({label:`Goal weight · ${gw} lbs`,val:'Your target',status:'next',color:'#7F77DD'});
   document.getElementById('milestone-list').innerHTML=milestones.map(m=>`<div class="milestone-row"><div class="ms-dot" style="background:${m.color};"></div><div class="ms-label">${m.label}</div><div class="ms-date">${m.val}</div><span class="ms-badge ${m.status==='done'?'badge-done':m.status==='now'?'badge-now':'badge-next'}">${m.status==='done'?'Done ✓':m.status==='now'?'This month!':'Coming up'}</span></div>`).join('');
 }
-function updateForecast(){buildRecentChart();if(activeChart==='milestones')buildMilestones();}
+async function updateForecast(){await buildRecentChart();if(activeChart==='milestones')buildMilestones();}
 
 // ── PHOTO HANDLING ────────────────────────────────────────────────────
 let curPhotoTarget=null;
