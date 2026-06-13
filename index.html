@@ -638,19 +638,19 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
       <!-- Today's Check-In -->
       <div class="card" id="checkin-card" style="margin-bottom:0;">
-        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:10px;" onclick="toggleCheckinForm()">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:6px;">
             <i class="ti ti-heart" style="font-size:14px;color:var(--accent);"></i>
             <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Today's Check-In</div>
           </div>
-          <button id="checkin-form-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+          <button onclick="openCheckinHistory()" style="background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
         </div>
-        <div id="checkin-form-body" style="display:none;">
+        <div id="checkin-form-body">
           <!-- Mood faces — SVG line art -->
           <div style="display:flex;justify-content:space-between;margin-bottom:12px;" id="mood-faces">
             <!-- Very sad -->
-            <button onclick="selectMoodFace(1,this)" data-face="1" style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+            <button onclick="selectMoodFace(1,this)" data-face="1" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
                 <circle cx="13" cy="13" r="11"/>
                 <circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/>
                 <circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/>
@@ -658,8 +658,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
               </svg>
             </button>
             <!-- Sad -->
-            <button onclick="selectMoodFace(2,this)" data-face="2" style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+            <button onclick="selectMoodFace(2,this)" data-face="2" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
                 <circle cx="13" cy="13" r="11"/>
                 <circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/>
                 <circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/>
@@ -667,8 +667,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
               </svg>
             </button>
             <!-- Neutral -->
-            <button onclick="selectMoodFace(3,this)" data-face="3" style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+            <button onclick="selectMoodFace(3,this)" data-face="3" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
                 <circle cx="13" cy="13" r="11"/>
                 <circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/>
                 <circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/>
@@ -676,8 +676,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
               </svg>
             </button>
             <!-- Happy -->
-            <button onclick="selectMoodFace(4,this)" data-face="4" style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+            <button onclick="selectMoodFace(4,this)" data-face="4" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
                 <circle cx="13" cy="13" r="11"/>
                 <circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/>
                 <circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/>
@@ -685,8 +685,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
               </svg>
             </button>
             <!-- Very happy -->
-            <button onclick="selectMoodFace(5,this)" data-face="5" style="width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+            <button onclick="selectMoodFace(5,this)" data-face="5" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
                 <circle cx="13" cy="13" r="11"/>
                 <circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/>
                 <circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/>
@@ -714,7 +714,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Sad</button>
           </div>
           <textarea id="today-note" rows="2" placeholder="Anything on your mind..." style="margin-top:10px;"></textarea>
-          <button class="btn-primary" onclick="saveCheckin()" style="margin-top:8px;">Save check-in</button>
+          <button onclick="saveCheckin()" style="margin-top:8px;padding:6px 14px;border-radius:20px;background:var(--accent);border:none;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Save</button>
           <button onclick="event.stopPropagation();openCheckinHistory()" style="background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:4px 0;font-family:var(--sans);">Past check-ins →</button>
           <div class="toast-msg" id="tt">Saved!</div>
         </div>
@@ -722,17 +722,16 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
       <!-- Today's Progress -->
       <div class="card" id="daily-progress-card" style="margin-bottom:0;">
-        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:10px;" onclick="toggleDailyProgress()">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
           <div style="display:flex;align-items:center;gap:6px;">
             <i class="ti ti-circle-check" style="font-size:14px;color:var(--accent);"></i>
             <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Today's Progress</div>
           </div>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div id="dp-overall" style="font-size:12px;color:var(--muted);"></div>
-            <span id="dp-chevron" style="font-size:16px;color:var(--muted);">▾</span>
-          </div>
+          <div id="dp-overall" style="font-size:13px;font-weight:600;color:var(--text);"></div>
         </div>
-        <div id="daily-progress-list" style="display:none;margin-top:4px;"></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Complete your daily check-ins</div>
+        <div id="daily-progress-list"></div>
+        <button onclick="openDPOverlay()" style="background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:4px 0;font-family:var(--sans);display:flex;align-items:center;gap:3px;margin-top:6px;">View all <span style="font-size:13px;">›</span></button>
       </div>
 
     </div>
@@ -4120,6 +4119,7 @@ async function buildDailyProgress(){
   if(overallEl) overallEl.textContent = `${pillarsDone} of 7`;
 
   // Update pillar ring indicators
+  window._lastAutoChecks = autoChecks;
   updatePillarRings(autoChecks);
 
   // Re-apply Today ring score
@@ -4141,6 +4141,36 @@ function buildTodayReminders(checks){
   setCheck('gs-bp-check', checks['dp-bp']);
   setCheck('gs-weight-check', checks['dp-body']);
   setCheck('gs-export-check', checks['dp-activation'] || (document.getElementById('auto-data-status-text')?.textContent?.includes('✓')));
+}
+
+function openDPOverlay(){
+  // Build the flat original view in the overlay
+  const el = document.getElementById('dp-detail-content');
+  if(!el) return;
+  openOverlay('dp-detail-overlay');
+  let html = '';
+  const PILLAR_META = {
+    '🧠 Mind':'Mind','😴 Sleep':'Sleep','🌿 Wellness':'Wellness',
+    '✨ Skin':'Skin','❤️ Body':'Body','👗 Style':'Style','💇 Hair':'Hair'
+  };
+  let currentPillar = '';
+  DP_ITEMS.forEach(([pillar, id, label, note, , deepLink]) => {
+    const done = window._lastAutoChecks?.[id]||false;
+    if(pillar !== currentPillar){
+      currentPillar = pillar;
+      html += `<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:10px 0 4px;">${pillar}</div>`;
+    }
+    html += `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);cursor:pointer;" onclick="closeOverlay('dp-detail-overlay');tab('${deepLink}')">
+      <div style="flex:1;">
+        <div style="font-size:13px;color:${done?'var(--muted)':'var(--text)'};${done?'text-decoration:line-through;':''}">${label}</div>
+        <div style="font-size:11px;color:var(--muted);">${note}</div>
+      </div>
+      <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid ${done?'#6B9E78':'var(--border)'};background:${done?'#6B9E78':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        ${done?'<svg width="10" height="10" viewBox="0 0 10 10"><polyline points="2,5 4,7 8,3" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>':''}
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
 }
 
 function toggleDPPillar(id){
@@ -14446,6 +14476,16 @@ async function weeklyMindInsight(){
 </div>
 
 <!-- Check-in history overlay -->
+<div id="dp-detail-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('dp-detail-overlay')" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Daily Check-ins</div>
+    </div>
+    <div id="dp-detail-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
 <div id="checkin-history-overlay" class="fullscreen-overlay">
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
