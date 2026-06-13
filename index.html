@@ -68,7 +68,8 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .bottom-nav{background:var(--cream);border-top:0.5px solid var(--border);padding:6px 0 max(10px,env(safe-area-inset-bottom));display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:200;}
 .bnav{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;font-size:10px;color:var(--muted);font-family:var(--sans);padding:6px 0;}
 .bnav i{font-size:22px;}
-.bnav.on{color:var(--accent);}
+.bnav.on{color:var(--cream);}
+.bnav.on i{background:var(--accent);border-radius:12px;padding:4px 14px;color:var(--cream);}
 
 /* STAT STRIP */
 .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px;}
@@ -2266,7 +2267,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div class="card-title" style="margin:0;">☀️ Morning routine</div>
           <div id="skin-am-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
-        <div id="skin-am-progress" style="font-size:12px;color:var(--muted);"></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div id="skin-am-progress" style="font-size:12px;color:var(--muted);"></div>
+          <button onclick="event.stopPropagation();openSkinAMLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
+        </div>
       </div>
       <!-- Saved state — always visible -->
       <div id="skin-am-saved" style="display:none;margin-top:10px;"></div>
@@ -2297,15 +2301,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Tonight's Musely treatment</div>
         <div class="med-row" id="r-musely-aa" onclick="selectMuselyCheck('aa')" style="margin-bottom:5px;">
           <div class="med-check">&#x2713;</div>
-          <div class="med-info"><div class="med-name">Anti-Aging Cream</div><div class="med-note">Alternate nightly with Spot Treatment</div></div>
+          <div class="med-info"><div class="med-name">Musely Anti-Aging Cream</div><div class="med-note">Alternate nightly with Spot Treatment</div></div>
         </div>
         <div class="med-row" id="r-musely-spot" onclick="selectMuselyCheck('spot')" style="margin-bottom:10px;">
           <div class="med-check">&#x2713;</div>
-          <div class="med-info"><div class="med-name">Spot Treatment</div><div class="med-note">Alternate nightly with Anti-Aging Cream</div></div>
+          <div class="med-info"><div class="med-name">Musely Spot Treatment</div><div class="med-note">Alternate nightly with Anti-Aging Cream</div></div>
         </div>
         <div class="med-row" id="r-regen" onclick="toggleSkinStep('r-regen')" style="margin-bottom:10px;">
           <div class="med-check">&#x2713;</div>
-          <div class="med-info"><div class="med-name">Olay Regenerist Ultra Rich</div><div class="med-note">After Musely · every night</div></div>
+          <div class="med-info"><div class="med-name">Olay Regenerist Ultra Rich Cream</div><div class="med-note">After Musely · every night</div></div>
         </div>
         <button class="btn-primary" style="margin-bottom:6px;" onclick="confirmMuselyApplied()">&#x2713; Log tonight's treatment</button>
         <div class="toast-msg" id="musely-toast">Treatment logged!</div>
@@ -3294,6 +3298,10 @@ async function tab(id){
   const compactHeader = document.getElementById('compact-header');
   if(isToday){ compactHeader.classList.remove('on'); }
   else { compactHeader.classList.add('on'); document.getElementById('compact-page-title').textContent = PILLAR_TITLES[id]||''; }
+
+  // Update bottom nav — Home active on Today, no bnav active on pillar pages
+  document.querySelectorAll('.bnav').forEach(b=>b.classList.remove('on'));
+  if(isToday) document.getElementById('bnav-home')?.classList.add('on');
   const scroll=document.getElementById('main-scroll');
   const activeSec=document.getElementById('s-'+id);
   // Hide all sections
@@ -3784,7 +3792,7 @@ var DP_ITEMS = [
   ['🌿 Wellness','dp-bodywater', 'Body water % entered',     'From Withings scale',                null, 'health'],
   ['🌿 Wellness','dp-water',     'Water goal met',           '64 oz · 8 glasses',                  null, 'health'],
   ['✨ Skin',    'dp-skin-checkin','Skin check-in logged',     'Daily skin notes',                   null, 'skin'],
-  ['✨ Skin',    'dp-skin-am',   'AM skin routine done',     'Cleanser · Serum · Vit C · SPF',     null, 'skin'],
+  ['✨ Skin',    'dp-skin-am',   'AM skin routine done',     'Cleanser · Serum · Vit C · SPF (eye mask bonus)',     null, 'skin'],
   ['✨ Skin',    'dp-skin-pm',   'PM routine done',          'Musely · Olay Regenerist',           null, 'skin'],
   ['✨ Skin',    'dp-musely-game','Musely avatar played',    'Evening skin game',                  null, 'skin'],
   ['❤️ Body',   'dp-body',      'Body check-in logged',     'Non-scale wins · measurements',      null, 'body'],
@@ -3903,8 +3911,11 @@ async function buildDailyProgress(){
       && document.getElementById('r-regen')?.classList.contains('done');
     const skinToday = skinState.date === today;
     autoChecks['dp-skin-am'] = amDom || (skinToday && ['r-cleanser','r-serum','r-vitc','r-spf'].every(id=>skinState[id]));
-    autoChecks['dp-skin-pm'] = pmDom || (skinToday && (skinState['r-musely-aa']||skinState['r-musely-spot'])&&skinState['r-regen']);
-    autoChecks['dp-musely-game'] = document.getElementById('r-musely-game')?.classList.contains('done') || (skinToday && skinState['r-musely-game']===true);
+    const pmMusely = (document.getElementById('r-musely-aa')?.classList.contains('done')||document.getElementById('r-musely-spot')?.classList.contains('done')) || (skinToday&&(skinState['r-musely-aa']||skinState['r-musely-spot']));
+    const pmRegen = document.getElementById('r-regen')?.classList.contains('done') || (skinToday&&skinState['r-regen']);
+    const pmGame = document.getElementById('r-musely-game')?.classList.contains('done') || (skinToday&&skinState['r-musely-game']);
+    autoChecks['dp-skin-pm'] = !!(pmMusely && pmRegen);
+    autoChecks['dp-musely-game'] = pmGame;
   } catch(e){
     autoChecks['dp-skin-am'] = false;
     autoChecks['dp-skin-pm'] = false;
@@ -4233,20 +4244,90 @@ async function openFacialLog(){
   } catch(err){ el.innerHTML='<div class="log-empty">Could not load entries.</div>'; console.warn(err); }
 }
 
-function openMuselyLog(){
-  const overlay = document.getElementById('musely-log-overlay');
+function renderSkinAMLog(){
+  const content = document.getElementById('skin-am-log-overlay-content');
+  if(!content) return;
+  const history = JSON.parse(localStorage.getItem('glowSkinAMHistory')||'[]');
+  const addForm = `<div style="background:var(--warm);border-radius:12px;padding:12px;margin-bottom:16px;">
+    <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">Add missed AM log</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="date" id="skin-am-log-date" max="${nowStr()}" value="${nowStr()}"
+        style="flex:1;padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;font-family:var(--sans);background:#fff;color:var(--text);">
+      <button onclick="addSkinAMLog()" style="padding:7px 14px;border-radius:8px;border:0.5px solid var(--accent);background:var(--accent);color:var(--cream);font-size:12px;cursor:pointer;font-family:var(--sans);">Add</button>
+    </div>
+  </div>`;
+  const rows = !history.length ? '<div class="log-empty">No AM routines logged yet.</div>' :
+    [...history].sort((a,b)=>b.date.localeCompare(a.date)).map(e=>{
+      const d = e.date ? safeDate(e.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : e.date;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border);">
+        <div><div style="font-size:12px;color:var(--muted);">${d}</div>
+        <div style="font-size:13px;color:var(--text);margin-top:2px;">☀️ ${(e.steps||[]).join(' · ')||'Completed'}</div></div>
+        <button onclick="deleteSkinAMLog('${e.date}')" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:4px 8px;">🗑</button>
+      </div>`;
+    }).join('');
+  content.innerHTML = addForm + rows;
+}
+function openSkinAMLog(){ openOverlay('skin-am-log-overlay'); renderSkinAMLog(); }
+function addSkinAMLog(){
+  const date = document.getElementById('skin-am-log-date')?.value;
+  if(!date){ showToast('Pick a date first'); return; }
+  const history = JSON.parse(localStorage.getItem('glowSkinAMHistory')||'[]');
+  if(history.find(e=>e.date===date)){ showToast('Entry already exists for that date'); return; }
+  history.push({date, steps:['Cleanser','Super Serum','Vit C','SPF']});
+  localStorage.setItem('glowSkinAMHistory', JSON.stringify(history));
+  renderSkinAMLog();
+}
+function deleteSkinAMLog(date){
+  if(!confirm('Delete AM log for '+date+'?')) return;
+  const history = JSON.parse(localStorage.getItem('glowSkinAMHistory')||'[]').filter(e=>e.date!==date);
+  localStorage.setItem('glowSkinAMHistory', JSON.stringify(history));
+  renderSkinAMLog();
+}
+
+function renderMuselyLog(){
   const content = document.getElementById('musely-log-overlay-content');
-  openOverlay(overlay.id);
-  
+  if(!content) return;
   const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
-  if(!history.length){ content.innerHTML='<div class="log-empty">No Musely treatments logged yet.</div>'; return; }
-  content.innerHTML = [...history].reverse().map(e=>{
-    const d = e.date ? safeDate(e.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : e.date;
-    return '<div style="padding:10px 0;border-bottom:0.5px solid var(--border);">'
-      +'<div style="font-size:12px;color:var(--muted);">'+d+'</div>'
-      +'<div style="font-size:14px;font-weight:500;color:var(--text);margin-top:2px;">'+e.treatment+'</div>'
-      +'</div>';
-  }).join('');
+  const addForm = `<div style="background:var(--warm);border-radius:12px;padding:12px;margin-bottom:16px;">
+    <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">Add missed PM log</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input type="date" id="pm-log-date" max="${nowStr()}" value="${nowStr()}"
+        style="flex:1;min-width:120px;padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;font-family:var(--sans);background:#fff;color:var(--text);">
+      <select id="pm-log-treatment" style="flex:1;min-width:140px;padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;font-family:var(--sans);background:#fff;color:var(--text);">
+        <option value="Musely Anti-Aging Cream">Musely Anti-Aging Cream</option>
+        <option value="Musely Spot Treatment">Musely Spot Treatment</option>
+      </select>
+      <button onclick="addMuselyLog()" style="padding:7px 14px;border-radius:8px;border:0.5px solid var(--accent);background:var(--accent);color:var(--cream);font-size:12px;cursor:pointer;font-family:var(--sans);">Add</button>
+    </div>
+  </div>`;
+  const rows = !history.length ? '<div class="log-empty">No PM routines logged yet.</div>' :
+    [...history].sort((a,b)=>b.date.localeCompare(a.date)).map(e=>{
+      const d = e.date ? safeDate(e.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : e.date;
+      const details = [e.treatment, e.regen?'Olay Regenerist':'', e.game?'Avatar game ✓':''].filter(Boolean).join(' · ');
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border);">
+        <div><div style="font-size:12px;color:var(--muted);">${d}</div>
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-top:2px;">🌙 ${details}</div></div>
+        <button onclick="deleteMuselyLog('${e.date}')" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:4px 8px;">🗑</button>
+      </div>`;
+    }).join('');
+  content.innerHTML = addForm + rows;
+}
+function openMuselyLog(){ openOverlay('musely-log-overlay'); renderMuselyLog(); }
+function addMuselyLog(){
+  const date = document.getElementById('pm-log-date')?.value;
+  const treatment = document.getElementById('pm-log-treatment')?.value;
+  if(!date){ showToast('Pick a date first'); return; }
+  const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
+  if(history.find(e=>e.date===date)){ showToast('Entry already exists — delete it first to replace'); return; }
+  history.push({date, treatment, regen:true, game:false});
+  localStorage.setItem('glowMuselyHistory', JSON.stringify(history));
+  renderMuselyLog();
+}
+function deleteMuselyLog(date){
+  if(!confirm('Delete PM log for '+date+'?')) return;
+  const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]').filter(e=>e.date!==date);
+  localStorage.setItem('glowMuselyHistory', JSON.stringify(history));
+  renderMuselyLog();
 }
 
 async function saveReflectionAnswer(){
@@ -6552,14 +6633,30 @@ function updateSkinProgress(){
   const pmDone = SKIN_STEPS_PM.filter(id=>document.getElementById(id)?.classList.contains('done')).length;
   const amEl = document.getElementById('skin-am-progress');
   const pmEl = document.getElementById('skin-pm-progress');
-  const amComplete = amDone === SKIN_STEPS_AM.length;
-  const pmComplete = pmDone === SKIN_STEPS_PM.length;
-  if(amEl) amEl.textContent = amComplete ? '✅ Complete' : amDone+'/'+SKIN_STEPS_AM.length+' done';
+  const amComplete = amDone >= 4; // 4/5 — eye mask is optional bonus
+  // PM complete = Musely (one or other) + Regen — game is its own separate DP check
+  const muselyDone = document.getElementById('r-musely-aa')?.classList.contains('done') || document.getElementById('r-musely-spot')?.classList.contains('done');
+  const regenDone = document.getElementById('r-regen')?.classList.contains('done');
+  const gameDone = document.getElementById('r-musely-game')?.classList.contains('done');
+  const pmComplete = !!(muselyDone && regenDone);
+  if(amEl) amEl.textContent = amComplete ? '✅ Complete' : amDone+'/4 done';
   if(amEl) amEl.style.color = amComplete ? '#6B9E78' : 'var(--muted)';
-  if(pmEl) pmEl.textContent = pmComplete ? '✅ Complete' : pmDone+'/'+SKIN_STEPS_PM.length+' done';
+  const pmCount = [muselyDone, regenDone].filter(Boolean).length;
+  if(pmEl) pmEl.textContent = pmComplete ? '✅ Complete' : pmCount+'/2 done';
   if(pmEl) pmEl.style.color = pmComplete ? '#6B9E78' : 'var(--muted)';
-  // Show saved state when complete but DON'T auto-collapse — user closes manually
-  if(amComplete) showSkinAMSavedView();
+  // Show saved state when complete
+  if(amComplete){
+    // Save AM completion to history
+    const AM_LABELS = {'r-cleanser':'Cleanser','r-serum':'Super Serum','r-vitc':'Vit C','r-spf':'SPF','r-eye':'Eye mask'};
+    const doneParts = SKIN_STEPS_AM.filter(id=>document.getElementById(id)?.classList.contains('done')).map(id=>AM_LABELS[id]||id);
+    const amHistory = JSON.parse(localStorage.getItem('glowSkinAMHistory')||'[]');
+    const todayIdx = amHistory.findIndex(e=>e.date===nowStr());
+    const entry = { date: nowStr(), steps: doneParts };
+    if(todayIdx>=0) amHistory[todayIdx]=entry; else amHistory.push(entry);
+    if(amHistory.length>30) amHistory.shift();
+    localStorage.setItem('glowSkinAMHistory', JSON.stringify(amHistory));
+    showSkinAMSavedView();
+  }
   if(pmComplete){
     showSkinPMSavedView();
     toggleSkinPM(false);
@@ -6792,9 +6889,9 @@ function showSkinPMSavedView(){
   const mspot = document.getElementById('r-musely-spot')?.classList.contains('done');
   const regen = document.getElementById('r-regen')?.classList.contains('done');
   const game = document.getElementById('r-musely-game')?.classList.contains('done');
-  const hasPM = maa||mspot||regen;
-  if(!hasPM){ saved.style.display='none'; return; }
-  const treatment = maa?'Anti-Aging Cream':mspot?'Spot Treatment':'';
+  const muselyDone = maa||mspot||regen;
+  if(!muselyDone){ saved.style.display='none'; return; }
+  const treatment = maa?'Musely Anti-Aging':mspot?'Musely Spot Treatment':'';
   saved.style.display='block';
   saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:10px 12px;">
     <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">🌙 PM routine ✓ <button onclick="editSkinPM()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
@@ -7334,13 +7431,14 @@ function selectMusely(which){
 function confirmMuselyApplied(){
   const aa = document.getElementById('r-musely-aa')?.classList.contains('done')||document.getElementById('r-musely-aa')?.classList.contains('on')||false;
   const spot = document.getElementById('r-musely-spot')?.classList.contains('done')||document.getElementById('r-musely-spot')?.classList.contains('on')||false;
-  if(!aa && !spot){ alert('Please select Anti-Aging Cream or Spot Treatment first.'); return; }
+  if(!aa && !spot){ alert('Please select Musely Anti-Aging Cream or Spot Treatment first.'); return; }
 
-  const treatment = aa ? 'Anti-Aging Cream' : 'Spot Treatment';
-  const selection = { treatment, date: nowStr(), isoDate: new Date().toISOString() };
+  const treatment = aa ? 'Musely Anti-Aging Cream' : 'Musely Spot Treatment';
+  const regen = document.getElementById('r-regen')?.classList.contains('done')||false;
+  const game = document.getElementById('r-musely-game')?.classList.contains('done')||false;
+  const selection = { treatment, regen, game, date: nowStr(), isoDate: new Date().toISOString() };
 
   const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
-  // Update today's entry if already logged, otherwise append
   const todayIdx = history.findIndex(e => e.date === selection.date);
   if(todayIdx >= 0) history[todayIdx] = selection;
   else history.push(selection);
@@ -14219,9 +14317,19 @@ async function weeklyMindInsight(){
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeOverlay('musely-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Musely Treatment Log</div>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Evening Routine Log</div>
     </div>
     <div id="musely-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="skin-am-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('skin-am-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Morning Routine Log</div>
+    </div>
+    <div id="skin-am-log-overlay-content"><div class="log-empty">Loading...</div></div>
   </div>
 </div>
 
