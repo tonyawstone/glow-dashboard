@@ -3485,7 +3485,7 @@ function nowStr(d){
   const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
 }
-function yesterdayStr(){ return new Date(Date.now()-86400000).toISOString().slice(0,10); }
+function yesterdayStr(){ const d=new Date(); d.setDate(d.getDate()-1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 // Steps & exercise from CSV always use yesterday's complete data, not today's partial data
 function getStepsRow(rows){ return rows.find(r=>r.date===yesterdayStr()&&parseInt(r.steps)>0) || rows.find(r=>parseInt(r.steps)>0); }
 function getExerciseRows(rows, sinceDate){ return rows.filter(r=>r.date!==nowStr()&&(r.exercise_types||parseInt(r.exercise_minutes)>0)&&(!sinceDate||r.date>=sinceDate)); }
@@ -6305,7 +6305,7 @@ async function saveSleep(){
 
   if(hrs!=='—'){ const sd=document.getElementById('sleep-display'); if(sd) sd.textContent=hrs+'h'; const sh=document.getElementById('s-sleep-h'); if(sh) sh.textContent=hrs+'h'; }
 
-  const sleepDate = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const sleepDate = yesterdayStr();
   const melatonin = document.getElementById('t-melatonin')?.classList.contains('done')||false;
   const sleepGummies = document.getElementById('t-sleep-gummies')?.classList.contains('done')||false;
   const sleepEntry={hrs,bed,wake,quality,energy,note,melatonin,sleepGummies,date:sleepDate};
