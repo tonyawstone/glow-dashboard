@@ -608,21 +608,27 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="stat-strip" style="grid-template-columns:repeat(3,1fr);">
       <div class="stat-tile" style="cursor:pointer;" onclick="tab('sleep')">
-        <div class="stat-src" style="margin-bottom:2px;">😴 Sleep</div>
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--warm);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">
+          <i class="ti ti-moon" style="font-size:18px;color:var(--accent);"></i>
+        </div>
+        <div class="stat-src" style="margin-bottom:2px;">Sleep</div>
         <div class="stat-val" id="s-sleep-h">—</div>
-        <div class="stat-lbl">hrs · mins</div>
         <div class="stat-src" id="s-sleep-date">Last night</div>
       </div>
       <div class="stat-tile" style="cursor:pointer;" onclick="tab('health');setTimeout(()=>{const el=document.getElementById('hydration-card');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},300)">
-        <div class="stat-src" style="margin-bottom:2px;">💧 Hydration</div>
-        <div class="stat-val" id="today-water-tile">0/8</div>
-        <div class="stat-lbl">glasses</div>
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--warm);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">
+          <i class="ti ti-droplet" style="font-size:18px;color:var(--accent);"></i>
+        </div>
+        <div class="stat-src" style="margin-bottom:2px;">Hydration</div>
+        <div class="stat-val" id="today-water-tile">0 oz</div>
         <div class="stat-src">Today</div>
       </div>
       <div class="stat-tile" style="cursor:pointer;" onclick="tab('body')">
-        <div class="stat-src" style="margin-bottom:2px;">⚖️ Weight</div>
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--warm);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">
+          <i class="ti ti-scale" style="font-size:18px;color:var(--accent);"></i>
+        </div>
+        <div class="stat-src" style="margin-bottom:2px;">Weight</div>
         <div class="stat-val" id="sw-weight">—</div>
-        <div class="stat-lbl">lbs</div>
         <div class="stat-src" id="s-weight-date"></div>
         <div class="stat-src" id="sw-weight-change" style="color:#27500A;font-size:10px;"></div>
       </div>
@@ -10534,12 +10540,10 @@ function updateWaterDisplay(){
   } else if(entriesEl){ entriesEl.innerHTML=''; }
 
   // Update Today tile
-  const glasses = Math.round(todayWaterOz/8);
-  const goalGlasses = Math.round(WATER_GOAL_OZ/8);
   const tileEl = document.getElementById('today-water-tile');
   if(tileEl){
-    tileEl.textContent = `${glasses}/${goalGlasses}`;
-    tileEl.style.color = glasses>=goalGlasses?'#27500A':glasses>=Math.floor(goalGlasses/2)?'#6B9E78':'var(--text)';
+    tileEl.textContent = `${todayWaterOz} oz`;
+    tileEl.style.color = todayWaterOz>=WATER_GOAL_OZ?'#27500A':todayWaterOz>=Math.floor(WATER_GOAL_OZ/2)?'#6B9E78':'var(--text)';
   }
 }
 
