@@ -3128,7 +3128,7 @@ req.onupgradeneeded=e=>{
 req.onsuccess=e=>{db=e.target.result;boot().catch(err=>console.error('Boot error:',err));};
 req.onerror=e=>console.error('IndexedDB error:',e);
 
-function dbAdd(store,data){return new Promise(r=>{const t=db.transaction(store,'readwrite');t.objectStore(store).add({...data,ts:Date.now()});t.oncomplete=r;});}
+function dbAdd(store,data){return new Promise((resolve,reject)=>{const t=db.transaction(store,'readwrite');const req=t.objectStore(store).add({...data,ts:data.ts||Date.now()});t.oncomplete=resolve;t.onerror=e=>{console.warn('dbAdd error',store,e.target.error?.message);resolve();};});}
 function dbUpdate(store,data){return new Promise(r=>{const t=db.transaction(store,'readwrite');t.objectStore(store).put({...data,ts:Date.now()});t.oncomplete=r;});}
 function dbAll(store){return new Promise(r=>{const t=db.transaction(store,'readonly');const rq=t.objectStore(store).getAll();rq.onsuccess=()=>r(rq.result);});}
 function dbDelete(store,key){return new Promise(r=>{const t=db.transaction(store,'readwrite');t.objectStore(store).delete(key);t.oncomplete=r;});}
@@ -3526,9 +3526,10 @@ async function syncToBlob(store) {
     // Merge: blob entries + local entries, dedup by id or date+type key
     const merged = [...blobData];
     for(const entry of local){
-      const key = entry.id || ((entry.type||'')+(entry.date||'')+(entry.sys||'')+(entry.mood||'')+(entry.isoDate||''));
+      const outfitKey = e => e.ts ? String(e.ts) : e.date+(e.src||'')+(e.photo||'').slice(-30)+(e.desc||'').slice(0,20);
+      const key = store==='outfits' ? outfitKey(entry) : (entry.id || ((entry.type||'')+(entry.date||'')+(entry.sys||'')+(entry.mood||'')+(entry.isoDate||'')));
       const exists = merged.some(e=>{
-        const ek = e.id || ((e.type||'')+(e.date||'')+(e.sys||'')+(e.mood||'')+(e.isoDate||''));
+        const ek = store==='outfits' ? outfitKey(e) : (e.id || ((e.type||'')+(e.date||'')+(e.sys||'')+(e.mood||'')+(e.isoDate||'')));
         return ek === key;
       });
       if(!exists) merged.push(entry);
