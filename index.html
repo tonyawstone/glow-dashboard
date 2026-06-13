@@ -3758,26 +3758,26 @@ async function deduplicateOutfits() {
 
 async function autoRepairOutfitPhotos() {
   try {
-    const res = await fetch(`${BACKEND}/api/sync?pillar=outfits`);
-    if (!res.ok) return;
-    const { data } = await res.json();
-    if (!data || !data.length) return;
     const local = await dbAll('outfits');
-    const outfitKey = e => e.ts ? String(e.ts) : e.date + (e.src||'') + (e.desc||'').slice(0,20);
-    // Build map of blob entries that have a photo URL
-    const blobPhotoMap = {};
-    data.forEach(e => { if(e.photo && e.photo.startsWith('https://')) blobPhotoMap[outfitKey(e)] = e.photo; });
+    const missing = local.filter(e => e.id && (!e.photo || e.photo === '' || e.photo.startsWith('data:')));
+    if (!missing.length) return;
     let fixed = 0;
-    for (const entry of local) {
-      const key = outfitKey(entry);
-      if (blobPhotoMap[key] && (!entry.photo || entry.photo === '' || entry.photo.startsWith('data:'))) {
-        entry.photo = blobPhotoMap[key];
-        await dbUpdate('outfits', entry);
-        fixed++;
-      }
+    for (const entry of missing) {
+      try {
+        // Photos were stored via upload-photo POST which returns a proxy URL
+        const proxyUrl = `${BACKEND}/api/upload-photo?slotId=outfit-${entry.id}`;
+        // Verify the photo exists by doing a HEAD-style check (GET returns image data)
+        const res = await fetch(proxyUrl);
+        if (res.ok && res.headers.get('content-type')?.startsWith('image/')) {
+          entry.photo = proxyUrl;
+          await dbUpdate('outfits', entry);
+          fixed++;
+        }
+      } catch(e) {}
     }
     if (fixed > 0) {
-      console.log(`✅ Auto-repaired ${fixed} outfit photo(s)`);
+      console.log(`✅ Restored ${fixed} outfit photo(s) from Blob`);
+      syncToBlob('outfits');
       renderLookbook();
     }
   } catch(e) { console.warn('autoRepairOutfitPhotos:', e.message); }
