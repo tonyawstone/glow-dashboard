@@ -3560,11 +3560,14 @@ async function loadFromBlob(store) {
     if (!data || !data.length) return;
     // Merge with local — add any entries not already in IndexedDB
     const local = await dbAll(store);
-    const localDates = new Set(local.map(e => (e.type||'') + e.date + (e.sys||'') + (e.mood||'')));
+    const entryKey = (e) => {
+      if(store === 'outfits') return e.ts ? String(e.ts) : e.date + (e.src||'') + (e.photo||'').slice(-30) + (e.desc||'').slice(0,20);
+      return (e.type||'') + e.date + (e.sys||'') + (e.mood||'') + (e.isoDate||'');
+    };
+    const localKeys = new Set(local.map(entryKey));
     let added = 0;
     for (const entry of data) {
-      const key = (entry.type||'') + entry.date + (entry.sys||'') + (entry.mood||'');
-      if (!localDates.has(key)) {
+      if (!localKeys.has(entryKey(entry))) {
         await dbAdd(store, entry);
         added++;
       }
@@ -4386,7 +4389,8 @@ async function saveOutfit(){
     notes:document.getElementById('outfit-notes').value.trim(),
     stars:getStars('outfit-stars'),
     photo,
-    date:outfitDate
+    date:outfitDate,
+    ts: Date.now()
   };
   await dbAdd('outfits',outfitEntry);
   syncToBlob('outfits');
