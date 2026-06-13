@@ -6257,7 +6257,7 @@ var SLEEP_AIDS_KEY = 'glowSleepAids'; // kept for toggleSleepAid draft only
 
 async function loadSleepAidState(){
   try{
-    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    const yesterday = yesterdayStr();
     const sleeps = await dbAll('sleeps');
     const entry = sleeps.find(e=>e.date===yesterday||e.date===nowStr());
     if(entry){
@@ -6811,7 +6811,7 @@ function editSleepCheckin(){
 
 async function restoreSleepCheckinState(){
   try{
-    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    const yesterday = yesterdayStr();
     const today = nowStr();
     let entry = null;
     // Try IndexedDB first
@@ -11564,8 +11564,7 @@ async function saveMyAirLog(){
   const score = (usageScore||0) + (ahiScore||0) + (sealScore||0) + (onoffScore||0);
 
   const datePickerEl = document.getElementById('myair-date');
-  const yesterdayStr = new Date(Date.now()-86400000).toISOString().slice(0,10);
-  const isoStr = datePickerEl?.value || yesterdayStr;
+  const isoStr = datePickerEl?.value || yesterdayStr();
   const logDate = new Date(isoStr+'T12:00:00');
   const dateStr = logDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
 
@@ -11665,7 +11664,7 @@ async function updateMyAirCardSummary(){
 }
 
 async function getMostRecentMyAirEntry(){
-  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const yesterday = yesterdayStr();
   const today = nowStr();
   try{
     // Try IndexedDB first — get last night's or most recent
@@ -11694,7 +11693,7 @@ async function getMostRecentMyAirEntry(){
 
 // Keep old name as alias for DP checks that need last-night specifically
 async function getMyAirEntryForLastNight(){
-  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const yesterday = yesterdayStr();
   try{
     const local = await dbAll('myair').catch(()=>[]);
     const entry = local.find(e=>(e.isoDate||'').slice(0,10)===yesterday);
@@ -11739,7 +11738,7 @@ function editMyAirEntry(){
 }
 async function loadMyAirState(){
   // Default date picker to yesterday
-  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const yesterday = yesterdayStr();
   const dateEl = document.getElementById('myair-date');
   if(dateEl){ dateEl.max = yesterday; }
   if(dateEl && !dateEl.value){
