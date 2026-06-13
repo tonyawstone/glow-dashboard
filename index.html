@@ -606,22 +606,25 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <span>👗 No outfit logged today — tap to snap &amp; log</span>
       <span style="font-size:16px;">📷</span>
     </div>
-    <div class="stat-strip">
-      <div class="stat-tile" style="cursor:pointer;" onclick="tab('body')"><div class="stat-val" id="sw-weight">170.7</div><div class="stat-lbl">lbs</div><div class="stat-src" id="s-weight-src">Withings</div><div class="stat-src" id="s-weight-date"></div></div>
-      <div class="stat-tile" style="cursor:pointer;" onclick="tab('health')"><div class="stat-val" id="sw-steps">—</div><div class="stat-lbl">steps</div><div class="stat-src">Apple Health</div><div class="stat-src" id="s-steps-src"></div></div>
-      <div class="stat-tile" style="cursor:pointer;" onclick="tab('sleep')"><div class="stat-val" id="s-sleep-h">—</div><div class="stat-lbl">sleep hrs</div><div class="stat-src" id="s-sleep-src">Withings</div><div class="stat-src">Last night</div></div>
-      <div class="stat-tile" style="cursor:pointer;" onclick="tab('health');setTimeout(()=>{const el=document.getElementById('hydration-card');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},300)"><div class="stat-val" id="today-water-tile">0/8</div><div class="stat-lbl">glasses</div><div class="stat-src">Hydration</div><div class="stat-src">💧 Today</div></div>
-    </div>
-    <div class="stat-strip" style="margin-top:6px;">
-      <div class="stat-tile" style="grid-column:span 2;">
-        <div class="stat-val" style="font-size:20px;">168.7</div>
-        <div class="stat-lbl">lbs · All-time low</div>
-        <div class="stat-src">May 19, 2026 🎉</div>
+    <div class="stat-strip" style="grid-template-columns:repeat(3,1fr);">
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('sleep')">
+        <div class="stat-src" style="margin-bottom:2px;">😴 Sleep</div>
+        <div class="stat-val" id="s-sleep-h">—</div>
+        <div class="stat-lbl">hrs · mins</div>
+        <div class="stat-src" id="s-sleep-date">Last night</div>
       </div>
-      <div class="stat-tile" style="grid-column:span 2;">
-        <div class="stat-val" id="today-loss-val" style="font-size:20px;">30.7</div>
-        <div class="stat-lbl">lbs lost · <span id="zep-day-count">Day 224</span></div>
-        <div class="stat-src"><span id="zep-tile-lbl">Month 7 · since Oct 25, 2025</span> · Zepbound</div>
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('health');setTimeout(()=>{const el=document.getElementById('hydration-card');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},300)">
+        <div class="stat-src" style="margin-bottom:2px;">💧 Hydration</div>
+        <div class="stat-val" id="today-water-tile">0/8</div>
+        <div class="stat-lbl">glasses</div>
+        <div class="stat-src">Today</div>
+      </div>
+      <div class="stat-tile" style="cursor:pointer;" onclick="tab('body')">
+        <div class="stat-src" style="margin-bottom:2px;">⚖️ Weight</div>
+        <div class="stat-val" id="sw-weight">—</div>
+        <div class="stat-lbl">lbs</div>
+        <div class="stat-src" id="s-weight-date"></div>
+        <div class="stat-src" id="sw-weight-change" style="color:#27500A;font-size:10px;"></div>
       </div>
     </div>
     <div class="affirmation-card">
@@ -3294,8 +3297,8 @@ async function boot(){
   document.getElementById('daily-affirmation').textContent=affirmations[now.getDate()%affirmations.length];
   const zepStart=new Date('2025-10-25');
   const days=Math.floor((now-zepStart)/864e5);
-  document.getElementById('zep-day-count').textContent='Day '+days;
-  document.getElementById('zep-tile-lbl').textContent='Month '+Math.floor(days/30.44)+' · since Oct 25, 2025';
+  const zdcEl = document.getElementById('zep-day-count'); if(zdcEl) zdcEl.textContent='Day '+days;
+  const ztlEl = document.getElementById('zep-tile-lbl'); if(ztlEl) ztlEl.textContent='Month '+Math.floor(days/30.44)+' · since Oct 25, 2025';
   const heroData=await dbGetPhoto('hero');
   if(heroData){document.getElementById('hero-img').src=heroData;document.getElementById('hero-img').style.display='block';document.getElementById('hero-fallback').style.display='none';}
   buildProductTags();
@@ -8581,10 +8584,12 @@ async function buildSleepAppleMetrics(){
   // Also update s-sleep-h on Today strip
   const sleepStripEl = document.getElementById('s-sleep-h');
   const sleepSrcEl = document.getElementById('s-sleep-src');
+  const sleepDateEl = document.getElementById('s-sleep-date');
   if(sleepStripEl && sleepStripEl.textContent === '—'){
     sleepStripEl.textContent = latestHrs + 'h';
   }
   if(sleepSrcEl) sleepSrcEl.textContent = staleLabel;
+  if(sleepDateEl) sleepDateEl.textContent = smartDate(latest.date) || 'Last night';
 
   // Daily view — sleep score + stages
   const score = parseFloat(latest.sleep_score)||null;
@@ -12180,6 +12185,12 @@ async function loadTodaySleepFromCSV(){
       const weightDateEl = document.getElementById('s-weight-date');
       if(weightDateEl) weightDateEl.textContent = smartDate(latestWeight.date);
       if(weightSrcEl) weightSrcEl.textContent = 'Withings';
+      // Show total loss from peak (210.5 lbs)
+      const changeEl = document.getElementById('sw-weight-change');
+      if(changeEl){
+        const loss = (210.5 - parseFloat(latestWeight.weight_lbs)).toFixed(1);
+        changeEl.textContent = `−${loss} lbs from peak`;
+      }
     }
 
     // Steps — always use yesterday's complete data (today's is still accumulating)
@@ -12200,11 +12211,17 @@ async function loadTodaySleepFromCSV(){
                   || withSleep.find(r=>r.date===yesterdayStr)
                   || withSleep[withSleep.length-1];
       if(sleepEl){
-        sleepEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
+        const hrs = parseFloat(latest.sleep_hrs);
+        const h = Math.floor(hrs);
+        const m = Math.round((hrs - h) * 60);
+        sleepEl.textContent = `${h}h ${m}m`;
+        const sleepLblEl = sleepEl.nextElementSibling;
+        if(sleepLblEl && sleepLblEl.className==='stat-lbl') sleepLblEl.textContent = 'last night';
+        const sleepDateEl2 = document.getElementById('s-sleep-date');
+        if(sleepDateEl2) sleepDateEl2.textContent = smartDate(latest.date) || 'Last night';
       }
       if(sleepSrcEl){
-        const src = latest.sleep_source||'';
-        sleepSrcEl.textContent = src.includes('Withings')?'Withings':'Last night';
+        sleepSrcEl.textContent = '';
       }
     }
   } catch(e){ console.warn('loadTodaySleepFromCSV error:', e); }
