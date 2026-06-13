@@ -3261,7 +3261,8 @@ async function boot(){
   updateOutfitNudge();
   buildBodyChart();
   await syncAllFromBlob();
-  autoRepairOutfitPhotos(); // silent background fix for missing photo URLs
+  await deduplicateOutfits();       // remove IDB duplicates caused by photo key change
+  autoRepairOutfitPhotos();          // silent background fix for missing photo URLs
   loadCheckinState();
   loadCoachingInsights();
   loadSavedScore();
@@ -3721,6 +3722,40 @@ async function syncAllFromBlob() {
 }
 
 // Auto-repair: fetch Blob outfits and update any local entries missing photo URLs
+async function deduplicateOutfits() {
+  try {
+    const outfits = await dbAll('outfits');
+    const seen = new Map();
+    const toDelete = [];
+    // Build dedup key: prefer ts, fall back to date+src+desc
+    for (const e of outfits) {
+      const key = e.ts ? String(e.ts) : e.date + (e.src||'') + (e.desc||'').slice(0,20);
+      if (seen.has(key)) {
+        // Keep the one with a photo URL, delete the other
+        const prev = seen.get(key);
+        if (!prev.photo && e.photo) {
+          toDelete.push(prev.id);
+          seen.set(key, e);
+        } else {
+          toDelete.push(e.id);
+        }
+      } else {
+        seen.set(key, e);
+      }
+    }
+    if (toDelete.length > 0) {
+      await new Promise((res, rej) => {
+        const tx = db.transaction('outfits', 'readwrite');
+        const store = tx.objectStore('outfits');
+        toDelete.forEach(id => { if(id) store.delete(id); });
+        tx.oncomplete = res;
+        tx.onerror = rej;
+      });
+      console.log(`✅ Deduped ${toDelete.length} outfit entries`);
+    }
+  } catch(e) { console.warn('deduplicateOutfits:', e.message); }
+}
+
 async function autoRepairOutfitPhotos() {
   try {
     const res = await fetch(`${BACKEND}/api/sync?pillar=outfits`);
