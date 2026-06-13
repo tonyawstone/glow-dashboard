@@ -1066,7 +1066,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content" id="vc-style-inspo">
     <div class="section-label">Inspo Board</div>
     <div class="card">
-      <div class="card-title">Saved looks</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="card-title" style="margin:0;">Saved looks</div>
+        <div id="inspo-count" style="font-size:12px;color:var(--muted);"></div>
+      </div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Outfits logged as "Inspo only" · tap a look to plan it</div>
       <div id="inspo-grid"><div class="lookbook-empty"><i class="ti ti-sparkles" aria-hidden="true"></i>Log outfits tagged "Inspo only" to build your board</div></div>
     </div>
@@ -3569,7 +3572,8 @@ async function loadFromBlob(store) {
     let added = 0;
     for (const entry of data) {
       if (!localKeys.has(entryKey(entry))) {
-        await dbAdd(store, entry);
+        const {id, ...entryWithoutId} = entry;
+        await dbAdd(store, entryWithoutId);
         added++;
       }
     }
@@ -3584,6 +3588,12 @@ async function syncAllFromBlob() {
   await Promise.all(stores.map(s => loadFromBlob(s)));
   await loadLogs();
   console.log('✅ All data synced from Blob');
+  // Rebuild Today page now that IDB is fully populated
+  await buildDailyProgress();
+  loadCheckinState();
+  loadTodayWater();
+  await updateBPBanners();
+  renderLookbook();
 }
 
 // ── SAVE HANDLERS ─────────────────────────────────────────────────────
@@ -4507,11 +4517,14 @@ async function renderLookbook(){
 
   // Inspo board
   const inspoGrid=document.getElementById('inspo-grid');
+  const inspoCount=document.getElementById('inspo-count');
   if(inspoGrid){
     if(inspo.length===0){
       inspoGrid.innerHTML='<div class="lookbook-empty"><i class="ti ti-sparkles" aria-hidden="true"></i>Log outfits tagged "Inspo only" to build your board</div>';
+      if(inspoCount) inspoCount.textContent='';
     } else {
       const _inspoList=[...inspo].reverse(); window._inspoMap={}; _inspoList.forEach((e,idx)=>window._inspoMap[idx]=e); inspoGrid.innerHTML=_inspoList.map((e,idx)=>inspoCardHTML(e,idx)).join('');
+      if(inspoCount) inspoCount.textContent=`${inspo.length} look${inspo.length===1?'':'s'}`;
     }
   }
 
