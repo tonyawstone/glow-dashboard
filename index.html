@@ -3261,8 +3261,6 @@ async function boot(){
   updateOutfitNudge();
   buildBodyChart();
   await syncAllFromBlob();
-  await deduplicateOutfits();       // remove IDB duplicates caused by photo key change
-  autoRepairOutfitPhotos();          // silent background fix for missing photo URLs
   loadCheckinState();
   loadCoachingInsights();
   loadSavedScore();
@@ -3719,68 +3717,6 @@ async function syncAllFromBlob() {
   loadTodayWater();
   await updateBPBanners();
   renderLookbook();
-}
-
-// Auto-repair: fetch Blob outfits and update any local entries missing photo URLs
-async function deduplicateOutfits() {
-  try {
-    const outfits = await dbAll('outfits');
-    const seen = new Map();
-    const toDelete = [];
-    // Build dedup key: prefer ts, fall back to date+src+desc
-    for (const e of outfits) {
-      const key = e.ts ? String(e.ts) : e.date + (e.src||'') + (e.desc||'').slice(0,20);
-      if (seen.has(key)) {
-        // Keep the one with a photo URL, delete the other
-        const prev = seen.get(key);
-        if (!prev.photo && e.photo) {
-          toDelete.push(prev.id);
-          seen.set(key, e);
-        } else {
-          toDelete.push(e.id);
-        }
-      } else {
-        seen.set(key, e);
-      }
-    }
-    if (toDelete.length > 0) {
-      await new Promise((res, rej) => {
-        const tx = db.transaction('outfits', 'readwrite');
-        const store = tx.objectStore('outfits');
-        toDelete.forEach(id => { if(id) store.delete(id); });
-        tx.oncomplete = res;
-        tx.onerror = rej;
-      });
-      console.log(`✅ Deduped ${toDelete.length} outfit entries`);
-    }
-  } catch(e) { console.warn('deduplicateOutfits:', e.message); }
-}
-
-async function autoRepairOutfitPhotos() {
-  try {
-    const local = await dbAll('outfits');
-    const missing = local.filter(e => e.id && (!e.photo || e.photo === '' || e.photo.startsWith('data:')));
-    if (!missing.length) return;
-    let fixed = 0;
-    for (const entry of missing) {
-      try {
-        // Photos were stored via upload-photo POST which returns a proxy URL
-        const proxyUrl = `${BACKEND}/api/upload-photo?slotId=outfit-${entry.id}`;
-        // Verify the photo exists by doing a HEAD-style check (GET returns image data)
-        const res = await fetch(proxyUrl);
-        if (res.ok && res.headers.get('content-type')?.startsWith('image/')) {
-          entry.photo = proxyUrl;
-          await dbUpdate('outfits', entry);
-          fixed++;
-        }
-      } catch(e) {}
-    }
-    if (fixed > 0) {
-      console.log(`✅ Restored ${fixed} outfit photo(s) from Blob`);
-      syncToBlob('outfits');
-      renderLookbook();
-    }
-  } catch(e) { console.warn('autoRepairOutfitPhotos:', e.message); }
 }
 
 // ── SAVE HANDLERS ─────────────────────────────────────────────────────
@@ -4730,26 +4666,12 @@ async function saveOutfit(){
   const desc=document.getElementById('outfit-desc').value.trim();if(!desc)return;
   const dateInput=document.getElementById('outfit-date');
   const outfitDate=dateInput.value||nowStr();
-  // Grab photo — upload to Blob first, fall back to base64 if upload fails
+  // Grab photo
   let photo='';
   const photoSlot=document.getElementById('outfit-new');
   if(photoSlot){
     const img=photoSlot.querySelector('img');
-    if(img && img.src && img.src.startsWith('data:')){
-      // Upload base64 to Blob immediately
-      try {
-        const slotId = 'outfit-' + Date.now();
-        const res = await fetch(`${BACKEND}/api/upload-photo`, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({slotId, dataUrl: img.src})
-        });
-        if(res.ok){ const {url} = await res.json(); photo = url; }
-        else { photo = img.src; }
-      } catch(e){ photo = img.src; }
-    } else if(img && img.src && img.src.startsWith('https://')){
-      photo = img.src; // already a Blob URL
-    }
+    if(img && img.src) photo = img.src;
   }
   const outfitEntry={
     desc,
