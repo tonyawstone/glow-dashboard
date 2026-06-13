@@ -49,9 +49,9 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .compact-header{display:none;flex-shrink:0;padding:10px 16px 0;background:var(--cream);}
 .compact-header.on{display:block;}
 .compact-header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.compact-wordmark{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);letter-spacing:0.01em;}
-.compact-wordmark sup{font-size:11px;color:var(--accent);vertical-align:super;line-height:0;}
-.compact-page-title{font-family:var(--serif);font-size:17px;font-weight:400;color:var(--text);text-align:center;flex:1;margin:0 8px;}
+.compact-wordmark{font-family:var(--serif);font-size:17px;font-weight:400;color:var(--text);letter-spacing:0.01em;}
+.compact-wordmark sup{font-size:9px;color:var(--accent);vertical-align:super;line-height:0;}
+.compact-page-title{font-family:var(--sans);font-size:15px;font-weight:400;color:var(--text);text-align:center;flex:1;margin:0 8px;}
 .compact-settings-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:4px;display:flex;align-items:center;justify-content:center;}
 .compact-nav{display:grid;grid-template-columns:repeat(8,1fr);background:var(--cream);border-bottom:0.5px solid var(--border);border-top:0.5px solid var(--border);}
 .compact-nav .tnav{font-size:10px;padding:8px 2px 7px;gap:2px;}
@@ -3924,18 +3924,19 @@ function toggleDPItem(id, deepLink){
 }
 
 function updateTodayRing(score){
-  const btn = Array.from(document.querySelectorAll('.tnav')).find(b=>b.textContent.trim().startsWith('Today'));
-  if(!btn) return;
-  const wrapper = btn.querySelector('.pillar-ring');
-  if(!wrapper) return;
-  // Today ring is always a SOLID circle — no arc, no partial fill
+  const btns = Array.from(document.querySelectorAll('.tnav')).filter(b=>b.textContent.trim().startsWith('Today'));
+  if(!btns.length) return;
   const pct = Math.min(100, Math.max(0, score||0));
   const color = pct>=85?'#27500A':pct>=70?'#6B9E78':pct>=55?'#92400E':pct>0?'#7F1D1D':'rgba(0,0,0,0.25)';
-  const iconClass = wrapper.querySelector('i')?.className||'ti ti-sun';
-  wrapper.innerHTML = '<svg width="36" height="36" style="position:absolute;top:0;left:0;pointer-events:none;">'
-    + '<circle cx="18" cy="18" r="16" fill="none" stroke="'+color+'" stroke-width="2.5"/>'
-    + '</svg>'
-    + '<i class="'+iconClass+'" aria-hidden="true" style="font-size:22px;position:relative;z-index:1;"></i>';
+  btns.forEach(btn=>{
+    const wrapper = btn.querySelector('.pillar-ring');
+    if(!wrapper) return;
+    const iconClass = wrapper.querySelector('i')?.className||'ti ti-sun';
+    wrapper.innerHTML = '<svg width="36" height="36" style="position:absolute;top:0;left:0;pointer-events:none;">'
+      + '<circle cx="18" cy="18" r="16" fill="none" stroke="'+color+'" stroke-width="2.5"/>'
+      + '</svg>'
+      + '<i class="'+iconClass+'" aria-hidden="true" style="font-size:22px;position:relative;z-index:1;"></i>';
+  });
 }
 
 function updatePillarRings(checks){
@@ -3949,56 +3950,59 @@ function updatePillarRings(checks){
     hair:    ['dp-hair'],
   };
 
-  // Give Today tab the same wrapper size for alignment (no progress arc)
-  const todayBtn = Array.from(document.querySelectorAll('.tnav')).find(b=>b.textContent.trim().startsWith('Today'));
-  if(todayBtn && !todayBtn.querySelector('.pillar-ring')){
-    const todayIcon = todayBtn.querySelector('i');
-    if(todayIcon){
-      const wrapper = document.createElement('div');
-      wrapper.className = 'pillar-ring';
-      wrapper.style.cssText = 'position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin:0 auto;';
-      todayIcon.parentNode.insertBefore(wrapper, todayIcon);
-      wrapper.appendChild(todayIcon);
-      wrapper.innerHTML = '<svg width="36" height="36" style="position:absolute;top:0;left:0;pointer-events:none;">'
-        + '<circle cx="18" cy="18" r="16" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="2.5"/>'
-        + '</svg>'
-        + '<i class="' + todayIcon.className + '" aria-hidden="true" style="font-size:22px;position:relative;z-index:1;"></i>';
+  // Give all Today tab buttons the same wrapper size for alignment (no progress arc)
+  const todayBtns = Array.from(document.querySelectorAll('.tnav')).filter(b=>b.textContent.trim().startsWith('Today'));
+  todayBtns.forEach(todayBtn=>{
+    if(todayBtn && !todayBtn.querySelector('.pillar-ring')){
+      const todayIcon = todayBtn.querySelector('i');
+      if(todayIcon){
+        const wrapper = document.createElement('div');
+        wrapper.className = 'pillar-ring';
+        wrapper.style.cssText = 'position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin:0 auto;';
+        todayIcon.parentNode.insertBefore(wrapper, todayIcon);
+        wrapper.appendChild(todayIcon);
+        wrapper.innerHTML = '<svg width="36" height="36" style="position:absolute;top:0;left:0;pointer-events:none;">'
+          + '<circle cx="18" cy="18" r="16" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="2.5"/>'
+          + '</svg>'
+          + '<i class="' + todayIcon.className + '" aria-hidden="true" style="font-size:22px;position:relative;z-index:1;"></i>';
+      }
     }
-  }
+  });
 
   Object.entries(pillarItems).forEach(([pillar, ids])=>{
     const done = ids.filter(id=>checks[id]).length;
     const total = ids.length;
     const pct = total ? Math.round(done/total*100) : 0;
-    const btn = document.querySelector(`.tnav[onclick="tab('${pillar}')"]`);
-    if(!btn) return;
+    const btns = document.querySelectorAll(`.tnav[onclick="tab('${pillar}')"]`);
+    if(!btns.length) return;
 
-    const icon = btn.querySelector('i');
-    if(!icon) return;
+    btns.forEach(btn=>{
+      const icon = btn.querySelector('i');
+      if(!icon) return;
 
-    // Wrap icon in ring container if not already done
-    let wrapper = btn.querySelector('.pillar-ring');
-    if(!wrapper){
-      wrapper = document.createElement('div');
-      wrapper.className = 'pillar-ring';
-      icon.parentNode.insertBefore(wrapper, icon);
-      wrapper.appendChild(icon);
-    }
+      let wrapper = btn.querySelector('.pillar-ring');
+      if(!wrapper){
+        wrapper = document.createElement('div');
+        wrapper.className = 'pillar-ring';
+        icon.parentNode.insertBefore(wrapper, icon);
+        wrapper.appendChild(icon);
+      }
 
-    const color = pct===100?'#6B9E78':pct>0?'#C4735A':'rgba(0,0,0,0.12)';
-    const r = 16;
-    const dash = 2*Math.PI*r;
-    const offset = dash*(1-pct/100);
-    const iconClass = icon.className;
+      const color = pct===100?'#6B9E78':pct>0?'#C4735A':'rgba(0,0,0,0.12)';
+      const r = 16;
+      const dash = 2*Math.PI*r;
+      const offset = dash*(1-pct/100);
+      const iconClass = icon.className;
 
     wrapper.style.cssText = 'position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin:0 auto;';
-    wrapper.innerHTML = '<svg width="36" height="36" style="position:absolute;top:0;left:0;pointer-events:none;">'
-      + '<circle cx="18" cy="18" r="'+r+'" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="2.5"/>'
-      + '<circle cx="18" cy="18" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="2.5"'
-      + ' stroke-dasharray="'+dash.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'"'
-      + ' stroke-linecap="round" transform="rotate(-90 18 18)"/>'
-      + '</svg>'
-      + '<i class="'+iconClass+'" aria-hidden="true" style="font-size:22px;position:relative;z-index:1;"></i>';
+      wrapper.innerHTML = '<svg width="36" height="36" style="position:absolute;top:0;left:0;pointer-events:none;">'
+        + '<circle cx="18" cy="18" r="'+r+'" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="2.5"/>'
+        + '<circle cx="18" cy="18" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="2.5"'
+        + ' stroke-dasharray="'+dash.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'"'
+        + ' stroke-linecap="round" transform="rotate(-90 18 18)"/>'
+        + '</svg>'
+        + '<i class="'+iconClass+'" aria-hidden="true" style="font-size:22px;position:relative;z-index:1;"></i>';
+    }); // end btns.forEach
   });
 }
 
