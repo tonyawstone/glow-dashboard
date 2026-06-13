@@ -3261,6 +3261,7 @@ async function boot(){
   updateOutfitNudge();
   buildBodyChart();
   await syncAllFromBlob();
+  autoRepairOutfitPhotos(); // silent background fix for missing photo URLs
   loadCheckinState();
   loadCoachingInsights();
   loadSavedScore();
@@ -3717,6 +3718,34 @@ async function syncAllFromBlob() {
   loadTodayWater();
   await updateBPBanners();
   renderLookbook();
+}
+
+// Auto-repair: fetch Blob outfits and update any local entries missing photo URLs
+async function autoRepairOutfitPhotos() {
+  try {
+    const res = await fetch(`${BACKEND}/api/sync?pillar=outfits`);
+    if (!res.ok) return;
+    const { data } = await res.json();
+    if (!data || !data.length) return;
+    const local = await dbAll('outfits');
+    const outfitKey = e => e.ts ? String(e.ts) : e.date + (e.src||'') + (e.desc||'').slice(0,20);
+    // Build map of blob entries that have a photo URL
+    const blobPhotoMap = {};
+    data.forEach(e => { if(e.photo && e.photo.startsWith('https://')) blobPhotoMap[outfitKey(e)] = e.photo; });
+    let fixed = 0;
+    for (const entry of local) {
+      const key = outfitKey(entry);
+      if (blobPhotoMap[key] && (!entry.photo || entry.photo === '' || entry.photo.startsWith('data:'))) {
+        entry.photo = blobPhotoMap[key];
+        await dbUpdate('outfits', entry);
+        fixed++;
+      }
+    }
+    if (fixed > 0) {
+      console.log(`✅ Auto-repaired ${fixed} outfit photo(s)`);
+      renderLookbook();
+    }
+  } catch(e) { console.warn('autoRepairOutfitPhotos:', e.message); }
 }
 
 // ── SAVE HANDLERS ─────────────────────────────────────────────────────
