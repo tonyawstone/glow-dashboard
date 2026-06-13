@@ -4722,15 +4722,30 @@ function outfitCardHTML(e, slotId){
   const allTags=[...(e.occ||[]),...(e.vibe||[]),...(e.colors||[]),...(Array.isArray(e.season)?e.season:(e.season?[e.season]:[]))].filter(Boolean);
   const tagsHTML=allTags.length?`<div class="outfit-tags">${allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('')}</div>`:'';
   const starsHTML=e.stars?`<span style="font-size:11px;color:#D4A96A;letter-spacing:1px;">${'★'.repeat(e.stars)}</span>`:'';
+  const delKey = e.ts || e.id;
   return `<div class="outfit-card">
     <div class="outfit-img" style="cursor:default;">${imgContent}${keepBadge}${wearBadge}</div>
     <div class="outfit-info">
-      <div class="outfit-name">${e.desc}</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;">
+        <div class="outfit-name" style="flex:1;">${e.desc}</div>
+        <button onclick="deleteOutfit(${delKey})" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;" title="Delete">✕</button>
+      </div>
       <div class="outfit-meta">${fmtOutfitDate(e.date)}${e.src?' · '+e.src:''} ${starsHTML}</div>
       ${tagsHTML}
       ${e.notes?`<div style="font-size:11px;color:var(--muted);margin-top:5px;font-style:italic;">"${e.notes}"</div>`:''}
     </div>
   </div>`;
+}
+
+async function deleteOutfit(ts){
+  if(!confirm('Delete this look? This cannot be undone.')) return;
+  // Try deleting by ts first, then by id
+  const all = await dbAll('outfits');
+  const entry = all.find(e => e.ts === ts || e.id === ts);
+  if(entry && entry.id) await dbDelete('outfits', entry.id);
+  syncToBlob('outfits');
+  await renderLookbook();
+  if(curView==='monthly') renderStyleCalendar();
 }
 
 async function repairOutfitPhotos(){
@@ -4839,7 +4854,10 @@ function inspoCardHTML(e, idx){
   return `<div class="outfit-card" style="grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;border-radius:12px;border:0.5px solid var(--border);background:var(--card);">
     <div style="aspect-ratio:3/4;overflow:hidden;border-radius:12px 0 0 12px;">${imgContent}</div>
     <div style="padding:10px;display:flex;flex-direction:column;gap:4px;">
-      <div style="font-size:13px;font-weight:500;color:var(--text);">${e.desc}</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;">
+        <div style="font-size:13px;font-weight:500;color:var(--text);flex:1;">${e.desc}</div>
+        <button onclick="deleteOutfit(${e.ts||e.id})" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;" title="Delete">✕</button>
+      </div>
       <div style="font-size:11px;color:var(--muted);">${fmtOutfitDate(e.date)}${e.src?' · '+e.src:''} ${starsHTML}</div>
       ${allTags.length?`<div class="outfit-tags">${allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('')}</div>`:''}
       ${e.notes?`<div style="font-size:11px;color:var(--muted);font-style:italic;">"${e.notes}"</div>`:''}
