@@ -910,6 +910,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div id="style-checkin-saved" style="display:none;"></div>
       <div id="style-checkin-body">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+          <span style="font-size:11px;color:var(--muted);">Date</span>
+          <input type="date" id="style-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
+        </div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">How do you feel in your look today?</div>
         <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="style-face-tags">
           <button class="sqb" data-style="Invisible" onclick="soloStyleFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
@@ -1289,6 +1293,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="sleep-checkin-saved" style="display:none;"></div>
       <!-- Form — visible by default, hidden after save -->
       <div id="sleep-checkin-body">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+          <span style="font-size:11px;color:var(--muted);">Date</span>
+          <input type="date" id="sleep-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
+        </div>
         <!-- Quality: 5 SVG circle face selectors -->
         <div style="display:flex;justify-content:space-between;margin-bottom:10px;" id="sq-tags">
           <!-- Distressed: furrowed brows, strained eyes, open mouth -->
@@ -2988,6 +2996,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div id="hair-checkin-saved" style="display:none;"></div>
       <div id="hair-checkin-body">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+          <span style="font-size:11px;color:var(--muted);">Date</span>
+          <input type="date" id="hair-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
+        </div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Overall how is your hair today?</div>
         <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="hair-face-tags">
           <button class="sqb" data-hair="Low" onclick="soloHairFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
@@ -3436,6 +3448,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div id="mind-checkin-saved" style="display:none;"></div>
       <div id="mind-checkin-body">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+          <span style="font-size:11px;color:var(--muted);">Date</span>
+          <input type="date" id="mind-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
+        </div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Overall how is your mind feeling today?</div>
         <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="mind-face-tags">
           <button class="sqb" data-mind="Low" onclick="soloMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
@@ -3992,10 +4008,10 @@ async function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); }
-  if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); }
+  if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld&&!_sld.value)_sld.value=logicalDayStr(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
-  if(id==='sleep') { 
-    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary();
+  if(id==='sleep') {
+    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary(); const _slpd=document.getElementById('sleep-log-date');if(_slpd&&!_slpd.value)_slpd.value=logicalDayStr();
     // Default myAir date to yesterday — CPAP data is always for last night
     const myairDate = document.getElementById('myair-date');
     const myairLabel = document.getElementById('myair-date-label');
@@ -4007,7 +4023,7 @@ async function tab(id){
     }
   }
   if(id==='today'){ loadCheckinState(); loadTodaySleepFromCSV(); await updateBPBanners(); updateOutfitNudge(); loadMindHabits(); buildDailyProgress(); loadWeekIntention(); restoreExerciseCheckinState(); updateUploadStatusBanner(); setTimeout(checkWeeklyNudge, 2500); }
-  if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); restoreMindCheckinState(); loadIntentionHistory(); loadReflectionHistory(); }
+  if(id==='mind'){ loadDailyAffirmation(); loadReflectionPrompt(); loadPillarsToday(); loadWeekIntention(); loadMindHabits(); restoreMindCheckinState(); loadIntentionHistory(); loadReflectionHistory(); const _mld=document.getElementById('mind-log-date');if(_mld&&!_mld.value)_mld.value=logicalDayStr(); }
   if(id==='hair'){
     try { await loadLatestHairScan(); } catch(e){ console.warn('loadLatestHairScan error:',e); }
     try { await loadHairGoalPhotos(); } catch(e){ console.warn('loadHairGoalPhotos error:',e); }
@@ -4015,6 +4031,7 @@ async function tab(id){
     try { loadGoalLabels(); } catch(e){}
     try { await loadCurrentHairPhoto(); } catch(e){ console.warn('loadCurrentHairPhoto error:',e); }
     try { restoreHairCheckinState(); } catch(e){}
+    try { const _hld=document.getElementById('hair-log-date');if(_hld&&!_hld.value)_hld.value=logicalDayStr(); } catch(e){}
     try { restoreWashDates(); } catch(e){}
     try { buildProductTags(); } catch(e){}
   }
@@ -8025,7 +8042,7 @@ async function saveSleep(){
 
   if(hrs!=='—'){ const sd=document.getElementById('sleep-display'); if(sd) sd.textContent=hrs+'h'; const sh=document.getElementById('s-sleep-h'); if(sh) sh.textContent=hrs+'h'; }
 
-  const sleepDate = yesterdayStr();
+  const sleepDate = document.getElementById('sleep-log-date')?.value || yesterdayStr();
   const aids = window._sleepAidsLastNight || {};
   const melatonin = aids.melatonin || false;
   const sleepGummies = aids.sleepGummies || false;
@@ -9283,7 +9300,7 @@ async function saveHairCheckin(){
   const hairState = gT('hair-tags');
   const note = document.getElementById('hair-note')?.value.trim()||'';
   if(!hairFace && !hairState.length && !note){ showToast('Add at least one entry first'); return; }
-  const dateVal = logicalDayStr();
+  const dateVal = document.getElementById('hair-log-date')?.value || logicalDayStr();
   const entry = {hairFace, hairT: hairState, hairState, note, date: dateVal};
   try{
     await dbAdd('hairs', entry);
@@ -9399,7 +9416,7 @@ async function saveStyleCheckin(){
   const working = gT('style-working-tags');
   const note = document.getElementById('style-checkin-note')?.value||'';
   if(!styleFace && !outfitFeel && !styleVibe.length){ showToast('Select at least a face or vibe first'); return; }
-  const entry = {type:'style-checkin', styleFace, outfitFeel, styleVibe, working, note, date: logicalDayStr()};
+  const entry = {type:'style-checkin', styleFace, outfitFeel, styleVibe, working, note, date: document.getElementById('style-log-date')?.value||logicalDayStr()};
   try{
     await dbAdd('outfits', entry);
     syncToBlob('outfits');
@@ -9430,7 +9447,7 @@ async function saveMind(){
   const gratitudeChips=gT('mind-gratitude-tags');
   const gratitudeNote=document.getElementById('gratitude-note')?.value.trim()||'';
   if(!mindFace && !vibe.length && !energy && !conf && !stress && !bodyImage && !win && !gratitudeChips.length && !gratitudeNote){ showToast('Add at least one entry first'); return; }
-  const dateVal=nowStr();
+  const dateVal=document.getElementById('mind-log-date')?.value||logicalDayStr();
   const mindEntry={mindFace,vibe,energy,conf,stress,bodyImage,win,gratitudeChips,gratitudeNote,date:dateVal};
   try {
     await dbAdd('minds',mindEntry);
