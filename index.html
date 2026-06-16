@@ -335,6 +335,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .quality-row{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:7px 0;}
 .qb{padding:11px 4px;border-radius:10px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;text-align:center;font-family:var(--sans);}
 .qb.on{background:var(--warm);color:var(--accent);border-color:var(--accent);font-weight:500;}
+.sqb{display:flex;flex-direction:column;align-items:center;gap:4px;background:transparent;border:none;padding:0;cursor:pointer;}
+.sqb-face{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;transition:border-color 0.15s,background 0.15s;}
+.sqb.on .sqb-face{border-color:var(--accent);background:var(--warm);}
+.sqb-lbl{font-size:9px;color:var(--muted);font-family:var(--sans);}
+.sqb.on .sqb-lbl{color:var(--accent);}
+.sqb.on svg{color:var(--accent);}
 
 /* OUTFITS */
 .outfit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:9px 0;}
@@ -1244,28 +1250,81 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <!-- Form — visible by default, hidden after save -->
       <div id="sleep-checkin-body">
         <!-- Quality: 5 SVG circle face selectors -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;" id="sq-tags">
-          <!-- Rough: furrowed brows + deep frown -->
-          <button class="qb" data-quality="Rough" onclick="soloQ(this)" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-            <svg width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M8 9.5 Q9.5 10.5 11 9.5"/><path d="M15 9.5 Q16.5 10.5 18 9.5"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9 18c1-2 7-2 8 0"/></svg>
-          </button>
-          <!-- Poor: droopy/sleepy eyes + frown -->
-          <button class="qb" data-quality="Poor" onclick="soloQ(this)" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-            <svg width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M8.5 10.5 Q9.5 11.5 10.5 10.5"/><path d="M15.5 10.5 Q16.5 11.5 17.5 10.5"/><path d="M9.5 17.5c1-1.5 5.5-1.5 7 0"/></svg>
-          </button>
-          <!-- OK: half-closed sleepy eyes + flat mouth -->
-          <button class="qb" data-quality="OK" onclick="soloQ(this)" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-            <svg width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M8.5 11h2"/><path d="M15.5 11h2"/><path d="M9.5 16.5h7"/></svg>
-          </button>
-          <!-- Good: normal eyes + gentle smile -->
-          <button class="qb" data-quality="Good" onclick="soloQ(this)" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-            <svg width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 15.5c1 1.5 5.5 1.5 7 0"/></svg>
-          </button>
-          <!-- Great: happy curved eyes + big smile -->
-          <button class="qb" data-quality="Great" onclick="soloQ(this)" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-            <svg width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M8.5 11.5 Q9.5 10 10.5 11.5"/><path d="M15.5 11.5 Q16.5 10 17.5 11.5"/><path d="M9 15c1 2.5 7 2.5 8 0"/></svg>
-          </button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--sans);">Sleep quality</div>
           <button id="sleep-energy-btn" onclick="toggleSleepEnergyTags()" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">+ Morning energy</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px;" id="sq-tags">
+          <!-- Distressed: furrowed brows, strained eyes, open mouth -->
+          <button class="sqb" data-quality="Rough" onclick="soloSleep(this)">
+            <div class="sqb-face">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+                <circle cx="13" cy="13" r="11"/>
+                <path d="M8 9 Q9.5 10.5 11 9"/>
+                <path d="M15 9 Q16.5 10.5 18 9"/>
+                <path d="M8.5 11.5 Q9.5 10.5 10.5 11.5"/>
+                <path d="M15.5 11.5 Q16.5 10.5 17.5 11.5"/>
+                <ellipse cx="13" cy="17.5" rx="1.8" ry="2.2" stroke="currentColor" fill="none"/>
+              </svg>
+            </div>
+            <span class="sqb-lbl">Distressed</span>
+          </button>
+          <!-- Groggy: very heavy drooping lids, flat mouth, ZZ -->
+          <button class="sqb" data-quality="Poor" onclick="soloSleep(this)">
+            <div class="sqb-face">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+                <circle cx="13" cy="13" r="11"/>
+                <path d="M8 10 Q9.5 13 11 10"/>
+                <path d="M15 10 Q16.5 13 18 10"/>
+                <path d="M10 17h6"/>
+                <text x="14.5" y="8.5" font-size="3.2" fill="currentColor" stroke="none" font-family="sans-serif" font-weight="bold">z</text>
+                <text x="16.5" y="6.5" font-size="4" fill="currentColor" stroke="none" font-family="sans-serif" font-weight="bold">Z</text>
+              </svg>
+            </div>
+            <span class="sqb-lbl">Groggy</span>
+          </button>
+          <!-- Sleepy: closed eyes, small open mouth, ZZZ -->
+          <button class="sqb" data-quality="OK" onclick="soloSleep(this)">
+            <div class="sqb-face">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+                <circle cx="13" cy="13" r="11"/>
+                <path d="M8.5 11 Q9.5 12.2 10.5 11"/>
+                <path d="M15.5 11 Q16.5 12.2 17.5 11"/>
+                <ellipse cx="13" cy="17" rx="1.2" ry="1.5" stroke="currentColor" fill="none"/>
+                <text x="11.5" y="8.5" font-size="2.8" fill="currentColor" stroke="none" font-family="sans-serif" font-weight="bold">z</text>
+                <text x="13.5" y="6.5" font-size="3.5" fill="currentColor" stroke="none" font-family="sans-serif" font-weight="bold">Z</text>
+                <text x="16" y="5" font-size="4" fill="currentColor" stroke="none" font-family="sans-serif" font-weight="bold">Z</text>
+              </svg>
+            </div>
+            <span class="sqb-lbl">Sleepy</span>
+          </button>
+          <!-- Rested: peaceful closed eyes, gentle smile, tiny z -->
+          <button class="sqb" data-quality="Good" onclick="soloSleep(this)">
+            <div class="sqb-face">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+                <circle cx="13" cy="13" r="11"/>
+                <path d="M8.5 11.5 Q9.5 9.8 10.5 11.5"/>
+                <path d="M15.5 11.5 Q16.5 9.8 17.5 11.5"/>
+                <path d="M10 15.5 Q13 17.5 16 15.5"/>
+                <text x="17.5" y="7.5" font-size="2.8" fill="currentColor" stroke="none" font-family="sans-serif" font-weight="bold">z</text>
+              </svg>
+            </div>
+            <span class="sqb-lbl">Rested</span>
+          </button>
+          <!-- Refreshed: bright open eyes, big smile, sparkles -->
+          <button class="sqb" data-quality="Great" onclick="soloSleep(this)">
+            <div class="sqb-face">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);">
+                <circle cx="13" cy="13" r="11"/>
+                <circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/>
+                <circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/>
+                <path d="M9 15.5c1 2.5 7 2.5 8 0"/>
+                <path d="M17,4 L17.3,5.3 L18.5,5.6 L17.3,5.9 L17,7.2 L16.7,5.9 L15.5,5.6 L16.7,5.3 Z" fill="currentColor" stroke="none"/>
+                <path d="M19.5,3 L19.7,3.9 L20.5,4.1 L19.7,4.3 L19.5,5.2 L19.3,4.3 L18.5,4.1 L19.3,3.9 Z" fill="currentColor" stroke="none"/>
+              </svg>
+            </div>
+            <span class="sqb-lbl">Refreshed</span>
+          </button>
         </div>
         <!-- Morning energy chips + popup -->
         <div id="sleep-energy-chips" style="display:none;margin-bottom:6px;flex-wrap:wrap;gap:4px;"></div>
@@ -3669,7 +3728,7 @@ function saveSleepDraft(){
 function restoreSleepDraft(){
   const d = getPillarDraft('sleep'); if(!d) return;
   restoreTags('cpap-tags', d.cpap);
-  if(d.quality) document.getElementById('sq-tags')?.querySelectorAll('.qb').forEach(b=>{ if(b.dataset.quality===d.quality) b.classList.add('on'); });
+  if(d.quality) document.getElementById('sq-tags')?.querySelectorAll('[data-quality]').forEach(b=>{ if(b.dataset.quality===d.quality) b.classList.add('on'); });
   restoreTags('energy-am-tags', d.energy);
   if(d.note && document.getElementById('sleep-note')) document.getElementById('sleep-note').value = d.note;
   toggleSleepCheckin(true);
@@ -3770,6 +3829,7 @@ function selectOutfitType(btn, type){
 }
 function solo(gid,btn){document.getElementById(gid).querySelectorAll('.tag').forEach(t=>t.classList.remove('on'));btn.classList.add('on');}
 function soloQ(btn){document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function soloSleep(btn){document.getElementById('sq-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function ts(id){document.getElementById(id).classList.toggle('on'); autoSaveCheckinState();}
 function fmtOutfitDate(d){
   if(!d)return '';
@@ -7522,7 +7582,7 @@ async function saveSleep(){
     syncToBlob('sleeps');
     if(document.getElementById('sleep-note')) document.getElementById('sleep-note').value='';
     document.getElementById('energy-am-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
-    document.getElementById('sq-tags')?.querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));
+    document.getElementById('sq-tags')?.querySelectorAll('[data-quality]').forEach(b=>b.classList.remove('on'));
     const chipsEl = document.getElementById('sleep-energy-chips');
     if(chipsEl){ chipsEl.style.display='none'; chipsEl.innerHTML=''; }
     document.getElementById('energy-am-tags').style.display='none';
@@ -8106,11 +8166,11 @@ function showSleepCheckinSaved(e){
   const saved = document.getElementById('sleep-checkin-saved');
   if(!saved) return;
   const qFaceInner = {
-    Rough: '<path d="M8 9.5 Q9.5 10.5 11 9.5"/><path d="M15 9.5 Q16.5 10.5 18 9.5"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9 18c1-2 7-2 8 0"/>',
-    Poor:  '<path d="M8.5 10.5 Q9.5 11.5 10.5 10.5"/><path d="M15.5 10.5 Q16.5 11.5 17.5 10.5"/><path d="M9.5 17.5c1-1.5 5.5-1.5 7 0"/>',
-    OK:    '<path d="M8.5 11h2"/><path d="M15.5 11h2"/><path d="M9.5 16.5h7"/>',
-    Good:  '<circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 15.5c1 1.5 5.5 1.5 7 0"/>',
-    Great: '<path d="M8.5 11.5 Q9.5 10 10.5 11.5"/><path d="M15.5 11.5 Q16.5 10 17.5 11.5"/><path d="M9 15c1 2.5 7 2.5 8 0"/>'
+    Rough: '<path d="M8 9 Q9.5 10.5 11 9"/><path d="M15 9 Q16.5 10.5 18 9"/><path d="M8.5 11.5 Q9.5 10.5 10.5 11.5"/><path d="M15.5 11.5 Q16.5 10.5 17.5 11.5"/><ellipse cx="13" cy="17.5" rx="1.8" ry="2.2" stroke="currentColor" fill="none"/>',
+    Poor:  '<path d="M8 10 Q9.5 13 11 10"/><path d="M15 10 Q16.5 13 18 10"/><path d="M10 17h6"/>',
+    OK:    '<path d="M8.5 11 Q9.5 12.2 10.5 11"/><path d="M15.5 11 Q16.5 12.2 17.5 11"/><ellipse cx="13" cy="17" rx="1.2" ry="1.5" stroke="currentColor" fill="none"/>',
+    Good:  '<path d="M8.5 11.5 Q9.5 9.8 10.5 11.5"/><path d="M15.5 11.5 Q16.5 9.8 17.5 11.5"/><path d="M10 15.5 Q13 17.5 16 15.5"/>',
+    Great: '<circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9 15.5c1 2.5 7 2.5 8 0"/><path d="M17,4 L17.3,5.3 L18.5,5.6 L17.3,5.9 L17,7.2 L16.7,5.9 L15.5,5.6 L16.7,5.3 Z" fill="currentColor" stroke="none"/><path d="M19.5,3 L19.7,3.9 L20.5,4.1 L19.7,4.3 L19.5,5.2 L19.3,4.3 L18.5,4.1 L19.3,3.9 Z" fill="currentColor" stroke="none"/>'
   };
   const chips = arr => (arr||[]).filter(Boolean).map(v=>`<span style="background:var(--warm);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
   let dateLabel = 'Last night';
