@@ -1243,35 +1243,42 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="sleep-checkin-saved" style="display:none;"></div>
       <!-- Form — visible by default, hidden after save -->
       <div id="sleep-checkin-body">
-        <!-- Quality: 5 sleep emoji selectors -->
-        <div class="quality-row" id="sq-tags" style="margin-bottom:10px;">
-          <button class="qb" data-quality="Rough" onclick="soloQ(this)" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;font-size:10px;"><span style="font-size:20px;">😩</span>Rough</button>
-          <button class="qb" data-quality="Poor" onclick="soloQ(this)" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;font-size:10px;"><span style="font-size:20px;">😪</span>Poor</button>
-          <button class="qb" data-quality="OK" onclick="soloQ(this)" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;font-size:10px;"><span style="font-size:20px;">😴</span>OK</button>
-          <button class="qb" data-quality="Good" onclick="soloQ(this)" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;font-size:10px;"><span style="font-size:20px;">😌</span>Good</button>
-          <button class="qb" data-quality="Great" onclick="soloQ(this)" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;font-size:10px;"><span style="font-size:20px;">✨</span>Great</button>
+        <!-- Quality: 5 SVG circle face selectors -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;" id="sq-tags">
+          <button class="qb" data-quality="Rough" onclick="soloQ(this)" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+            <svg width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9 18c1-2 7-2 8 0"/></svg>
+          </button>
+          <button class="qb" data-quality="Poor" onclick="soloQ(this)" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+            <svg width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17.5c1-1.5 5.5-1.5 7 0"/></svg>
+          </button>
+          <button class="qb" data-quality="OK" onclick="soloQ(this)" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+            <svg width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16.5h7"/></svg>
+          </button>
+          <button class="qb" data-quality="Good" onclick="soloQ(this)" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+            <svg width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 15.5c1 1.5 5.5 1.5 7 0"/></svg>
+          </button>
+          <button class="qb" data-quality="Great" onclick="soloQ(this)" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+            <svg width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9 15c1 2.5 7 2.5 8 0"/></svg>
+          </button>
+          <button id="sleep-energy-btn" onclick="toggleSleepEnergyTags()" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">+ Morning energy</button>
         </div>
         <!-- Morning energy chips + popup -->
         <div id="sleep-energy-chips" style="display:none;margin-bottom:6px;flex-wrap:wrap;gap:4px;"></div>
-        <div style="margin-bottom:10px;">
-          <button id="sleep-energy-btn" onclick="toggleSleepEnergyTags()" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Morning energy</button>
-          <div class="tags" id="energy-am-tags" style="margin-top:8px;display:none;">
-            <button class="tag" onclick="togSleepEnergy(this)">Rested</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Energized</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Tired</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Groggy</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Foggy</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Refreshed</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Exhausted</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Wired</button>
-          </div>
+        <div class="tags" id="energy-am-tags" style="margin-bottom:10px;display:none;">
+          <button class="tag" onclick="togSleepEnergy(this)">Rested</button>
+          <button class="tag" onclick="togSleepEnergy(this)">Energized</button>
+          <button class="tag" onclick="togSleepEnergy(this)">Tired</button>
+          <button class="tag" onclick="togSleepEnergy(this)">Groggy</button>
+          <button class="tag" onclick="togSleepEnergy(this)">Foggy</button>
+          <button class="tag" onclick="togSleepEnergy(this)">Refreshed</button>
+          <button class="tag" onclick="togSleepEnergy(this)">Exhausted</button>
+          <button class="tag" onclick="togSleepEnergy(this)">Wired</button>
         </div>
         <!-- Sleep aids: auto-populated read-only from yesterday's meds -->
         <div id="sleep-aids-info" style="display:none;margin-bottom:10px;font-size:12px;color:var(--muted);"></div>
         <!-- Notes -->
         <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..." oninput="saveSleepDraft()" style="margin-bottom:8px;"></textarea>
-        <button class="btn-primary" onclick="saveSleep()">Log sleep</button>
-        <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px;">Saves to last night's date</div>
+        <button class="btn-primary" onclick="saveSleep()">Save</button>
         <div class="toast-msg" id="slp-t">Saved!</div>
       </div>
     </div>
@@ -8093,18 +8100,22 @@ function togSleepEnergy(el){
 function showSleepCheckinSaved(e){
   const saved = document.getElementById('sleep-checkin-saved');
   if(!saved) return;
-  const qEmoji = {Rough:'😩',Poor:'😪',OK:'😴',Good:'😌',Great:'✨'};
+  const qFacePath = {Rough:'M9 18c1-2 7-2 8 0',Poor:'M9.5 17.5c1-1.5 5.5-1.5 7 0',OK:'M9.5 16.5h7',Good:'M9.5 15.5c1 1.5 5.5 1.5 7 0',Great:'M9 15c1 2.5 7 2.5 8 0'};
   const chips = arr => (arr||[]).filter(Boolean).map(v=>`<span style="background:var(--warm);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
   let dateLabel = 'Last night';
   if(e.date){
     const d = safeDate(e.date);
     dateLabel = d && !isNaN(d) ? 'Night of '+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : 'Last night';
   }
-  const qualityDisplay = e.quality ? `${qEmoji[e.quality]||''} ${e.quality}` : '';
+  const facePath = e.quality ? qFacePath[e.quality] : null;
+  const faceSvgHtml = facePath ? `<div style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--accent);background:var(--warm);display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+    <svg width="22" height="22" viewBox="0 0 26 26" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="var(--accent)" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="var(--accent)" stroke="none"/><path d="${facePath}"/></svg>
+  </div>` : '';
   saved.style.display='block';
   saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${dateLabel} ✓ <button onclick="editSleepCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
-    ${qualityDisplay?`<div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px;">${qualityDisplay}</div>`:''}
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${dateLabel} ✓ <button onclick="editSleepCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">· edit</button></div>
+    ${faceSvgHtml}
+    ${e.quality?`<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${e.quality}</div>`:''}
     ${e.hrs&&e.hrs!=='—'?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">⏱ ${e.hrs}h sleep</div>`:''}
     ${(e.energy||[]).length?`<div style="margin-bottom:4px;">${chips(e.energy)}</div>`:''}
     ${e.melatonin||e.sleepGummies?`<div style="font-size:11px;color:var(--muted);margin-top:4px;">Took last night: ${[e.melatonin?'Melatonin':'',e.sleepGummies?'Sleep gummies':''].filter(Boolean).join(' · ')}</div>`:''}
