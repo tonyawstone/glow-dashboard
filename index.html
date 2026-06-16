@@ -2540,8 +2540,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Skincare Routine — unified card with AM, PM, Avatar subsections -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div class="card-title" style="margin:0;">✨ Skincare routine</div>
-        <button onclick="openSkincareLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs →</button>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-sparkles" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Skincare Routine</div>
+        </div>
+        <button onclick="openSkincareLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past logs →</button>
       </div>
 
       <!-- AM subcard -->
@@ -2607,7 +2610,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- AI Skin Scan -->
     <div class="card skin-scan-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div class="card-title" style="margin:0;">✨ Weekly skin scan</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-camera" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Weekly Skin Scan</div>
+        </div>
         <button class="guide-btn" onclick="openGuide('skin_score')">?</button>
       </div>
       <div id="skin-scan-latest">
@@ -2643,32 +2649,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toggle-row"><div><div class="tl">Facials (every 8 weeks)</div><div class="ts" id="start-facials-display">Tap to set start date</div></div><input type="text" id="start-facials" placeholder="e.g. Jun 2024" style="width:110px;padding:6px 8px;font-size:12px;" onchange="saveStartDate('facials',this.value)"></div>
     </div>
 
-    <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-title" style="margin:0;">Facial log</div><button onclick="openFacialLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button></div>
-    </div>
-
-    <!-- Derm prep — every 8 weeks -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleDermCard()">
-        <div>
-          <div class="card-title" style="margin:0;">🩺 Derm appointment prep</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Every 8 weeks · use before your visit</div>
-        </div>
-        <span id="derm-card-arrow" style="font-size:16px;color:var(--muted);">▾</span>
-      </div>
-      <div id="derm-card-body" style="display:none;margin-top:12px;">
-        <div class="fl">Next facial date</div>
-        <input type="text" id="next-facial" placeholder="e.g. July 5, 2026">
-        <div class="fl">Notes from last facial</div>
-        <textarea id="facial-notes" rows="2" placeholder="What was done, products, skin reaction..."></textarea>
-        <div class="fl">Notes / questions for derm</div>
-        <textarea id="derm-note" rows="3" placeholder="Rx changes, skin reactions, questions to ask, things you've noticed since last visit..."></textarea>
-        <button class="btn-primary" onclick="saveFacial()">Save derm notes</button>
-        <button class="btn-ai" style="margin-top:8px;" onclick="dermCoach()">✨ Generate derm prep questions ↗</button>
-        <div id="derm-coach-output" class="coach-response" style="display:none"></div>
-        <button onclick="openCoachHistory('Skin')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:4px 0 0;font-family:var(--sans);">Past conversations →</button>
-        <div class="toast-msg" id="ft">Saved!</div>
-      </div>
-    </div>
   </div>
 
   <div class="view-content" id="vc-skin-weekly">
@@ -2717,6 +2697,40 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:10px;">Side-by-side comparison</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="skin-comparison-content"></div>
         <button onclick="clearSkinComparison()" style="width:100%;margin-top:12px;padding:8px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;">Clear comparison</button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-calendar" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Facial Log</div>
+        </div>
+        <button onclick="openFacialLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past logs →</button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleDermCard()">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-stethoscope" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Derm Appointment Prep</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;color:var(--muted);">Every 8 weeks</span>
+          <span id="derm-card-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+        </div>
+      </div>
+      <div id="derm-card-body" style="display:none;margin-top:12px;">
+        <div class="fl">Next facial date</div>
+        <input type="text" id="next-facial" placeholder="e.g. July 5, 2026">
+        <div class="fl">Notes from last facial</div>
+        <textarea id="facial-notes" rows="2" placeholder="What was done, products, skin reaction..."></textarea>
+        <div class="fl">Notes / questions for derm</div>
+        <textarea id="derm-note" rows="3" placeholder="Rx changes, skin reactions, questions to ask, things you've noticed since last visit..."></textarea>
+        <button class="btn-primary" onclick="saveFacial()">Save derm notes</button>
+        <button class="btn-ai" style="margin-top:8px;" onclick="dermCoach()">✨ Generate derm prep questions ↗</button>
+        <div id="derm-coach-output" class="coach-response" style="display:none"></div>
+        <button onclick="openCoachHistory('Skin')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:4px 0 0;font-family:var(--sans);">Past conversations →</button>
+        <div class="toast-msg" id="ft">Saved!</div>
       </div>
     </div>
   </div>
