@@ -2024,13 +2024,21 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <span class="sqb-lbl">Amazing</span>
           </button>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Energy level</div>
-        <div class="tags" id="wellness-energy-tags" style="margin-bottom:14px;">
-          <button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">High</button><button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">Steady</button><button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">Low</button><button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">Exhausted</button>
+        <div style="margin-bottom:8px;">
+          <button id="wellness-energy-btn" onclick="toggleWellnessEnergy()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Energy level</button>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Appetite today</div>
-        <div class="tags" id="wellness-appetite-tags" style="margin-bottom:14px;">
-          <button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">Much less</button><button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">Slightly less</button><button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">Normal</button><button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">More than usual</button>
+        <div id="wellness-energy-panel" style="display:none;">
+          <div class="tags" id="wellness-energy-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">High</button><button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">Steady</button><button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">Low</button><button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">Exhausted</button>
+          </div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <button id="wellness-appetite-btn" onclick="toggleWellnessAppetite()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Appetite today</button>
+        </div>
+        <div id="wellness-appetite-panel" style="display:none;">
+          <div class="tags" id="wellness-appetite-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">Much less</button><button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">Slightly less</button><button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">Normal</button><button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">More than usual</button>
+          </div>
         </div>
         <div style="margin-bottom:8px;">
           <button id="wellness-symptoms-btn" onclick="toggleWellnessSymptoms()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Add symptoms</button>
@@ -8736,6 +8744,8 @@ async function saveBody(){
 // ── WELLNESS CHECK-IN ──────────────────────────────────────────────────────
 function soloWellnessFace(btn){document.getElementById('wellness-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveWellnessDraft();}
 function soloWellnessGroup(id,btn){document.getElementById(id).querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveWellnessDraft();}
+function toggleWellnessEnergy(){const p=document.getElementById('wellness-energy-panel'),b=document.getElementById('wellness-energy-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Energy level':'+ Energy level';}
+function toggleWellnessAppetite(){const p=document.getElementById('wellness-appetite-panel'),b=document.getElementById('wellness-appetite-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Appetite today':'+ Appetite today';}
 function toggleWellnessSymptoms(){const p=document.getElementById('wellness-symptoms-panel'),b=document.getElementById('wellness-symptoms-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Add symptoms':'+ Add symptoms';}
 function toggleWellnessFeelings(){const p=document.getElementById('wellness-feelings-panel'),b=document.getElementById('wellness-feelings-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Feeling good about':'+ Feeling good about';}
 function saveWellnessDraft(){
@@ -8751,8 +8761,8 @@ function saveWellnessDraft(){
 function restoreWellnessDraft(){
   const d = getPillarDraft('wellness'); if(!d) return;
   if(d.wellnessFace){const b=document.getElementById('wellness-face-tags')?.querySelector('[data-wellness="'+d.wellnessFace+'"]');if(b)soloWellnessFace(b);}
-  if(d.energy){const b=Array.from(document.getElementById('wellness-energy-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.energy);if(b)soloWellnessGroup('wellness-energy-tags',b);}
-  if(d.appetite){const b=Array.from(document.getElementById('wellness-appetite-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.appetite);if(b)soloWellnessGroup('wellness-appetite-tags',b);}
+  if(d.energy){const b=Array.from(document.getElementById('wellness-energy-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.energy);if(b){soloWellnessGroup('wellness-energy-tags',b);const p=document.getElementById('wellness-energy-panel');if(p&&p.style.display==='none')toggleWellnessEnergy();}}
+  if(d.appetite){const b=Array.from(document.getElementById('wellness-appetite-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.appetite);if(b){soloWellnessGroup('wellness-appetite-tags',b);const p=document.getElementById('wellness-appetite-panel');if(p&&p.style.display==='none')toggleWellnessAppetite();}}
   if(d.symptoms?.length){restoreTags('wellness-symptom-tags',d.symptoms);const p=document.getElementById('wellness-symptoms-panel');if(p&&p.style.display==='none')toggleWellnessSymptoms();}
   if(d.feelings?.length){restoreTags('wellness-feeling-tags',d.feelings);const p=document.getElementById('wellness-feelings-panel');if(p&&p.style.display==='none')toggleWellnessFeelings();}
   if(d.note && document.getElementById('wellness-note')) document.getElementById('wellness-note').value = d.note;
@@ -8793,8 +8803,8 @@ function editWellnessCheckin(){
   if(!state) return;
   if(state.wellnessFace){const b=document.getElementById('wellness-face-tags')?.querySelector('[data-wellness="'+state.wellnessFace+'"]');if(b)soloWellnessFace(b);}
   if(state.date && document.getElementById('wellness-log-date')) document.getElementById('wellness-log-date').value = state.date;
-  if(state.energy){const b=Array.from(document.getElementById('wellness-energy-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.energy);if(b)soloWellnessGroup('wellness-energy-tags',b);}
-  if(state.appetite){const b=Array.from(document.getElementById('wellness-appetite-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.appetite);if(b)soloWellnessGroup('wellness-appetite-tags',b);}
+  if(state.energy){const b=Array.from(document.getElementById('wellness-energy-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.energy);if(b){soloWellnessGroup('wellness-energy-tags',b);const p=document.getElementById('wellness-energy-panel');if(p&&p.style.display==='none')toggleWellnessEnergy();}}
+  if(state.appetite){const b=Array.from(document.getElementById('wellness-appetite-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.appetite);if(b){soloWellnessGroup('wellness-appetite-tags',b);const p=document.getElementById('wellness-appetite-panel');if(p&&p.style.display==='none')toggleWellnessAppetite();}}
   if(state.symptoms?.length){restoreTags('wellness-symptom-tags',state.symptoms);const p=document.getElementById('wellness-symptoms-panel');if(p&&p.style.display==='none')toggleWellnessSymptoms();}
   if(state.feelings?.length){restoreTags('wellness-feeling-tags',state.feelings);const p=document.getElementById('wellness-feelings-panel');if(p&&p.style.display==='none')toggleWellnessFeelings();}
   if(state.note && document.getElementById('wellness-note')) document.getElementById('wellness-note').value = state.note;
@@ -8839,6 +8849,8 @@ async function saveWellness(){
     document.getElementById('wellness-symptom-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     document.getElementById('wellness-feeling-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     if(document.getElementById('wellness-note')) document.getElementById('wellness-note').value='';
+    const eP=document.getElementById('wellness-energy-panel');if(eP&&eP.style.display!=='none')toggleWellnessEnergy();
+    const aP=document.getElementById('wellness-appetite-panel');if(aP&&aP.style.display!=='none')toggleWellnessAppetite();
     const sP=document.getElementById('wellness-symptoms-panel');if(sP&&sP.style.display!=='none')toggleWellnessSymptoms();
     const fP=document.getElementById('wellness-feelings-panel');if(fP&&fP.style.display!=='none')toggleWellnessFeelings();
     localStorage.setItem('glowWellnessCheckinState', JSON.stringify({...entry, savedAt: Date.now()}));
