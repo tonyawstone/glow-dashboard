@@ -898,8 +898,69 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button onclick="clearTodayPlan()" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0;flex-shrink:0;">✕</button>
     </div>
 
+    <!-- Style Check-In card -->
+    <div class="card" id="style-checkin-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-hanger" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">How are you showing up today?</div>
+        </div>
+        <div id="style-checkin-header-right" style="display:flex;align-items:center;gap:8px;">
+        </div>
+      </div>
+      <div id="style-checkin-saved" style="display:none;"></div>
+      <div id="style-checkin-body">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">How do you feel in your look today?</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="style-face-tags">
+          <button class="sqb" data-style="Invisible" onclick="soloStyleFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/></svg></div>
+            <span class="sqb-lbl">Invisible</span>
+          </button>
+          <button class="sqb" data-style="Okay" onclick="soloStyleFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/></svg></div>
+            <span class="sqb-lbl">Okay</span>
+          </button>
+          <button class="sqb" data-style="Put together" onclick="soloStyleFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/></svg></div>
+            <span class="sqb-lbl">Put together</span>
+          </button>
+          <button class="sqb" data-style="Confident" onclick="soloStyleFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20 17.5 16"/></svg></div>
+            <span class="sqb-lbl">Confident</span>
+          </button>
+          <button class="sqb" data-style="Fierce" onclick="soloStyleFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="-2 -2 30 30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/></svg></div>
+            <span class="sqb-lbl">Fierce 🔥</span>
+          </button>
+        </div>
+        <div style="margin-bottom:8px;"><button id="style-outfitfeel-btn" onclick="toggleStyleOutfitFeel()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ How does your outfit feel?</button></div>
+        <div id="style-outfitfeel-panel" style="display:none;">
+          <div class="tags" id="style-outfitfeel-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="solo('style-outfitfeel-tags',this);saveStyleCheckinDraft()">Love it</button><button class="tag" onclick="solo('style-outfitfeel-tags',this);saveStyleCheckinDraft()">It works</button><button class="tag" onclick="solo('style-outfitfeel-tags',this);saveStyleCheckinDraft()">Comfortable</button><button class="tag" onclick="solo('style-outfitfeel-tags',this);saveStyleCheckinDraft()">Meh</button><button class="tag" onclick="solo('style-outfitfeel-tags',this);saveStyleCheckinDraft()">Overdressed</button><button class="tag" onclick="solo('style-outfitfeel-tags',this);saveStyleCheckinDraft()">Underdressed</button>
+          </div>
+        </div>
+        <div style="margin-bottom:8px;"><button id="style-vibe-btn" onclick="toggleStyleVibe()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Style vibe today</button></div>
+        <div id="style-vibe-panel" style="display:none;">
+          <div class="tags" id="style-vibe-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Polished</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Casual</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Elevated</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Effortless</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Bold</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Soft</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Professional</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Creative</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Cozy</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Minimal</button>
+          </div>
+        </div>
+        <div style="margin-bottom:8px;"><button id="style-working-btn" onclick="toggleStyleWorking()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ What's working?</button></div>
+        <div id="style-working-panel" style="display:none;">
+          <div class="tags" id="style-working-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Fit is perfect</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Colors feel right</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Feeling my size</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Accessories on point</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Hair matches</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Skin is glowing</button><button class="tag" onclick="tog(this);saveStyleCheckinDraft()">Shoes are 🔥</button>
+          </div>
+        </div>
+        <textarea id="style-checkin-note" rows="2" placeholder="Anything about today's look worth remembering…" oninput="saveStyleCheckinDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
+        <div style="text-align:center;">
+          <button onclick="saveStyleCheckin()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
+        </div>
+        <div class="toast-msg" id="sct">Saved!</div>
+      </div>
+    </div>
+
     <!-- 1. Log an outfit — first card -->
-    
+
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleOutfitForm()">
         <div class="card-title" style="margin:0;">+ Log an outfit</div>
@@ -3931,7 +3992,7 @@ async function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); }
-  if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); loadWardrobePlanLog(); loadTodayPlannedLook(); }
+  if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') { 
     buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary();
@@ -7227,13 +7288,14 @@ async function renderCheckinHub(){
     dbAll('hairs').catch(()=>[]),
   ]);
 
-  const mindEntry   = minds.find(e=>e.date===today||e.date===logical);
-  const sleepEntry  = sleeps.filter(e=>e.date===yesterday||e.date===logical).pop();
-  const waterEntry  = waters.find(e=>e.date===today||e.date===logical);
-  const skinEntry   = skins.find(e=>e.type==='checkin'&&(e.date===today||e.date===logical));
-  const bodyEntry   = bodies.filter(e=>e.type==='body'&&(e.date===today||e.date===logical)).pop();
-  const outfitEntry = outfits.filter(e=>e.type!=='inspo'&&e.date===today).pop();
-  const hairEntry   = hairs.find(e=>e.date===today||e.date===logical);
+  const mindEntry        = minds.find(e=>e.date===today||e.date===logical);
+  const sleepEntry       = sleeps.filter(e=>e.date===yesterday||e.date===logical).pop();
+  const waterEntry       = waters.find(e=>e.date===today||e.date===logical);
+  const skinEntry        = skins.find(e=>e.type==='checkin'&&(e.date===today||e.date===logical));
+  const bodyEntry        = bodies.filter(e=>e.type==='body'&&(e.date===today||e.date===logical)).pop();
+  const outfitEntry      = outfits.filter(e=>e.type!=='inspo'&&e.type!=='style-checkin'&&e.date===today).pop();
+  const styleCheckinEntry = outfits.filter(e=>e.type==='style-checkin'&&(e.date===today||e.date===logical)).pop();
+  const hairEntry        = hairs.find(e=>e.date===today||e.date===logical);
 
   const chips = arr=>(arr||[]).filter(Boolean).map(v=>`<span style="background:rgba(0,0,0,0.06);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
 
@@ -7255,9 +7317,9 @@ async function renderCheckinHub(){
     { emoji:'❤️', name:'Body', done:!!bodyEntry,
       saved: bodyEntry ? `${(bodyEntry.nsv||[]).length?`<div style="margin-bottom:4px;">${chips(bodyEntry.nsv)}</div>`:''}${(bodyEntry.waist||bodyEntry.hips)?`<div>${[bodyEntry.waist?'Waist: '+bodyEntry.waist+'"':'',bodyEntry.hips?'Hips: '+bodyEntry.hips+'"':''].filter(Boolean).join(' · ')}</div>`:''}` : null,
       tab:'body', scrollId:'body-log-chevron', toggleFn:'toggleBodyLog' },
-    { emoji:'👗', name:'Style', done:!!outfitEntry,
-      saved: outfitEntry ? `<div>${[outfitEntry.vibe,outfitEntry.occasion].filter(Boolean).join(' · ')||'Outfit logged ✓'}</div>` : null,
-      tab:'style', scrollId:'outfit-form-chevron', toggleFn:'toggleOutfitForm' },
+    { emoji:'👗', name:'Style', done:!!styleCheckinEntry||!!outfitEntry,
+      saved: styleCheckinEntry ? `${styleCheckinEntry.styleFace?`<div style="margin-bottom:2px;">${styleCheckinEntry.styleFace}</div>`:''}${(styleCheckinEntry.styleVibe||[]).length?`<div style="margin-bottom:4px;">${chips(styleCheckinEntry.styleVibe)}</div>`:''}${styleCheckinEntry.note?`<div style="color:var(--muted);">${styleCheckinEntry.note}</div>`:''}` : outfitEntry ? `<div>${[outfitEntry.vibe,outfitEntry.occasion].filter(Boolean).join(' · ')||'Outfit logged ✓'}</div>` : null,
+      tab:'style', scrollId:'style-checkin-card', toggleFn:'' },
     { emoji:'💇', name:'Hair', done:!!hairEntry,
       saved: hairEntry ? `${hairEntry.hairFace?`<div style="margin-bottom:2px;">${hairEntry.hairFace}</div>`:''}${(hairEntry.hairT||hairEntry.hairState||[]).length?`<div style="margin-bottom:4px;">${chips(hairEntry.hairT||hairEntry.hairState)}</div>`:''}${hairEntry.note?`<div style="color:var(--muted);">${hairEntry.note}</div>`:''}` : null,
       tab:'hair', scrollId:'hair-checkin-card', toggleFn:'' },
@@ -9240,6 +9302,123 @@ async function saveHairCheckin(){
 }
 
 async function saveHair(){ return saveHairCheckin(); }
+
+// ── Style Check-In ──────────────────────────────────────────────
+function soloStyleFace(btn){document.getElementById('style-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveStyleCheckinDraft();}
+function toggleStyleOutfitFeel(){const p=document.getElementById('style-outfitfeel-panel'),b=document.getElementById('style-outfitfeel-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– How does your outfit feel?':'+ How does your outfit feel?';}
+function toggleStyleVibe(){const p=document.getElementById('style-vibe-panel'),b=document.getElementById('style-vibe-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Style vibe today':'+ Style vibe today';}
+function toggleStyleWorking(){const p=document.getElementById('style-working-panel'),b=document.getElementById('style-working-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– What\'s working?':'+ What\'s working?';}
+
+function saveStyleCheckinDraft(){
+  savePillarDraft('style-checkin',{
+    styleFace: document.getElementById('style-face-tags')?.querySelector('.on')?.dataset.style||'',
+    outfitFeel: document.getElementById('style-outfitfeel-tags')?.querySelector('.on')?.textContent||'',
+    styleVibe: gT('style-vibe-tags'),
+    working: gT('style-working-tags'),
+    note: document.getElementById('style-checkin-note')?.value||''
+  });
+}
+
+function showStyleCheckinSaved(e){
+  const saved = document.getElementById('style-checkin-saved');
+  if(!saved) return;
+  const styleFaceInner = {
+    Invisible:'<circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/>',
+    Okay:'<circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/>',
+    'Put together':'<circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/>',
+    Confident:'<path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20 17.5 16"/>',
+    Fierce:'<path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/>'
+  };
+  const styleFaceViewBox = {Invisible:'0 0 26 26',Okay:'0 0 26 26','Put together':'0 0 26 26',Confident:'0 0 26 26',Fierce:'-2 -2 30 30'};
+  const styleFaces = ['Invisible','Okay','Put together','Confident','Fierce'];
+  const faceSvg = (f,sel) => `<div style="width:32px;height:32px;border-radius:50%;border:1.5px solid ${sel?'var(--accent)':'transparent'};background:${sel?'rgba(160,120,80,0.1)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="${styleFaceViewBox[f]||'0 0 26 26'}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:${sel?'var(--accent)':'var(--border)'}"><circle cx="13" cy="13" r="11"/>${styleFaceInner[f]||''}</svg></div>`;
+  const chip = (v,col) => `<span style="background:${col||'rgba(107,158,120,0.12)'};color:${col?'var(--accent)':'var(--green)'};border:0.5px solid ${col||'rgba(107,158,120,0.3)'};border-radius:20px;padding:3px 10px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`;
+  const chips = arr => (arr||[]).filter(Boolean).map(v=>chip(v)).join('');
+  const editPill = `<button onclick="editStyleCheckin()" style="padding:2px 10px;border-radius:10px;border:1px dashed var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin:2px 0 0 0;">+ edit</button>`;
+  const outfitFeelHtml = e.outfitFeel ? chip(e.outfitFeel,'rgba(160,120,80,0.12)') : '';
+  const noteHtml = e.note?`<div style="font-family:var(--serif);font-size:13px;color:var(--muted);font-style:italic;margin-top:8px;">${e.note}</div>`:'';
+  const headerRight = document.getElementById('style-checkin-header-right');
+  if(headerRight) headerRight.innerHTML = `<span style="font-size:11px;color:var(--muted);">${fmtOutfitDate(e.date)}</span>`;
+  const body = document.getElementById('style-checkin-body');
+  if(body) body.style.display = 'none';
+  saved.style.display = 'block';
+  saved.innerHTML = `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">${styleFaces.map(f=>faceSvg(f,e.styleFace===f)).join('')}${outfitFeelHtml}${chips(e.styleVibe)}${chips(e.working)}${editPill}</div>${noteHtml}`;
+}
+
+function editStyleCheckin(){
+  const saved = document.getElementById('style-checkin-saved');
+  if(saved) saved.style.display = 'none';
+  const headerRight = document.getElementById('style-checkin-header-right');
+  if(headerRight) headerRight.innerHTML = '';
+  const body = document.getElementById('style-checkin-body');
+  if(body) body.style.display = 'block';
+  const state = JSON.parse(localStorage.getItem('glowStyleCheckinState')||'null');
+  if(!state) return;
+  if(state.styleFace){const b=document.getElementById('style-face-tags')?.querySelector('[data-style="'+state.styleFace+'"]');if(b)soloStyleFace(b);}
+  if(state.outfitFeel){const tags=document.getElementById('style-outfitfeel-tags');if(tags){const b=Array.from(tags.querySelectorAll('.tag')).find(t=>t.textContent===state.outfitFeel);if(b){solo('style-outfitfeel-tags',b);const p=document.getElementById('style-outfitfeel-panel');if(p&&p.style.display==='none')toggleStyleOutfitFeel();}}}
+  if(state.styleVibe?.length){restoreTags('style-vibe-tags',state.styleVibe);const p=document.getElementById('style-vibe-panel');if(p&&p.style.display==='none')toggleStyleVibe();}
+  if(state.working?.length){restoreTags('style-working-tags',state.working);const p=document.getElementById('style-working-panel');if(p&&p.style.display==='none')toggleStyleWorking();}
+  if(state.note && document.getElementById('style-checkin-note')) document.getElementById('style-checkin-note').value = state.note;
+}
+
+function restoreStyleCheckinDraft(){
+  const d = getPillarDraft('style-checkin'); if(!d) return;
+  if(d.styleFace){const b=document.getElementById('style-face-tags')?.querySelector('[data-style="'+d.styleFace+'"]');if(b)soloStyleFace(b);}
+  if(d.outfitFeel){const tags=document.getElementById('style-outfitfeel-tags');if(tags){const b=Array.from(tags.querySelectorAll('.tag')).find(t=>t.textContent===d.outfitFeel);if(b){solo('style-outfitfeel-tags',b);const p=document.getElementById('style-outfitfeel-panel');if(p&&p.style.display==='none')toggleStyleOutfitFeel();}}}
+  if(d.styleVibe?.length){restoreTags('style-vibe-tags',d.styleVibe);const p=document.getElementById('style-vibe-panel');if(p&&p.style.display==='none')toggleStyleVibe();}
+  if(d.working?.length){restoreTags('style-working-tags',d.working);const p=document.getElementById('style-working-panel');if(p&&p.style.display==='none')toggleStyleWorking();}
+  if(d.note && document.getElementById('style-checkin-note')) document.getElementById('style-checkin-note').value = d.note;
+}
+
+async function restoreStyleCheckinState(){
+  try{
+    const today = logicalDayStr();
+    const cached = JSON.parse(localStorage.getItem('glowStyleCheckinState')||'null');
+    if(cached && cached.savedAt && cached.date===today && (Date.now()-cached.savedAt)<86400000){
+      showStyleCheckinSaved(cached); return;
+    }
+    let entry = null;
+    try{ const all = await dbAll('outfits'); entry = all.filter(e=>e.type==='style-checkin'&&(e.date===today||e.date===logicalDayStr())).pop(); }catch(e){}
+    if(!entry){
+      try{
+        const res = await fetch(`${BACKEND}/api/sync?pillar=outfits&t=${Date.now()}`);
+        if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+          entry = data.filter(e=>e.type==='style-checkin'&&(e.date===today||e.date===logicalDayStr())).pop();
+        }
+      }catch(e){}
+    }
+    if(entry) showStyleCheckinSaved(entry);
+    else restoreStyleCheckinDraft();
+  }catch(e){}
+}
+
+async function saveStyleCheckin(){
+  const styleFace = document.getElementById('style-face-tags')?.querySelector('.on')?.dataset.style||'';
+  const outfitFeel = document.getElementById('style-outfitfeel-tags')?.querySelector('.on')?.textContent||'';
+  const styleVibe = gT('style-vibe-tags');
+  const working = gT('style-working-tags');
+  const note = document.getElementById('style-checkin-note')?.value||'';
+  if(!styleFace && !outfitFeel && !styleVibe.length){ showToast('Select at least a face or vibe first'); return; }
+  const entry = {type:'style-checkin', styleFace, outfitFeel, styleVibe, working, note, date: logicalDayStr()};
+  try{
+    await dbAdd('outfits', entry);
+    syncToBlob('outfits');
+    clearPillarDraft('style-checkin');
+    document.getElementById('style-face-tags')?.querySelectorAll('.on').forEach(b=>b.classList.remove('on'));
+    document.getElementById('style-outfitfeel-tags')?.querySelectorAll('.on').forEach(b=>b.classList.remove('on'));
+    document.getElementById('style-vibe-tags')?.querySelectorAll('.on').forEach(b=>b.classList.remove('on'));
+    document.getElementById('style-working-tags')?.querySelectorAll('.on').forEach(b=>b.classList.remove('on'));
+    if(document.getElementById('style-checkin-note')) document.getElementById('style-checkin-note').value='';
+    const oP=document.getElementById('style-outfitfeel-panel');if(oP&&oP.style.display!=='none')toggleStyleOutfitFeel();
+    const vP=document.getElementById('style-vibe-panel');if(vP&&vP.style.display!=='none')toggleStyleVibe();
+    const wP=document.getElementById('style-working-panel');if(wP&&wP.style.display!=='none')toggleStyleWorking();
+    localStorage.setItem('glowStyleCheckinState', JSON.stringify({...entry, savedAt: Date.now()}));
+    toast('sct');
+    buildDailyProgress();
+    showStyleCheckinSaved(entry);
+  }catch(err){ showToast('Could not save — please try again'); }
+}
+
 async function saveMind(){
   const mindFace=document.getElementById('mind-face-tags')?.querySelector('.on')?.dataset.mind||'';
   const vibe=gT('vibe-tags');
