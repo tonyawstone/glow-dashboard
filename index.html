@@ -1347,46 +1347,39 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="sleep-coach-output" class="coach-response" style="display:none;margin-top:10px;"></div>
     </div>
 
-    <!-- Sleep Snapshot — side-by-side -->
+    <!-- Sleep Snapshot -->
     <div class="card" id="sleep-snapshot-card">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
         <i class="ti ti-moon-stars" style="font-size:13px;color:var(--accent);"></i>
         <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Sleep Snapshot</div>
       </div>
-      <div style="display:flex;gap:14px;align-items:flex-start;">
-        <!-- Left: hours + bedtime/wake -->
-        <div style="flex:1;">
-          <div style="font-size:42px;font-weight:700;color:var(--accent);line-height:1;" id="sleep-display">—</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">hours last night</div>
-          <div style="display:flex;flex-direction:column;gap:7px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="font-size:11px;color:var(--muted);width:46px;flex-shrink:0;">Bedtime</div>
-              <div style="font-size:15px;font-weight:600;color:var(--text);" id="csv-bedtime">—</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="font-size:11px;color:var(--muted);width:46px;flex-shrink:0;">Wake</div>
-              <div style="font-size:15px;font-weight:600;color:var(--text);" id="csv-waketime">—</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="font-size:11px;color:var(--muted);width:46px;flex-shrink:0;">In bed</div>
-              <div style="font-size:14px;font-weight:500;color:var(--text);" id="csv-timeinbed">—</div>
-            </div>
-          </div>
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:14px;">
+        <div style="font-size:44px;font-weight:700;font-family:var(--serif);color:var(--accent);line-height:1;" id="sleep-display">—</div>
+        <div style="font-size:14px;color:var(--muted);">hrs last night</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:11px;color:var(--muted);width:48px;flex-shrink:0;">Bedtime</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text);" id="csv-bedtime">—</div>
         </div>
-        <!-- Right: Sleep score circle -->
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding-top:4px;" id="sleep-score-right">
-          <div style="width:84px;height:84px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;background:var(--warm);">
-            <div style="font-size:10px;color:var(--muted);text-align:center;padding:4px;">No data</div>
-          </div>
-          <div style="font-size:10px;color:var(--muted);margin-top:6px;">Sleep Score</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:11px;color:var(--muted);width:48px;flex-shrink:0;">Wake</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text);" id="csv-waketime">—</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:11px;color:var(--muted);width:48px;flex-shrink:0;">In bed</div>
+          <div style="font-size:15px;font-weight:500;color:var(--text);" id="csv-timeinbed">—</div>
         </div>
       </div>
-      <!-- HR/HRV row -->
-      <div id="sleep-hrv-row" style="display:none;margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border);"></div>
-      <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:12px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
       <div style="display:none;" id="csv-sleephrs"></div>
       <div style="display:none;" id="sleep-times-from-csv"></div>
       <a href="javascript:void(0)" onclick="openWithings()" class="ext-link" style="margin-top:10px;"><i class="ti ti-external-link" aria-hidden="true"></i>Open Withings · see your Sleep Score</a>
+    </div>
+
+    <!-- Sleep Score + HR/HRV -->
+    <div class="card" id="sleep-score-card">
+      <div id="sleep-score-card-content"><div class="log-empty">Upload CSV to see Sleep Score</div></div>
     </div>
 
     <!-- Sleep Stages -->
@@ -1415,7 +1408,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleMyAirCard()">
         <div style="display:flex;align-items:center;gap:6px;">
-          <div class="card-title" style="margin:0;">😴 ResMed myAir</div>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">ResMed myAir</div>
           <div id="myair-card-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
         <button onclick="event.stopPropagation();openMyAirLogOverlay()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past entries</button>
@@ -9175,8 +9168,7 @@ function buildSleepStagesDisplay(row){
   ].filter(s=>s.val>0||s.label==='Awake');
 
   return `
-    <div style="margin-top:12px;">
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px;">Sleep stages</div>
+    <div style="margin-top:4px;">
       ${barHtml}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
         ${stages.map(s=>{
@@ -9741,41 +9733,48 @@ async function buildSleepAppleMetrics(){
   const oHRV = parseFloat(latest.overnight_hrv)||null;
   const scoreColor = score>=80?'#27500A':score>=60?'#6B9E78':score>=40?'#E8A87C':'#C0392B';
   const scoreLabel = score>=80?'Optimal':score>=60?'Good':score>=40?'Fair':'Needs attention';
-  const scoreRightEl = document.getElementById('sleep-score-right');
-  if(scoreRightEl){
+  const hrHrvHTML = (oHR||oHRV) ? `
+    <div style="display:flex;gap:10px;margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border);">
+      ${oHR?`<div style="flex:1;display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:rgba(192,57,43,0.06);">
+        <div style="width:30px;height:30px;border-radius:50%;background:rgba(192,57,43,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="ti ti-heart-rate" style="font-size:14px;color:#C0392B;"></i>
+        </div>
+        <div><div style="font-size:20px;font-weight:700;color:var(--text);line-height:1;">${oHR}</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">avg HR bpm</div></div>
+      </div>`:''}
+      ${oHRV?`<div style="flex:1;display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:rgba(91,141,217,0.06);">
+        <div style="width:30px;height:30px;border-radius:50%;background:rgba(91,141,217,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="ti ti-activity" style="font-size:14px;color:#5B8DD9;"></i>
+        </div>
+        <div><div style="font-size:20px;font-weight:700;color:var(--text);line-height:1;">${oHRV}</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">HRV ms</div></div>
+      </div>`:''}
+    </div>` : '';
+  const scoreCardEl = document.getElementById('sleep-score-card-content');
+  if(scoreCardEl){
     if(score){
-      scoreRightEl.innerHTML = `
-        <div style="width:84px;height:84px;border-radius:50%;border:3px solid ${scoreColor};display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--warm);">
-          <div style="font-size:28px;font-weight:700;color:${scoreColor};line-height:1;">${score}</div>
-          <div style="font-size:9px;font-weight:600;color:${scoreColor};margin-top:2px;">${scoreLabel}</div>
+      scoreCardEl.innerHTML = `
+        <div style="padding:14px;background:var(--warm);border-radius:12px;border:0.5px solid var(--border);">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Sleep Score</div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div style="font-size:42px;font-weight:700;font-family:var(--serif);color:${scoreColor};line-height:1;min-width:56px;">${score}</div>
+            <div style="width:1px;height:44px;background:var(--border);flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div style="font-size:20px;font-weight:600;font-family:var(--serif);color:${scoreColor};">${scoreLabel}</div>
+              <div style="display:flex;gap:2px;margin-top:7px;border-radius:4px;overflow:hidden;height:5px;">
+                <div style="flex:1;background:#C0392B;"></div>
+                <div style="flex:1;background:#E8A87C;"></div>
+                <div style="flex:1;background:#6B9E78;"></div>
+                <div style="flex:1;background:#27500A;"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:2px;">
+                <span>0 · Poor</span><span>80+ · Optimal</span>
+              </div>
+            </div>
+          </div>
+          ${hrHrvHTML}
         </div>
-        <div style="font-size:10px;color:var(--muted);margin-top:6px;">Sleep Score</div>
-        <button onclick="openSleepScoreInfo()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;margin-top:2px;opacity:0.7;">ⓘ how it's scored</button>
-        <div style="display:flex;gap:2px;margin-top:6px;border-radius:4px;overflow:hidden;height:4px;width:70px;">
-          <div style="flex:1;background:#C0392B;"></div>
-          <div style="flex:1;background:#E8A87C;"></div>
-          <div style="flex:1;background:#6B9E78;"></div>
-          <div style="flex:1;background:#27500A;"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted);width:70px;margin-top:2px;"><span>0</span><span>80+</span></div>`;
+        <button onclick="openSleepScoreInfo()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;margin-top:8px;opacity:0.7;font-family:var(--sans);">ⓘ how it's calculated</button>`;
     } else {
-      scoreRightEl.innerHTML = `
-        <div style="width:84px;height:84px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;background:var(--warm);">
-          <div style="font-size:10px;color:var(--muted);text-align:center;padding:4px;">No score data</div>
-        </div>
-        <div style="font-size:10px;color:var(--muted);margin-top:6px;">Sleep Score</div>`;
-    }
-  }
-  const hrvRowEl = document.getElementById('sleep-hrv-row');
-  if(hrvRowEl){
-    if(oHR||oHRV){
-      hrvRowEl.style.display = 'block';
-      hrvRowEl.innerHTML = `<div style="display:flex;gap:24px;justify-content:center;">
-        ${oHR?`<div style="text-align:center;"><div style="font-size:18px;font-weight:600;color:var(--text);">${oHR}</div><div style="font-size:10px;color:var(--muted);">avg HR bpm</div></div>`:''}
-        ${oHRV?`<div style="text-align:center;"><div style="font-size:18px;font-weight:600;color:var(--text);">${oHRV}</div><div style="font-size:10px;color:var(--muted);">HRV ms</div></div>`:''}
-      </div>`;
-    } else {
-      hrvRowEl.style.display = 'none';
+      scoreCardEl.innerHTML = '<div class="log-empty">Upload CSV to see Sleep Score</div>';
     }
   }
   el.innerHTML = `${buildSleepStagesDisplay(latest)}${buildSleepSourceComparison(latest)}`;
