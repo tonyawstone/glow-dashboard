@@ -1209,33 +1209,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="s-sleep" class="sec">
   <div class="view-content on" id="vc-sleep-daily">
     <div class="section-label">Sleep & Energy <button class="guide-btn" onclick="openGuide('sleep')">?</button></div>
-    <div class="card">
-      <div class="card-title">Apple Health · sleep data</div>
-      <!-- Last night's hours — prominently shown -->
-      <div style="text-align:center;padding:10px 0 8px;">
-        <div style="font-size:42px;font-weight:700;color:var(--accent);" id="sleep-display">—</div>
-        <div style="font-size:13px;color:var(--muted);">hours last night</div>
-      </div>
-      <!-- Bedtime, Wake & Time in Bed -->
-      <div id="sleep-times-from-csv" style="display:flex;justify-content:center;gap:16px;padding:10px 12px;border-radius:10px;background:var(--warm);margin:8px 0 4px;">
-        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Bedtime</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-bedtime">—</div></div>
-        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Wake time</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-waketime">—</div></div>
-        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Time in bed</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-timeinbed">—</div></div>
-        <div style="display:none;" id="csv-sleephrs"></div>
-      </div>
-      <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:10px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
-      <!-- Sleep score + stages rendered here -->
-      <div id="sleep-apple-metrics"></div>
-      <!-- Sleep timeline placeholder -->
-      <div id="sleep-timeline-wrap" style="margin-top:10px;">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Sleep timeline</div>
-        <div id="sleep-timeline-canvas-wrap" style="position:relative;height:96px;background:var(--warm);border-radius:10px;overflow:hidden;">
-          <canvas id="sleep-timeline-chart"></canvas>
-        </div>
-        <div style="position:relative;height:14px;margin-top:3px;" id="sleep-timeline-labels"></div>
-      </div>
-      <a href="javascript:void(0)" onclick="openWithings()" class="ext-link" style="margin-top:10px;"><i class="ti ti-external-link" aria-hidden="true"></i>Open Withings · see your Sleep Score</a>
-    </div>
     <!-- Sleep check-in -->
     <div class="card" id="sleep-checkin-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -1327,22 +1300,27 @@ textarea:focus,input:focus{border-color:var(--accent);}
           </button>
         </div>
         <!-- Morning energy chips + popup -->
+        <!-- Sleep aids: always visible, auto-populated from yesterday's meds -->
+        <div id="sleep-aids-info" style="margin-bottom:10px;font-size:12px;color:var(--muted);"></div>
+        <!-- Morning energy chips (selected ones shown inline) -->
         <div id="sleep-energy-chips" style="display:none;margin-bottom:6px;flex-wrap:wrap;gap:4px;"></div>
-        <div class="tags" id="energy-am-tags" style="margin-bottom:10px;display:none;">
-          <button class="tag" onclick="togSleepEnergy(this)">Rested</button>
-          <button class="tag" onclick="togSleepEnergy(this)">Energized</button>
-          <button class="tag" onclick="togSleepEnergy(this)">Tired</button>
-          <button class="tag" onclick="togSleepEnergy(this)">Groggy</button>
-          <button class="tag" onclick="togSleepEnergy(this)">Foggy</button>
-          <button class="tag" onclick="togSleepEnergy(this)">Refreshed</button>
-          <button class="tag" onclick="togSleepEnergy(this)">Exhausted</button>
-          <button class="tag" onclick="togSleepEnergy(this)">Wired</button>
+        <!-- Morning energy tag grid + notes — revealed together when + Morning energy is tapped -->
+        <div id="sleep-energy-panel" style="display:none;">
+          <div class="tags" id="energy-am-tags" style="margin-bottom:10px;">
+            <button class="tag" onclick="togSleepEnergy(this)">Rested</button>
+            <button class="tag" onclick="togSleepEnergy(this)">Energized</button>
+            <button class="tag" onclick="togSleepEnergy(this)">Tired</button>
+            <button class="tag" onclick="togSleepEnergy(this)">Groggy</button>
+            <button class="tag" onclick="togSleepEnergy(this)">Foggy</button>
+            <button class="tag" onclick="togSleepEnergy(this)">Refreshed</button>
+            <button class="tag" onclick="togSleepEnergy(this)">Exhausted</button>
+            <button class="tag" onclick="togSleepEnergy(this)">Wired</button>
+          </div>
+          <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..." oninput="saveSleepDraft()" style="margin-bottom:10px;"></textarea>
         </div>
-        <!-- Sleep aids: auto-populated read-only from yesterday's meds -->
-        <div id="sleep-aids-info" style="display:none;margin-bottom:10px;font-size:12px;color:var(--muted);"></div>
-        <!-- Notes -->
-        <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..." oninput="saveSleepDraft()" style="margin-bottom:8px;"></textarea>
-        <button class="btn-primary" onclick="saveSleep()">Save</button>
+        <div style="text-align:center;margin-top:4px;">
+          <button onclick="saveSleep()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
+        </div>
         <div class="toast-msg" id="slp-t">Saved!</div>
       </div>
     </div>
@@ -1368,6 +1346,31 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button onclick="sleepCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <div id="sleep-coach-output" class="coach-response" style="display:none;margin-top:10px;"></div>
+    </div>
+
+    <!-- Apple Health sleep data -->
+    <div class="card">
+      <div class="card-title">Apple Health · sleep data</div>
+      <div style="text-align:center;padding:10px 0 8px;">
+        <div style="font-size:42px;font-weight:700;color:var(--accent);" id="sleep-display">—</div>
+        <div style="font-size:13px;color:var(--muted);">hours last night</div>
+      </div>
+      <div id="sleep-times-from-csv" style="display:flex;justify-content:center;gap:16px;padding:10px 12px;border-radius:10px;background:var(--warm);margin:8px 0 4px;">
+        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Bedtime</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-bedtime">—</div></div>
+        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Wake time</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-waketime">—</div></div>
+        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Time in bed</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-timeinbed">—</div></div>
+        <div style="display:none;" id="csv-sleephrs"></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:10px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
+      <div id="sleep-apple-metrics"></div>
+      <div id="sleep-timeline-wrap" style="margin-top:10px;">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Sleep timeline</div>
+        <div id="sleep-timeline-canvas-wrap" style="position:relative;height:96px;background:var(--warm);border-radius:10px;overflow:hidden;">
+          <canvas id="sleep-timeline-chart"></canvas>
+        </div>
+        <div style="position:relative;height:14px;margin-top:3px;" id="sleep-timeline-labels"></div>
+      </div>
+      <a href="javascript:void(0)" onclick="openWithings()" class="ext-link" style="margin-top:10px;"><i class="ti ti-external-link" aria-hidden="true"></i>Open Withings · see your Sleep Score</a>
     </div>
 
     <div class="card">
@@ -7534,11 +7537,10 @@ function renderSleepAidsInfo(){
   const aids = window._sleepAidsLastNight || {};
   const taken = [aids.melatonin?'Melatonin':'', aids.sleepGummies?'Sleep gummies':''].filter(Boolean);
   if(taken.length){
-    el.style.display = 'block';
-    el.innerHTML = `<span style="color:var(--muted);font-size:11px;">Last night: </span>`+
+    el.innerHTML = `<span style="color:var(--muted);font-size:11px;">Sleep aids last night: </span>`+
       taken.map(v=>`<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:12px;padding:3px 10px;font-size:11px;color:var(--text);margin-right:4px;display:inline-block;">${v}</span>`).join('');
   } else {
-    el.style.display = 'none';
+    el.innerHTML = `<span style="color:var(--muted);font-size:11px;">Sleep aids last night: </span><span style="font-size:11px;color:var(--muted);">None logged</span>`;
   }
 }
 
@@ -8143,9 +8145,12 @@ function toggleSleepCheckin(forceOpen){
 }
 
 function toggleSleepEnergyTags(){
-  const popup = document.getElementById('energy-am-tags');
-  if(!popup) return;
-  popup.style.display = popup.style.display === 'none' ? 'flex' : 'none';
+  const panel = document.getElementById('sleep-energy-panel');
+  if(!panel) return;
+  const open = panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  const btn = document.getElementById('sleep-energy-btn');
+  if(btn) btn.textContent = open ? '– Morning energy' : '+ Morning energy';
 }
 
 function togSleepEnergy(el){
