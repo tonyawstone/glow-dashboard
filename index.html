@@ -1223,11 +1223,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <!-- Form — visible by default, hidden after save -->
       <div id="sleep-checkin-body">
         <!-- Quality: 5 SVG circle face selectors -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <div style="font-size:11px;color:var(--muted);font-family:var(--sans);">Sleep quality</div>
-          <button id="sleep-energy-btn" onclick="toggleSleepEnergyTags()" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">+ Morning energy</button>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:12px;" id="sq-tags">
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;" id="sq-tags">
           <!-- Distressed: furrowed brows, strained eyes, open mouth -->
           <button class="sqb" data-quality="Rough" onclick="soloSleep(this)">
             <div class="sqb-face">
@@ -1299,7 +1295,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <span class="sqb-lbl">Refreshed</span>
           </button>
         </div>
-        <!-- Morning energy chips + popup -->
+        <!-- + Morning energy button sits below faces -->
+        <div style="margin-bottom:10px;">
+          <button id="sleep-energy-btn" onclick="toggleSleepEnergyTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Morning energy</button>
+        </div>
         <!-- Sleep aids: always visible, auto-populated from yesterday's meds -->
         <div id="sleep-aids-info" style="margin-bottom:10px;font-size:12px;color:var(--muted);"></div>
         <!-- Morning energy chips (selected ones shown inline) -->
@@ -1334,16 +1333,16 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <button onclick="openCoachHistory('Sleep')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
-      <!-- Prompt suggestions -->
-      <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
-        <button onclick="sleepCoachPrompt('How is my sleep quality trending over the past few weeks?')" style="white-space:nowrap;padding:6px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);flex-shrink:0;">Trending</button>
-        <button onclick="sleepCoachPrompt('What patterns are affecting my sleep quality?')" style="white-space:nowrap;padding:6px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);flex-shrink:0;">What's affecting it?</button>
-        <button onclick="sleepCoachPrompt('How do Melatonin and sleep gummies correlate with my sleep quality scores?')" style="white-space:nowrap;padding:6px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);flex-shrink:0;">Sleep aids vs quality</button>
-        <button onclick="sleepCoachPrompt('What should I discuss with my sleep doctor about my CPAP data and sleep patterns?')" style="white-space:nowrap;padding:6px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);flex-shrink:0;">Doctor prep</button>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
         <input id="sleep-coach-input" type="text" placeholder="Ask about your sleep…" style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')sleepCoach()">
         <button onclick="sleepCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
+      </div>
+      <button onclick="toggleSleepSuggestions()" id="sleep-suggestions-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
+      <div id="sleep-suggestions-panel" style="display:none;margin-top:8px;display:none;">
+        <button onclick="sleepCoachPrompt('How is my sleep quality trending over the past few weeks?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">How is my sleep quality trending?</button>
+        <button onclick="sleepCoachPrompt('What patterns are affecting my sleep quality?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">What patterns are affecting my sleep?</button>
+        <button onclick="sleepCoachPrompt('How do Melatonin and sleep gummies correlate with my sleep quality scores?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">Sleep aids vs quality</button>
+        <button onclick="sleepCoachPrompt('What should I discuss with my sleep doctor about my CPAP data and sleep patterns?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Doctor prep</button>
       </div>
       <div id="sleep-coach-output" class="coach-response" style="display:none;margin-top:10px;"></div>
     </div>
@@ -15801,7 +15800,17 @@ function sleepCoach(){
 function sleepCoachPrompt(text){
   const input = document.getElementById('sleep-coach-input');
   if(input){ input.value = text; input.focus(); }
+  toggleSleepSuggestions(false);
   sleepCoach();
+}
+
+function toggleSleepSuggestions(forceClose){
+  const panel = document.getElementById('sleep-suggestions-panel');
+  const btn = document.getElementById('sleep-suggestions-btn');
+  if(!panel) return;
+  const open = forceClose === false ? false : panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? 'Suggestions ↙' : 'Suggestions ↗';
 }
 function bpCoach(){ callCoach('Health · Blood Pressure','Review my recent BP readings and trends. What patterns do you see and what should I discuss with my doctor?','zep-coach-output'); }
 function zepCoach(){ callCoach('Body · Zepbound','How is my Zepbound journey going and what should I discuss with my doctor at my next visit?','zep-coach-output'); }
