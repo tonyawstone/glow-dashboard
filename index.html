@@ -2460,32 +2460,34 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="section-label">Skin · Face Care <button class="guide-btn" onclick="openGuide('skin')">?</button></div>
 
     <!-- Skin check-in — collapsible, first card -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinCheckin()">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="card-title" style="margin:0;">✨ Skin check-in</div>
-          <div id="skin-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+    <div class="card" id="skin-checkin-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+        <div style="display:flex;align-items:center;gap:6px;cursor:pointer;" onclick="toggleSkinCheckin()">
+          <i class="ti ti-sparkles" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Skin Check-in</div>
+          <div id="skin-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;margin-left:2px;">›</div>
         </div>
-        <button onclick="event.stopPropagation();openSkinLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past check-ins</button>
+        <button onclick="openSkinLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past check-ins →</button>
       </div>
       <!-- Saved state — always visible -->
       <div id="skin-checkin-saved" style="display:none;margin-top:10px;"></div>
       <div id="skin-checkin-body" style="display:none;margin-top:12px;">
-        <div class="fl">Skin today</div>
-        <div class="tags" id="skin-tags">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Skin today</div>
+        <div class="tags" id="skin-tags" style="margin-bottom:12px;">
           <button class="tag" onclick="tog(this)">Clear</button><button class="tag" onclick="tog(this)">Glowing</button><button class="tag" onclick="tog(this)">Breaking out</button><button class="tag" onclick="tog(this)">Dry</button><button class="tag" onclick="tog(this)">Oily</button><button class="tag" onclick="tog(this)">Irritated</button><button class="tag" onclick="tog(this)">Uneven tone</button><button class="tag" onclick="tog(this)">Dull</button>
         </div>
-        <div class="fl">Concerns</div>
-        <div class="tags" id="concern-tags">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Concerns</div>
+        <div class="tags" id="concern-tags" style="margin-bottom:12px;">
           <button class="tag" onclick="tog(this)">Hyperpigmentation</button><button class="tag" onclick="tog(this)">Fine lines</button><button class="tag" onclick="tog(this)">Texture</button><button class="tag" onclick="tog(this)">Pores</button><button class="tag" onclick="tog(this)">Redness</button>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
           <div style="font-size:12px;color:var(--muted);">Logging for:</div>
           <input type="date" id="skin-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
         </div>
-        <div class="fl">Notes</div>
-        <textarea id="skin-note" rows="2" placeholder="How does your skin feel today? Any changes, reactions, concerns..." oninput="saveSkinDraft()"></textarea>
-        <button class="btn-primary" onclick="saveSkin()">Log skin check-in</button>
+        <textarea id="skin-note" rows="2" placeholder="How does your skin feel today? Any changes, reactions, concerns..." oninput="saveSkinDraft()" style="margin-bottom:10px;"></textarea>
+        <div style="text-align:center;margin-top:4px;">
+          <button onclick="saveSkin()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
+        </div>
         <div class="toast-msg" id="skt">Saved!</div>
       </div>
     </div>
