@@ -2908,39 +2908,94 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <input type="file" id="hair-current-input" accept="image/*" style="display:none;" onchange="saveCurrentHairPhoto(this)">
     </div>
 
-    <!-- Card 2: Daily hair check-in -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleHairCheckin()">
-        <div class="card-title" style="margin:0;">Daily hair check-in</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button onclick="event.stopPropagation();openHairLog()" style="padding:5px 12px;border-radius:20px;background:var(--warm);border:0.5px solid var(--border);font-size:11px;color:var(--muted);cursor:pointer;">Past check-ins</button>
-          <span id="hair-checkin-arrow" style="font-size:16px;color:var(--muted);">▾</span>
+    <!-- Card 2: Hair Check-In -->
+    <div class="card" id="hair-checkin-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-scissors" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">How does your hair feel today?</div>
+        </div>
+        <div id="hair-checkin-header-right" style="display:flex;align-items:center;gap:8px;">
+          <button onclick="openHairLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
         </div>
       </div>
-      <div id="hair-checkin-body" style="display:none;margin-top:12px;">
-        <div class="fl">Products used today</div>
-        <div class="tags" id="products-used-tags"></div>
-        <div class="fl">Hair today</div>
-        <div class="tags" id="hair-tags">
-          <button class="tag" onclick="tog(this)">New growth visible</button>
-          <button class="tag" onclick="tog(this)">Shedding</button>
-          <button class="tag" onclick="tog(this)">Healthy shine</button>
-          <button class="tag" onclick="tog(this)">Frizzy</button>
-          <button class="tag" onclick="tog(this)">Loving it</button>
-          <button class="tag" onclick="tog(this)">Dry</button>
+      <div id="hair-checkin-saved" style="display:none;"></div>
+      <div id="hair-checkin-body">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Overall how is your hair today?</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="hair-face-tags">
+          <button class="sqb" data-hair="Low" onclick="soloHairFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/></svg></div>
+            <span class="sqb-lbl">Low</span>
+          </button>
+          <button class="sqb" data-hair="Okay" onclick="soloHairFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/></svg></div>
+            <span class="sqb-lbl">Okay</span>
+          </button>
+          <button class="sqb" data-hair="Good" onclick="soloHairFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/></svg></div>
+            <span class="sqb-lbl">Good</span>
+          </button>
+          <button class="sqb" data-hair="Great" onclick="soloHairFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20 17.5 16"/></svg></div>
+            <span class="sqb-lbl">Great</span>
+          </button>
+          <button class="sqb" data-hair="Amazing" onclick="soloHairFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="-2 -2 30 30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/></svg></div>
+            <span class="sqb-lbl">Amazing</span>
+          </button>
         </div>
-        <div class="fl">Haircare done</div>
-        <div class="tags" id="hcare-tags">
-          <button class="tag" onclick="tog(this)">Wash day</button>
-          <button class="tag" onclick="tog(this)">Deep condition</button>
-          <button class="tag" onclick="tog(this)">Protein treatment</button>
-          <button class="tag" onclick="tog(this)">Silk pillowcase</button>
-          <button class="tag" onclick="tog(this)">Protective style</button>
-          <button class="tag" onclick="tog(this)">Dusting trim</button>
-          <button class="tag" onclick="tog(this)">Salon visit</button>
+        <div style="margin-bottom:8px;"><button id="hair-state-btn" onclick="toggleHairState()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ How is your hair feeling?</button></div>
+        <div id="hair-state-panel" style="display:none;">
+          <div class="tags" id="hair-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="tog(this);saveHairDraft()">Moisturized</button><button class="tag" onclick="tog(this);saveHairDraft()">Defined</button><button class="tag" onclick="tog(this);saveHairDraft()">Healthy shine</button><button class="tag" onclick="tog(this);saveHairDraft()">Loving it</button><button class="tag" onclick="tog(this);saveHairDraft()">New growth visible</button><button class="tag" onclick="tog(this);saveHairDraft()">Frizzy</button><button class="tag" onclick="tog(this);saveHairDraft()">Dry</button><button class="tag" onclick="tog(this);saveHairDraft()">Shedding</button>
+          </div>
         </div>
-        <hr style="border:none;border-top:0.5px solid var(--border);margin:12px 0;">
-        <div class="card-title" style="font-size:13px;">Current products</div>
+        <textarea id="hair-note" rows="2" placeholder="Notes — how it looks, growth updates, edges filling in…" oninput="saveHairDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
+        <div style="text-align:center;">
+          <button onclick="saveHairCheckin()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
+        </div>
+        <div class="toast-msg" id="ht">Saved!</div>
+      </div>
+    </div>
+
+    <!-- Wash Day card -->
+    <div class="card" id="wash-day-card">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+        <i class="ti ti-droplet" style="font-size:13px;color:var(--accent);"></i>
+        <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Wash Day</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;">
+        <div style="flex:1;background:var(--warm);border-radius:10px;padding:10px 12px;border:0.5px solid var(--border);">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:5px;">Last wash</div>
+          <input type="date" id="last-wash-date" onchange="saveWashDates()" style="font-size:12px;color:var(--text);border:none;background:transparent;width:100%;font-family:var(--sans);cursor:pointer;">
+        </div>
+        <div style="flex:1;background:var(--warm);border-radius:10px;padding:10px 12px;border:0.5px solid var(--border);">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:5px;">Next wash</div>
+          <input type="date" id="next-wash-date" onchange="saveWashDates()" style="font-size:12px;color:var(--text);border:none;background:transparent;width:100%;font-family:var(--sans);cursor:pointer;">
+        </div>
+      </div>
+      <div style="margin-bottom:8px;"><button id="hair-care-btn" onclick="toggleHairCare()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Haircare done today</button></div>
+      <div id="hair-care-panel" style="display:none;">
+        <div class="tags" id="hcare-tags" style="margin-bottom:12px;">
+          <button class="tag" onclick="tog(this);saveHairDraft()">Wash day</button><button class="tag" onclick="tog(this);saveHairDraft()">Deep condition</button><button class="tag" onclick="tog(this);saveHairDraft()">Protein treatment</button><button class="tag" onclick="tog(this);saveHairDraft()">Silk pillowcase</button><button class="tag" onclick="tog(this);saveHairDraft()">Protective style</button><button class="tag" onclick="tog(this);saveHairDraft()">Dusting trim</button><button class="tag" onclick="tog(this);saveHairDraft()">Salon visit</button>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <button onclick="saveWashDay()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
+      </div>
+      <div class="toast-msg" id="wdt">Saved!</div>
+    </div>
+
+    <!-- Products card -->
+    <div class="card" id="hair-products-card">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+        <i class="ti ti-bottle" style="font-size:13px;color:var(--accent);"></i>
+        <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Products</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Select what you used today</div>
+      <div class="tags" id="products-used-tags" style="margin-bottom:14px;"></div>
+      <div style="border-top:0.5px solid var(--border);padding-top:12px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">My products</div>
         <div id="product-list">
           <div class="product-item" data-product="Kinky-Curly Original Curling Custard"><span>Kinky-Curly Original Curling Custard</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
           <div class="product-item" data-product="Kinky-Curly Knot Today"><span>Kinky-Curly Knot Today (detangler)</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
@@ -2949,17 +3004,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div class="product-item" data-product="Camille Rose Honey Hydrate Leave-In"><span>Camille Rose Honey Hydrate Leave-In</span><button class="btn-sm" onclick="removeProduct(this)">Remove</button></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:10px;">
-          <input type="text" id="new-product" placeholder="Add a product..." style="flex:1;">
-          <button class="btn-sm accent" onclick="addProduct()">Add</button>
+          <input type="text" id="new-product" placeholder="Add a product…" style="flex:1;font-size:13px;padding:8px 12px;border:0.5px solid var(--border);border-radius:20px;background:#fff;color:var(--text);font-family:var(--sans);outline:none;">
+          <button onclick="addProduct()" style="padding:8px 16px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Add</button>
         </div>
-        <hr style="border:none;border-top:0.5px solid var(--border);margin:12px 0;">
-        <div class="fl">Note</div>
-        <textarea id="hair-note" rows="2" placeholder="e.g. Can pull into a bun now. Edges filling in."></textarea>
-        <button class="btn-primary" onclick="saveHair()">Log hair</button>
-        <button class="btn-ai" onclick="hairCoach()">Hair growth coaching ↗</button>
-        <div id="hair-coach-output" class="coach-response" style="display:none"></div>
-        <button onclick="openCoachHistory('Hair')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:4px 0 0;font-family:var(--sans);">Past conversations →</button>
-        <div class="toast-msg" id="ht">Saved!</div>
       </div>
     </div>
 
@@ -3900,7 +3947,9 @@ async function tab(id){
     try { loadGoalNotes(); } catch(e){}
     try { loadGoalLabels(); } catch(e){}
     try { await loadCurrentHairPhoto(); } catch(e){ console.warn('loadCurrentHairPhoto error:',e); }
-    try { restoreHairDraft(); } catch(e){}
+    try { restoreHairCheckinState(); } catch(e){}
+    try { restoreWashDates(); } catch(e){}
+    try { buildProductTags(); } catch(e){}
   }
   if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); loadSkinRoutineState(); loadMuselyHistoryFromBlob().then(()=>{ renderSkincareLog(); showSkinPMSavedView(); loadPMLastNight(); }); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
@@ -4060,17 +4109,18 @@ function restoreSkinDraft(){
 // Hair draft
 function saveHairDraft(){
   savePillarDraft('hair',{
-    tags: getTags('hair-tags'),
-    hcare: getTags('hcare-tags'),
+    hairFace: document.getElementById('hair-face-tags')?.querySelector('.on')?.dataset.hair||'',
+    tags: gT('hair-tags'),
+    hcare: gT('hcare-tags'),
     note: document.getElementById('hair-note')?.value||''
   });
 }
 function restoreHairDraft(){
   const d = getPillarDraft('hair'); if(!d) return;
-  restoreTags('hair-tags', d.tags);
-  restoreTags('hcare-tags', d.hcare);
+  if(d.hairFace){const b=document.getElementById('hair-face-tags')?.querySelector('[data-hair="'+d.hairFace+'"]');if(b)soloHairFace(b);}
+  if(d.tags?.length){restoreTags('hair-tags',d.tags);const p=document.getElementById('hair-state-panel');if(p&&p.style.display==='none')toggleHairState();}
+  if(d.hcare?.length){restoreTags('hcare-tags',d.hcare);const p=document.getElementById('hair-care-panel');if(p&&p.style.display==='none')toggleHairCare();}
   if(d.note && document.getElementById('hair-note')) document.getElementById('hair-note').value = d.note;
-  toggleHairCheckin(true);
 }
 
 // Style draft
@@ -7164,8 +7214,8 @@ async function renderCheckinHub(){
       saved: outfitEntry ? `<div>${[outfitEntry.vibe,outfitEntry.occasion].filter(Boolean).join(' · ')||'Outfit logged ✓'}</div>` : null,
       tab:'style', scrollId:'outfit-form-chevron', toggleFn:'toggleOutfitForm' },
     { emoji:'💇', name:'Hair', done:!!hairEntry,
-      saved: hairEntry ? `${(hairEntry.products||[]).length?`<div style="margin-bottom:4px;">${chips(hairEntry.products)}</div>`:''}${hairEntry.style?`<div>Style: ${hairEntry.style}</div>`:''}` : null,
-      tab:'hair', scrollId:'hair-checkin-arrow', toggleFn:'toggleHairCheckin' },
+      saved: hairEntry ? `${hairEntry.hairFace?`<div style="margin-bottom:2px;">${hairEntry.hairFace}</div>`:''}${(hairEntry.hairT||hairEntry.hairState||[]).length?`<div style="margin-bottom:4px;">${chips(hairEntry.hairT||hairEntry.hairState)}</div>`:''}${hairEntry.note?`<div style="color:var(--muted);">${hairEntry.note}</div>`:''}` : null,
+      tab:'hair', scrollId:'hair-checkin-card', toggleFn:'' },
   ];
 
   const doneCount = PILLARS.filter(p=>p.done).length;
@@ -8733,14 +8783,102 @@ function toggleMindCheckin(forceOpen){
   if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
 }
 
-function toggleHairCheckin(forceOpen){
+function toggleHairCheckin(){}
+
+function soloHairFace(btn){document.getElementById('hair-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveHairDraft();}
+function toggleHairState(){const p=document.getElementById('hair-state-panel'),b=document.getElementById('hair-state-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– How is your hair feeling?':'+ How is your hair feeling?';}
+function toggleHairCare(){const p=document.getElementById('hair-care-panel'),b=document.getElementById('hair-care-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Haircare done today':'+ Haircare done today';}
+
+function showHairCheckinSaved(e){
+  const saved = document.getElementById('hair-checkin-saved');
+  if(!saved) return;
+  const hairFaceInner = {
+    Low:'<circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/>',
+    Okay:'<circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/>',
+    Good:'<circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/>',
+    Great:'<path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20 17.5 16"/>',
+    Amazing:'<path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/>'
+  };
+  const hairFaceViewBox = {Low:'0 0 26 26',Okay:'0 0 26 26',Good:'0 0 26 26',Great:'0 0 26 26',Amazing:'-2 -2 30 30'};
+  const hairFaces = ['Low','Okay','Good','Great','Amazing'];
+  const faceSvg = (f,sel) => `<div style="width:32px;height:32px;border-radius:50%;border:1.5px solid ${sel?'var(--accent)':'transparent'};background:${sel?'rgba(160,120,80,0.1)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="${hairFaceViewBox[f]}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:${sel?'var(--accent)':'var(--border)'}"><circle cx="13" cy="13" r="11"/>${hairFaceInner[f]}</svg></div>`;
+  const stateChips = (arr) => (arr||[]).filter(Boolean).map(v=>`<span style="background:rgba(107,158,120,0.12);color:var(--green);border:0.5px solid rgba(107,158,120,0.3);border-radius:20px;padding:3px 10px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
+  const editPill = `<button onclick="editHairCheckin()" style="padding:2px 10px;border-radius:10px;border:1px dashed var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin:2px 0 0 0;">+ edit</button>`;
+  const noteHtml = e.note?`<div style="font-family:var(--serif);font-size:13px;color:var(--muted);font-style:italic;margin-top:8px;">${e.note}</div>`:'';
+  const headerRight = document.getElementById('hair-checkin-header-right');
+  if(headerRight) headerRight.innerHTML = `<span style="font-size:11px;color:var(--muted);">${fmtOutfitDate(e.date)}</span><button onclick="openHairLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>`;
   const body = document.getElementById('hair-checkin-body');
-  const arrow = document.getElementById('hair-checkin-arrow');
-  if(!body) return;
-  const isOpen = body.style.display !== 'none';
-  const open = forceOpen !== undefined ? forceOpen : !isOpen;
-  body.style.display = open ? 'block' : 'none';
-  if(arrow) arrow.textContent = open ? '▴' : '▾';
+  if(body) body.style.display = 'none';
+  saved.style.display = 'block';
+  saved.innerHTML = `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">${hairFaces.map(f=>faceSvg(f,e.hairFace===f)).join('')}${stateChips(e.hairT||e.hairState)}${editPill}</div>${noteHtml}`;
+}
+
+function editHairCheckin(){
+  const saved = document.getElementById('hair-checkin-saved');
+  if(saved) saved.style.display = 'none';
+  const headerRight = document.getElementById('hair-checkin-header-right');
+  if(headerRight) headerRight.innerHTML = `<button onclick="openHairLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>`;
+  const body = document.getElementById('hair-checkin-body');
+  if(body) body.style.display = 'block';
+  const state = JSON.parse(localStorage.getItem('glowHairCheckinState')||'null');
+  if(!state) return;
+  if(state.hairFace){const b=document.getElementById('hair-face-tags')?.querySelector('[data-hair="'+state.hairFace+'"]');if(b)soloHairFace(b);}
+  const hairState = state.hairState||state.hairT||[];
+  if(hairState.length){restoreTags('hair-tags',hairState);const p=document.getElementById('hair-state-panel');if(p&&p.style.display==='none')toggleHairState();}
+  if(state.note && document.getElementById('hair-note')) document.getElementById('hair-note').value = state.note;
+}
+
+async function restoreHairCheckinState(){
+  try{
+    const today = logicalDayStr();
+    const cached = JSON.parse(localStorage.getItem('glowHairCheckinState')||'null');
+    if(cached && cached.savedAt && cached.date===today && (Date.now()-cached.savedAt)<86400000){
+      showHairCheckinSaved(cached); return;
+    }
+    let entry = null;
+    try{ const all = await dbAll('hairs'); entry = all.filter(e=>e.date===today&&(e.hairFace||e.hairT)).pop(); }catch(e){}
+    if(!entry){
+      try{
+        const res = await fetch(`${BACKEND}/api/sync?pillar=hairs&t=${Date.now()}`);
+        if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+          entry = data.filter(e=>e.date===today&&(e.hairFace||e.hairT)).pop();
+        }
+      }catch(e){}
+    }
+    if(entry) showHairCheckinSaved(entry);
+    else restoreHairDraft();
+  }catch(e){}
+}
+
+function saveWashDates(){
+  const last = document.getElementById('last-wash-date')?.value||'';
+  const next = document.getElementById('next-wash-date')?.value||'';
+  localStorage.setItem('glowWashDates', JSON.stringify({last,next}));
+}
+
+function restoreWashDates(){
+  try{
+    const d = JSON.parse(localStorage.getItem('glowWashDates')||'null');
+    if(!d) return;
+    if(d.last && document.getElementById('last-wash-date')) document.getElementById('last-wash-date').value = d.last;
+    if(d.next && document.getElementById('next-wash-date')) document.getElementById('next-wash-date').value = d.next;
+  }catch(e){}
+}
+
+async function saveWashDay(){
+  const care = gT('hcare-tags');
+  const lastWash = document.getElementById('last-wash-date')?.value||'';
+  const nextWash = document.getElementById('next-wash-date')?.value||'';
+  if(!care.length && !lastWash){ showToast('Add at least one entry first'); return; }
+  const entry = {type:'wash-day', care, lastWash, nextWash, date: logicalDayStr()};
+  try{
+    await dbAdd('hairs', entry);
+    syncToBlob('hairs');
+    document.getElementById('hcare-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    const p=document.getElementById('hair-care-panel');if(p&&p.style.display!=='none')toggleHairCare();
+    toast('wdt');
+    buildDailyProgress();
+  }catch(err){ showToast('Could not save — please try again'); }
 }
 
 async function openHairLog(){
@@ -9033,15 +9171,30 @@ async function saveSkin(){
     buildDailyProgress();
   }catch(err){ console.error('saveSkin error:',err); showToast('Could not save — please try again'); }
 }
-async function saveHair(){
-  const hairT=gT('hair-tags'),care=gT('hcare-tags'),prods=gT('products-used-tags'),note=document.getElementById('hair-note').value.trim();
-  const hairEntry={hairT,care,prods,note,date:nowStr()};
-  await dbAdd('hairs',hairEntry);
-  syncToBlob('hairs');
-  document.getElementById('hair-note').value='';
-  ['hair-tags','hcare-tags','products-used-tags'].forEach(id=>document.getElementById(id).querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
-  toast('ht');loadLogs();toggleHairCheckin(false);buildDailyProgress();
+async function saveHairCheckin(){
+  const hairFace = document.getElementById('hair-face-tags')?.querySelector('.on')?.dataset.hair||'';
+  const hairState = gT('hair-tags');
+  const note = document.getElementById('hair-note')?.value.trim()||'';
+  if(!hairFace && !hairState.length && !note){ showToast('Add at least one entry first'); return; }
+  const dateVal = logicalDayStr();
+  const entry = {hairFace, hairT: hairState, hairState, note, date: dateVal};
+  try{
+    await dbAdd('hairs', entry);
+    syncToBlob('hairs');
+    clearPillarDraft('hair');
+    document.getElementById('hair-face-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('hair-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    if(document.getElementById('hair-note')) document.getElementById('hair-note').value='';
+    const sP=document.getElementById('hair-state-panel');if(sP&&sP.style.display!=='none')toggleHairState();
+    localStorage.setItem('glowHairCheckinState', JSON.stringify({...entry, savedAt: Date.now()}));
+    toast('ht');
+    loadLogs();
+    buildDailyProgress();
+    showHairCheckinSaved(entry);
+  }catch(e){ showToast('Could not save — please try again'); }
 }
+
+async function saveHair(){ return saveHairCheckin(); }
 async function saveMind(){
   const mindFace=document.getElementById('mind-face-tags')?.querySelector('.on')?.dataset.mind||'';
   const vibe=gT('vibe-tags');
@@ -9101,7 +9254,7 @@ async function loadLogs(){
   const bodies=await dbAll('skins');
   renderLog('body-log',bodies.filter(s=>s.type==='body'),e=>logItem(e.date,[...(e.nsv||[]),...(e.waist?['Waist '+e.waist+'"']:[]),...(e.hips?['Hips '+e.hips+'"']:[])],e.note));
   const hairs=await dbAll('hairs');
-  renderLog('hair-log',hairs,e=>logItem(e.date,[...e.hairT,...e.care,...(e.prods||[])],e.note));
+  renderLog('hair-log',hairs,e=>logItem(e.date,[...(e.hairFace?[e.hairFace]:[]),...(e.hairT||e.hairState||[]),...(e.care||[]),...(e.prods||[])],e.note));
   const minds=await dbAll('minds');
   renderLog('mind-log',minds,e=>{
     const gratFmt=e.gratitude?'\nGrateful: '+e.gratitude.split('\n').map(s=>s.replace(/^\d+\.\s*/,'')).filter(Boolean).join(', '):'';
