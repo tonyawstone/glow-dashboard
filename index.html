@@ -7354,7 +7354,7 @@ async function renderCheckinHub(){
       ${PILLARS.map(p=>`<div class="ci-progress-bar${p.done?' done':''}" style="flex:1;" title="${p.name}"></div>`).join('')}
     </div>
     <div style="display:flex;gap:5px;margin-top:5px;">
-      ${PILLARS.map(p=>`<div style="flex:1;text-align:center;font-size:9px;color:${p.done?'#27500A':'var(--muted)'};">${p.emoji}</div>`).join('')}
+      ${PILLARS.map(p=>`<div style="flex:1;display:flex;justify-content:center;"><i class="ti ${p.icon}" style="font-size:11px;color:${p.done?'#27500A':'var(--muted)'};"></i></div>`).join('')}
     </div>`;
 
   const dateEl = document.getElementById('ci-hub-date');
