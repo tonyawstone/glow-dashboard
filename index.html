@@ -5595,8 +5595,45 @@ function runActivationBreath(){
 }
 
 let _actTimers = {};
+let _actAudioCtx = null;
+
+function playActivationChime(){
+  try {
+    // Reuse context created during Begin click (needed for iOS gesture requirement)
+    const ctx = (_actAudioCtx && _actAudioCtx.state !== 'closed')
+      ? _actAudioCtx
+      : new (window.AudioContext || window.webkitAudioContext)();
+    if(ctx.state === 'suspended') ctx.resume();
+    const t = ctx.currentTime;
+    // Fundamental tone — A5 (880 Hz)
+    const osc1 = ctx.createOscillator();
+    const g1 = ctx.createGain();
+    osc1.connect(g1); g1.connect(ctx.destination);
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(880, t);
+    g1.gain.setValueAtTime(0.28, t);
+    g1.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
+    osc1.start(t); osc1.stop(t + 1.1);
+    // Second harmonic — A6 (1760 Hz), fades faster for bell character
+    const osc2 = ctx.createOscillator();
+    const g2 = ctx.createGain();
+    osc2.connect(g2); g2.connect(ctx.destination);
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(1760, t);
+    g2.gain.setValueAtTime(0.12, t);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+    osc2.start(t); osc2.stop(t + 0.45);
+  } catch(e){}
+}
+
 function runActivationTimer(timerId, seconds, rowId, widgetId){
   if(_actTimers[timerId]) clearInterval(_actTimers[timerId]);
+  // Create AudioContext during user gesture (Begin click) so it's authorized on iOS
+  try {
+    if(!_actAudioCtx || _actAudioCtx.state === 'closed')
+      _actAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(_actAudioCtx.state === 'suspended') _actAudioCtx.resume();
+  } catch(e){}
   const el = document.getElementById(timerId);
   let remaining = seconds;
   el.textContent = remaining;
@@ -5605,7 +5642,8 @@ function runActivationTimer(timerId, seconds, rowId, widgetId){
     el.textContent = remaining;
     if(remaining <= 0){
       clearInterval(_actTimers[timerId]);
-      setTimeout(()=>doneActivationStep(rowId, widgetId), 500);
+      playActivationChime();
+      setTimeout(()=>doneActivationStep(rowId, widgetId), 800);
     }
   }, 1000);
 }
