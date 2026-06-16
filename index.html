@@ -3784,7 +3784,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- BOTTOM VIEW TABS -->
 <div class="bottom-nav" id="bottom-nav">
   <button class="bnav on" id="bnav-home" onclick="goHome()"><i class="ti ti-home" aria-hidden="true"></i>Home</button>
-  <button class="bnav" id="bnav-checkin" onclick="openCheckinHub()"><i class="ti ti-checklist" aria-hidden="true"></i>Check-in</button>
+  <button class="bnav" id="bnav-checkin" onclick="openCheckinHub()"><i class="ti ti-clipboard-check" aria-hidden="true"></i>Check-in</button>
   <button class="bnav" id="bnav-library" onclick="openLibrary()"><i class="ti ti-books" aria-hidden="true"></i>Library</button>
   <button class="bnav" id="bnav-coach" onclick="openCoachMenu()"><i class="ti ti-message-circle" aria-hidden="true"></i>Coach</button>
 </div>
@@ -7319,25 +7319,25 @@ async function renderCheckinHub(){
   const waterDone = !!(waterEntry && ((waterEntry.oz||0)>=64||(waterEntry.glasses||0)>=8));
 
   const PILLARS = [
-    { emoji:'🧠', name:'Mind', done:!!mindEntry,
+    { icon:'ti-brain', name:'Mind', done:!!mindEntry,
       saved: mindEntry ? `${(mindEntry.vibe||[]).length?`<div style="margin-bottom:4px;">${chips(mindEntry.vibe)}</div>`:''}${mindEntry.win?`<div>Win: ${mindEntry.win}</div>`:''}` : null,
       tab:'mind', scrollId:'mind-checkin-card', toggleFn:'' },
-    { emoji:'😴', name:'Sleep', done:!!sleepEntry,
+    { icon:'ti-moon', name:'Sleep', done:!!sleepEntry,
       saved: sleepEntry ? `${sleepEntry.quality?`<div>${sleepEntry.quality}${sleepEntry.energy?' · Energy: '+sleepEntry.energy:''}</div>`:''}${sleepEntry.note?`<div style="color:var(--muted);margin-top:2px;">${sleepEntry.note}</div>`:''}` : null,
       tab:'sleep', scrollId:'sleep-checkin-chevron', toggleFn:'toggleSleepCheckin' },
-    { emoji:'🌿', name:'Wellness', done:waterDone,
+    { icon:'ti-leaf', name:'Wellness', done:waterDone,
       saved: waterEntry ? `<div>${waterEntry.glasses||Math.floor((waterEntry.oz||0)/8)||0} glasses · ${waterEntry.oz||0} oz water</div>` : null,
       tab:'health', scrollId:'hydration-card', toggleFn:'' },
-    { emoji:'✨', name:'Skin', done:!!skinEntry,
+    { icon:'ti-sparkles', name:'Skin', done:!!skinEntry,
       saved: skinEntry ? `${skinEntry.skinFace?`<div style="margin-bottom:2px;">${skinEntry.skinFace}</div>`:''}${(skinEntry.skinState||[]).length?`<div style="margin-bottom:4px;">${chips(skinEntry.skinState)}</div>`:''}${skinEntry.note?`<div style="color:var(--muted);">${skinEntry.note}</div>`:''}` : null,
       tab:'skin', scrollId:'skin-checkin-chevron', toggleFn:'toggleSkinCheckin' },
-    { emoji:'❤️', name:'Body', done:!!bodyEntry,
+    { icon:'ti-barbell', name:'Body', done:!!bodyEntry,
       saved: bodyEntry ? `${(bodyEntry.nsv||[]).length?`<div style="margin-bottom:4px;">${chips(bodyEntry.nsv)}</div>`:''}${(bodyEntry.waist||bodyEntry.hips)?`<div>${[bodyEntry.waist?'Waist: '+bodyEntry.waist+'"':'',bodyEntry.hips?'Hips: '+bodyEntry.hips+'"':''].filter(Boolean).join(' · ')}</div>`:''}` : null,
       tab:'body', scrollId:'body-log-chevron', toggleFn:'toggleBodyLog' },
-    { emoji:'👗', name:'Style', done:!!styleCheckinEntry||!!outfitEntry,
+    { icon:'ti-hanger', name:'Style', done:!!styleCheckinEntry||!!outfitEntry,
       saved: styleCheckinEntry ? `${styleCheckinEntry.styleFace?`<div style="margin-bottom:2px;">${styleCheckinEntry.styleFace}</div>`:''}${(styleCheckinEntry.styleVibe||[]).length?`<div style="margin-bottom:4px;">${chips(styleCheckinEntry.styleVibe)}</div>`:''}${styleCheckinEntry.note?`<div style="color:var(--muted);">${styleCheckinEntry.note}</div>`:''}` : outfitEntry ? `<div>${[outfitEntry.vibe,outfitEntry.occasion].filter(Boolean).join(' · ')||'Outfit logged ✓'}</div>` : null,
       tab:'style', scrollId:'style-checkin-card', toggleFn:'' },
-    { emoji:'💇', name:'Hair', done:!!hairEntry,
+    { icon:'ti-scissors', name:'Hair', done:!!hairEntry,
       saved: hairEntry ? `${hairEntry.hairFace?`<div style="margin-bottom:2px;">${hairEntry.hairFace}</div>`:''}${(hairEntry.hairT||hairEntry.hairState||[]).length?`<div style="margin-bottom:4px;">${chips(hairEntry.hairT||hairEntry.hairState)}</div>`:''}${hairEntry.note?`<div style="color:var(--muted);">${hairEntry.note}</div>`:''}` : null,
       tab:'hair', scrollId:'hair-checkin-card', toggleFn:'' },
   ];
@@ -7357,24 +7357,26 @@ async function renderCheckinHub(){
       ${PILLARS.map(p=>`<div style="flex:1;text-align:center;font-size:9px;color:${p.done?'#27500A':'var(--muted)'};">${p.emoji}</div>`).join('')}
     </div>`;
 
+  const dateEl = document.getElementById('ci-hub-date');
+  if(dateEl){
+    const d = new Date();
+    dateEl.textContent = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  }
+
   const sectionsEl = document.getElementById('ci-sections');
   if(!sectionsEl) return;
-  sectionsEl.innerHTML = PILLARS.map((p,i)=>`
+  sectionsEl.innerHTML = PILLARS.map(p=>`
     <div class="ci-section">
-      <div class="ci-section-header" onclick="toggleCISection(${i})">
-        <div class="ci-pillar-name">${p.emoji} ${p.name}</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="ci-badge ${p.done?'done':'todo'}">${p.done?'✓ Done':'Log →'}</span>
-          <div id="ci-chevron-${i}" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
+      <div class="ci-section-header" onclick="checkinGoTo('${p.tab}','${p.scrollId}','${p.toggleFn}')">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:50%;background:${p.done?'rgba(107,158,120,0.12)':'rgba(0,0,0,0.04)'};border:0.5px solid ${p.done?'rgba(107,158,120,0.3)':'var(--border)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="ti ${p.icon}" style="font-size:15px;color:${p.done?'#6B9E78':'var(--muted)'};"></i>
+          </div>
+          <div class="ci-pillar-name">${p.name}</div>
         </div>
+        <span class="ci-badge ${p.done?'done':'todo'}">${p.done?'✓ Done':'Log →'}</span>
       </div>
       ${p.done&&p.saved?`<div class="ci-saved"><div class="ci-saved-inner">${p.saved}</div></div>`:''}
-      <div class="ci-expanded" id="ci-exp-${i}">
-        <button class="${p.done?'btn-secondary':'btn-primary'}" style="width:100%;margin-top:2px;"
-          onclick="checkinGoTo('${p.tab}','${p.scrollId}','${p.toggleFn}')">
-          ${p.done?'Edit in '+p.name+' tab →':'Log '+p.name+' →'}
-        </button>
-      </div>
     </div>`).join('');
 }
 
@@ -17279,10 +17281,13 @@ async function weeklyMindInsight(){
 <!-- Coach history overlay -->
 <div id="checkin-hub-overlay" class="fullscreen-overlay">
   <div style="padding:0 0 100px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <button onclick="closeCheckinHub()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Daily Check-in</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button onclick="closeCheckinHub()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+        <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Daily Check-in</div>
+      </div>
     </div>
+    <div id="ci-hub-date" style="font-size:12px;color:var(--muted);font-family:var(--sans);margin-bottom:20px;padding-left:40px;"></div>
     <!-- Progress strip -->
     <div id="ci-progress-strip" style="background:#fff;border:0.5px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:16px;">
       <div style="font-size:13px;color:var(--muted);text-align:center;">Loading…</div>
