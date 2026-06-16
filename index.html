@@ -575,7 +575,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <div id="gs-export-check" style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;"></div>
             <span style="font-size:12px;color:var(--text);">Export Apple Health</span>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="tab('sleep');setTimeout(()=>document.getElementById('myair-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)">
+          <div style="display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="tab('sleep');setTimeout(()=>{toggleMyAirCard(true);document.getElementById('myair-card')?.scrollIntoView({behavior:'smooth',block:'start'});},300)">
             <div id="gs-resmed-check" style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;"></div>
             <span style="font-size:12px;color:var(--text);">Log CPAP data</span>
           </div>
@@ -1417,7 +1417,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="myair-card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleMyAirCard()">
         <div style="display:flex;align-items:center;gap:6px;">
           <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">ResMed myAir</div>
@@ -13998,12 +13998,12 @@ function openMyAirCard(){
   if(chevron) chevron.style.transform = 'rotate(90deg)';
 }
 
-function toggleMyAirCard(){
+function toggleMyAirCard(forceOpen){
   const body = document.getElementById('myair-card-body');
   const chevron = document.getElementById('myair-card-chevron');
   if(!body) return;
   const isOpen = body.style.display !== 'none';
-  const open = !isOpen;
+  const open = forceOpen !== undefined ? forceOpen : !isOpen;
   body.style.display = open ? 'block' : 'none';
   if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
 }
