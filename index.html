@@ -9778,26 +9778,24 @@ async function buildSleepAppleMetrics(){
       hrvStripEl.style.display = 'grid';
       hrvStripEl.innerHTML = `
         ${oHR?`<div class="stat-tile" style="padding:8px 10px;">
-          <div style="display:flex;align-items:center;gap:7px;">
-            <div style="width:26px;height:26px;border-radius:50%;background:rgba(192,57,43,0.12);border:0.5px solid rgba(192,57,43,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="ti ti-heart-rate" style="font-size:13px;color:#C0392B;"></i>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:26px;height:26px;border-radius:50%;background:rgba(107,158,120,0.12);border:0.5px solid rgba(107,158,120,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="ti ti-heart-rate" style="font-size:13px;color:#6B9E78;"></i>
             </div>
             <div style="min-width:0;">
-              <div class="stat-src" style="margin-bottom:0;line-height:1.2;">avg HR</div>
-              <div class="stat-val" style="font-size:15px;line-height:1.2;">${oHR}</div>
-              <div class="stat-src" style="line-height:1.2;">bpm</div>
+              <div style="font-size:10px;color:var(--muted);line-height:1.2;">avg HR</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text);line-height:1.3;">${oHR} <span style="font-size:11px;font-weight:400;color:var(--text);">bpm</span></div>
             </div>
           </div>
         </div>`:''}
         ${oHRV?`<div class="stat-tile" style="padding:8px 10px;">
-          <div style="display:flex;align-items:center;gap:7px;">
-            <div style="width:26px;height:26px;border-radius:50%;background:rgba(91,141,217,0.12);border:0.5px solid rgba(91,141,217,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i class="ti ti-activity" style="font-size:13px;color:#5B8DD9;"></i>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:26px;height:26px;border-radius:50%;background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="ti ti-activity" style="font-size:13px;color:#A07850;"></i>
             </div>
             <div style="min-width:0;">
-              <div class="stat-src" style="margin-bottom:0;line-height:1.2;">HRV</div>
-              <div class="stat-val" style="font-size:15px;line-height:1.2;">${oHRV}</div>
-              <div class="stat-src" style="line-height:1.2;">ms</div>
+              <div style="font-size:10px;color:var(--muted);line-height:1.2;">HRV</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text);line-height:1.3;">${oHRV} <span style="font-size:11px;font-weight:400;color:var(--text);">ms</span></div>
             </div>
           </div>
         </div>`:''}`;
