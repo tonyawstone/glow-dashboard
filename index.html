@@ -1216,7 +1216,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <i class="ti ti-moon" style="font-size:13px;color:var(--accent);"></i>
           <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">How did you sleep?</div>
         </div>
-        <button onclick="openPastSleepLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past check-ins →</button>
+        <div id="sleep-checkin-header-right" style="display:flex;align-items:center;gap:8px;">
+          <button onclick="openPastSleepLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past check-ins →</button>
+        </div>
       </div>
       <!-- Saved state — replaces form after logging -->
       <div id="sleep-checkin-saved" style="display:none;"></div>
@@ -8229,31 +8231,42 @@ function showSleepCheckinSaved(e){
     Good:  '<path d="M8.5 11.5 Q9.5 9.8 10.5 11.5"/><path d="M15.5 11.5 Q16.5 9.8 17.5 11.5"/><path d="M10 15.5 Q13 17.5 16 15.5"/>',
     Great: '<circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9 15.5c1 2.5 7 2.5 8 0"/><path d="M17,4 L17.3,5.3 L18.5,5.6 L17.3,5.9 L17,7.2 L16.7,5.9 L15.5,5.6 L16.7,5.3 Z" fill="currentColor" stroke="none"/><path d="M19.5,3 L19.7,3.9 L20.5,4.1 L19.7,4.3 L19.5,5.2 L19.3,4.3 L18.5,4.1 L19.3,3.9 Z" fill="currentColor" stroke="none"/>'
   };
-  const chips = arr => (arr||[]).filter(Boolean).map(v=>`<span style="background:var(--warm);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
-  let dateLabel = 'Last night';
-  if(e.date){
-    const d = safeDate(e.date);
-    dateLabel = d && !isNaN(d) ? 'Night of '+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : 'Last night';
-  }
-  const faceInner = e.quality ? qFaceInner[e.quality] : null;
-  const faceSvgHtml = faceInner ? `<div style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--accent);background:var(--warm);display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
-    <svg width="22" height="22" viewBox="0 0 26 26" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"><circle cx="13" cy="13" r="11"/>${faceInner}</svg>
-  </div>` : '';
-  saved.style.display='block';
-  saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${dateLabel} ✓ <button onclick="editSleepCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">· edit</button></div>
-    ${faceSvgHtml}
-    ${e.quality?`<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${e.quality}</div>`:''}
-    ${e.hrs&&e.hrs!=='—'?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">⏱ ${e.hrs}h sleep</div>`:''}
-    ${(e.energy||[]).length?`<div style="margin-bottom:4px;">${chips(e.energy)}</div>`:''}
-    ${e.melatonin||e.sleepGummies?`<div style="font-size:11px;color:var(--muted);margin-top:4px;">Took last night: ${[e.melatonin?'Melatonin':'',e.sleepGummies?'Sleep gummies':''].filter(Boolean).join(' · ')}</div>`:''}
-    ${e.note?`<div style="font-size:12px;color:var(--muted);margin-top:4px;">${e.note}</div>`:''}
+  const qualities = ['Rough','Poor','OK','Good','Great'];
+  const faceSvg = (q, selected) => `<div style="width:32px;height:32px;border-radius:50%;border:1.5px solid ${selected?'var(--accent)':'transparent'};background:${selected?'rgba(160,120,80,0.1)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+    <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:${selected?'var(--accent)':'var(--border)'};">
+      <circle cx="13" cy="13" r="11"/>${qFaceInner[q]}
+    </svg>
   </div>`;
+  const wordChips = (e.energy||[]).filter(Boolean).map(w=>`<span style="background:rgba(107,158,120,0.12);border:0.5px solid rgba(107,158,120,0.3);border-radius:20px;padding:3px 10px;font-size:11px;color:#27500A;white-space:nowrap;">${w}</span>`).join('');
+  const medsChip = (e.melatonin||e.sleepGummies) ? `<span style="font-size:11px;color:var(--muted);">${[e.melatonin?'Melatonin':'',e.sleepGummies?'Sleep gummies':''].filter(Boolean).join(' · ')}</span>` : '';
+  const editPill = `<button onclick="editSleepCheckin()" style="padding:3px 10px;border-radius:20px;border:1.5px dashed var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">+ edit</button>`;
+  const noteHtml = e.note ? `<div style="font-family:var(--serif);font-size:13px;font-style:italic;color:var(--muted);margin-top:6px;font-weight:300;">${e.note}</div>` : '';
+  // Update header right with date
+  const headerRight = document.getElementById('sleep-checkin-header-right');
+  if(headerRight && e.date){
+    const d = safeDate(e.date);
+    const dateLabel = d && !isNaN(d) ? d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : '';
+    if(dateLabel) headerRight.innerHTML = `<span style="font-size:11px;color:var(--muted);">${dateLabel}</span><button onclick="openPastSleepLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>`;
+  }
+  const sleepBody = document.getElementById('sleep-checkin-body');
+  if(sleepBody) sleepBody.style.display = 'none';
+  saved.style.display = 'block';
+  saved.innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
+      ${qualities.map(q => faceSvg(q, e.quality===q)).join('')}
+      ${wordChips}
+      ${medsChip}
+      ${editPill}
+    </div>
+    ${noteHtml}
+  `;
 }
 
 function editSleepCheckin(){
   const saved = document.getElementById('sleep-checkin-saved');
   if(saved) saved.style.display = 'none';
+  const headerRight = document.getElementById('sleep-checkin-header-right');
+  if(headerRight) headerRight.innerHTML = `<button onclick="openPastSleepLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past check-ins →</button>`;
   toggleSleepCheckin(true);
 }
 
