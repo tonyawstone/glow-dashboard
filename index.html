@@ -1984,6 +1984,78 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-health-daily">
     <div class="section-label">Wellness · Today <button class="guide-btn" onclick="openGuide('health')">?</button></div>
 
+    <!-- Wellness Check-in card -->
+    <div class="card" id="wellness-checkin-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-heart" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">How is your body feeling?</div>
+        </div>
+        <div id="wellness-checkin-header-right" style="display:flex;align-items:center;gap:8px;">
+          <button onclick="openWellnessLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
+        </div>
+      </div>
+      <div id="wellness-checkin-saved" style="display:none;"></div>
+      <div id="wellness-checkin-body">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+          <span style="font-size:11px;color:var(--muted);">Date</span>
+          <input type="date" id="wellness-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Overall physical feeling today?</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="wellness-face-tags">
+          <button class="sqb" data-wellness="Low" onclick="soloWellnessFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/></svg></div>
+            <span class="sqb-lbl">Low</span>
+          </button>
+          <button class="sqb" data-wellness="Okay" onclick="soloWellnessFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/></svg></div>
+            <span class="sqb-lbl">Okay</span>
+          </button>
+          <button class="sqb" data-wellness="Good" onclick="soloWellnessFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/></svg></div>
+            <span class="sqb-lbl">Good</span>
+          </button>
+          <button class="sqb" data-wellness="Great" onclick="soloWellnessFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20 17.5 16"/></svg></div>
+            <span class="sqb-lbl">Great</span>
+          </button>
+          <button class="sqb" data-wellness="Amazing" onclick="soloWellnessFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="-2 -2 30 30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/></svg></div>
+            <span class="sqb-lbl">Amazing</span>
+          </button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Energy level</div>
+        <div class="tags" id="wellness-energy-tags" style="margin-bottom:14px;">
+          <button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">High</button><button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">Steady</button><button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">Low</button><button class="tag" onclick="soloWellnessGroup('wellness-energy-tags',this)">Exhausted</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Appetite today</div>
+        <div class="tags" id="wellness-appetite-tags" style="margin-bottom:14px;">
+          <button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">Much less</button><button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">Slightly less</button><button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">Normal</button><button class="tag" onclick="soloWellnessGroup('wellness-appetite-tags',this)">More than usual</button>
+        </div>
+        <div style="margin-bottom:8px;">
+          <button id="wellness-symptoms-btn" onclick="toggleWellnessSymptoms()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Add symptoms</button>
+        </div>
+        <div id="wellness-symptoms-panel" style="display:none;">
+          <div class="tags" id="wellness-symptom-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="tog(this);saveWellnessDraft()">Nausea</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Fatigue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Headache</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Bloating</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Constipation</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Brain fog</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Injection site soreness</button>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <button id="wellness-feelings-btn" onclick="toggleWellnessFeelings()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Feeling good about</button>
+        </div>
+        <div id="wellness-feelings-panel" style="display:none;">
+          <div class="tags" id="wellness-feeling-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="tog(this);saveWellnessDraft()">Less bloated</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Clothes looser</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Less hungry</button><button class="tag" onclick="tog(this);saveWellnessDraft()">More energy</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Sleeping better</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Less joint pain</button>
+          </div>
+        </div>
+        <textarea id="wellness-note" rows="2" placeholder="Anything else worth noting?" oninput="saveWellnessDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
+        <div style="text-align:center;">
+          <button onclick="saveWellness()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
+        </div>
+        <div class="toast-msg" id="wct">Saved!</div>
+      </div>
+    </div>
+
     <!-- BP Log — collapsible, first card -->
     <div class="card" id="bp-entry-card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleBPForm()">
@@ -3794,7 +3866,8 @@ async function tab(id){
   if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); loadSkinRoutineState(); loadMuselyHistoryFromBlob().then(()=>{ renderSkincareLog(); showSkinPMSavedView(); loadPMLastNight(); }); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
     const today = logicalDayStr();
-    ['skin-log-date','water-log-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=today; });
+    ['skin-log-date','water-log-date','wellness-log-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=today; });
+    restoreWellnessDraft(); restoreWellnessCheckinState();
   }
 }
 function setView(v,btn){
@@ -8660,6 +8733,123 @@ async function saveBody(){
     showToast('Could not save — please try again');
   }
 }
+// ── WELLNESS CHECK-IN ──────────────────────────────────────────────────────
+function soloWellnessFace(btn){document.getElementById('wellness-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveWellnessDraft();}
+function soloWellnessGroup(id,btn){document.getElementById(id).querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveWellnessDraft();}
+function toggleWellnessSymptoms(){const p=document.getElementById('wellness-symptoms-panel'),b=document.getElementById('wellness-symptoms-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Add symptoms':'+ Add symptoms';}
+function toggleWellnessFeelings(){const p=document.getElementById('wellness-feelings-panel'),b=document.getElementById('wellness-feelings-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Feeling good about':'+ Feeling good about';}
+function saveWellnessDraft(){
+  savePillarDraft('wellness',{
+    wellnessFace: document.getElementById('wellness-face-tags')?.querySelector('.on')?.dataset.wellness||'',
+    energy: document.getElementById('wellness-energy-tags')?.querySelector('.on')?.textContent?.trim()||'',
+    appetite: document.getElementById('wellness-appetite-tags')?.querySelector('.on')?.textContent?.trim()||'',
+    symptoms: getTags('wellness-symptom-tags'),
+    feelings: getTags('wellness-feeling-tags'),
+    note: document.getElementById('wellness-note')?.value||''
+  });
+}
+function restoreWellnessDraft(){
+  const d = getPillarDraft('wellness'); if(!d) return;
+  if(d.wellnessFace){const b=document.getElementById('wellness-face-tags')?.querySelector('[data-wellness="'+d.wellnessFace+'"]');if(b)soloWellnessFace(b);}
+  if(d.energy){const b=Array.from(document.getElementById('wellness-energy-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.energy);if(b)soloWellnessGroup('wellness-energy-tags',b);}
+  if(d.appetite){const b=Array.from(document.getElementById('wellness-appetite-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.appetite);if(b)soloWellnessGroup('wellness-appetite-tags',b);}
+  if(d.symptoms?.length){restoreTags('wellness-symptom-tags',d.symptoms);const p=document.getElementById('wellness-symptoms-panel');if(p&&p.style.display==='none')toggleWellnessSymptoms();}
+  if(d.feelings?.length){restoreTags('wellness-feeling-tags',d.feelings);const p=document.getElementById('wellness-feelings-panel');if(p&&p.style.display==='none')toggleWellnessFeelings();}
+  if(d.note && document.getElementById('wellness-note')) document.getElementById('wellness-note').value = d.note;
+}
+function showWellnessCheckinSaved(e){
+  const saved = document.getElementById('wellness-checkin-saved');
+  if(!saved) return;
+  const wFaceInner = {
+    Low:'<circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/>',
+    Okay:'<circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/>',
+    Good:'<circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/>',
+    Great:'<path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20 17.5 16"/>',
+    Amazing:'<path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/>'
+  };
+  const wFaceVB = {Low:'0 0 26 26',Okay:'0 0 26 26',Good:'0 0 26 26',Great:'0 0 26 26',Amazing:'-2 -2 30 30'};
+  const wFaces = ['Low','Okay','Good','Great','Amazing'];
+  const faceSvg = (f,sel) => `<div style="width:32px;height:32px;border-radius:50%;border:1.5px solid ${sel?'var(--accent)':'transparent'};background:${sel?'rgba(160,120,80,0.1)':'transparent'};display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="${wFaceVB[f]}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:${sel?'var(--accent)':'var(--border)'}"><circle cx="13" cy="13" r="11"/>${wFaceInner[f]}</svg></div>`;
+  const warmChip = v => v?`<span style="background:var(--warm);color:var(--accent);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`:'';
+  const symptomChips = arr => (arr||[]).filter(Boolean).map(v=>`<span style="background:rgba(196,115,90,0.1);color:var(--rose);border:0.5px solid rgba(196,115,90,0.3);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
+  const feelingChips = arr => (arr||[]).filter(Boolean).map(v=>`<span style="background:rgba(107,158,120,0.12);color:var(--green);border:0.5px solid rgba(107,158,120,0.3);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
+  const editPill = `<button onclick="editWellnessCheckin()" style="padding:2px 10px;border-radius:10px;border:1px dashed var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin:2px 0 0 0;">+ edit</button>`;
+  const noteHtml = e.note?`<div style="font-family:var(--serif);font-size:13px;color:var(--muted);font-style:italic;margin-top:8px;">${e.note}</div>`:'';
+  const headerRight = document.getElementById('wellness-checkin-header-right');
+  if(headerRight) headerRight.innerHTML = `<span style="font-size:11px;color:var(--muted);">${fmtOutfitDate(e.date)}</span><button onclick="openWellnessLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>`;
+  const body = document.getElementById('wellness-checkin-body');
+  if(body) body.style.display = 'none';
+  saved.style.display = 'block';
+  saved.innerHTML = `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">${wFaces.map(f=>faceSvg(f,e.wellnessFace===f)).join('')}${warmChip(e.energy)}${warmChip(e.appetite)}${symptomChips(e.symptoms)}${feelingChips(e.feelings)}${editPill}</div>${noteHtml}`;
+}
+function editWellnessCheckin(){
+  const saved = document.getElementById('wellness-checkin-saved');
+  if(saved) saved.style.display = 'none';
+  const headerRight = document.getElementById('wellness-checkin-header-right');
+  if(headerRight) headerRight.innerHTML = `<button onclick="openWellnessLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>`;
+  const body = document.getElementById('wellness-checkin-body');
+  if(body) body.style.display = 'block';
+  const state = JSON.parse(localStorage.getItem('glowWellnessCheckinState')||'null');
+  if(!state) return;
+  if(state.wellnessFace){const b=document.getElementById('wellness-face-tags')?.querySelector('[data-wellness="'+state.wellnessFace+'"]');if(b)soloWellnessFace(b);}
+  if(state.date && document.getElementById('wellness-log-date')) document.getElementById('wellness-log-date').value = state.date;
+  if(state.energy){const b=Array.from(document.getElementById('wellness-energy-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.energy);if(b)soloWellnessGroup('wellness-energy-tags',b);}
+  if(state.appetite){const b=Array.from(document.getElementById('wellness-appetite-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.appetite);if(b)soloWellnessGroup('wellness-appetite-tags',b);}
+  if(state.symptoms?.length){restoreTags('wellness-symptom-tags',state.symptoms);const p=document.getElementById('wellness-symptoms-panel');if(p&&p.style.display==='none')toggleWellnessSymptoms();}
+  if(state.feelings?.length){restoreTags('wellness-feeling-tags',state.feelings);const p=document.getElementById('wellness-feelings-panel');if(p&&p.style.display==='none')toggleWellnessFeelings();}
+  if(state.note && document.getElementById('wellness-note')) document.getElementById('wellness-note').value = state.note;
+}
+async function restoreWellnessCheckinState(){
+  try{
+    const today = logicalDayStr();
+    const dateEl = document.getElementById('wellness-log-date');
+    if(dateEl && !dateEl.value) dateEl.value = today;
+    const cached = JSON.parse(localStorage.getItem('glowWellnessCheckinState')||'null');
+    if(cached && cached.savedAt && cached.date===today && (Date.now()-cached.savedAt)<86400000){
+      showWellnessCheckinSaved(cached); return;
+    }
+    let entry = null;
+    try{ const all = await dbAll('wellness_checkins'); entry = all.filter(e=>e.date===today).pop(); }catch(e){}
+    if(!entry){
+      try{
+        const res = await fetch(`${BACKEND}/api/sync?pillar=wellness_checkins&t=${Date.now()}`);
+        if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+          entry = data.filter(e=>e.date===today).pop();
+        }
+      }catch(e){}
+    }
+    if(entry) showWellnessCheckinSaved(entry);
+  }catch(e){}
+}
+async function saveWellness(){
+  const wellnessFace = document.getElementById('wellness-face-tags')?.querySelector('.on')?.dataset.wellness||'';
+  const energy = document.getElementById('wellness-energy-tags')?.querySelector('.on')?.textContent?.trim()||'';
+  const appetite = document.getElementById('wellness-appetite-tags')?.querySelector('.on')?.textContent?.trim()||'';
+  const symptoms = getTags('wellness-symptom-tags');
+  const feelings = getTags('wellness-feeling-tags');
+  const note = document.getElementById('wellness-note')?.value.trim()||'';
+  const dateVal = document.getElementById('wellness-log-date')?.value||logicalDayStr();
+  if(!wellnessFace && !energy && !appetite && !symptoms.length && !feelings.length && !note){ showToast('Add at least one entry first'); return; }
+  const entry={type:'wellness',wellnessFace,energy,appetite,symptoms,feelings,note,date:dateVal};
+  try{
+    try{ await dbAdd('wellness_checkins',entry); syncToBlob('wellness_checkins'); }catch(e){}
+    document.getElementById('wellness-face-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('wellness-energy-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('wellness-appetite-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('wellness-symptom-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('wellness-feeling-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    if(document.getElementById('wellness-note')) document.getElementById('wellness-note').value='';
+    const sP=document.getElementById('wellness-symptoms-panel');if(sP&&sP.style.display!=='none')toggleWellnessSymptoms();
+    const fP=document.getElementById('wellness-feelings-panel');if(fP&&fP.style.display!=='none')toggleWellnessFeelings();
+    localStorage.setItem('glowWellnessCheckinState', JSON.stringify({...entry, savedAt: Date.now()}));
+    clearPillarDraft('wellness');
+    toast('wct');
+    showWellnessCheckinSaved(entry);
+    buildDailyProgress();
+  }catch(err){ showToast('Could not save — please try again'); }
+}
+function openWellnessLog(){ showToast('Wellness history coming soon'); }
+
 async function saveExercise(){
   const walk=document.getElementById('ex-walk').value;
   const pilates=document.getElementById('ex-pilates').value;
