@@ -2469,12 +2469,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">How is your skin today?</div>
         </div>
         <div id="skin-checkin-header-right" style="display:flex;align-items:center;gap:8px;">
-          <input type="date" id="skin-log-date" style="font-size:11px;color:var(--muted);border:0.5px solid var(--border);border-radius:6px;padding:2px 6px;background:transparent;cursor:pointer;font-family:var(--sans);">
-          <button onclick="openSkinLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past check-ins →</button>
+          <button onclick="openSkinLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
         </div>
       </div>
       <div id="skin-checkin-saved" style="display:none;"></div>
       <div id="skin-checkin-body">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <span style="font-size:11px;color:var(--muted);">Date</span>
+          <input type="date" id="skin-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
+        </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:10px;" id="skin-face-tags">
           <button class="sqb" data-skin="Glowing" onclick="soloSkin(this)">
             <div class="sqb-face"><svg width="26" height="26" viewBox="-2 -2 30 30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/><path d="M26 11 L26.3 12 L27.3 12.3 L26.3 12.6 L26 13.6 L25.7 12.6 L24.7 12.3 L25.7 12 Z" fill="currentColor" stroke="none"/></svg></div>
@@ -8048,7 +8051,7 @@ function editSkinCheckin(){
   const saved = document.getElementById('skin-checkin-saved');
   if(saved) saved.style.display = 'none';
   const headerRight = document.getElementById('skin-checkin-header-right');
-  if(headerRight) headerRight.innerHTML = `<input type="date" id="skin-log-date" style="font-size:11px;color:var(--muted);border:0.5px solid var(--border);border-radius:6px;padding:2px 6px;background:transparent;cursor:pointer;font-family:var(--sans);"><button onclick="openSkinLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past check-ins →</button>`;
+  if(headerRight) headerRight.innerHTML = `<button onclick="openSkinLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>`;
   const body = document.getElementById('skin-checkin-body');
   if(body) body.style.display = 'block';
   try{
