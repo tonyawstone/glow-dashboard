@@ -1347,29 +1347,69 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="sleep-coach-output" class="coach-response" style="display:none;margin-top:10px;"></div>
     </div>
 
-    <!-- Apple Health sleep data -->
-    <div class="card">
-      <div class="card-title">Apple Health · sleep data</div>
-      <div style="text-align:center;padding:10px 0 8px;">
-        <div style="font-size:42px;font-weight:700;color:var(--accent);" id="sleep-display">—</div>
-        <div style="font-size:13px;color:var(--muted);">hours last night</div>
+    <!-- Sleep Snapshot — side-by-side -->
+    <div class="card" id="sleep-snapshot-card">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+        <i class="ti ti-moon-stars" style="font-size:13px;color:var(--accent);"></i>
+        <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Sleep Snapshot</div>
       </div>
-      <div id="sleep-times-from-csv" style="display:flex;justify-content:center;gap:16px;padding:10px 12px;border-radius:10px;background:var(--warm);margin:8px 0 4px;">
-        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Bedtime</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-bedtime">—</div></div>
-        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Wake time</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-waketime">—</div></div>
-        <div style="text-align:center;"><div style="font-size:11px;color:var(--muted);">Time in bed</div><div style="font-size:18px;font-weight:600;color:var(--text);" id="csv-timeinbed">—</div></div>
-        <div style="display:none;" id="csv-sleephrs"></div>
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <!-- Left: hours + bedtime/wake -->
+        <div style="flex:1;">
+          <div style="font-size:42px;font-weight:700;color:var(--accent);line-height:1;" id="sleep-display">—</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">hours last night</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="font-size:11px;color:var(--muted);width:46px;flex-shrink:0;">Bedtime</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text);" id="csv-bedtime">—</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="font-size:11px;color:var(--muted);width:46px;flex-shrink:0;">Wake</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text);" id="csv-waketime">—</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="font-size:11px;color:var(--muted);width:46px;flex-shrink:0;">In bed</div>
+              <div style="font-size:14px;font-weight:500;color:var(--text);" id="csv-timeinbed">—</div>
+            </div>
+          </div>
+        </div>
+        <!-- Right: Sleep score circle -->
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding-top:4px;" id="sleep-score-right">
+          <div style="width:84px;height:84px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;background:var(--warm);">
+            <div style="font-size:10px;color:var(--muted);text-align:center;padding:4px;">No data</div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:6px;">Sleep Score</div>
+        </div>
       </div>
-      <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:10px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
-      <div id="sleep-apple-metrics"></div>
-      <div id="sleep-timeline-wrap" style="margin-top:10px;">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Sleep timeline</div>
+      <!-- HR/HRV row -->
+      <div id="sleep-hrv-row" style="display:none;margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border);"></div>
+      <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px;" id="csv-sleep-date-label">Upload CSV to populate · last known shown</div>
+      <div style="display:none;" id="csv-sleephrs"></div>
+      <div style="display:none;" id="sleep-times-from-csv"></div>
+      <a href="javascript:void(0)" onclick="openWithings()" class="ext-link" style="margin-top:10px;"><i class="ti ti-external-link" aria-hidden="true"></i>Open Withings · see your Sleep Score</a>
+    </div>
+
+    <!-- Sleep Stages -->
+    <div class="card" id="sleep-stages-daily-card">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+        <i class="ti ti-chart-bar" style="font-size:13px;color:var(--accent);"></i>
+        <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Sleep Stages</div>
+      </div>
+      <div id="sleep-apple-metrics"><div class="log-empty">Upload CSV to see sleep stages</div></div>
+    </div>
+
+    <!-- Sleep Timeline -->
+    <div class="card" id="sleep-timeline-card">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+        <i class="ti ti-timeline" style="font-size:13px;color:var(--accent);"></i>
+        <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Sleep Timeline</div>
+      </div>
+      <div id="sleep-timeline-wrap">
         <div id="sleep-timeline-canvas-wrap" style="position:relative;height:96px;background:var(--warm);border-radius:10px;overflow:hidden;">
           <canvas id="sleep-timeline-chart"></canvas>
         </div>
         <div style="position:relative;height:14px;margin-top:3px;" id="sleep-timeline-labels"></div>
       </div>
-      <a href="javascript:void(0)" onclick="openWithings()" class="ext-link" style="margin-top:10px;"><i class="ti ti-external-link" aria-hidden="true"></i>Open Withings · see your Sleep Score</a>
     </div>
 
     <div class="card">
@@ -1512,55 +1552,63 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div><!-- myair-card-body -->
     </div>
 
-    <!-- CPAP Equipment -->
-    <div class="card">
-      <div class="card-title">🔧 CPAP equipment · ResMed AirSense 11</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">AirTouch F30i Clear mask</div>
-
-      <!-- Weekly cleaning — top, checkboxes persist until Sunday midnight -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="font-size:12px;font-weight:600;color:var(--text);">🧼 Weekly cleaning · every Sunday</div>
-        <div id="cpap-clean-reminder" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--warm);color:var(--muted);"></div>
-      </div>
-      <div class="med-row" id="cpap-clean-mask" onclick="toggleCPAPClean('cpap-clean-mask')">
-        <div class="med-check">&#x2713;</div>
-        <div class="med-info"><div class="med-name">Mask &amp; cushion soaked</div><div class="med-note">Warm water + mild soap</div></div>
-      </div>
-      <div class="med-row" id="cpap-clean-tube" onclick="toggleCPAPClean('cpap-clean-tube')">
-        <div class="med-check">&#x2713;</div>
-        <div class="med-info"><div class="med-name">Tubing cleaned</div><div class="med-note">Rinse through tube</div></div>
-      </div>
-      <div class="med-row" id="cpap-clean-chamber" onclick="toggleCPAPClean('cpap-clean-chamber')" style="margin-bottom:10px;">
-        <div class="med-check">&#x2713;</div>
-        <div class="med-info"><div class="med-name">Water chamber cleaned</div><div class="med-note">Empty &amp; rinse · deep clean weekly</div></div>
-      </div>
-      <button class="btn-primary" style="margin-bottom:4px;" onclick="saveCPAPCleaning()">Log cleaning done</button>
-      <div class="toast-msg" id="cpap-clean-toast">Cleaning logged!</div>
-
-      <!-- Replacement tracker -->
-      <div style="margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">🔄 Replacement schedule</div>
-        <div id="cpap-equipment-status">
-          <div class="log-empty">Loading equipment status...</div>
-        </div>
-        <div style="margin-top:12px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Enter replacement date:</div>
-          <div class="cpap-date-row"><span>Mask cushion</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_cushion" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_cushion')">Save</button></div></div>
-          <div class="cpap-date-row"><span>Mask frame</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_frame" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_frame')">Save</button></div></div>
-          <div class="cpap-date-row"><span>Headgear</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-headgear" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('headgear')">Save</button></div></div>
-          <div class="cpap-date-row"><span>Tubing</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-tubing" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('tubing')">Save</button></div></div>
-          <div class="cpap-date-row"><span>Water chamber</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-water_chamber" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('water_chamber')">Save</button></div></div>
-          <div style="margin-top:10px;">
-            <button class="cpap-replace-btn" style="width:100%;" onclick="replaceCPAPItem('filter_disposable')">&#x2713; Replaced disposable filter today</button>
-          </div>
-          <div class="toast-msg" id="cpap-replace-toast">Saved!</div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <div class="view-content" id="vc-sleep-weekly">
     <div class="section-label">Sleep this week</div>
+
+    <!-- CPAP Care — collapsible, always closed on load -->
+    <div class="card" id="cpap-care-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleCPAPCareCard()">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-device-heart-monitor" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">CPAP Care</div>
+          <div id="cpap-care-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;margin-left:2px;">›</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);">AirSense 11 · AirTouch F30i</div>
+      </div>
+      <div id="cpap-care-body" style="display:none;margin-top:14px;">
+        <!-- Weekly cleaning -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:12px;font-weight:600;color:var(--text);">Weekly cleaning · every Sunday</div>
+          <div id="cpap-clean-reminder" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--warm);color:var(--muted);"></div>
+        </div>
+        <div class="med-row" id="cpap-clean-mask" onclick="toggleCPAPClean('cpap-clean-mask')">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Mask &amp; cushion soaked</div><div class="med-note">Warm water + mild soap</div></div>
+        </div>
+        <div class="med-row" id="cpap-clean-tube" onclick="toggleCPAPClean('cpap-clean-tube')">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Tubing cleaned</div><div class="med-note">Rinse through tube</div></div>
+        </div>
+        <div class="med-row" id="cpap-clean-chamber" onclick="toggleCPAPClean('cpap-clean-chamber')" style="margin-bottom:10px;">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Water chamber cleaned</div><div class="med-note">Empty &amp; rinse · deep clean weekly</div></div>
+        </div>
+        <button class="btn-primary" style="margin-bottom:4px;" onclick="saveCPAPCleaning()">Log cleaning done</button>
+        <div class="toast-msg" id="cpap-clean-toast">Cleaning logged!</div>
+        <!-- Replacement tracker -->
+        <div style="margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border);">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">Replacement schedule</div>
+          <div id="cpap-equipment-status">
+            <div class="log-empty">Loading equipment status...</div>
+          </div>
+          <div style="margin-top:12px;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Enter replacement date:</div>
+            <div class="cpap-date-row"><span>Mask cushion</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_cushion" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_cushion')">Save</button></div></div>
+            <div class="cpap-date-row"><span>Mask frame</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_frame" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_frame')">Save</button></div></div>
+            <div class="cpap-date-row"><span>Headgear</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-headgear" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('headgear')">Save</button></div></div>
+            <div class="cpap-date-row"><span>Tubing</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-tubing" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('tubing')">Save</button></div></div>
+            <div class="cpap-date-row"><span>Water chamber</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-water_chamber" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('water_chamber')">Save</button></div></div>
+            <div style="margin-top:10px;">
+              <button class="cpap-replace-btn" style="width:100%;" onclick="replaceCPAPItem('filter_disposable')">&#x2713; Replaced disposable filter today</button>
+            </div>
+            <div class="toast-msg" id="cpap-replace-toast">Saved!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Sleep quality chart — bedtime/wake bars + score bubbles -->
     <div class="card">
       <div class="card-title">Sleep quality this week</div>
@@ -9691,30 +9739,46 @@ async function buildSleepAppleMetrics(){
   const score = parseFloat(latest.sleep_score)||null;
   const oHR = parseFloat(latest.overnight_hr)||null;
   const oHRV = parseFloat(latest.overnight_hrv)||null;
-  const scoreHTML = score ? `
-    <div style="padding:12px;background:var(--warm);border-radius:12px;margin-bottom:10px;">
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px;">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">Sleep Score</div>
-        <button onclick="openSleepScoreInfo()" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:0;opacity:0.7;">ⓘ</button>
-      </div>
-      <div style="font-size:40px;font-weight:700;text-align:center;color:${score>=80?'#27500A':score>=60?'#6B9E78':score>=40?'#E8A87C':'#C0392B'};">${score}</div>
-      <div style="text-align:center;font-size:12px;font-weight:600;color:${score>=80?'#27500A':score>=60?'#6B9E78':score>=40?'#E8A87C':'#C0392B'};margin-top:2px;">${score>=80?'Optimal':score>=60?'Good':score>=40?'Fair':'Needs attention'}</div>
-      <!-- Color scale -->
-      <div style="display:flex;gap:3px;margin:10px 0 4px;border-radius:6px;overflow:hidden;height:6px;">
-        <div style="flex:1;background:#C0392B;"></div>
-        <div style="flex:1;background:#E8A87C;"></div>
-        <div style="flex:1;background:#6B9E78;"></div>
-        <div style="flex:1;background:#27500A;"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:8px;">
-        <span>0 · Poor</span><span>40 · Fair</span><span>60 · Good</span><span>80+ · Optimal</span>
-      </div>
-      ${(oHR||oHRV)?`<div style="display:flex;gap:12px;padding-top:8px;border-top:0.5px solid var(--border);justify-content:center;">
-        ${oHR?`<div style="text-align:center;"><div style="font-size:15px;font-weight:600;color:var(--text);">${oHR}</div><div style="font-size:10px;color:var(--muted);">avg HR bpm</div></div>`:''}
-        ${oHRV?`<div style="text-align:center;"><div style="font-size:15px;font-weight:600;color:var(--text);">${oHRV}</div><div style="font-size:10px;color:var(--muted);">HRV ms</div></div>`:''}
-      </div>`:''}
-    </div>` : '';
-  el.innerHTML = `${scoreHTML}${buildSleepStagesDisplay(latest)}${buildSleepSourceComparison(latest)}`;
+  const scoreColor = score>=80?'#27500A':score>=60?'#6B9E78':score>=40?'#E8A87C':'#C0392B';
+  const scoreLabel = score>=80?'Optimal':score>=60?'Good':score>=40?'Fair':'Needs attention';
+  const scoreRightEl = document.getElementById('sleep-score-right');
+  if(scoreRightEl){
+    if(score){
+      scoreRightEl.innerHTML = `
+        <div style="width:84px;height:84px;border-radius:50%;border:3px solid ${scoreColor};display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--warm);">
+          <div style="font-size:28px;font-weight:700;color:${scoreColor};line-height:1;">${score}</div>
+          <div style="font-size:9px;font-weight:600;color:${scoreColor};margin-top:2px;">${scoreLabel}</div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:6px;">Sleep Score</div>
+        <button onclick="openSleepScoreInfo()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;margin-top:2px;opacity:0.7;">ⓘ how it's scored</button>
+        <div style="display:flex;gap:2px;margin-top:6px;border-radius:4px;overflow:hidden;height:4px;width:70px;">
+          <div style="flex:1;background:#C0392B;"></div>
+          <div style="flex:1;background:#E8A87C;"></div>
+          <div style="flex:1;background:#6B9E78;"></div>
+          <div style="flex:1;background:#27500A;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted);width:70px;margin-top:2px;"><span>0</span><span>80+</span></div>`;
+    } else {
+      scoreRightEl.innerHTML = `
+        <div style="width:84px;height:84px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;background:var(--warm);">
+          <div style="font-size:10px;color:var(--muted);text-align:center;padding:4px;">No score data</div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:6px;">Sleep Score</div>`;
+    }
+  }
+  const hrvRowEl = document.getElementById('sleep-hrv-row');
+  if(hrvRowEl){
+    if(oHR||oHRV){
+      hrvRowEl.style.display = 'block';
+      hrvRowEl.innerHTML = `<div style="display:flex;gap:24px;justify-content:center;">
+        ${oHR?`<div style="text-align:center;"><div style="font-size:18px;font-weight:600;color:var(--text);">${oHR}</div><div style="font-size:10px;color:var(--muted);">avg HR bpm</div></div>`:''}
+        ${oHRV?`<div style="text-align:center;"><div style="font-size:18px;font-weight:600;color:var(--text);">${oHRV}</div><div style="font-size:10px;color:var(--muted);">HRV ms</div></div>`:''}
+      </div>`;
+    } else {
+      hrvRowEl.style.display = 'none';
+    }
+  }
+  el.innerHTML = `${buildSleepStagesDisplay(latest)}${buildSleepSourceComparison(latest)}`;
   // Build timeline for latest date
   buildSleepTimeline(latest.date);
 }
@@ -12946,6 +13010,15 @@ function loadCPAPCleanState(){
       reminder.style.color = 'var(--muted)';
     }
   }
+}
+
+function toggleCPAPCareCard(){
+  const body = document.getElementById('cpap-care-body');
+  const chevron = document.getElementById('cpap-care-chevron');
+  if(!body) return;
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
 }
 
 function toggleCPAPClean(id){
