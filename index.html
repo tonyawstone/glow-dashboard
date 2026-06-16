@@ -3776,7 +3776,7 @@ async function tab(id){
   }
   if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); loadSkinRoutineState(); loadMuselyHistoryFromBlob().then(()=>{ renderSkincareLog(); showSkinPMSavedView(); loadPMLastNight(); }); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
-    const today = nowStr();
+    const today = logicalDayStr();
     ['skin-log-date','water-log-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=today; });
   }
 }
@@ -12072,7 +12072,7 @@ async function openWaterLog(){
 }
 
 async function saveWaterIntake(){
-  const today = document.getElementById('water-log-date')?.value || nowStr();
+  const today = document.getElementById('water-log-date')?.value || logicalDayStr();
   const notes = document.getElementById('water-notes')?.value?.trim() || '';
   const water = await dbAll('water');
   const existing = water.findIndex(w=>w.date===today);
