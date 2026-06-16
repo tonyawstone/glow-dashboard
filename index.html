@@ -579,6 +579,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <div id="gs-resmed-check" style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;"></div>
             <span style="font-size:12px;color:var(--text);">Log CPAP data</span>
           </div>
+          <div style="display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="tab('health');setTimeout(()=>document.getElementById('body-water-card')?.scrollIntoView({behavior:'smooth',block:'start'}),300)">
+            <div id="gs-bodywater-check" style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;"></div>
+            <span style="font-size:12px;color:var(--text);">Log body water %</span>
+          </div>
         </div>
       </div>
 
@@ -2155,22 +2159,22 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div><!-- end meds-form-body -->
     </div>
 
-    <!-- Hydration -->
+    <!-- Daily Water Intake -->
     <div class="card" id="hydration-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div class="card-title" style="margin:0;">💧 Hydration tracker</div>
-        <button onclick="openWaterLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-droplet" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Daily Water Intake</div>
+        </div>
+        <button onclick="openWaterLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
       </div>
-
-      <!-- Section 1: Daily Water Intake -->
-      <div style="font-size:12px;font-weight:600;color:var(--text);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.04em;">Daily water intake</div>
       <div style="text-align:center;padding:10px 0 6px;">
         <div style="font-size:42px;font-weight:700;color:#5B9EC9;" id="water-oz-total">0</div>
         <div style="font-size:13px;color:var(--muted);">oz today</div>
         <div style="margin-top:10px;background:rgba(0,0,0,0.06);border-radius:20px;height:10px;overflow:hidden;">
           <div id="water-goal-bar" style="height:10px;border-radius:20px;background:#5B9EC9;transition:width 0.4s ease;width:0%;"></div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:5px;" id="water-goal-label">Goal: 80 oz · recommended on Zepbound + diuretics</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:5px;" id="water-goal-label">Goal: 64 oz · recommended on Zepbound + diuretics</div>
       </div>
       <div style="font-size:12px;font-weight:500;color:var(--text);margin:8px 0 6px;">Tap to add a drink:</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="water-container-buttons">
@@ -2194,13 +2198,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <button class="btn-primary" style="margin-top:8px;" onclick="saveWaterIntake()">💾 Save & sync</button>
       <div class="toast-msg" id="wt">Saved!</div>
+    </div>
 
-      <!-- Section 2: Body Water % -->
-      <div style="border-top:0.5px solid var(--border);margin-top:16px;padding-top:14px;">
-        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Body water %</div>
-        <div id="hydration-status"><div class="log-empty">Loading...</div></div>
+    <!-- Body Water % -->
+    <div class="card" id="body-water-card">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+        <i class="ti ti-percentage" style="font-size:13px;color:var(--accent);"></i>
+        <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Body Water %</div>
       </div>
-
+      <div id="hydration-status"><div class="log-empty">Loading...</div></div>
       <button class="btn-ai" style="margin-top:8px;" onclick="hydrationCoach()">Hydration coaching ↗</button>
       <div id="hydration-coach-output" class="coach-response" style="display:none"></div>
       <button onclick="openCoachHistory('Health')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:4px 0 0;font-family:var(--sans);">Past conversations →</button>
@@ -4895,6 +4901,7 @@ function buildTodayReminders(checks){
   };
   setCheck('gs-bp-check', checks['dp-bp']);
   setCheck('gs-resmed-check', checks['dp-myair']);
+  setCheck('gs-bodywater-check', checks['dp-bodywater']);
 }
 
 function openDPOverlay(){
