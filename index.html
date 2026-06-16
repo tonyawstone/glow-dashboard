@@ -1722,7 +1722,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:6px;">
           <i class="ti ti-barbell" style="font-size:13px;color:var(--accent);"></i>
-          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">How is your body today?</div>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">How is your transformation going?</div>
         </div>
         <div id="body-checkin-header-right" style="display:flex;align-items:center;gap:8px;">
           <button onclick="openBodyLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
@@ -1730,61 +1730,51 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div id="body-checkin-saved" style="display:none;"></div>
       <div id="body-checkin-body">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
           <span style="font-size:11px;color:var(--muted);">Date</span>
           <input type="date" id="body-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
         </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:10px;" id="body-face-tags">
-          <button class="sqb" data-body="Energized" onclick="soloBody(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
-            <div class="sqb-face"><svg width="26" height="26" viewBox="-2 -2 30 30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M22 1 L20 5 L22.5 5 L20.5 9" stroke-width="1.3" fill="none"/></svg></div>
-            <span class="sqb-lbl">Energized</span>
-          </button>
-          <button class="sqb" data-body="Good" onclick="soloBody(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
-            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/></svg></div>
-            <span class="sqb-lbl">Good</span>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">How do you feel in your body today?</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="body-face-tags">
+          <button class="sqb" data-body="Low" onclick="soloBody(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/></svg></div>
+            <span class="sqb-lbl">Low</span>
           </button>
           <button class="sqb" data-body="Okay" onclick="soloBody(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
             <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/></svg></div>
             <span class="sqb-lbl">Okay</span>
           </button>
-          <button class="sqb" data-body="Tired" onclick="soloBody(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
-            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M8.5 11.5 Q10 13 11.5 11.5"/><path d="M14.5 11.5 Q16 13 17.5 11.5"/><path d="M9.5 17.5 Q13 15 16.5 17.5"/></svg></div>
-            <span class="sqb-lbl">Tired</span>
+          <button class="sqb" data-body="Good" onclick="soloBody(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/></svg></div>
+            <span class="sqb-lbl">Good</span>
           </button>
-          <button class="sqb" data-body="Rough" onclick="soloBody(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
-            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M8.5 11.5 Q10 13 11.5 11.5"/><path d="M14.5 11.5 Q16 13 17.5 11.5"/><path d="M9.5 18 Q13 15.5 16.5 18"/><circle cx="8.5" cy="15" r="0.9" fill="currentColor" stroke="none"/><circle cx="17.5" cy="14.5" r="0.9" fill="currentColor" stroke="none"/></svg></div>
-            <span class="sqb-lbl">Rough</span>
+          <button class="sqb" data-body="Great" onclick="soloBody(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20 17.5 16"/></svg></div>
+            <span class="sqb-lbl">Great</span>
+          </button>
+          <button class="sqb" data-body="Amazing" onclick="soloBody(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="-2 -2 30 30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/></svg></div>
+            <span class="sqb-lbl">Amazing</span>
           </button>
         </div>
-        <div style="margin-bottom:8px;">
-          <button id="body-nsv-btn" onclick="toggleBodyNsvTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Non-scale wins</button>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Any wins today?</div>
+        <div class="tags" id="nsv-tags" style="margin-bottom:14px;">
+          <button class="tag" onclick="tog(this);saveBodyDraft()">Clothes looser</button><button class="tag" onclick="tog(this);saveBodyDraft()">Compliment</button><button class="tag" onclick="tog(this);saveBodyDraft()">New low</button><button class="tag" onclick="tog(this);saveBodyDraft()">Less bloated</button><button class="tag" onclick="tog(this);saveBodyDraft()">More energy</button><button class="tag" onclick="tog(this);saveBodyDraft()">Feeling strong</button><button class="tag" onclick="tog(this);saveBodyDraft()">Waist smaller</button>
         </div>
-        <div id="body-nsv-panel" style="display:none;">
-          <div class="tags" id="nsv-tags" style="margin-bottom:8px;">
-            <button class="tag" onclick="tog(this)">Clothes fit better</button><button class="tag" onclick="tog(this)">More energy</button><button class="tag" onclick="tog(this)">Compliment</button><button class="tag" onclick="tog(this)">New low</button><button class="tag" onclick="tog(this)">Less bloated</button>
-          </div>
-          <textarea id="body-note-nsv" rows="2" placeholder="Any wins or non-scale victories?..." oninput="saveBodyDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
+        <div class="two-col" style="margin-bottom:14px;">
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Waist (in)</div><input type="number" id="waist" placeholder="—" step="0.5" oninput="saveBodyDraft()"></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hips (in)</div><input type="number" id="hips" placeholder="—" step="0.5" oninput="saveBodyDraft()"></div>
         </div>
-        <div style="margin-bottom:8px;">
-          <button id="body-measure-btn" onclick="toggleBodyMeasureTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Measurements</button>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Confidence in your body</div>
+        <div class="tags" id="body-confidence-tags" style="margin-bottom:14px;">
+          <button class="tag" onclick="soloConfidence(this)">Loving it</button><button class="tag" onclick="soloConfidence(this)">Good</button><button class="tag" onclick="soloConfidence(this)">Neutral</button><button class="tag" onclick="soloConfidence(this)">Struggling</button>
         </div>
-        <div id="body-measure-panel" style="display:none;">
-          <div class="two-col" style="margin-bottom:8px;">
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Waist (in)</div><input type="number" id="waist" placeholder="—" step="0.5" oninput="saveBodyDraft()"></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hips (in)</div><input type="number" id="hips" placeholder="—" step="0.5" oninput="saveBodyDraft()"></div>
-          </div>
-          <textarea id="body-note-measure" rows="2" placeholder="Measurement notes..." oninput="saveBodyDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Clothes fit today</div>
+        <div class="tags" id="body-clothes-tags" style="margin-bottom:14px;">
+          <button class="tag" onclick="soloClothes(this)">Looser</button><button class="tag" onclick="soloClothes(this)">Same</button><button class="tag" onclick="soloClothes(this)">Tighter</button>
         </div>
-        <div style="margin-bottom:10px;">
-          <button id="body-zep-btn" onclick="toggleBodyZepTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Zepbound</button>
-        </div>
-        <div id="body-zep-panel" style="display:none;">
-          <textarea id="zep-note" rows="2" placeholder="Appetite, side effects, energy..." oninput="saveBodyDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:8px;"></textarea>
-          <button class="btn-ai" onclick="zepCoach()">Zepbound review ↗</button>
-          <div id="zep-coach-output" class="coach-response" style="display:none"></div>
-          <button onclick="openCoachHistory('Body')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:4px 0 0;font-family:var(--sans);">Past conversations →</button>
-        </div>
-        <div style="text-align:center;margin-top:4px;">
+        <textarea id="zep-note" rows="3" placeholder="How is your body responding this week? Appetite, energy, physical changes…" oninput="saveBodyDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
+        <div style="text-align:center;">
           <button onclick="saveBody()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
         </div>
         <div class="toast-msg" id="bt">Saved!</div>
@@ -3898,37 +3888,22 @@ function saveBodyDraft(){
   savePillarDraft('body',{
     bodyFace: document.getElementById('body-face-tags')?.querySelector('.on')?.dataset.body||'',
     nsv: getTags('nsv-tags'),
-    noteNsv: document.getElementById('body-note-nsv')?.value||'',
     waist: document.getElementById('waist')?.value||'',
     hips: document.getElementById('hips')?.value||'',
-    noteMeasure: document.getElementById('body-note-measure')?.value||'',
-    note: document.getElementById('zep-note')?.value||''
+    confidence: document.getElementById('body-confidence-tags')?.querySelector('.on')?.textContent?.trim()||'',
+    clothesFit: document.getElementById('body-clothes-tags')?.querySelector('.on')?.textContent?.trim()||'',
+    noteZep: document.getElementById('zep-note')?.value||''
   });
 }
 function restoreBodyDraft(){
   const d = getPillarDraft('body'); if(!d) return;
-  if(d.bodyFace){
-    const faceBtn = document.getElementById('body-face-tags')?.querySelector('[data-body="'+d.bodyFace+'"]');
-    if(faceBtn) soloBody(faceBtn);
-  }
-  if((d.nsv&&d.nsv.length)||d.noteNsv){
-    restoreTags('nsv-tags', d.nsv||[]);
-    if(d.noteNsv && document.getElementById('body-note-nsv')) document.getElementById('body-note-nsv').value = d.noteNsv;
-    const p = document.getElementById('body-nsv-panel');
-    if(p && p.style.display==='none') toggleBodyNsvTags();
-  }
-  if(d.waist||d.hips||d.noteMeasure){
-    if(d.waist && document.getElementById('waist')) document.getElementById('waist').value = d.waist;
-    if(d.hips && document.getElementById('hips')) document.getElementById('hips').value = d.hips;
-    if(d.noteMeasure && document.getElementById('body-note-measure')) document.getElementById('body-note-measure').value = d.noteMeasure;
-    const p = document.getElementById('body-measure-panel');
-    if(p && p.style.display==='none') toggleBodyMeasureTags();
-  }
-  if(d.note){
-    if(document.getElementById('zep-note')) document.getElementById('zep-note').value = d.note;
-    const p = document.getElementById('body-zep-panel');
-    if(p && p.style.display==='none') toggleBodyZepTags();
-  }
+  if(d.bodyFace){const b=document.getElementById('body-face-tags')?.querySelector('[data-body="'+d.bodyFace+'"]');if(b) soloBody(b);}
+  if(d.nsv?.length) restoreTags('nsv-tags', d.nsv);
+  if(d.waist && document.getElementById('waist')) document.getElementById('waist').value = d.waist;
+  if(d.hips && document.getElementById('hips')) document.getElementById('hips').value = d.hips;
+  if(d.confidence){const b=Array.from(document.getElementById('body-confidence-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.confidence);if(b) soloConfidence(b);}
+  if(d.clothesFit){const b=Array.from(document.getElementById('body-clothes-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.clothesFit);if(b) soloClothes(b);}
+  if(d.noteZep && document.getElementById('zep-note')) document.getElementById('zep-note').value = d.noteZep;
 }
 
 // Skin draft
@@ -4015,10 +3990,9 @@ function solo(gid,btn){document.getElementById(gid).querySelectorAll('.tag').for
 function soloQ(btn){document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function soloSleep(btn){document.getElementById('sq-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function soloSkin(btn){document.getElementById('skin-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
-function soloBody(btn){document.getElementById('body-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
-function toggleBodyNsvTags(){const p=document.getElementById('body-nsv-panel'),b=document.getElementById('body-nsv-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Non-scale wins':'+ Non-scale wins';}
-function toggleBodyMeasureTags(){const p=document.getElementById('body-measure-panel'),b=document.getElementById('body-measure-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Measurements':'+ Measurements';}
-function toggleBodyZepTags(){const p=document.getElementById('body-zep-panel'),b=document.getElementById('body-zep-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Zepbound':'+ Zepbound';}
+function soloBody(btn){document.getElementById('body-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
+function soloConfidence(btn){document.getElementById('body-confidence-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
+function soloClothes(btn){document.getElementById('body-clothes-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
 function soloMusely(btn){document.getElementById('skin-musely-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function ts(id){document.getElementById(id).classList.toggle('on'); autoSaveCheckinState();}
 function fmtOutfitDate(d){
@@ -7933,25 +7907,26 @@ function showBodyCheckinSaved(e){
   const saved = document.getElementById('body-checkin-saved');
   if(!saved) return;
   const bodyFaceInner = {
-    Energized:'<path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M22 1 L20 5 L22.5 5 L20.5 9" stroke-width="1.3" fill="none"/>',
-    Good:'<circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/>',
+    Low:'<circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/>',
     Okay:'<circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/>',
-    Tired:'<path d="M8.5 11.5 Q10 13 11.5 11.5"/><path d="M14.5 11.5 Q16 13 17.5 11.5"/><path d="M9.5 17.5 Q13 15 16.5 17.5"/>',
-    Rough:'<path d="M8.5 11.5 Q10 13 11.5 11.5"/><path d="M14.5 11.5 Q16 13 17.5 11.5"/><path d="M9.5 18 Q13 15.5 16.5 18"/><circle cx="8.5" cy="15" r="0.9" fill="currentColor" stroke="none"/><circle cx="17.5" cy="14.5" r="0.9" fill="currentColor" stroke="none"/>'
+    Good:'<circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/>',
+    Great:'<path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20 17.5 16"/>',
+    Amazing:'<path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/>'
   };
-  const bodyFaceViewBox = {Energized:'-2 -2 30 30',Good:'0 0 26 26',Okay:'0 0 26 26',Tired:'0 0 26 26',Rough:'0 0 26 26'};
-  const bodyFaces = ['Energized','Good','Okay','Tired','Rough'];
+  const bodyFaceViewBox = {Low:'0 0 26 26',Okay:'0 0 26 26',Good:'0 0 26 26',Great:'0 0 26 26',Amazing:'-2 -2 30 30'};
+  const bodyFaces = ['Low','Okay','Good','Great','Amazing'];
   const faceSvg = (f,sel) => `<div style="width:32px;height:32px;border-radius:50%;border:1.5px solid ${sel?'var(--accent)':'transparent'};background:${sel?'rgba(160,120,80,0.1)':'transparent'};display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="${bodyFaceViewBox[f]}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:${sel?'var(--accent)':'var(--border)'}"><circle cx="13" cy="13" r="11"/>${bodyFaceInner[f]}</svg></div>`;
   const nsvChips = (arr) => (arr||[]).filter(Boolean).map(v=>`<span style="background:rgba(107,158,120,0.12);color:var(--green);border:0.5px solid rgba(107,158,120,0.3);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
   const measureChip = (e.waist||e.hips)?`<span style="background:var(--warm);color:var(--accent);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${[e.waist?'Waist '+e.waist+'"':'',e.hips?'Hips '+e.hips+'"':''].filter(Boolean).join(' · ')}</span>`:'';
+  const warmChip = (v) => v?`<span style="background:var(--warm);color:var(--muted);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`:'';
   const editPill = `<button onclick="editBodyCheckin()" style="padding:2px 10px;border-radius:10px;border:1px dashed var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin:2px 0 0 0;">+ edit</button>`;
-  const noteHtml = e.note?`<div style="font-family:var(--serif);font-size:13px;color:var(--muted);font-style:italic;margin-top:8px;">${e.note}</div>`:'';
+  const noteHtml = e.noteZep?`<div style="font-family:var(--serif);font-size:13px;color:var(--muted);font-style:italic;margin-top:8px;">${e.noteZep}</div>`:'';
   const headerRight = document.getElementById('body-checkin-header-right');
   if(headerRight) headerRight.innerHTML = `<span style="font-size:11px;color:var(--muted);">${fmtOutfitDate(e.date)}</span><button onclick="openBodyLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>`;
   const body = document.getElementById('body-checkin-body');
   if(body) body.style.display = 'none';
   saved.style.display = 'block';
-  saved.innerHTML = `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">${bodyFaces.map(f=>faceSvg(f,e.bodyFace===f)).join('')}${nsvChips(e.nsv)}${measureChip}${editPill}</div>${noteHtml}`;
+  saved.innerHTML = `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">${bodyFaces.map(f=>faceSvg(f,e.bodyFace===f)).join('')}${nsvChips(e.nsv)}${measureChip}${warmChip(e.confidence)}${warmChip(e.clothesFit)}${editPill}</div>${noteHtml}`;
 }
 
 function editBodyCheckin(){
@@ -7963,23 +7938,14 @@ function editBodyCheckin(){
   if(body) body.style.display = 'block';
   const state = JSON.parse(localStorage.getItem('glowBodyCheckinState')||'null');
   if(!state) return;
-  if(state.bodyFace){const faceBtn=document.getElementById('body-face-tags')?.querySelector('[data-body="'+state.bodyFace+'"]');if(faceBtn) soloBody(faceBtn);}
+  if(state.bodyFace){const b=document.getElementById('body-face-tags')?.querySelector('[data-body="'+state.bodyFace+'"]');if(b) soloBody(b);}
   if(state.date && document.getElementById('body-log-date')) document.getElementById('body-log-date').value = state.date;
-  if((state.nsv&&state.nsv.length)||state.noteNsv){
-    restoreTags('nsv-tags', state.nsv||[]);
-    if(state.noteNsv && document.getElementById('body-note-nsv')) document.getElementById('body-note-nsv').value = state.noteNsv;
-    const p=document.getElementById('body-nsv-panel');if(p&&p.style.display==='none') toggleBodyNsvTags();
-  }
-  if(state.waist||state.hips||state.noteMeasure){
-    if(state.waist && document.getElementById('waist')) document.getElementById('waist').value = state.waist;
-    if(state.hips && document.getElementById('hips')) document.getElementById('hips').value = state.hips;
-    if(state.noteMeasure && document.getElementById('body-note-measure')) document.getElementById('body-note-measure').value = state.noteMeasure;
-    const p=document.getElementById('body-measure-panel');if(p&&p.style.display==='none') toggleBodyMeasureTags();
-  }
-  if(state.noteZep){
-    if(document.getElementById('zep-note')) document.getElementById('zep-note').value = state.noteZep;
-    const p=document.getElementById('body-zep-panel');if(p&&p.style.display==='none') toggleBodyZepTags();
-  }
+  if(state.nsv?.length) restoreTags('nsv-tags', state.nsv);
+  if(state.waist && document.getElementById('waist')) document.getElementById('waist').value = state.waist;
+  if(state.hips && document.getElementById('hips')) document.getElementById('hips').value = state.hips;
+  if(state.confidence){const b=Array.from(document.getElementById('body-confidence-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.confidence);if(b) soloConfidence(b);}
+  if(state.clothesFit){const b=Array.from(document.getElementById('body-clothes-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.clothesFit);if(b) soloClothes(b);}
+  if(state.noteZep && document.getElementById('zep-note')) document.getElementById('zep-note').value = state.noteZep;
 }
 
 async function restoreBodyCheckinState(){
@@ -8641,28 +8607,24 @@ async function openHairLog(){
 async function saveBody(){
   const bodyFace = document.getElementById('body-face-tags')?.querySelector('.on')?.dataset.body||'';
   const nsv = getTags('nsv-tags');
-  const noteNsv = document.getElementById('body-note-nsv')?.value.trim()||'';
   const waist = document.getElementById('waist')?.value||'';
   const hips = document.getElementById('hips')?.value||'';
-  const noteMeasure = document.getElementById('body-note-measure')?.value.trim()||'';
+  const confidence = document.getElementById('body-confidence-tags')?.querySelector('.on')?.textContent?.trim()||'';
+  const clothesFit = document.getElementById('body-clothes-tags')?.querySelector('.on')?.textContent?.trim()||'';
   const noteZep = document.getElementById('zep-note')?.value.trim()||'';
-  const note = [noteNsv, noteMeasure, noteZep].filter(Boolean).join(' · ');
   const dateVal = document.getElementById('body-log-date')?.value||nowStr();
-  if(!bodyFace && !nsv.length && !noteNsv && !waist && !hips && !noteMeasure && !noteZep){ showToast('Add at least one entry first'); return; }
-  const entry={type:'body',bodyFace,nsv,noteNsv,waist,hips,noteMeasure,noteZep,note,date:dateVal};
+  if(!bodyFace && !nsv.length && !waist && !hips && !confidence && !clothesFit && !noteZep){ showToast('Add at least one entry first'); return; }
+  const entry={type:'body',bodyFace,nsv,waist,hips,confidence,clothesFit,noteZep,note:noteZep,date:dateVal};
   try{
     await dbAdd('bodies',entry);
     syncToBlob('bodies');
-    if(document.getElementById('body-note-nsv')) document.getElementById('body-note-nsv').value='';
+    document.getElementById('body-face-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('nsv-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     if(document.getElementById('waist')) document.getElementById('waist').value='';
     if(document.getElementById('hips')) document.getElementById('hips').value='';
-    if(document.getElementById('body-note-measure')) document.getElementById('body-note-measure').value='';
+    document.getElementById('body-confidence-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('body-clothes-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     if(document.getElementById('zep-note')) document.getElementById('zep-note').value='';
-    document.getElementById('nsv-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
-    document.getElementById('body-face-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
-    const nsvP=document.getElementById('body-nsv-panel'); if(nsvP&&nsvP.style.display!=='none') toggleBodyNsvTags();
-    const mP=document.getElementById('body-measure-panel'); if(mP&&mP.style.display!=='none') toggleBodyMeasureTags();
-    const zP=document.getElementById('body-zep-panel'); if(zP&&zP.style.display!=='none') toggleBodyZepTags();
     localStorage.setItem('glowBodyCheckinState', JSON.stringify({...entry, savedAt: Date.now()}));
     clearPillarDraft('body');
     toast('bt');
