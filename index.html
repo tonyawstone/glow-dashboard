@@ -1757,23 +1757,40 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <span class="sqb-lbl">Amazing</span>
           </button>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Any wins today?</div>
-        <div class="tags" id="nsv-tags" style="margin-bottom:14px;">
-          <button class="tag" onclick="tog(this);saveBodyDraft()">Clothes looser</button><button class="tag" onclick="tog(this);saveBodyDraft()">Compliment</button><button class="tag" onclick="tog(this);saveBodyDraft()">New low</button><button class="tag" onclick="tog(this);saveBodyDraft()">Less bloated</button><button class="tag" onclick="tog(this);saveBodyDraft()">More energy</button><button class="tag" onclick="tog(this);saveBodyDraft()">Feeling strong</button><button class="tag" onclick="tog(this);saveBodyDraft()">Waist smaller</button>
+        <div style="margin-bottom:8px;">
+          <button id="body-nsv-btn" onclick="toggleBodyNsvTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Any wins today</button>
         </div>
-        <div class="two-col" style="margin-bottom:14px;">
-          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Waist (in)</div><input type="number" id="waist" placeholder="—" step="0.5" oninput="saveBodyDraft()"></div>
-          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hips (in)</div><input type="number" id="hips" placeholder="—" step="0.5" oninput="saveBodyDraft()"></div>
+        <div id="body-nsv-panel" style="display:none;">
+          <div class="tags" id="nsv-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="tog(this);saveBodyDraft()">Clothes looser</button><button class="tag" onclick="tog(this);saveBodyDraft()">Compliment</button><button class="tag" onclick="tog(this);saveBodyDraft()">New low</button><button class="tag" onclick="tog(this);saveBodyDraft()">Less bloated</button><button class="tag" onclick="tog(this);saveBodyDraft()">More energy</button><button class="tag" onclick="tog(this);saveBodyDraft()">Feeling strong</button><button class="tag" onclick="tog(this);saveBodyDraft()">Waist smaller</button>
+          </div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Confidence in your body</div>
-        <div class="tags" id="body-confidence-tags" style="margin-bottom:14px;">
-          <button class="tag" onclick="soloConfidence(this)">Loving it</button><button class="tag" onclick="soloConfidence(this)">Good</button><button class="tag" onclick="soloConfidence(this)">Neutral</button><button class="tag" onclick="soloConfidence(this)">Struggling</button>
+        <div style="margin-bottom:8px;">
+          <button id="body-measure-btn" onclick="toggleBodyMeasureTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Measurements</button>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Clothes fit today</div>
-        <div class="tags" id="body-clothes-tags" style="margin-bottom:14px;">
-          <button class="tag" onclick="soloClothes(this)">Looser</button><button class="tag" onclick="soloClothes(this)">Same</button><button class="tag" onclick="soloClothes(this)">Tighter</button>
+        <div id="body-measure-panel" style="display:none;">
+          <div class="two-col" style="margin-bottom:12px;">
+            <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Waist (in)</div><input type="number" id="waist" placeholder="—" step="0.5" oninput="saveBodyDraft()"></div>
+            <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hips (in)</div><input type="number" id="hips" placeholder="—" step="0.5" oninput="saveBodyDraft()"></div>
+          </div>
         </div>
-        <textarea id="zep-note" rows="3" placeholder="How is your body responding this week? Appetite, energy, physical changes…" oninput="saveBodyDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
+        <div style="margin-bottom:8px;">
+          <button id="body-confidence-btn" onclick="toggleBodyConfidenceTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Confidence in your body</button>
+        </div>
+        <div id="body-confidence-panel" style="display:none;">
+          <div class="tags" id="body-confidence-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="soloConfidence(this)">Loving it</button><button class="tag" onclick="soloConfidence(this)">Good</button><button class="tag" onclick="soloConfidence(this)">Neutral</button><button class="tag" onclick="soloConfidence(this)">Struggling</button>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <button id="body-clothes-btn" onclick="toggleBodyClothesTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Clothes fit today</button>
+        </div>
+        <div id="body-clothes-panel" style="display:none;">
+          <div class="tags" id="body-clothes-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="soloClothes(this)">Looser</button><button class="tag" onclick="soloClothes(this)">Same</button><button class="tag" onclick="soloClothes(this)">Tighter</button>
+          </div>
+        </div>
+        <textarea id="zep-note" rows="2" placeholder="How is your body responding this week? Appetite, energy, physical changes…" oninput="saveBodyDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
         <div style="text-align:center;">
           <button onclick="saveBody()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
         </div>
@@ -3898,11 +3915,10 @@ function saveBodyDraft(){
 function restoreBodyDraft(){
   const d = getPillarDraft('body'); if(!d) return;
   if(d.bodyFace){const b=document.getElementById('body-face-tags')?.querySelector('[data-body="'+d.bodyFace+'"]');if(b) soloBody(b);}
-  if(d.nsv?.length) restoreTags('nsv-tags', d.nsv);
-  if(d.waist && document.getElementById('waist')) document.getElementById('waist').value = d.waist;
-  if(d.hips && document.getElementById('hips')) document.getElementById('hips').value = d.hips;
-  if(d.confidence){const b=Array.from(document.getElementById('body-confidence-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.confidence);if(b) soloConfidence(b);}
-  if(d.clothesFit){const b=Array.from(document.getElementById('body-clothes-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.clothesFit);if(b) soloClothes(b);}
+  if(d.nsv?.length){restoreTags('nsv-tags', d.nsv);const p=document.getElementById('body-nsv-panel');if(p&&p.style.display==='none')toggleBodyNsvTags();}
+  if(d.waist||d.hips){if(d.waist&&document.getElementById('waist'))document.getElementById('waist').value=d.waist;if(d.hips&&document.getElementById('hips'))document.getElementById('hips').value=d.hips;const p=document.getElementById('body-measure-panel');if(p&&p.style.display==='none')toggleBodyMeasureTags();}
+  if(d.confidence){const b=Array.from(document.getElementById('body-confidence-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.confidence);if(b){soloConfidence(b);const p=document.getElementById('body-confidence-panel');if(p&&p.style.display==='none')toggleBodyConfidenceTags();}}
+  if(d.clothesFit){const b=Array.from(document.getElementById('body-clothes-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.clothesFit);if(b){soloClothes(b);const p=document.getElementById('body-clothes-panel');if(p&&p.style.display==='none')toggleBodyClothesTags();}}
   if(d.noteZep && document.getElementById('zep-note')) document.getElementById('zep-note').value = d.noteZep;
 }
 
@@ -3993,6 +4009,10 @@ function soloSkin(btn){document.getElementById('skin-face-tags').querySelectorAl
 function soloBody(btn){document.getElementById('body-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
 function soloConfidence(btn){document.getElementById('body-confidence-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
 function soloClothes(btn){document.getElementById('body-clothes-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
+function toggleBodyNsvTags(){const p=document.getElementById('body-nsv-panel'),b=document.getElementById('body-nsv-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Any wins today':'+ Any wins today';}
+function toggleBodyMeasureTags(){const p=document.getElementById('body-measure-panel'),b=document.getElementById('body-measure-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Measurements':'+ Measurements';}
+function toggleBodyConfidenceTags(){const p=document.getElementById('body-confidence-panel'),b=document.getElementById('body-confidence-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Confidence in your body':'+ Confidence in your body';}
+function toggleBodyClothesTags(){const p=document.getElementById('body-clothes-panel'),b=document.getElementById('body-clothes-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Clothes fit today':'+ Clothes fit today';}
 function soloMusely(btn){document.getElementById('skin-musely-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function ts(id){document.getElementById(id).classList.toggle('on'); autoSaveCheckinState();}
 function fmtOutfitDate(d){
@@ -7941,11 +7961,10 @@ function editBodyCheckin(){
   if(!state) return;
   if(state.bodyFace){const b=document.getElementById('body-face-tags')?.querySelector('[data-body="'+state.bodyFace+'"]');if(b) soloBody(b);}
   if(state.date && document.getElementById('body-log-date')) document.getElementById('body-log-date').value = state.date;
-  if(state.nsv?.length) restoreTags('nsv-tags', state.nsv);
-  if(state.waist && document.getElementById('waist')) document.getElementById('waist').value = state.waist;
-  if(state.hips && document.getElementById('hips')) document.getElementById('hips').value = state.hips;
-  if(state.confidence){const b=Array.from(document.getElementById('body-confidence-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.confidence);if(b) soloConfidence(b);}
-  if(state.clothesFit){const b=Array.from(document.getElementById('body-clothes-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.clothesFit);if(b) soloClothes(b);}
+  if(state.nsv?.length){restoreTags('nsv-tags', state.nsv);const p=document.getElementById('body-nsv-panel');if(p&&p.style.display==='none')toggleBodyNsvTags();}
+  if(state.waist||state.hips){if(state.waist&&document.getElementById('waist'))document.getElementById('waist').value=state.waist;if(state.hips&&document.getElementById('hips'))document.getElementById('hips').value=state.hips;const p=document.getElementById('body-measure-panel');if(p&&p.style.display==='none')toggleBodyMeasureTags();}
+  if(state.confidence){const b=Array.from(document.getElementById('body-confidence-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.confidence);if(b){soloConfidence(b);const p=document.getElementById('body-confidence-panel');if(p&&p.style.display==='none')toggleBodyConfidenceTags();}}
+  if(state.clothesFit){const b=Array.from(document.getElementById('body-clothes-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.clothesFit);if(b){soloClothes(b);const p=document.getElementById('body-clothes-panel');if(p&&p.style.display==='none')toggleBodyClothesTags();}}
   if(state.noteZep && document.getElementById('zep-note')) document.getElementById('zep-note').value = state.noteZep;
 }
 
@@ -8626,6 +8645,10 @@ async function saveBody(){
     document.getElementById('body-confidence-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     document.getElementById('body-clothes-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     if(document.getElementById('zep-note')) document.getElementById('zep-note').value='';
+    const nsvP=document.getElementById('body-nsv-panel');if(nsvP&&nsvP.style.display!=='none')toggleBodyNsvTags();
+    const mP=document.getElementById('body-measure-panel');if(mP&&mP.style.display!=='none')toggleBodyMeasureTags();
+    const cP=document.getElementById('body-confidence-panel');if(cP&&cP.style.display!=='none')toggleBodyConfidenceTags();
+    const clP=document.getElementById('body-clothes-panel');if(clP&&clP.style.display!=='none')toggleBodyClothesTags();
     localStorage.setItem('glowBodyCheckinState', JSON.stringify({...entry, savedAt: Date.now()}));
     clearPillarDraft('body');
     toast('bt');
