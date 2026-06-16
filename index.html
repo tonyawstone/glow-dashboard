@@ -2461,33 +2461,63 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-skin-daily">
     <div class="section-label">Skin · Face Care <button class="guide-btn" onclick="openGuide('skin')">?</button></div>
 
-    <!-- Skin check-in — collapsible, first card -->
+    <!-- Skin check-in -->
     <div class="card" id="skin-checkin-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
-        <div style="display:flex;align-items:center;gap:6px;cursor:pointer;" onclick="toggleSkinCheckin()">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
           <i class="ti ti-sparkles" style="font-size:13px;color:var(--accent);"></i>
           <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Skin Check-in</div>
-          <div id="skin-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;margin-left:2px;">›</div>
+          <span id="skin-checkin-chevron" style="display:none;"></span>
         </div>
-        <button onclick="openSkinLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past check-ins →</button>
+        <div id="skin-checkin-header-right" style="display:flex;align-items:center;gap:8px;">
+          <button onclick="openSkinLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past check-ins →</button>
+        </div>
       </div>
-      <!-- Saved state — always visible -->
-      <div id="skin-checkin-saved" style="display:none;margin-top:10px;"></div>
-      <div id="skin-checkin-body" style="display:none;margin-top:12px;">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Skin today</div>
-        <div class="tags" id="skin-tags" style="margin-bottom:12px;">
-          <button class="tag" onclick="tog(this)">Clear</button><button class="tag" onclick="tog(this)">Glowing</button><button class="tag" onclick="tog(this)">Breaking out</button><button class="tag" onclick="tog(this)">Dry</button><button class="tag" onclick="tog(this)">Oily</button><button class="tag" onclick="tog(this)">Irritated</button><button class="tag" onclick="tog(this)">Uneven tone</button><button class="tag" onclick="tog(this)">Dull</button>
+      <!-- Saved state -->
+      <div id="skin-checkin-saved" style="display:none;"></div>
+      <!-- Form body -->
+      <div id="skin-checkin-body">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">How is your skin today?</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="skin-face-tags">
+          <button class="sqb" data-skin="Glowing" onclick="soloSkin(this)">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9 16c1 2.5 7 2.5 8 0"/><path d="M17,4 L17.3,5.3 L18.5,5.6 L17.3,5.9 L17,7.2 L16.7,5.9 L15.5,5.6 L16.7,5.3 Z" fill="currentColor" stroke="none"/></svg></div>
+            <span class="sqb-lbl">Glowing</span>
+          </button>
+          <button class="sqb" data-skin="Good" onclick="soloSkin(this)">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16c1 2 6 2 7 0"/></svg></div>
+            <span class="sqb-lbl">Good</span>
+          </button>
+          <button class="sqb" data-skin="Okay" onclick="soloSkin(this)">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/></svg></div>
+            <span class="sqb-lbl">Okay</span>
+          </button>
+          <button class="sqb" data-skin="Dull" onclick="soloSkin(this)">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M8.5 11.5 Q10 13 11.5 11.5"/><path d="M14.5 11.5 Q16 13 17.5 11.5"/><path d="M9.5 17.5c1-1.5 6-1.5 7 0"/></svg></div>
+            <span class="sqb-lbl">Dull</span>
+          </button>
+          <button class="sqb" data-skin="Rough" onclick="soloSkin(this)">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M8 9 Q9.5 10.5 11 9"/><path d="M15 9 Q16.5 10.5 18 9"/><path d="M8.5 11.5 Q9.5 10.5 10.5 11.5"/><path d="M15.5 11.5 Q16.5 10.5 17.5 11.5"/><path d="M9 17.5c1-2 8-2 8 0"/></svg></div>
+            <span class="sqb-lbl">Rough</span>
+          </button>
         </div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Concerns</div>
-        <div class="tags" id="concern-tags" style="margin-bottom:12px;">
-          <button class="tag" onclick="tog(this)">Hyperpigmentation</button><button class="tag" onclick="tog(this)">Fine lines</button><button class="tag" onclick="tog(this)">Texture</button><button class="tag" onclick="tog(this)">Pores</button><button class="tag" onclick="tog(this)">Redness</button>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Skin state today</div>
+        <div class="tags" id="skin-state-tags" style="margin-bottom:12px;">
+          <button class="tag" onclick="tog(this)">Clear</button><button class="tag" onclick="tog(this)">Glowing</button><button class="tag" onclick="tog(this)">Dewy</button><button class="tag" onclick="tog(this)">Tight</button><button class="tag" onclick="tog(this)">Dry</button><button class="tag" onclick="tog(this)">Oily</button><button class="tag" onclick="tog(this)">Sensitive</button><button class="tag" onclick="tog(this)">Puffy</button><button class="tag" onclick="tog(this)">Irritated</button><button class="tag" onclick="tog(this)">Breakout</button>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-          <div style="font-size:12px;color:var(--muted);">Logging for:</div>
-          <input type="date" id="skin-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Active concerns</div>
+        <div class="tags" id="skin-concern-tags" style="margin-bottom:12px;">
+          <button class="tag" onclick="tog(this)">Hyperpigmentation</button><button class="tag" onclick="tog(this)">Fine lines</button><button class="tag" onclick="tog(this)">Texture</button><button class="tag" onclick="tog(this)">Pores</button><button class="tag" onclick="tog(this)">Redness</button><button class="tag" onclick="tog(this)">Dark spots</button><button class="tag" onclick="tog(this)">Acne</button><button class="tag" onclick="tog(this)">Uneven tone</button>
         </div>
-        <textarea id="skin-note" rows="2" placeholder="How does your skin feel today? Any changes, reactions, concerns..." oninput="saveSkinDraft()" style="margin-bottom:10px;"></textarea>
-        <div style="text-align:center;margin-top:4px;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Musely progress</div>
+        <div class="tags" id="skin-musely-tags" style="margin-bottom:12px;">
+          <button class="tag" onclick="soloMusely(this)">Improving</button><button class="tag" onclick="soloMusely(this)">Holding steady</button><button class="tag" onclick="soloMusely(this)">No change yet</button><button class="tag" onclick="soloMusely(this)">Concerned</button>
+        </div>
+        <textarea id="skin-note" rows="2" placeholder="How does your skin feel today? Any changes, reactions, concerns..." oninput="saveSkinDraft()" style="margin-bottom:12px;"></textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="font-size:12px;color:var(--muted);">Date:</div>
+            <input type="date" id="skin-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
+          </div>
           <button onclick="saveSkin()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
         </div>
         <div class="toast-msg" id="skt">Saved!</div>
@@ -3812,19 +3842,20 @@ function restoreBodyDraft(){
 // Skin draft
 function saveSkinDraft(){
   savePillarDraft('skin',{
-    skinT: getTags('skin-tags'),
-    concerns: getTags('concern-tags'),
-    musely_aa: document.getElementById('r-musely-aa')?.classList.contains('on')||false,
-    musely_spot: document.getElementById('r-musely-spot')?.classList.contains('on')||false
+    skinFace: document.getElementById('skin-face-tags')?.querySelector('.on')?.dataset.skin||'',
+    skinState: getTags('skin-state-tags'),
+    concerns: getTags('skin-concern-tags'),
+    musely: document.getElementById('skin-musely-tags')?.querySelector('.on')?.textContent?.trim()||'',
+    note: document.getElementById('skin-note')?.value||''
   });
 }
 function restoreSkinDraft(){
   const d = getPillarDraft('skin'); if(!d) return;
-  restoreTags('skin-tags', d.skinT);
-  restoreTags('concern-tags', d.concerns);
-  restoreCheckbox('r-musely-aa', d.musely_aa);
-  restoreCheckbox('r-musely-spot', d.musely_spot);
-  toggleSkinCheckin(true);
+  if(d.skinFace) document.getElementById('skin-face-tags')?.querySelectorAll('[data-skin]').forEach(b=>{ if(b.dataset.skin===d.skinFace) b.classList.add('on'); });
+  restoreTags('skin-state-tags', d.skinState);
+  restoreTags('skin-concern-tags', d.concerns);
+  if(d.musely) document.getElementById('skin-musely-tags')?.querySelectorAll('.tag').forEach(b=>{ if(b.textContent.trim()===d.musely) b.classList.add('on'); });
+  if(d.note && document.getElementById('skin-note')) document.getElementById('skin-note').value = d.note;
 }
 
 // Hair draft
@@ -3887,6 +3918,8 @@ function selectOutfitType(btn, type){
 function solo(gid,btn){document.getElementById(gid).querySelectorAll('.tag').forEach(t=>t.classList.remove('on'));btn.classList.add('on');}
 function soloQ(btn){document.getElementById('sq-tags').querySelectorAll('.qb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function soloSleep(btn){document.getElementById('sq-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function soloSkin(btn){document.getElementById('skin-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function soloMusely(btn){document.getElementById('skin-musely-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function ts(id){document.getElementById(id).classList.toggle('on'); autoSaveCheckinState();}
 function fmtOutfitDate(d){
   if(!d)return '';
@@ -6915,7 +6948,7 @@ async function renderCheckinHub(){
       saved: waterEntry ? `<div>${waterEntry.glasses||Math.floor((waterEntry.oz||0)/8)||0} glasses · ${waterEntry.oz||0} oz water</div>` : null,
       tab:'health', scrollId:'hydration-card', toggleFn:'' },
     { emoji:'✨', name:'Skin', done:!!skinEntry,
-      saved: skinEntry ? `${(skinEntry.skinT||[]).length?`<div style="margin-bottom:4px;">${chips(skinEntry.skinT)}</div>`:''}${skinEntry.note?`<div style="color:var(--muted);">${skinEntry.note}</div>`:''}` : null,
+      saved: skinEntry ? `${skinEntry.skinFace?`<div style="margin-bottom:2px;">${skinEntry.skinFace}</div>`:''}${(skinEntry.skinState||[]).length?`<div style="margin-bottom:4px;">${chips(skinEntry.skinState)}</div>`:''}${skinEntry.note?`<div style="color:var(--muted);">${skinEntry.note}</div>`:''}` : null,
       tab:'skin', scrollId:'skin-checkin-chevron', toggleFn:'toggleSkinCheckin' },
     { emoji:'❤️', name:'Body', done:!!bodyEntry,
       saved: bodyEntry ? `${(bodyEntry.nsv||[]).length?`<div style="margin-bottom:4px;">${chips(bodyEntry.nsv)}</div>`:''}${(bodyEntry.waist||bodyEntry.hips)?`<div>${[bodyEntry.waist?'Waist: '+bodyEntry.waist+'"':'',bodyEntry.hips?'Hips: '+bodyEntry.hips+'"':''].filter(Boolean).join(' · ')}</div>`:''}` : null,
@@ -7960,42 +7993,91 @@ function loadPMLastNight(){
 function showSkinCheckinSaved(e){
   const saved = document.getElementById('skin-checkin-saved');
   if(!saved) return;
-  const chips = arr => (arr||[]).filter(Boolean).map(v=>`<span style="background:var(--warm);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`).join('');
-  const dateLabel = e.date ? fmtOutfitDate(e.date) : 'Today';
-  saved.style.display='block';
-  saved.innerHTML=`<div style="background:var(--warm);border-radius:12px;padding:12px;">
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${dateLabel} ✓ <button onclick="editSkinCheckin()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
-    ${(e.skinT||[]).length?`<div style="margin-bottom:6px;">${chips(e.skinT)}</div>`:''}
-    ${(e.concerns||[]).length?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${e.concerns.join(' · ')}</div>`:''}
-    ${e.note?`<div style="font-size:12px;color:var(--muted);">${e.note}</div>`:''}
-    ${e.derm?`<div style="font-size:12px;color:var(--muted);margin-top:4px;">Derm: ${e.derm}</div>`:''}
-  </div>`;
+  const skinFaceInner = {
+    Glowing: '<circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9 16c1 2.5 7 2.5 8 0"/><path d="M17,4 L17.3,5.3 L18.5,5.6 L17.3,5.9 L17,7.2 L16.7,5.9 L15.5,5.6 L16.7,5.3 Z" fill="currentColor" stroke="none"/>',
+    Good:    '<circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16c1 2 6 2 7 0"/>',
+    Okay:    '<circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/>',
+    Dull:    '<path d="M8.5 11.5 Q10 13 11.5 11.5"/><path d="M14.5 11.5 Q16 13 17.5 11.5"/><path d="M9.5 17.5c1-1.5 6-1.5 7 0"/>',
+    Rough:   '<path d="M8 9 Q9.5 10.5 11 9"/><path d="M15 9 Q16.5 10.5 18 9"/><path d="M8.5 11.5 Q9.5 10.5 10.5 11.5"/><path d="M15.5 11.5 Q16.5 10.5 17.5 11.5"/><path d="M9 17.5c1-2 8-2 8 0"/>'
+  };
+  const skinFaces = ['Glowing','Good','Okay','Dull','Rough'];
+  const faceSvg = (f, sel) => `<div style="width:32px;height:32px;border-radius:50%;border:1.5px solid ${sel?'var(--accent)':'transparent'};background:${sel?'rgba(160,120,80,0.1)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:${sel?'var(--accent)':'var(--border)'};"><circle cx="13" cy="13" r="11"/>${skinFaceInner[f]}</svg></div>`;
+  const stateChips = (arr) => (arr||[]).filter(Boolean).map(w=>`<span style="background:rgba(107,158,120,0.12);border:0.5px solid rgba(107,158,120,0.3);border-radius:20px;padding:3px 10px;font-size:11px;color:#27500A;white-space:nowrap;">${w}</span>`).join('');
+  const concernChips = (arr) => (arr||[]).filter(Boolean).map(w=>`<span style="background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--accent);white-space:nowrap;">${w}</span>`).join('');
+  const muselyChip = e.musely ? `<span style="background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--accent);white-space:nowrap;">Musely: ${e.musely}</span>` : '';
+  const editPill = `<button onclick="editSkinCheckin()" style="padding:3px 10px;border-radius:20px;border:1.5px dashed var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">+ edit</button>`;
+  const noteHtml = e.note ? `<div style="font-family:var(--serif);font-size:13px;font-style:italic;color:var(--muted);margin-top:6px;font-weight:300;">${e.note}</div>` : '';
+  // Update header right with date
+  const headerRight = document.getElementById('skin-checkin-header-right');
+  if(headerRight && e.date){
+    const d = new Date(e.date+'T12:00:00');
+    const lbl = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    headerRight.innerHTML = `<span style="font-size:11px;color:var(--muted);">${lbl}</span><button onclick="openSkinLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>`;
+  }
+  const body = document.getElementById('skin-checkin-body');
+  if(body) body.style.display = 'none';
+  saved.style.display = 'block';
+  saved.innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
+      ${skinFaces.map(f=>faceSvg(f,e.skinFace===f)).join('')}
+      ${stateChips(e.skinState)}
+      ${concernChips(e.concerns)}
+      ${muselyChip}
+      ${editPill}
+    </div>
+    ${noteHtml}
+  `;
 }
 
 function editSkinCheckin(){
-  toggleSkinCheckin(true);
+  const saved = document.getElementById('skin-checkin-saved');
+  if(saved) saved.style.display = 'none';
+  const headerRight = document.getElementById('skin-checkin-header-right');
+  if(headerRight) headerRight.innerHTML = `<button onclick="openSkinLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past check-ins →</button>`;
+  const body = document.getElementById('skin-checkin-body');
+  if(body) body.style.display = 'block';
+  try{
+    const stored = localStorage.getItem('glowSkinCheckinState');
+    if(!stored) return;
+    const s = JSON.parse(stored);
+    if(s.skinFace) document.getElementById('skin-face-tags')?.querySelectorAll('[data-skin]').forEach(b=>{ if(b.dataset.skin===s.skinFace) b.classList.add('on'); });
+    if(s.skinState?.length) restoreTags('skin-state-tags', s.skinState);
+    if(s.concerns?.length) restoreTags('skin-concern-tags', s.concerns);
+    if(s.musely) document.getElementById('skin-musely-tags')?.querySelectorAll('.tag').forEach(b=>{ if(b.textContent.trim()===s.musely) b.classList.add('on'); });
+    const noteEl = document.getElementById('skin-note');
+    if(noteEl && s.note) noteEl.value = s.note;
+    const dateEl = document.getElementById('skin-log-date');
+    if(dateEl && s.date) dateEl.value = s.date;
+  }catch(err){}
 }
 
 async function restoreSkinCheckinState(){
   try{
-    const logical = logicalDayStr();
-    const today = nowStr();
-    let entry = null;
-    const skins = await dbAll('skins');
-    // Prefer logical day, fall back to most recent check-in
-    entry = skins.find(e=>e.type==='checkin'&&(e.date===logical||e.date===today));
-    if(!entry){
-      const allCheckins = skins.filter(e=>e.type==='checkin').sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-      entry = allCheckins[0] || null;
+    const now = new Date();
+    const localHour = now.getHours();
+    const stored = localStorage.getItem('glowSkinCheckinState');
+    if(stored){
+      const s = JSON.parse(stored);
+      const savedAt = s.savedAt ? new Date(s.savedAt) : null;
+      const hoursAgo = savedAt ? (now - savedAt) / 3600000 : 999;
+      if(hoursAgo < 27){
+        showSkinCheckinSaved(s);
+        return;
+      } else {
+        localStorage.removeItem('glowSkinCheckinState');
+      }
     }
+    const logical = logicalDayStr();
+    const skins = await dbAll('skins');
+    const entry = skins.filter(e=>e.type==='checkin').find(e=>e.date===logical);
+    if(entry){ showSkinCheckinSaved(entry); return; }
     if(!entry){
       const res = await fetch(`${BACKEND}/api/sync?pillar=skins&t=${Date.now()}`);
       if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
-        const checkins = data.filter(e=>e.type==='checkin').sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-        entry = checkins[0] || null;
+        const found = data.filter(e=>e.type==='checkin').find(e=>e.date===logical);
+        if(found) showSkinCheckinSaved(found);
       }
     }
-    if(entry) showSkinCheckinSaved(entry);
   }catch(e){}
 }
 
@@ -8188,12 +8270,8 @@ function toggleDermCard(forceOpen){
 
 function toggleSkinCheckin(forceOpen){
   const body = document.getElementById('skin-checkin-body');
-  const chevron = document.getElementById('skin-checkin-chevron');
   if(!body) return;
-  const isOpen = body.style.display !== 'none';
-  const open = forceOpen !== undefined ? forceOpen : !isOpen;
-  body.style.display = open ? 'block' : 'none';
-  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
+  body.style.display = (forceOpen === false) ? 'none' : 'block';
 }
 
 function toggleSleepCheckin(forceOpen){
@@ -8490,22 +8568,28 @@ async function saveFacial(){
   toast('ft');
 }
 async function saveSkin(){
-  const skinT=gT('skin-tags'),concerns=gT('concern-tags'),derm=document.getElementById('derm-note')?.value.trim()||'';
-  const musely_aa=document.getElementById('r-musely-aa').classList.contains('on');
-  const musely_spot=document.getElementById('r-musely-spot').classList.contains('on');
-  const dateVal = document.getElementById('skin-log-date')?.value||nowStr();
-  const note=document.getElementById('skin-note')?.value.trim()||'';
-  const skinEntry={type:'checkin',skinT,concerns,derm,note,musely_aa,musely_spot,date:dateVal};
-  await dbAdd('skins',skinEntry);
-  syncToBlob('skins');
-  if(document.getElementById('derm-note')) document.getElementById('derm-note').value='';
-  if(document.getElementById('skin-note')) document.getElementById('skin-note').value='';
-  ['skin-tags','concern-tags'].forEach(id=>document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
-  toast('skt');
-  loadLogs();
-  toggleSkinCheckin(false);
-  showSkinCheckinSaved(skinEntry);
-  buildDailyProgress();
+  const skinFace = document.getElementById('skin-face-tags')?.querySelector('.on')?.dataset.skin||'';
+  const skinState = getTags('skin-state-tags');
+  const concerns = getTags('skin-concern-tags');
+  const musely = document.getElementById('skin-musely-tags')?.querySelector('.on')?.textContent?.trim()||'';
+  const note = document.getElementById('skin-note')?.value.trim()||'';
+  const dateVal = document.getElementById('skin-log-date')?.value||logicalDayStr();
+  if(!skinFace && !skinState.length && !concerns.length && !musely && !note){ showToast('Add at least one skin observation'); return; }
+  const skinEntry={type:'checkin',skinFace,skinState,concerns,musely,note,date:dateVal};
+  try{
+    await dbAdd('skins',skinEntry);
+    syncToBlob('skins');
+    localStorage.setItem('glowSkinCheckinState', JSON.stringify({...skinEntry, savedAt: new Date().toISOString()}));
+    clearPillarDraft('skin');
+    document.getElementById('skin-face-tags')?.querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));
+    ['skin-state-tags','skin-concern-tags','skin-musely-tags'].forEach(id=>document.getElementById(id)?.querySelectorAll('.on').forEach(t=>t.classList.remove('on')));
+    if(document.getElementById('skin-note')) document.getElementById('skin-note').value='';
+    toast('skt');
+    loadLogs();
+    toggleSkinCheckin(false);
+    showSkinCheckinSaved(skinEntry);
+    buildDailyProgress();
+  }catch(err){ console.error('saveSkin error:',err); showToast('Could not save — please try again'); }
 }
 async function saveHair(){
   const hairT=gT('hair-tags'),care=gT('hcare-tags'),prods=gT('products-used-tags'),note=document.getElementById('hair-note').value.trim();
