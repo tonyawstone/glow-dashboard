@@ -5447,7 +5447,8 @@ function toggleOutfitForm(forceOpen){
 }
 
 async function saveOutfit(){
-  const desc=document.getElementById('outfit-desc').value.trim();if(!desc)return;
+  const desc=document.getElementById('outfit-desc').value.trim();
+  if(!desc){showToast('Add an outfit description first');return;}
   const dateInput=document.getElementById('outfit-date');
   const outfitDate=dateInput.value||nowStr();
   // Grab photo
