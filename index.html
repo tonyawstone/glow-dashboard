@@ -4300,7 +4300,7 @@ function editCheckin(){
 
 async function saveCheckin(){
   const mood=gT('mood-tags'),note=document.getElementById('today-note').value.trim();
-  if(!mood.length&&!note)return;
+  if(!window._selectedMoodFace&&!mood.length&&!note)return;
   const cpap=document.getElementById('t-cpap')?.classList.contains('on')||false;
   const meds=document.getElementById('t-meds')?.classList.contains('on')||false;
   const exercise=document.getElementById('t-exercise')?.classList.contains('on')||false;
@@ -7636,12 +7636,18 @@ async function saveSleep(){
   try{
     await dbAdd('sleeps',sleepEntry);
     syncToBlob('sleeps');
+    // Persist to localStorage so restore is instant on tab re-entry (no DB race)
+    localStorage.setItem('glowSleepCheckinState', JSON.stringify({...sleepEntry, savedAt: new Date().toISOString()}));
+    clearPillarDraft('sleep');
     if(document.getElementById('sleep-note')) document.getElementById('sleep-note').value='';
     document.getElementById('energy-am-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     document.getElementById('sq-tags')?.querySelectorAll('[data-quality]').forEach(b=>b.classList.remove('on'));
     const chipsEl = document.getElementById('sleep-energy-chips');
     if(chipsEl){ chipsEl.style.display='none'; chipsEl.innerHTML=''; }
-    document.getElementById('energy-am-tags').style.display='none';
+    const epanel = document.getElementById('sleep-energy-panel');
+    if(epanel) epanel.style.display='none';
+    const ebtn = document.getElementById('sleep-energy-btn');
+    if(ebtn) ebtn.textContent='+ Morning energy';
     toast('slp-t');
     loadLogs();
     toggleSleepCheckin(false);
@@ -8268,26 +8274,63 @@ function editSleepCheckin(){
   const headerRight = document.getElementById('sleep-checkin-header-right');
   if(headerRight) headerRight.innerHTML = `<button onclick="openPastSleepLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past check-ins →</button>`;
   toggleSleepCheckin(true);
+  // Restore previous values from localStorage
+  try{
+    const stored = localStorage.getItem('glowSleepCheckinState');
+    if(!stored) return;
+    const s = JSON.parse(stored);
+    // Restore quality face
+    if(s.quality){
+      document.getElementById('sq-tags')?.querySelectorAll('[data-quality]').forEach(b=>{
+        if(b.dataset.quality === s.quality) b.classList.add('on');
+      });
+    }
+    // Restore energy tags
+    if(s.energy?.length){
+      const panel = document.getElementById('sleep-energy-panel');
+      const btn = document.getElementById('sleep-energy-btn');
+      if(panel) panel.style.display = 'block';
+      if(btn) btn.textContent = '– Morning energy';
+      document.getElementById('energy-am-tags')?.querySelectorAll('.tag').forEach(t=>{
+        if(s.energy.includes(t.textContent.trim())) t.classList.add('on');
+      });
+      // Rebuild chips
+      const chips = document.getElementById('sleep-energy-chips');
+      if(chips){
+        chips.style.display = 'flex';
+        chips.innerHTML = s.energy.map(v=>`<span style="background:var(--accent-light,rgba(107,158,120,0.15));border-radius:14px;padding:3px 10px;font-size:11px;color:var(--accent);">${v}</span>`).join('');
+      }
+    }
+    // Restore note
+    const noteEl = document.getElementById('sleep-note');
+    if(noteEl && s.note) noteEl.value = s.note;
+  }catch(e){}
 }
 
 async function restoreSleepCheckinState(){
   try{
-    // Sleep check-in resets at 3 AM CST (9 AM UTC)
-    // Before 3 AM, the "sleep night" is still yesterday (you're still in the same night)
-    // After 3 AM, the "sleep night" is yesterday (last night)
+    // Valid window: entry savedAt within the last 27 hours (covers logging at wake-up until 3 AM next morning)
     const now = new Date();
-    const hourCST = (now.getUTCHours() - 5 + 24) % 24; // UTC-5 for CST (no DST adjust needed for reset logic)
-    // Valid sleep night dates: yesterday always valid; today only valid before 3 AM (still "last night")
-    const validDates = new Set([yesterdayStr()]);
-    if(hourCST < 3) validDates.add(nowStr(now));
-
-    let entry = null;
-    // Try IndexedDB first
-    const sleeps = await dbAll('sleeps');
-    if(sleeps.length){
-      entry = sleeps.find(e=>validDates.has(e.date));
+    const localHour = now.getHours();
+    // Check localStorage first — instant, no DB race
+    const stored = localStorage.getItem('glowSleepCheckinState');
+    if(stored){
+      const s = JSON.parse(stored);
+      const savedAt = s.savedAt ? new Date(s.savedAt) : null;
+      const hoursAgo = savedAt ? (now - savedAt) / 3600000 : 999;
+      // Valid if saved within 27 hours AND we haven't passed 3 AM after the save date
+      if(hoursAgo < 27 && !(hoursAgo >= 3 && localHour >= 3 && localHour - hoursAgo < 0)){
+        showSleepCheckinSaved(s);
+        return;
+      } else if(hoursAgo >= 27 || (localHour >= 3 && hoursAgo > localHour)) {
+        localStorage.removeItem('glowSleepCheckinState');
+      }
     }
-    // Fall back to Blob
+    // Fall back to DB
+    const validDates = new Set([yesterdayStr()]);
+    if(localHour < 3) validDates.add(nowStr(now));
+    const sleeps = await dbAll('sleeps');
+    let entry = sleeps.find(e=>validDates.has(e.date));
     if(!entry){
       const res = await fetch(`${BACKEND}/api/sync?pillar=sleeps&t=${Date.now()}`);
       if(res.ok){
@@ -8296,7 +8339,6 @@ async function restoreSleepCheckinState(){
         entry = data.find(e=>validDates.has(e.date));
       }
     }
-    // Only show if entry is from the current sleep night — never show stale past entries
     if(entry) showSleepCheckinSaved(entry);
   }catch(e){ console.warn('restoreSleepCheckinState error:',e); }
 }
