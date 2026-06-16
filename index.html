@@ -11028,7 +11028,7 @@ function buildSkinMetricChart(metric, data){
 
 
 let todayWaterCount = 0; // legacy alias
-var WATER_GOAL = 10; // legacy alias
+var WATER_GOAL = 8; // 8 glasses = 64 oz
 
 // ── HAIR ANALYSIS ─────────────────────────────────────────────────────
 let _currentHairGoalSlot = null;
@@ -11931,7 +11931,7 @@ function showSkinComparison(a, b){
   setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
 
-var WATER_GOAL_OZ = 80; // 80 oz goal
+var WATER_GOAL_OZ = 64; // 64 oz goal
 let todayWaterOz = 0;
 let todayWaterEntries = []; // [{oz, label, time}]
 
@@ -12835,7 +12835,7 @@ const PILLAR_INFO = {
   physical: {
     icon: '💪', title: 'Physical Self-Care',
     why: 'Your body is the foundation of everything. Physical care directly impacts energy, mood, weight loss, and longevity.',
-    activities: ['Any movement — walk, stretch, workout, yoga','Getting 7-9 hours of sleep','Staying hydrated (10+ glasses)','Eating nourishing meals, not skipping','Taking your medications on time','CPAP compliance for sleep apnea','Zepbound injection on schedule'],
+    activities: ['Any movement — walk, stretch, workout, yoga','Getting 7-9 hours of sleep','Staying hydrated (8+ glasses · 64 oz)','Eating nourishing meals, not skipping','Taking your medications on time','CPAP compliance for sleep apnea','Zepbound injection on schedule'],
     inGlow: 'Tracked via steps, sleep hours, weight, hydration, and treatment compliance.',
     tip: 'On Zepbound, your appetite cues change — eat intentionally even when not hungry.'
   },
