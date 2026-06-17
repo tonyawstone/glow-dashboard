@@ -7378,7 +7378,7 @@ async function renderCheckinHub(){
         ${!p.formHtml?`<span class="ci-badge ${p.done?'done':'todo'}">${p.done?'✓ Done':'Log →'}</span>`:''}
       </div>
       ${p.done&&p.saved?`<div class="ci-saved"><div class="ci-saved-inner">${p.saved}</div></div>`:''}
-      ${!p.done&&p.formHtml?`<div style="padding:4px 0 8px;">${p.formHtml}</div>`:''}
+      ${!p.done&&p.formHtml?`<div style="padding:4px 16px 12px;">${p.formHtml}</div>`:''}
     </div>`).join('');
 }
 
