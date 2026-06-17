@@ -12961,7 +12961,8 @@ function addWater(oz, label=''){
   todayWaterOz += oz;
   todayWaterEntries.push({oz, label, time: new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
   updateWaterDisplay();
-  autoSaveWater(); // save immediately on every tap
+  autoSaveWater();
+  saveWaterIntake();
 }
 
 function addWaterCustom(){
