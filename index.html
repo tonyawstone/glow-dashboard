@@ -3520,6 +3520,26 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div style="font-size:10px;color:var(--muted);margin-top:4px;">Toggle to save as a favourite</div>
     </div>
+    <!-- Mind Coach -->
+    <div class="card" id="mind-coach-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="ti ti-sparkles" style="font-size:16px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Mind Coach</div>
+        </div>
+        <button onclick="openCoachHistory('Mind')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+        <button onclick="mindCoachPrompt('Help me process this: ',true)" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Help me process this</button>
+        <button onclick="mindCoachPrompt('I need to mentally reset right now. Give me something short and grounding to help me shift my headspace.')" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Help me reset</button>
+        <button onclick="mindCoachPrompt('I am struggling to focus. Give me one clear, grounding way to redirect my attention and get present.')" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Help me focus</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="mind-coach-input" type="text" placeholder="What's on your mind?" style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')mindCoach()">
+        <button onclick="mindCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
+      </div>
+      <div id="mind-coach-output" class="coach-response" style="display:none;margin-top:10px;"></div>
+    </div>
   </div><!-- close vc-mind-daily -->
 
 
@@ -17345,7 +17365,18 @@ async function dermCoach(){
   callCoach('Skin · Derm Prep','Based on my recent skin check-ins, routine completion, and Musely treatment schedule, what questions should I bring to my next derm appointment?','derm-coach-output', logData);
 }
 function hairCoach(){ callCoach('Hair','I am growing my hair from chin to collarbone length. What should I focus on for healthy growth?','hair-coach-output'); }
-function mindCoach(){ callCoach('Mind','Give me an honest encouraging weekly reflection on my overall wellness journey.','mind-coach-output'); }
+function mindCoach(){
+  const input = document.getElementById('mind-coach-input');
+  const msg = input ? input.value.trim() : '';
+  if(!msg){ showToast('Type something or tap a suggestion'); return; }
+  if(input) input.value = '';
+  callCoach('Mind', msg, 'mind-coach-output');
+}
+function mindCoachPrompt(text, focusOnly){
+  const input = document.getElementById('mind-coach-input');
+  if(input){ input.value = text; input.focus(); }
+  if(!focusOnly) mindCoach();
+}
 
 async function weeklyInsight(){
   const checkins=await dbAll('checkins');
