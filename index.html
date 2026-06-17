@@ -1885,6 +1885,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
+    <div class="card">
+      <div class="card-title">🚶 Gait & Mobility · last 7 days</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Post hip replacement recovery · Walk asymmetry target &lt;5%</div>
+      <div class="chart-wrap" style="height:160px;" id="wrap-asymmetry-week-chart"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:12px;margin-bottom:6px;">Double support % · normal &lt;25% · higher may indicate gait caution</div>
+      <div class="chart-wrap" style="height:160px;" id="wrap-doublesupport-week-chart"></div>
+    </div>
+
     <!-- Zepbound weekly dose -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
@@ -2546,17 +2554,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">Healthy range for women: 45–60% · Estimated from Withings scale data</div>
     </div>
 
-    <div class="card">
-      <div class="card-title">🚶 Walk asymmetry · this week</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Post hip replacement recovery · target &lt;5% · lower is better</div>
-      <div class="chart-wrap" style="height:180px;" id="wrap-asymmetry-week-chart"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🦶 Double support % · this week</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Time with both feet on ground · normal &lt;25% · higher may indicate caution in gait</div>
-      <div class="chart-wrap" style="height:180px;" id="wrap-doublesupport-week-chart"></div>
-    </div>
   </div>
 
   <!-- ── MONTHLY ── -->
@@ -4041,7 +4038,7 @@ async function tab(id){
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
-  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); }
+  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitWeekCharts(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld&&!_sld.value)_sld.value=logicalDayStr(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') {
@@ -4086,7 +4083,7 @@ function setView(v,btn){
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
-  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildGaitWeekCharts();}if(v==='monthly')buildZepMonthlyTracker();}
+  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();}if(v==='monthly')buildZepMonthlyTracker();}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); if(v==='monthly') setTimeout(()=>switchSkinMetricChart(activeSkinMetric, document.querySelector('#skin-metric-tabs .chart-tab.on')||document.querySelector('#skin-metric-tabs .chart-tab')),100); }
   if(curTab==='hair'&&v!=='daily'){ buildHairCharts(); if(v==='weekly'){ loadHairAnalysesLog(); loadHairMilestones(); } }
   if(curTab==='body'&&v!=='daily'){ buildBodyCompChartsForView(v); if(v==='weekly') buildWeeklyExercise(); if(v==='yearly') buildBodyYearlySummary(); }
