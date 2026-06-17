@@ -109,7 +109,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 
 /* CARDS */
 .card{background:#fff;border:0.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
-.card-title{font-family:var(--serif);font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:16px;}
+.card-title{font-family:var(--serif);font-size:13px;font-weight:500;color:var(--muted);text-transform:capitalize;letter-spacing:0.03em;margin-bottom:16px;}
 .section-label{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;display:flex;align-items:center;justify-content:space-between;}
 .guide-btn{font-size:12px;font-family:var(--sans);font-weight:600;color:var(--accent);background:var(--warm);border:1.5px solid var(--accent);border-radius:50%;-webkit-border-radius:50%;width:24px;height:24px;min-width:24px;min-height:24px;cursor:pointer;letter-spacing:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.9;padding:0;line-height:1;-webkit-appearance:none;appearance:none;}
 .goal-label-input{font-size:10px;font-weight:600;color:var(--accent);background:transparent;border:none;border-bottom:0.5px solid transparent;text-align:center;width:100%;margin-top:3px;font-family:var(--sans);cursor:text;padding:1px 2px;border-radius:0;}
@@ -14788,7 +14788,7 @@ async function updateBPBanners(){
           const sysPts=sparkArr.map((b,i)=>`${sx(i)},${sy(b.sys)}`).join(' ');
           const diaPts=sparkArr.map((b,i)=>`${sx(i)},${sy(b.dia)}`).join(' ');
           const lx=sx(n-1), lsy=sy(sparkArr[n-1].sys), ldy=sy(sparkArr[n-1].dia);
-          const sysLY=Math.max(lsy-5,tpad+9);
+          const sysLY = lsy < tpad+chartH*0.45 ? lsy+14 : Math.max(lsy-8,tpad+8);
           const diaLY=Math.min(ldy+10,tpad+chartH+13);
           sparkSVG=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">`+
             `<line x1="${lpad}" y1="${tpad}" x2="${lpad}" y2="${tpad+chartH}" stroke="${color}" stroke-width="0.5" opacity="0.25"/>`+
@@ -14801,7 +14801,7 @@ async function updateBPBanners(){
             `<polyline points="${diaPts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>`+
             `<circle cx="${lx}" cy="${lsy}" r="3" fill="${color}"/>`+
             `<circle cx="${lx}" cy="${ldy}" r="2.5" fill="${color}" opacity="0.5"/>`+
-            `<text x="${lx}" y="${sysLY}" text-anchor="middle" font-size="8" font-weight="600" fill="${color}">${sparkArr[n-1].sys}</text>`+
+            `<text x="${lx}" y="${sysLY}" text-anchor="middle" font-size="8" font-weight="600" fill="${color}" stroke="#fff" stroke-width="2" paint-order="stroke">${sparkArr[n-1].sys}</text>`+
             `<text x="${lx}" y="${diaLY}" text-anchor="middle" font-size="7" fill="${color}" opacity="0.55">${sparkArr[n-1].dia}</text>`+
             `</svg>`;
         }
@@ -15254,10 +15254,10 @@ function showMedsSavedCard(sectionId, label, items, editFn){
   if(!el) return;
   const chips = items.map(id=>{
     const name = document.getElementById(id)?.querySelector('.med-name')?.textContent||id;
-    return `<span style="background:#EAF3DE;border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;color:#27500A;">${name}</span>`;
+    return `<span style="background:rgba(107,158,120,0.12);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;color:#27500A;">${name}</span>`;
   }).join('');
   el.style.display='block';
-  el.innerHTML=`<div style="background:#EAF3DE;border-top:2px solid #6B9E78;border-radius:12px;padding:10px 12px;">
+  el.innerHTML=`<div style="background:rgba(107,158,120,0.08);border:0.5px solid rgba(107,158,120,0.35);border-radius:12px;padding:10px 12px;">
     <div style="font-size:11px;color:#27500A;font-weight:600;margin-bottom:6px;">${label} ✓ <button onclick="${editFn}()" style="margin-left:8px;background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;padding:0;font-family:var(--sans);">Edit</button></div>
     <div>${chips}</div>
   </div>`;
