@@ -7321,6 +7321,7 @@ async function renderCheckinHub(){
   const PILLARS = [
     { icon:'ti-brain', name:'Mind', done:!!mindEntry,
       saved: mindEntry ? `${(mindEntry.vibe||[]).length?`<div style="margin-bottom:4px;">${chips(mindEntry.vibe)}</div>`:''}${mindEntry.win?`<div>Win: ${mindEntry.win}</div>`:''}` : null,
+      formHtml: !mindEntry ? getHubMindFormHtml() : null,
       tab:'mind', scrollId:'mind-checkin-card', toggleFn:'' },
     { icon:'ti-moon', name:'Sleep', done:!!sleepEntry,
       saved: sleepEntry ? `${sleepEntry.quality?`<div>${sleepEntry.quality}${sleepEntry.energy?' · Energy: '+sleepEntry.energy:''}</div>`:''}${sleepEntry.note?`<div style="color:var(--muted);margin-top:2px;">${sleepEntry.note}</div>`:''}` : null,
@@ -7367,16 +7368,17 @@ async function renderCheckinHub(){
   if(!sectionsEl) return;
   sectionsEl.innerHTML = PILLARS.map(p=>`
     <div class="ci-section">
-      <div class="ci-section-header" onclick="checkinGoTo('${p.tab}','${p.scrollId}','${p.toggleFn}')">
+      <div class="ci-section-header" ${!p.formHtml?`onclick="checkinGoTo('${p.tab}','${p.scrollId}','${p.toggleFn}')"`:'style="cursor:default;"'}>
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="width:34px;height:34px;border-radius:50%;background:${p.done?'rgba(107,158,120,0.12)':'rgba(0,0,0,0.04)'};border:0.5px solid ${p.done?'rgba(107,158,120,0.3)':'var(--border)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <i class="ti ${p.icon}" style="font-size:15px;color:${p.done?'#6B9E78':'var(--muted)'};"></i>
           </div>
           <div class="ci-pillar-name">${p.name}</div>
         </div>
-        <span class="ci-badge ${p.done?'done':'todo'}">${p.done?'✓ Done':'Log →'}</span>
+        ${!p.formHtml?`<span class="ci-badge ${p.done?'done':'todo'}">${p.done?'✓ Done':'Log →'}</span>`:''}
       </div>
       ${p.done&&p.saved?`<div class="ci-saved"><div class="ci-saved-inner">${p.saved}</div></div>`:''}
+      ${!p.done&&p.formHtml?`<div style="padding:4px 0 8px;">${p.formHtml}</div>`:''}
     </div>`).join('');
 }
 
@@ -7399,6 +7401,76 @@ function checkinGoTo(targetTab, scrollId, toggleFn){
   }, 400);
 }
 
+// ── HUB MIND CHECK-IN ─────────────────────────────────────────────────────────
+function getHubMindFormHtml(){
+  const today = logicalDayStr();
+  const stars = id => [1,2,3,4,5].map(n=>`<span class="star" onclick="setHubMindStars('${id}',${n})">&#x2605;</span>`).join('');
+  return `
+    <div style="padding:4px 0;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+        <span style="font-size:11px;color:var(--muted);">Date</span>
+        <input type="date" id="hm-log-date" value="${today}" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Overall how is your mind feeling today?</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="hm-face-tags">
+        <button class="sqb" data-mind="Low" onclick="soloHubMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;"><div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/></svg></div><span class="sqb-lbl">Low</span></button>
+        <button class="sqb" data-mind="Okay" onclick="soloHubMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;"><div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/></svg></div><span class="sqb-lbl">Okay</span></button>
+        <button class="sqb" data-mind="Good" onclick="soloHubMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;"><div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/></svg></div><span class="sqb-lbl">Good</span></button>
+        <button class="sqb" data-mind="Great" onclick="soloHubMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;"><div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20 17.5 16"/></svg></div><span class="sqb-lbl">Great</span></button>
+        <button class="sqb" data-mind="Amazing" onclick="soloHubMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;"><div class="sqb-face"><svg width="26" height="26" viewBox="-2 -2 30 30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/></svg></div><span class="sqb-lbl">Amazing</span></button>
+      </div>
+      <div style="margin-bottom:8px;"><button id="hm-state-btn" onclick="toggleHubMindState()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ What's your mental state?</button></div>
+      <div id="hm-state-panel" style="display:none;"><div class="tags" id="hm-vibe-tags" style="margin-bottom:12px;"><button class="tag" onclick="tog(this)">Motivated</button><button class="tag" onclick="tog(this)">Focused</button><button class="tag" onclick="tog(this)">Grateful</button><button class="tag" onclick="tog(this)">Grounded</button><button class="tag" onclick="tog(this)">In my power</button><button class="tag" onclick="tog(this)">Clear-headed</button><button class="tag" onclick="tog(this)">Overwhelmed</button><button class="tag" onclick="tog(this)">Anxious</button><button class="tag" onclick="tog(this)">Scattered</button><button class="tag" onclick="tog(this)">Restless</button></div></div>
+      <div style="margin-bottom:8px;"><button id="hm-ratings-btn" onclick="toggleHubMindRatings()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Rate your mind today</button></div>
+      <div id="hm-ratings-panel" style="display:none;border:0.5px solid var(--border);border-radius:10px;padding:0 12px;margin-bottom:12px;">
+        <div class="stars-row" style="margin-top:0;"><div class="stars-row-label">Energy</div><div class="stars" id="hm-energy-stars">${stars('hm-energy-stars')}</div></div>
+        <div class="stars-row"><div class="stars-row-label">Confidence</div><div class="stars" id="hm-conf-stars">${stars('hm-conf-stars')}</div></div>
+        <div class="stars-row"><div class="stars-row-label">Calm</div><div class="stars" id="hm-stress-stars">${stars('hm-stress-stars')}</div></div>
+        <div class="stars-row"><div class="stars-row-label">Body image</div><div class="stars" id="hm-body-image-stars">${stars('hm-body-image-stars')}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">One win today</div>
+      <textarea id="hm-win-note" rows="2" placeholder="Big or small — new low, wore something I love…" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
+      <div style="margin-bottom:8px;"><button id="hm-gratitude-btn" onclick="toggleHubMindGratitude()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Gratitude · (select 3)</button></div>
+      <div id="hm-gratitude-panel" style="display:none;">
+        <div class="tags" id="hm-gratitude-tags" style="margin-bottom:8px;"><button class="tag" onclick="tog(this)">My strength</button><button class="tag" onclick="tog(this)">My progress</button><button class="tag" onclick="tog(this)">My family</button><button class="tag" onclick="tog(this)">My body</button><button class="tag" onclick="tog(this)">A moment of peace</button><button class="tag" onclick="tog(this)">My support system</button><button class="tag" onclick="tog(this)">Small wins</button><button class="tag" onclick="tog(this)">My mindset</button><button class="tag" onclick="tog(this)">Being present</button><button class="tag" onclick="tog(this)">My health journey</button><button class="tag" onclick="tog(this)">Rest I got</button><button class="tag" onclick="tog(this)">My home</button></div>
+        <textarea id="hm-gratitude-note" rows="2" placeholder="Write what you're grateful for…" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
+      </div>
+      <div style="text-align:center;margin-top:14px;">
+        <button onclick="saveHubMind()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
+      </div>
+      <div class="toast-msg" id="hm-toast">Saved!</div>
+    </div>`;
+}
+function soloHubMindFace(btn){document.getElementById('hm-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function setHubMindStars(id,n){document.getElementById(id)?.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n));}
+function toggleHubMindState(){const p=document.getElementById('hm-state-panel'),b=document.getElementById('hm-state-btn'),open=p.style.display==='none'||!p.style.display;p.style.display=open?'block':'none';b.textContent=open?'− Mental state':"+ What's your mental state?";}
+function toggleHubMindRatings(){const p=document.getElementById('hm-ratings-panel'),b=document.getElementById('hm-ratings-btn'),open=p.style.display==='none'||!p.style.display;p.style.display=open?'block':'none';b.textContent=open?'− Ratings':'+ Rate your mind today';}
+function toggleHubMindGratitude(){const p=document.getElementById('hm-gratitude-panel'),b=document.getElementById('hm-gratitude-btn'),open=p.style.display==='none'||!p.style.display;p.style.display=open?'block':'none';b.textContent=open?'− Gratitude':'+ Gratitude · (select 3)';}
+async function saveHubMind(){
+  const mindFace=document.getElementById('hm-face-tags')?.querySelector('.on')?.dataset.mind||'';
+  const vibe=gT('hm-vibe-tags');
+  const energy=getStars('hm-energy-stars');
+  const conf=getStars('hm-conf-stars');
+  const stress=getStars('hm-stress-stars');
+  const bodyImage=getStars('hm-body-image-stars');
+  const win=document.getElementById('hm-win-note')?.value.trim()||'';
+  const gratitudeChips=gT('hm-gratitude-tags');
+  const gratitudeNote=document.getElementById('hm-gratitude-note')?.value.trim()||'';
+  if(!mindFace&&!vibe.length&&!energy&&!conf&&!stress&&!bodyImage&&!win&&!gratitudeChips.length&&!gratitudeNote){showToast('Add at least one entry first');return;}
+  const dateVal=document.getElementById('hm-log-date')?.value||logicalDayStr();
+  const entry={mindFace,vibe,energy,conf,stress,bodyImage,win,gratitudeChips,gratitudeNote,date:dateVal};
+  try{
+    await dbAdd('minds',entry);
+    syncToBlob('minds');
+    clearPillarDraft('mind');
+    localStorage.removeItem('glowMindDraft');
+    localStorage.setItem('glowMindCheckinState',JSON.stringify({...entry,savedAt:Date.now()}));
+    toast('hm-toast');
+    loadLogs();
+    buildDailyProgress();
+    setTimeout(()=>renderCheckinHub(),700);
+  }catch(e){showToast('Could not save — please try again');}
+}
 
 const GUIDES = {
   skin_score: {
