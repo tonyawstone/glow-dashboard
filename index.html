@@ -3227,15 +3227,73 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-mind-daily">
     <div class="section-label">Mind & Mood <button class="guide-btn" onclick="openGuide('mind')">?</button></div>
 
-    <!-- Daily Affirmation -->
-    <div class="card" style="background:linear-gradient(135deg,rgba(155,142,196,0.15),rgba(232,168,124,0.1));">
-      <div class="card-title">✨ Today's affirmation</div>
-      <div id="daily-affirmation" style="font-size:15px;line-height:1.6;color:var(--text);font-style:italic;padding:8px 0;min-height:48px;">"Loading your affirmation..."</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-        <button onclick="generateAffirmation()" style="padding:7px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);">✨ New affirmation</button>
-        <div class="tog" id="aff-saved" onclick="ts('aff-saved')" style="width:40px;height:22px;"><div class="tok"></div></div>
+    <!-- Mind check-in -->
+    <div class="card" id="mind-checkin-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-brain" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">How is your mind today?</div>
+        </div>
+        <div id="mind-checkin-header-right" style="display:flex;align-items:center;gap:8px;">
+          <button onclick="openMindLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past &#x2192;</button>
+        </div>
       </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:4px;">Toggle to save as a favourite</div>
+      <div id="mind-checkin-saved" style="display:none;"></div>
+      <div id="mind-checkin-body">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+          <span style="font-size:11px;color:var(--muted);">Date</span>
+          <input type="date" id="mind-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Overall how is your mind feeling today?</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="mind-face-tags">
+          <button class="sqb" data-mind="Low" onclick="soloMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/></svg></div>
+            <span class="sqb-lbl">Low</span>
+          </button>
+          <button class="sqb" data-mind="Okay" onclick="soloMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/></svg></div>
+            <span class="sqb-lbl">Okay</span>
+          </button>
+          <button class="sqb" data-mind="Good" onclick="soloMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/></svg></div>
+            <span class="sqb-lbl">Good</span>
+          </button>
+          <button class="sqb" data-mind="Great" onclick="soloMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20 17.5 16"/></svg></div>
+            <span class="sqb-lbl">Great</span>
+          </button>
+          <button class="sqb" data-mind="Amazing" onclick="soloMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
+            <div class="sqb-face"><svg width="26" height="26" viewBox="-2 -2 30 30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/></svg></div>
+            <span class="sqb-lbl">Amazing</span>
+          </button>
+        </div>
+        <div style="margin-bottom:8px;"><button id="mind-state-btn" onclick="toggleMindState()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ What's your mental state?</button></div>
+        <div id="mind-state-panel" style="display:none;">
+          <div class="tags" id="vibe-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="tog(this);saveMindDraft()">Motivated</button><button class="tag" onclick="tog(this);saveMindDraft()">Focused</button><button class="tag" onclick="tog(this);saveMindDraft()">Grateful</button><button class="tag" onclick="tog(this);saveMindDraft()">Grounded</button><button class="tag" onclick="tog(this);saveMindDraft()">In my power</button><button class="tag" onclick="tog(this);saveMindDraft()">Clear-headed</button><button class="tag" onclick="tog(this);saveMindDraft()">Overwhelmed</button><button class="tag" onclick="tog(this);saveMindDraft()">Anxious</button><button class="tag" onclick="tog(this);saveMindDraft()">Scattered</button><button class="tag" onclick="tog(this);saveMindDraft()">Restless</button>
+          </div>
+        </div>
+        <div style="margin-bottom:8px;"><button id="mind-ratings-btn" onclick="toggleMindRatings()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Rate your mind today</button></div>
+        <div id="mind-ratings-panel" style="display:none;border:0.5px solid var(--border);border-radius:10px;padding:0 12px;margin-bottom:12px;">
+          <div class="stars-row" style="margin-top:0;"><div class="stars-row-label">Energy</div><div class="stars" id="energy-stars"><span class="star" onclick="setStars('energy-stars',1)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',2)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',3)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',4)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',5)">&#x2605;</span></div></div>
+          <div class="stars-row"><div class="stars-row-label">Confidence</div><div class="stars" id="conf-stars"><span class="star" onclick="setStars('conf-stars',1)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',2)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',3)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',4)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',5)">&#x2605;</span></div></div>
+          <div class="stars-row"><div class="stars-row-label">Calm</div><div class="stars" id="stress-stars"><span class="star" onclick="setStars('stress-stars',1)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',2)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',3)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',4)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',5)">&#x2605;</span></div></div>
+          <div class="stars-row"><div class="stars-row-label">Body image</div><div class="stars" id="body-image-stars"><span class="star" onclick="setStars('body-image-stars',1)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',2)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',3)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',4)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',5)">&#x2605;</span></div></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">One win today</div>
+        <textarea id="win-note" rows="2" placeholder="Big or small — new low, wore something I love…" oninput="saveMindDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
+        <div style="margin-bottom:8px;"><button id="mind-gratitude-btn" onclick="toggleMindGratitude()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Gratitude · (select 3)</button></div>
+        <div id="mind-gratitude-panel" style="display:none;">
+          <div class="tags" id="mind-gratitude-tags" style="margin-bottom:8px;">
+            <button class="tag" onclick="tog(this);saveMindDraft()">My strength</button><button class="tag" onclick="tog(this);saveMindDraft()">My progress</button><button class="tag" onclick="tog(this);saveMindDraft()">My family</button><button class="tag" onclick="tog(this);saveMindDraft()">My body</button><button class="tag" onclick="tog(this);saveMindDraft()">A moment of peace</button><button class="tag" onclick="tog(this);saveMindDraft()">My support system</button><button class="tag" onclick="tog(this);saveMindDraft()">Small wins</button><button class="tag" onclick="tog(this);saveMindDraft()">My mindset</button><button class="tag" onclick="tog(this);saveMindDraft()">Being present</button><button class="tag" onclick="tog(this);saveMindDraft()">My health journey</button><button class="tag" onclick="tog(this);saveMindDraft()">Rest I got</button><button class="tag" onclick="tog(this);saveMindDraft()">My home</button>
+          </div>
+          <textarea id="gratitude-note" rows="2" placeholder="Write what you're grateful for…" oninput="saveMindDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
+        </div>
+        <div style="text-align:center;margin-top:14px;">
+          <button onclick="saveMind()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
+        </div>
+        <div class="toast-msg" id="mt">Saved!</div>
+      </div><!-- mind-checkin-body -->
     </div>
 
     <!-- Morning Activation Ritual -->
@@ -3384,80 +3442,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <!-- Mind check-in -->
-    <div class="card" id="mind-checkin-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <i class="ti ti-brain" style="font-size:13px;color:var(--accent);"></i>
-          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">How is your mind today?</div>
-        </div>
-        <div id="mind-checkin-header-right" style="display:flex;align-items:center;gap:8px;">
-          <button onclick="openMindLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
-        </div>
-      </div>
-      <div id="mind-checkin-saved" style="display:none;"></div>
-      <div id="mind-checkin-body">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
-          <span style="font-size:11px;color:var(--muted);">Date</span>
-          <input type="date" id="mind-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Overall how is your mind feeling today?</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="mind-face-tags">
-          <button class="sqb" data-mind="Low" onclick="soloMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
-            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/></svg></div>
-            <span class="sqb-lbl">Low</span>
-          </button>
-          <button class="sqb" data-mind="Okay" onclick="soloMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
-            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17h7"/></svg></div>
-            <span class="sqb-lbl">Okay</span>
-          </button>
-          <button class="sqb" data-mind="Good" onclick="soloMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
-            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16 Q13 19 16.5 16"/></svg></div>
-            <span class="sqb-lbl">Good</span>
-          </button>
-          <button class="sqb" data-mind="Great" onclick="soloMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
-            <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20 17.5 16"/></svg></div>
-            <span class="sqb-lbl">Great</span>
-          </button>
-          <button class="sqb" data-mind="Amazing" onclick="soloMindFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
-            <div class="sqb-face"><svg width="26" height="26" viewBox="-2 -2 30 30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/></svg></div>
-            <span class="sqb-lbl">Amazing</span>
-          </button>
-        </div>
-        <div style="margin-bottom:8px;"><button id="mind-state-btn" onclick="toggleMindState()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ What's your mental state?</button></div>
-        <div id="mind-state-panel" style="display:none;">
-          <div class="tags" id="vibe-tags" style="margin-bottom:12px;">
-            <button class="tag" onclick="tog(this);saveMindDraft()">Motivated</button><button class="tag" onclick="tog(this);saveMindDraft()">Focused</button><button class="tag" onclick="tog(this);saveMindDraft()">Grateful</button><button class="tag" onclick="tog(this);saveMindDraft()">Grounded</button><button class="tag" onclick="tog(this);saveMindDraft()">In my power</button><button class="tag" onclick="tog(this);saveMindDraft()">Clear-headed</button><button class="tag" onclick="tog(this);saveMindDraft()">Overwhelmed</button><button class="tag" onclick="tog(this);saveMindDraft()">Anxious</button><button class="tag" onclick="tog(this);saveMindDraft()">Scattered</button><button class="tag" onclick="tog(this);saveMindDraft()">Restless</button>
-          </div>
-        </div>
-        <div style="margin-bottom:8px;"><button id="mind-ratings-btn" onclick="toggleMindRatings()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Rate your mind today</button></div>
-        <div id="mind-ratings-panel" style="display:none;border:0.5px solid var(--border);border-radius:10px;padding:0 12px;margin-bottom:12px;">
-          <div class="stars-row" style="margin-top:0;"><div class="stars-row-label">Energy</div><div class="stars" id="energy-stars"><span class="star" onclick="setStars('energy-stars',1)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',2)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',3)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',4)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',5)">&#x2605;</span></div></div>
-          <div class="stars-row"><div class="stars-row-label">Confidence</div><div class="stars" id="conf-stars"><span class="star" onclick="setStars('conf-stars',1)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',2)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',3)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',4)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',5)">&#x2605;</span></div></div>
-          <div class="stars-row"><div class="stars-row-label">Calm</div><div class="stars" id="stress-stars"><span class="star" onclick="setStars('stress-stars',1)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',2)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',3)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',4)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',5)">&#x2605;</span></div></div>
-          <div class="stars-row"><div class="stars-row-label">Body image</div><div class="stars" id="body-image-stars"><span class="star" onclick="setStars('body-image-stars',1)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',2)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',3)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',4)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',5)">&#x2605;</span></div></div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">One win today</div>
-        <textarea id="win-note" rows="2" placeholder="Big or small — new low, wore something I love…" oninput="saveMindDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
-        <div style="margin-bottom:8px;"><button id="mind-gratitude-btn" onclick="toggleMindGratitude()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Gratitude · (select 3)</button></div>
-        <div id="mind-gratitude-panel" style="display:none;">
-          <div class="tags" id="mind-gratitude-tags" style="margin-bottom:8px;">
-            <button class="tag" onclick="tog(this);saveMindDraft()">My strength</button><button class="tag" onclick="tog(this);saveMindDraft()">My progress</button><button class="tag" onclick="tog(this);saveMindDraft()">My family</button><button class="tag" onclick="tog(this);saveMindDraft()">My body</button><button class="tag" onclick="tog(this);saveMindDraft()">A moment of peace</button><button class="tag" onclick="tog(this);saveMindDraft()">My support system</button><button class="tag" onclick="tog(this);saveMindDraft()">Small wins</button><button class="tag" onclick="tog(this);saveMindDraft()">My mindset</button><button class="tag" onclick="tog(this);saveMindDraft()">Being present</button><button class="tag" onclick="tog(this);saveMindDraft()">My health journey</button><button class="tag" onclick="tog(this);saveMindDraft()">Rest I got</button><button class="tag" onclick="tog(this);saveMindDraft()">My home</button>
-          </div>
-          <textarea id="gratitude-note" rows="2" placeholder="Write what you're grateful for…" oninput="saveMindDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
-        </div>
-        <div style="text-align:center;margin-top:14px;">
-          <button onclick="saveMind()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
-        </div>
-        <div class="toast-msg" id="mt">Saved!</div>
-      </div><!-- mind-checkin-body -->
-    </div>
-
     <!-- Daily Reflection Prompt -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div class="card-title" style="margin:0;">💭 Today's reflection prompt</div>
-        <button onclick="newReflectionPrompt()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Different prompt</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="newReflectionPrompt()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Different prompt</button>
+          <button onclick="toggleReflectionLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
+        </div>
       </div>
       <div id="reflection-prompt" style="font-size:14px;color:var(--text);line-height:1.5;padding:4px 0 12px;font-style:italic;"></div>
       <textarea id="reflection-answer" rows="3" placeholder="Write your thoughts here..."></textarea>
@@ -3482,17 +3474,24 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <a href="javascript:void(0)" onclick="openDayOne()" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">📖 Open Day One</a>
         <a href="javascript:void(0)" onclick="window.location.href='shortcuts://run-shortcut?name=OpenWellspoken'" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">🗣 Wellspoken</a>
       </div>
+      <div id="reflection-log-daily" style="display:none;margin-top:12px;border-top:0.5px solid var(--border);padding-top:10px;"><div class="log-empty">No reflections yet.</div></div>
     </div>
 
-    <!-- Recent reflections log -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div class="card-title" style="margin:0;">Recent reflections</div>
+    <!-- Daily Affirmation -->
+    <div class="card" style="background:linear-gradient(135deg,rgba(155,142,196,0.15),rgba(232,168,124,0.1));">
+      <div class="card-title">✨ Today's affirmation</div>
+      <div id="daily-affirmation" style="font-size:15px;line-height:1.6;color:var(--text);font-style:italic;padding:8px 0;min-height:48px;">"Loading your affirmation..."</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+        <button onclick="generateAffirmation()" style="padding:7px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);">✨ New affirmation</button>
+        <div class="tog" id="aff-saved" onclick="ts('aff-saved')" style="width:40px;height:22px;"><div class="tok"></div></div>
       </div>
-      <div id="reflection-log-daily" style="margin-top:8px;"><div class="log-empty">No reflections yet.</div></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;">Toggle to save as a favourite</div>
     </div>
+  </div><!-- close vc-mind-daily -->
 
-    <!-- Weekly Intention -->
+
+  <div class="view-content" id="vc-mind-weekly">
+    <div class="section-label">Mind · this week</div>
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div class="card-title" style="margin:0;">🎯 Weekly intention word</div>
@@ -3500,12 +3499,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <button onclick="editWeekIntention()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Edit</button>
         </div>
       </div>
-      <!-- Saved state — shown when word is set -->
       <div id="intention-set-view" style="display:none;text-align:center;padding:10px 0 6px;">
         <div id="week-intention-display" style="font-size:40px;font-weight:700;color:var(--accent);letter-spacing:-1px;"></div>
         <div id="intention-set-meta" style="font-size:11px;color:var(--muted);margin-top:4px;"></div>
       </div>
-      <!-- Input state — shown when no word set or editing -->
       <div id="intention-input-view">
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">One word to carry through this week · resets every Monday</div>
         <input type="text" id="week-intention-input" placeholder="e.g. Strength · Patience · Joy · Glow · Bold">
@@ -3526,15 +3523,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="btn-primary" style="margin-top:12px;" onclick="saveWeekIntention()">Set this week's word</button>
         <div class="toast-msg" id="wi-toast">Intention set! ✨</div>
       </div>
-    </div>
-  </div><!-- close vc-mind-daily -->
-
-
-  <div class="view-content" id="vc-mind-weekly">
-    <div class="section-label">Mind · this week</div>
-    <div class="card">
-      <div class="card-title">🎯 This week's intention</div>
-      <div id="intention-weekly"><div class="log-empty">No intention set this week.</div></div>
     </div>
     <div class="card">
       <div class="card-title">💭 Reflections this week</div>
@@ -5503,6 +5491,12 @@ async function openPastMindLog(){
 function closeMoodLogOverlay(){
   closeOverlay('mood-log-overlay');
   
+}
+
+function toggleReflectionLog(){
+  const el = document.getElementById('reflection-log-daily');
+  if(!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
 function toggleActivation(){
@@ -17339,6 +17333,13 @@ async function weeklyMindInsight(){
         <div>
           <div style="font-size:12px;font-weight:500;color:var(--text);font-family:var(--serif);">Weekly mind reflection</div>
           <div style="font-size:10px;color:var(--muted);">Mind → Weekly tab → Weekly insight</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);">
+        <i class="ti ti-target" style="font-size:16px;color:var(--accent);flex-shrink:0;"></i>
+        <div>
+          <div style="font-size:12px;font-weight:500;color:var(--text);font-family:var(--serif);">Set weekly intention word</div>
+          <div style="font-size:10px;color:var(--muted);">Mind → Weekly tab → Intention word</div>
         </div>
       </div>
     </div>
