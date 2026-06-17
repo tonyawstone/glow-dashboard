@@ -61,6 +61,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .profile-menu-signout{color:var(--muted);font-size:13px;}
 .profile-menu-signout i{color:var(--muted);}
 .compact-nav{display:grid;grid-template-columns:repeat(8,1fr);background:var(--cream);border-bottom:0.5px solid var(--border);border-top:0.5px solid var(--border);}
+.compact-header.today .compact-nav{display:none;}
 .compact-nav .tnav{font-size:10px;padding:8px 2px 7px;gap:2px;}
 .compact-nav .tnav i{font-size:18px;}
 
@@ -3986,8 +3987,9 @@ async function tab(id){
   document.getElementById('hero-wrap').style.display = isToday ? '' : 'none';
   document.getElementById('pillar-nav').style.display = isToday ? '' : 'none';
   const compactHeader = document.getElementById('compact-header');
-  if(isToday){ compactHeader.classList.remove('on'); }
-  else { compactHeader.classList.add('on'); document.getElementById('compact-page-title').textContent = PILLAR_TITLES[id]||''; }
+  compactHeader.classList.add('on');
+  if(isToday){ compactHeader.classList.add('today'); document.getElementById('compact-page-title').textContent = ''; }
+  else { compactHeader.classList.remove('today'); document.getElementById('compact-page-title').textContent = PILLAR_TITLES[id]||''; }
 
   // Update bottom nav — Home active on Today, no bnav active on pillar pages
   document.querySelectorAll('.bnav').forEach(b=>b.classList.remove('on'));
