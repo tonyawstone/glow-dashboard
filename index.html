@@ -2359,35 +2359,46 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <button onclick="openWaterLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
       </div>
-      <div style="text-align:center;padding:10px 0 6px;">
-        <div style="font-size:42px;font-weight:700;color:#5B9EC9;" id="water-oz-total">0</div>
-        <div style="font-size:13px;color:var(--muted);">oz today</div>
-        <div style="margin-top:10px;background:rgba(0,0,0,0.06);border-radius:20px;height:10px;overflow:hidden;">
-          <div id="water-goal-bar" style="height:10px;border-radius:20px;background:#5B9EC9;transition:width 0.4s ease;width:0%;"></div>
+      <!-- Two-column: ring left, buttons right -->
+      <div style="display:flex;gap:14px;align-items:center;margin-bottom:10px;">
+        <div style="flex-shrink:0;text-align:center;">
+          <svg viewBox="0 0 100 100" width="110" height="110" style="display:block;">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="8"/>
+            <circle id="water-ring-arc" cx="50" cy="50" r="42" fill="none" stroke="#5B9EC9" stroke-width="8" stroke-linecap="round" transform="rotate(-90 50 50)" stroke-dasharray="263.9 263.9" stroke-dashoffset="263.9" style="transition:stroke-dashoffset 0.4s ease,stroke 0.4s ease;"/>
+            <text id="water-ring-text" x="50" y="48" text-anchor="middle" font-size="22" font-weight="700" fill="#5B9EC9" font-family="sans-serif">0</text>
+            <text x="50" y="62" text-anchor="middle" font-size="9" fill="#9B8E84" font-family="sans-serif">oz</text>
+          </svg>
+          <div id="water-goal-label" style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;text-align:center;">0 / 64 oz<br>64 oz to go</div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:5px;" id="water-goal-label">Goal: 64 oz · recommended on Zepbound + diuretics</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px;">
+          <button onclick="addWater(8)" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);cursor:pointer;font-family:var(--sans);width:100%;box-sizing:border-box;">
+            <span style="font-size:16px;">🥛</span><span style="font-size:13px;color:var(--text);">Glass</span><span style="font-size:11px;color:var(--muted);margin-left:auto;">8 oz</span>
+          </button>
+          <button onclick="addWater(12)" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);cursor:pointer;font-family:var(--sans);width:100%;box-sizing:border-box;">
+            <span style="font-size:16px;">☕</span><span style="font-size:13px;color:var(--text);">Mug</span><span style="font-size:11px;color:var(--muted);margin-left:auto;">12 oz</span>
+          </button>
+          <button onclick="addWater(16)" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);cursor:pointer;font-family:var(--sans);width:100%;box-sizing:border-box;">
+            <span style="font-size:16px;">🍶</span><span style="font-size:13px;color:var(--text);">Bottle</span><span style="font-size:11px;color:var(--muted);margin-left:auto;">16 oz</span>
+          </button>
+          <button onclick="showWaterCustom()" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:0.5px dashed var(--border);background:transparent;cursor:pointer;font-family:var(--sans);width:100%;box-sizing:border-box;">
+            <span style="font-size:16px;color:var(--muted);">＋</span><span style="font-size:13px;color:var(--muted);">Custom</span>
+          </button>
+        </div>
       </div>
-      <div style="font-size:12px;font-weight:500;color:var(--text);margin:8px 0 6px;">Tap to add a drink:</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="water-container-buttons">
-        <button class="water-container-btn" onclick="addWater(8)"><div style="font-size:22px;">🥛</div><div class="water-btn-label">Glass</div><div class="water-btn-oz">8 oz</div></button>
-        <button class="water-container-btn" onclick="addWater(12)"><div style="font-size:22px;">☕</div><div class="water-btn-label">Mug</div><div class="water-btn-oz">12 oz</div></button>
-        <button class="water-container-btn" onclick="addWater(16)"><div style="font-size:22px;">🍶</div><div class="water-btn-label">Bottle (sm)</div><div class="water-btn-oz">16 oz</div></button>
-        <button class="water-container-btn" onclick="addWater(20)"><div style="font-size:22px;">💧</div><div class="water-btn-label">Tumbler</div><div class="water-btn-oz">20 oz</div></button>
-        <button class="water-container-btn" onclick="addWater(24)"><div style="font-size:22px;">🧴</div><div class="water-btn-label">Bottle (lg)</div><div class="water-btn-oz">24 oz</div></button>
-        <button class="water-container-btn" onclick="addWater(32)"><div style="font-size:22px;">🫙</div><div class="water-btn-label">Quart</div><div class="water-btn-oz">32 oz</div></button>
+      <!-- Custom input row (hidden until tapped) -->
+      <div id="water-custom-row" style="display:none;gap:8px;align-items:center;margin-bottom:8px;">
+        <input type="number" id="water-custom-oz" placeholder="oz" min="1" max="200" style="flex:1;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;background:var(--cream);color:var(--text);">
+        <button onclick="addWaterCustom()" style="padding:8px 16px;border-radius:8px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;cursor:pointer;font-family:var(--sans);">Add</button>
+        <button onclick="document.getElementById('water-custom-row').style.display='none'" style="padding:6px 8px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;">×</button>
       </div>
-      <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
-        <input type="number" id="water-custom-oz" placeholder="Custom oz" min="1" max="64" style="flex:1;padding:8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;">
-        <button onclick="addWaterCustom()" style="padding:8px 14px;border-radius:8px;border:0.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans);">Add</button>
-        <button onclick="undoWater()" style="padding:8px 14px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);">Undo</button>
+      <!-- Recent logs + undo -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;min-height:18px;">
+        <div id="water-entries-today" style="font-size:11px;color:var(--muted);flex:1;"></div>
+        <button onclick="undoWater()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);flex-shrink:0;margin-left:8px;">Undo</button>
       </div>
-      <div id="water-entries-today" style="margin-top:8px;font-size:12px;color:var(--muted);min-height:20px;"></div>
-      <textarea id="water-notes" rows="1" placeholder="Notes: gatorade, tea, electrolytes..." style="margin-top:8px;font-size:12px;width:100%;box-sizing:border-box;"></textarea>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
-        <div style="font-size:12px;color:var(--muted);">Logging for:</div>
-        <input type="date" id="water-log-date" style="padding:4px 8px;font-size:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--warm);color:var(--text);">
-      </div>
-      <button class="btn-primary" style="margin-top:8px;" onclick="saveWaterIntake()">💾 Save & sync</button>
+      <!-- Notes -->
+      <textarea id="water-notes" rows="1" placeholder="Notes: Gatorade, tea, electrolytes…" style="margin-top:8px;font-size:12px;width:100%;box-sizing:border-box;padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;"></textarea>
+      <input type="date" id="water-log-date" style="display:none;">
       <div class="toast-msg" id="wt">Saved!</div>
     </div>
 
@@ -12959,6 +12970,11 @@ function addWaterCustom(){
   if(!oz||oz<1||oz>128) return;
   addWater(oz, `${oz} oz`);
   input.value='';
+  document.getElementById('water-custom-row').style.display='none';
+}
+function showWaterCustom(){
+  const el=document.getElementById('water-custom-row');
+  if(el){el.style.display='flex';el.querySelector('input')?.focus();}
 }
 
 function undoWater(){
@@ -12980,14 +12996,17 @@ function autoSaveWater(){
 
 function updateWaterDisplay(){
   const ozEl = document.getElementById('water-oz-total');
-  const barEl = document.getElementById('water-goal-bar');
   const labelEl = document.getElementById('water-goal-label');
   const entriesEl = document.getElementById('water-entries-today');
 
   if(ozEl) ozEl.textContent = todayWaterOz;
-  const pct = Math.min(100,(todayWaterOz/WATER_GOAL_OZ)*100);
-  if(barEl){ barEl.style.width=pct+'%'; barEl.style.background=todayWaterOz>=WATER_GOAL_OZ?'#27500A':todayWaterOz>=60?'#6B9E78':todayWaterOz>=40?'#E8A87C':'#5B9EC9'; }
-  if(labelEl) labelEl.textContent = todayWaterOz>=WATER_GOAL_OZ ? `✅ Goal reached! ${todayWaterOz}/${WATER_GOAL_OZ} oz` : `${todayWaterOz}/${WATER_GOAL_OZ} oz · ${WATER_GOAL_OZ-todayWaterOz} oz to go`;
+  const color = todayWaterOz>=WATER_GOAL_OZ?'#27500A':todayWaterOz>=60?'#6B9E78':todayWaterOz>=40?'#E8A87C':'#5B9EC9';
+  const C = 263.9;
+  const arcEl = document.getElementById('water-ring-arc');
+  const ringTextEl = document.getElementById('water-ring-text');
+  if(arcEl){ arcEl.setAttribute('stroke-dashoffset', C*(1-Math.min(1,todayWaterOz/WATER_GOAL_OZ))); arcEl.setAttribute('stroke',color); }
+  if(ringTextEl){ ringTextEl.textContent=todayWaterOz; ringTextEl.setAttribute('fill',color); }
+  if(labelEl) labelEl.innerHTML = todayWaterOz>=WATER_GOAL_OZ ? `✅ Goal reached!<br>${todayWaterOz} / ${WATER_GOAL_OZ} oz` : `${todayWaterOz} / ${WATER_GOAL_OZ} oz<br>${WATER_GOAL_OZ-todayWaterOz} oz to go`;
   if(entriesEl && todayWaterEntries.length){
     entriesEl.innerHTML = todayWaterEntries.map(e=>`<span style="display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;background:rgba(91,158,201,0.12);border-radius:8px;font-size:11px;color:#5B9EC9;">${e.oz} oz${e.time?' · '+e.time:''}</span>`).join('');
   } else if(entriesEl){ entriesEl.innerHTML=''; }
