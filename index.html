@@ -435,6 +435,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .stars-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:0.5px solid var(--border);}
 .stars-row:first-child{border-top:none;}
 .stars-row-label{font-size:15px;color:var(--text);}
+.mind-slider-row{margin-bottom:14px;}
+.mind-slider{width:100%;-webkit-appearance:none;appearance:none;height:5px;border-radius:3px;background:var(--border);outline:none;cursor:pointer;display:block;margin:4px 0;}
+.mind-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--accent);box-shadow:0 1px 4px rgba(0,0,0,0.12);}
+.mind-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--accent);box-shadow:0 1px 4px rgba(0,0,0,0.12);}
+.mind-slider-ends{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px;}
 
 /* PRODUCT LIST */
 .product-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:0.5px solid var(--border);font-size:14px;}
@@ -3273,12 +3278,27 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <button class="tag" onclick="tog(this);saveMindDraft()">Motivated</button><button class="tag" onclick="tog(this);saveMindDraft()">Focused</button><button class="tag" onclick="tog(this);saveMindDraft()">Grateful</button><button class="tag" onclick="tog(this);saveMindDraft()">Grounded</button><button class="tag" onclick="tog(this);saveMindDraft()">In my power</button><button class="tag" onclick="tog(this);saveMindDraft()">Clear-headed</button><button class="tag" onclick="tog(this);saveMindDraft()">Overwhelmed</button><button class="tag" onclick="tog(this);saveMindDraft()">Anxious</button><button class="tag" onclick="tog(this);saveMindDraft()">Scattered</button><button class="tag" onclick="tog(this);saveMindDraft()">Restless</button>
           </div>
         </div>
-        <div style="margin-bottom:8px;"><button id="mind-ratings-btn" onclick="toggleMindRatings()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Rate your mind today</button></div>
-        <div id="mind-ratings-panel" style="display:none;border:0.5px solid var(--border);border-radius:10px;padding:0 12px;margin-bottom:12px;">
-          <div class="stars-row" style="margin-top:0;"><div class="stars-row-label">Energy</div><div class="stars" id="energy-stars"><span class="star" onclick="setStars('energy-stars',1)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',2)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',3)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',4)">&#x2605;</span><span class="star" onclick="setStars('energy-stars',5)">&#x2605;</span></div></div>
-          <div class="stars-row"><div class="stars-row-label">Confidence</div><div class="stars" id="conf-stars"><span class="star" onclick="setStars('conf-stars',1)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',2)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',3)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',4)">&#x2605;</span><span class="star" onclick="setStars('conf-stars',5)">&#x2605;</span></div></div>
-          <div class="stars-row"><div class="stars-row-label">Calm</div><div class="stars" id="stress-stars"><span class="star" onclick="setStars('stress-stars',1)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',2)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',3)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',4)">&#x2605;</span><span class="star" onclick="setStars('stress-stars',5)">&#x2605;</span></div></div>
-          <div class="stars-row"><div class="stars-row-label">Body image</div><div class="stars" id="body-image-stars"><span class="star" onclick="setStars('body-image-stars',1)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',2)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',3)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',4)">&#x2605;</span><span class="star" onclick="setStars('body-image-stars',5)">&#x2605;</span></div></div>
+        <div id="mind-ratings-panel" style="margin-bottom:14px;">
+          <div class="mind-slider-row">
+            <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">Energy</div>
+            <input type="range" id="mind-energy-slider" class="mind-slider" min="1" max="5" step="1" value="3" oninput="saveMindDraft()">
+            <div class="mind-slider-ends"><span>Drained</span><span>Steady</span><span>Energized</span></div>
+          </div>
+          <div class="mind-slider-row">
+            <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">Focus</div>
+            <input type="range" id="mind-focus-slider" class="mind-slider" min="1" max="5" step="1" value="3" oninput="saveMindDraft()">
+            <div class="mind-slider-ends"><span>Scattered</span><span>Present</span><span>Clear</span></div>
+          </div>
+          <div class="mind-slider-row">
+            <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">Calm</div>
+            <input type="range" id="mind-calm-slider" class="mind-slider" min="1" max="5" step="1" value="3" oninput="saveMindDraft()">
+            <div class="mind-slider-ends"><span>Tense</span><span>Settled</span><span>Peaceful</span></div>
+          </div>
+          <div class="mind-slider-row" style="margin-bottom:0;">
+            <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">Confidence</div>
+            <input type="range" id="mind-conf-slider" class="mind-slider" min="1" max="5" step="1" value="3" oninput="saveMindDraft()">
+            <div class="mind-slider-ends"><span>Unsure</span><span>Grounded</span><span>Strong</span></div>
+          </div>
         </div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">One win today</div>
         <textarea id="win-note" rows="2" placeholder="Big or small — new low, wore something I love…" oninput="saveMindDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
@@ -4214,6 +4234,9 @@ function fmtOutfitDate(d){
 }
 function setStars(id,n){document.getElementById(id).querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n)); saveMindDraft();}
 function getStars(id){return document.getElementById(id).querySelectorAll('.on').length;}
+function getSlider(id){const el=document.getElementById(id);return el?parseInt(el.value):3;}
+function setSlider(id,v){const el=document.getElementById(id);if(el&&v)el.value=v;}
+function sliderLabel(v,lo,mid,hi){const n=parseInt(v)||3;return n<=2?lo:n>=4?hi:mid;}
 function gT(id){return Array.from(document.getElementById(id).querySelectorAll('.on')).map(b=>b.textContent.trim());}
 function showToast(msg,duration=2400){const t=document.getElementById('glow-toast');t.textContent=msg;t.style.display='block';clearTimeout(t._tid);t._tid=setTimeout(()=>t.style.display='none',duration);}
 function toast(id){const t=document.getElementById(id);t.style.display='block';setTimeout(()=>t.style.display='none',2400);}
@@ -5480,7 +5503,7 @@ async function openPastMindLog(){
       html+='<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
         +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'+e.date+'</div>'
         +vibeFmt
-        +'<div style="margin-top:4px;">'+stars('Energy',e.energy)+stars('Confidence',e.conf)+stars('Calm',e.stress)+stars('Body',e.bodyImage)+'</div>'
+        +(e.energy||e.stress||e.conf||e.focus?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;"><span style="font-size:10px;color:var(--muted);">Energy · ${sliderLabel(e.energy,'Drained','Steady','Energized')}</span><span style="font-size:10px;color:var(--muted);">  Focus · ${sliderLabel(e.focus,'Scattered','Present','Clear')}</span><span style="font-size:10px;color:var(--muted);">  Calm · ${sliderLabel(e.stress,'Tense','Settled','Peaceful')}</span><span style="font-size:10px;color:var(--muted);">  Confidence · ${sliderLabel(e.conf,'Unsure','Grounded','Strong')}</span></div>`:'')
         +winFmt+gratFmt
         +'</div>';
     }
@@ -8468,17 +8491,17 @@ async function restoreBodyCheckinState(){
 
 function soloMindFace(btn){document.getElementById('mind-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveMindDraft();}
 function toggleMindState(){const p=document.getElementById('mind-state-panel'),b=document.getElementById('mind-state-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– What\'s your mental state?':'+ What\'s your mental state?';}
-function toggleMindRatings(){const p=document.getElementById('mind-ratings-panel'),b=document.getElementById('mind-ratings-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Rate your mind today':'+ Rate your mind today';}
+function toggleMindRatings(){}
 function toggleMindGratitude(){const p=document.getElementById('mind-gratitude-panel'),b=document.getElementById('mind-gratitude-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Gratitude · (select 3)':'+ Gratitude · (select 3)';}
 
 function saveMindDraft(){
   savePillarDraft('mind',{
     mindFace: document.getElementById('mind-face-tags')?.querySelector('.on')?.dataset.mind||'',
     vibe: gT('vibe-tags'),
-    energy: getStars('energy-stars'),
-    conf: getStars('conf-stars'),
-    stress: getStars('stress-stars'),
-    bodyImage: getStars('body-image-stars'),
+    energy: getSlider('mind-energy-slider'),
+    focus: getSlider('mind-focus-slider'),
+    stress: getSlider('mind-calm-slider'),
+    conf: getSlider('mind-conf-slider'),
     win: document.getElementById('win-note')?.value||'',
     gratitudeChips: gT('mind-gratitude-tags'),
     gratitudeNote: document.getElementById('gratitude-note')?.value||'',
@@ -8493,13 +8516,10 @@ async function restoreMindDraft(){
     if(draft.date !== new Date().toDateString()){ localStorage.removeItem('glowMindDraft'); return; }
     if(draft.mindFace){const b=document.getElementById('mind-face-tags')?.querySelector('[data-mind="'+draft.mindFace+'"]');if(b)soloMindFace(b);}
     if(draft.vibe?.length){restoreTags('vibe-tags',draft.vibe);const p=document.getElementById('mind-state-panel');if(p&&p.style.display==='none')toggleMindState();}
-    if(draft.energy||draft.conf||draft.stress||draft.bodyImage){
-      if(draft.energy)setStars('energy-stars',draft.energy);
-      if(draft.conf)setStars('conf-stars',draft.conf);
-      if(draft.stress)setStars('stress-stars',draft.stress);
-      if(draft.bodyImage)setStars('body-image-stars',draft.bodyImage);
-      const p=document.getElementById('mind-ratings-panel');if(p&&p.style.display==='none')toggleMindRatings();
-    }
+    setSlider('mind-energy-slider',draft.energy);
+    setSlider('mind-focus-slider',draft.focus);
+    setSlider('mind-calm-slider',draft.stress);
+    setSlider('mind-conf-slider',draft.conf);
     if(draft.win && document.getElementById('win-note')) document.getElementById('win-note').value=draft.win;
     if(draft.gratitudeChips?.length||draft.gratitudeNote){
       if(draft.gratitudeChips?.length)restoreTags('mind-gratitude-tags',draft.gratitudeChips);
@@ -8526,7 +8546,8 @@ function showMindCheckinSaved(e){
   const warmChip = (v) => v?`<span style="background:var(--warm);color:var(--muted);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`:'';
   const stars = n => n?`<span style="color:var(--accent);font-size:11px;">${'★'.repeat(n)}</span>`:'';
   const editPill = `<button onclick="editMindCheckin()" style="padding:2px 10px;border-radius:10px;border:1px dashed var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin:2px 0 0 0;">+ edit</button>`;
-  const ratingHtml = (e.energy||e.conf||e.stress||e.bodyImage)?`<div style="display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--muted);margin-top:6px;">${e.energy?`<span>Energy ${stars(e.energy)}</span>`:''}${e.conf?`<span>Confidence ${stars(e.conf)}</span>`:''}${e.stress?`<span>Calm ${stars(e.stress)}</span>`:''}${e.bodyImage?`<span>Body image ${stars(e.bodyImage)}</span>`:''}` + '</div>' : '';
+  const slLbl = (v,lo,mid,hi) => { const n=parseInt(v)||3; return n<=2?lo:n>=4?hi:mid; };
+  const ratingHtml = `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;"><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Energy · ${slLbl(e.energy,'Drained','Steady','Energized')}</span><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Focus · ${slLbl(e.focus,'Scattered','Present','Clear')}</span><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Calm · ${slLbl(e.stress,'Tense','Settled','Peaceful')}</span><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Confidence · ${slLbl(e.conf,'Unsure','Grounded','Strong')}</span></div>`;
   const winHtml = e.win?`<div style="font-family:var(--serif);font-size:13px;color:var(--muted);font-style:italic;margin-top:8px;">Win: ${e.win}</div>`:'';
   const gratitudeText = e.gratitudeNote||(e.gratitude||'');
   const gratitudeHtml = (e.gratitudeChips?.length||gratitudeText)?`<div style="font-size:11px;color:var(--muted);margin-top:6px;">${vibeChips(e.gratitudeChips)}${gratitudeText?`<span style="font-style:italic;"> ${gratitudeText}</span>`:''}</div>`:'';
@@ -8549,13 +8570,10 @@ function editMindCheckin(){
   if(!state) return;
   if(state.mindFace){const b=document.getElementById('mind-face-tags')?.querySelector('[data-mind="'+state.mindFace+'"]');if(b)soloMindFace(b);}
   if(state.vibe?.length){restoreTags('vibe-tags',state.vibe);const p=document.getElementById('mind-state-panel');if(p&&p.style.display==='none')toggleMindState();}
-  if(state.energy||state.conf||state.stress||state.bodyImage){
-    if(state.energy)setStars('energy-stars',state.energy);
-    if(state.conf)setStars('conf-stars',state.conf);
-    if(state.stress)setStars('stress-stars',state.stress);
-    if(state.bodyImage)setStars('body-image-stars',state.bodyImage);
-    const p=document.getElementById('mind-ratings-panel');if(p&&p.style.display==='none')toggleMindRatings();
-  }
+  setSlider('mind-energy-slider',state.energy);
+  setSlider('mind-focus-slider',state.focus);
+  setSlider('mind-calm-slider',state.stress);
+  setSlider('mind-conf-slider',state.conf);
   if(state.win && document.getElementById('win-note')) document.getElementById('win-note').value=state.win;
   if(state.gratitudeChips?.length||state.gratitudeNote){
     if(state.gratitudeChips?.length)restoreTags('mind-gratitude-tags',state.gratitudeChips);
@@ -9629,16 +9647,16 @@ async function saveStyleCheckin(){
 async function saveMind(){
   const mindFace=document.getElementById('mind-face-tags')?.querySelector('.on')?.dataset.mind||'';
   const vibe=gT('vibe-tags');
-  const energy=getStars('energy-stars');
-  const conf=getStars('conf-stars');
-  const stress=getStars('stress-stars');
-  const bodyImage=getStars('body-image-stars');
+  const energy=getSlider('mind-energy-slider');
+  const focus=getSlider('mind-focus-slider');
+  const stress=getSlider('mind-calm-slider');
+  const conf=getSlider('mind-conf-slider');
   const win=document.getElementById('win-note')?.value.trim()||'';
   const gratitudeChips=gT('mind-gratitude-tags');
   const gratitudeNote=document.getElementById('gratitude-note')?.value.trim()||'';
-  if(!mindFace && !vibe.length && !energy && !conf && !stress && !bodyImage && !win && !gratitudeChips.length && !gratitudeNote){ showToast('Add at least one entry first'); return; }
+  if(!mindFace && !vibe.length && !win && !gratitudeChips.length && !gratitudeNote){ showToast('Add at least one entry first'); return; }
   const dateVal=document.getElementById('mind-log-date')?.value||logicalDayStr();
-  const mindEntry={mindFace,vibe,energy,conf,stress,bodyImage,win,gratitudeChips,gratitudeNote,date:dateVal};
+  const mindEntry={mindFace,vibe,energy,focus,stress,conf,win,gratitudeChips,gratitudeNote,date:dateVal};
   try {
     await dbAdd('minds',mindEntry);
     syncToBlob('minds');
@@ -9649,9 +9667,8 @@ async function saveMind(){
     document.getElementById('mind-gratitude-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     if(document.getElementById('win-note')) document.getElementById('win-note').value='';
     if(document.getElementById('gratitude-note')) document.getElementById('gratitude-note').value='';
-    setStars('energy-stars',0);setStars('conf-stars',0);setStars('stress-stars',0);setStars('body-image-stars',0);
+    setSlider('mind-energy-slider',3);setSlider('mind-focus-slider',3);setSlider('mind-calm-slider',3);setSlider('mind-conf-slider',3);
     const sP=document.getElementById('mind-state-panel');if(sP&&sP.style.display!=='none')toggleMindState();
-    const rP=document.getElementById('mind-ratings-panel');if(rP&&rP.style.display!=='none')toggleMindRatings();
     const gP=document.getElementById('mind-gratitude-panel');if(gP&&gP.style.display!=='none')toggleMindGratitude();
     localStorage.setItem('glowMindCheckinState', JSON.stringify({...mindEntry, savedAt: Date.now()}));
     toast('mt');
