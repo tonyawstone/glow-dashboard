@@ -1871,6 +1871,124 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
+    <!-- Zepbound weekly dose -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="card-title" style="margin:0;">💉 Zepbound · weekly dose</div>
+        <button onclick="openInjectionNotes()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past notes</button>
+      </div>
+      <div id="zep-dose-status" style="margin-top:10px;"></div>
+
+      <!-- Ready to log slider -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding:10px 14px;border-radius:12px;background:var(--warm);">
+        <div style="font-size:13px;color:var(--text);">Ready to log this week's injection</div>
+        <label style="position:relative;display:inline-block;width:44px;height:26px;flex-shrink:0;">
+          <input type="checkbox" id="zep-ready-toggle" onchange="toggleZepForm()" style="opacity:0;width:0;height:0;position:absolute;">
+          <span id="zep-ready-slider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:26px;transition:0.2s;">
+            <span style="position:absolute;content:'';height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.2s;" id="zep-slider-knob"></span>
+          </span>
+        </label>
+      </div>
+
+      <!-- Collapsible form — hidden until slider on -->
+      <div id="zep-form-body" style="display:none;margin-top:12px;">
+
+        <!-- Date -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="font-size:12px;color:var(--muted);font-weight:500;min-width:56px;">Date</div>
+          <input type="date" id="zep-injection-date" style="flex:1;padding:7px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:10px;background:#fff;color:var(--text);">
+        </div>
+
+        <!-- Dosage — .tag style matching Today card exactly -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <div style="font-family:var(--serif);font-size:15px;font-weight:400;color:var(--text);">Dosage</div>
+          <div style="display:flex;gap:6px;" id="zep-dose-buttons">
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="selectZepDose(2.5,this)">2.5 mg</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="selectZepDose(5,this)">5 mg</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="selectZepDose(7.5,this)">7.5 mg</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="selectZepDose(10,this)">10 mg</button>
+          </div>
+        </div>
+
+        <!-- Injection site — equal square tiles side by side -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+          <label id="zep-site-tile" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:14px 8px;border-radius:12px;background:var(--warm);border:1.5px solid var(--border);text-align:center;aspect-ratio:1;transition:border-color 0.15s,background 0.15s;">
+            <input type="checkbox" id="zep-new-site-check" onchange="toggleNewSiteSelection()" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">
+            <div style="font-size:12px;font-weight:500;color:var(--text);line-height:1.4;">Select new injection site for today</div>
+            <div style="font-size:10px;color:var(--muted);">Previous site marked 📍</div>
+            <div id="zep-site-selected-label" style="font-size:11px;color:#27500A;font-weight:500;"></div>
+          </label>
+          <div style="border-radius:12px;border:1.5px solid var(--border);background:#fff;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;padding:34px;">
+            <div id="injection-site-diagram" style="width:100%;">
+              <svg width="100%" viewBox="215 5 260 365" xmlns="http://www.w3.org/2000/svg">
+                <style>.site-zone{cursor:pointer;}.site-zone:hover ellipse{opacity:0.8;}.szl{font-family:sans-serif;font-size:14px;font-weight:700;fill:white;pointer-events:none;}.szs{font-family:sans-serif;font-size:11px;fill:rgba(255,255,255,0.9);pointer-events:none;}</style>
+                <rect x="230" y="10" width="220" height="220" rx="18" fill="#E8C99A"/>
+                <rect x="230" y="200" width="96" height="148" rx="36" fill="#E8C99A"/>
+                <rect x="354" y="200" width="96" height="148" rx="36" fill="#E8C99A"/>
+                <rect x="326" y="212" width="28" height="140" fill="#fff"/>
+                <line x1="340" y1="28" x2="340" y2="330" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
+                <line x1="242" y1="120" x2="438" y2="120" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
+                <g class="site-zone" id="site-upper-left" onclick="selectInjectionSite('upper-left')"><ellipse cx="283" cy="78" rx="50" ry="36" fill="#6B9E78"/><text x="283" y="74" text-anchor="middle" class="szl">Upper</text><text x="283" y="90" text-anchor="middle" class="szs">Left</text></g>
+                <g class="site-zone" id="site-upper-right" onclick="selectInjectionSite('upper-right')"><ellipse cx="397" cy="78" rx="50" ry="36" fill="#6B9E78"/><text x="397" y="74" text-anchor="middle" class="szl">Upper</text><text x="397" y="90" text-anchor="middle" class="szs">Right</text></g>
+                <g class="site-zone" id="site-lower-left" onclick="selectInjectionSite('lower-left')"><ellipse cx="283" cy="162" rx="50" ry="36" fill="#6B9E78"/><text x="283" y="158" text-anchor="middle" class="szl">Lower</text><text x="283" y="174" text-anchor="middle" class="szs">Left</text></g>
+                <g class="site-zone" id="site-lower-right" onclick="selectInjectionSite('lower-right')"><ellipse cx="397" cy="162" rx="50" ry="36" fill="#6B9E78"/><text x="397" y="158" text-anchor="middle" class="szl">Lower</text><text x="397" y="174" text-anchor="middle" class="szs">Right</text></g>
+                <ellipse cx="340" cy="120" rx="7" ry="5" fill="#D4A870"/><ellipse cx="340" cy="120" rx="4" ry="3" fill="#C49060"/>
+                <g class="site-zone" id="site-left-hip" onclick="selectInjectionSite('left-hip')"><ellipse cx="268" cy="286" rx="50" ry="38" fill="#6B9E78"/><text x="268" y="282" text-anchor="middle" class="szl">Left</text><text x="268" y="298" text-anchor="middle" class="szs">Hip</text></g>
+                <g class="site-zone" id="site-right-hip" onclick="selectInjectionSite('right-hip')"><ellipse cx="412" cy="286" rx="50" ry="38" fill="#6B9E78"/><text x="412" y="282" text-anchor="middle" class="szl">Right</text><text x="412" y="298" text-anchor="middle" class="szs">Hip</text></g>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div id="injection-site-history" style="display:none;"></div>
+        <div id="new-site-ready-btn" style="display:none;"></div>
+        <div id="injection-site-selector" style="display:none;"></div>
+        <div id="injection-site-status" style="display:none;"></div>
+
+        <!-- How did it feel — serif title, faces + pill button, chips hidden until tapped -->
+        <div style="margin-bottom:10px;">
+          <div style="font-family:var(--serif);font-size:15px;font-weight:400;color:var(--text);margin-bottom:8px;">How did it feel?</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;" id="zep-face-row">
+            <button data-zepface="1" onclick="selectZepFace(1,this)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9 18c1-2 7-2 8 0"/></svg>
+            </button>
+            <button data-zepface="2" onclick="selectZepFace(2,this)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17.5c1-1.5 5.5-1.5 7 0"/></svg>
+            </button>
+            <button data-zepface="3" onclick="selectZepFace(3,this)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16.5h7"/></svg>
+            </button>
+            <button data-zepface="4" onclick="selectZepFace(4,this)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 15.5c1 1.5 5.5 1.5 7 0"/></svg>
+            </button>
+            <button data-zepface="5" onclick="selectZepFace(5,this)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9 15c1 2.5 7 2.5 8 0"/></svg>
+            </button>
+            <button onclick="toggleZepChips()" id="zep-add-feelings-btn" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">+ Add feelings</button>
+          </div>
+          <!-- All chips — hidden until button tapped; only selected ones visible after Done -->
+          <div id="zep-sensation-chips" class="tags" style="gap:5px;display:none;margin-bottom:8px;">
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Felt nothing</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Slight sting</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Burning</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Bruising after</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Itchy after</button>
+            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Lump/bump</button>
+          </div>
+          <!-- Selected chips summary — shown after Done, hidden while editing -->
+          <div id="zep-chips-summary" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:4px;"></div>
+        </div>
+
+        <!-- Notes -->
+        <textarea id="injection-notes" rows="2" placeholder="Anything notable — hunger levels, energy…" style="width:100%;padding:8px 10px;border-radius:10px;border:0.5px solid var(--border);font-size:13px;font-family:var(--sans);background:#fff;color:var(--text);resize:vertical;box-sizing:border-box;margin-bottom:10px;"></textarea>
+
+        <!-- Save — matches Today card Save button exactly -->
+        <div style="display:flex;justify-content:center;margin-top:4px;">
+          <button onclick="saveZepInjection()" style="padding:6px 24px;border-radius:20px;background:var(--accent);border:none;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Save</button>
+        </div>
+        <div class="toast-msg" id="zep-toast">💉 Saved!</div>
+      </div>
+    </div>
+
     <!-- Exercise check-in — collapsible -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
@@ -2281,124 +2399,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button onclick="openCoachHistory('Health')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:4px 0 0;font-family:var(--sans);">Past conversations →</button>
     </div>
 
-
-    <!-- Zepbound -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div class="card-title" style="margin:0;">💉 Zepbound · weekly dose</div>
-        <button onclick="openInjectionNotes()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past notes</button>
-      </div>
-      <div id="zep-dose-status" style="margin-top:10px;"></div>
-
-      <!-- Ready to log slider -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding:10px 14px;border-radius:12px;background:var(--warm);">
-        <div style="font-size:13px;color:var(--text);">Ready to log this week's injection</div>
-        <label style="position:relative;display:inline-block;width:44px;height:26px;flex-shrink:0;">
-          <input type="checkbox" id="zep-ready-toggle" onchange="toggleZepForm()" style="opacity:0;width:0;height:0;position:absolute;">
-          <span id="zep-ready-slider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:26px;transition:0.2s;">
-            <span style="position:absolute;content:'';height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.2s;" id="zep-slider-knob"></span>
-          </span>
-        </label>
-      </div>
-
-      <!-- Collapsible form — hidden until slider on -->
-      <div id="zep-form-body" style="display:none;margin-top:12px;">
-
-        <!-- Date -->
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-          <div style="font-size:12px;color:var(--muted);font-weight:500;min-width:56px;">Date</div>
-          <input type="date" id="zep-injection-date" style="flex:1;padding:7px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:10px;background:#fff;color:var(--text);">
-        </div>
-
-        <!-- Dosage — .tag style matching Today card exactly -->
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-          <div style="font-family:var(--serif);font-size:15px;font-weight:400;color:var(--text);">Dosage</div>
-          <div style="display:flex;gap:6px;" id="zep-dose-buttons">
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="selectZepDose(2.5,this)">2.5 mg</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="selectZepDose(5,this)">5 mg</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="selectZepDose(7.5,this)">7.5 mg</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="selectZepDose(10,this)">10 mg</button>
-          </div>
-        </div>
-
-        <!-- Injection site — equal square tiles side by side -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
-          <label id="zep-site-tile" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:14px 8px;border-radius:12px;background:var(--warm);border:1.5px solid var(--border);text-align:center;aspect-ratio:1;transition:border-color 0.15s,background 0.15s;">
-            <input type="checkbox" id="zep-new-site-check" onchange="toggleNewSiteSelection()" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">
-            <div style="font-size:12px;font-weight:500;color:var(--text);line-height:1.4;">Select new injection site for today</div>
-            <div style="font-size:10px;color:var(--muted);">Previous site marked 📍</div>
-            <div id="zep-site-selected-label" style="font-size:11px;color:#27500A;font-weight:500;"></div>
-          </label>
-          <div style="border-radius:12px;border:1.5px solid var(--border);background:#fff;overflow:hidden;aspect-ratio:1;display:flex;align-items:center;justify-content:center;padding:34px;">
-            <div id="injection-site-diagram" style="width:100%;">
-              <svg width="100%" viewBox="215 5 260 365" xmlns="http://www.w3.org/2000/svg">
-                <style>.site-zone{cursor:pointer;}.site-zone:hover ellipse{opacity:0.8;}.szl{font-family:sans-serif;font-size:14px;font-weight:700;fill:white;pointer-events:none;}.szs{font-family:sans-serif;font-size:11px;fill:rgba(255,255,255,0.9);pointer-events:none;}</style>
-                <rect x="230" y="10" width="220" height="220" rx="18" fill="#E8C99A"/>
-                <rect x="230" y="200" width="96" height="148" rx="36" fill="#E8C99A"/>
-                <rect x="354" y="200" width="96" height="148" rx="36" fill="#E8C99A"/>
-                <rect x="326" y="212" width="28" height="140" fill="#fff"/>
-                <line x1="340" y1="28" x2="340" y2="330" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
-                <line x1="242" y1="120" x2="438" y2="120" stroke="#C0A878" stroke-width="0.5" stroke-dasharray="5,7" opacity="0.25"/>
-                <g class="site-zone" id="site-upper-left" onclick="selectInjectionSite('upper-left')"><ellipse cx="283" cy="78" rx="50" ry="36" fill="#6B9E78"/><text x="283" y="74" text-anchor="middle" class="szl">Upper</text><text x="283" y="90" text-anchor="middle" class="szs">Left</text></g>
-                <g class="site-zone" id="site-upper-right" onclick="selectInjectionSite('upper-right')"><ellipse cx="397" cy="78" rx="50" ry="36" fill="#6B9E78"/><text x="397" y="74" text-anchor="middle" class="szl">Upper</text><text x="397" y="90" text-anchor="middle" class="szs">Right</text></g>
-                <g class="site-zone" id="site-lower-left" onclick="selectInjectionSite('lower-left')"><ellipse cx="283" cy="162" rx="50" ry="36" fill="#6B9E78"/><text x="283" y="158" text-anchor="middle" class="szl">Lower</text><text x="283" y="174" text-anchor="middle" class="szs">Left</text></g>
-                <g class="site-zone" id="site-lower-right" onclick="selectInjectionSite('lower-right')"><ellipse cx="397" cy="162" rx="50" ry="36" fill="#6B9E78"/><text x="397" y="158" text-anchor="middle" class="szl">Lower</text><text x="397" y="174" text-anchor="middle" class="szs">Right</text></g>
-                <ellipse cx="340" cy="120" rx="7" ry="5" fill="#D4A870"/><ellipse cx="340" cy="120" rx="4" ry="3" fill="#C49060"/>
-                <g class="site-zone" id="site-left-hip" onclick="selectInjectionSite('left-hip')"><ellipse cx="268" cy="286" rx="50" ry="38" fill="#6B9E78"/><text x="268" y="282" text-anchor="middle" class="szl">Left</text><text x="268" y="298" text-anchor="middle" class="szs">Hip</text></g>
-                <g class="site-zone" id="site-right-hip" onclick="selectInjectionSite('right-hip')"><ellipse cx="412" cy="286" rx="50" ry="38" fill="#6B9E78"/><text x="412" y="282" text-anchor="middle" class="szl">Right</text><text x="412" y="298" text-anchor="middle" class="szs">Hip</text></g>
-              </svg>
-            </div>
-          </div>
-        </div>
-        <div id="injection-site-history" style="display:none;"></div>
-        <div id="new-site-ready-btn" style="display:none;"></div>
-        <div id="injection-site-selector" style="display:none;"></div>
-        <div id="injection-site-status" style="display:none;"></div>
-
-        <!-- How did it feel — serif title, faces + pill button, chips hidden until tapped -->
-        <div style="margin-bottom:10px;">
-          <div style="font-family:var(--serif);font-size:15px;font-weight:400;color:var(--text);margin-bottom:8px;">How did it feel?</div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;" id="zep-face-row">
-            <button data-zepface="1" onclick="selectZepFace(1,this)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9 18c1-2 7-2 8 0"/></svg>
-            </button>
-            <button data-zepface="2" onclick="selectZepFace(2,this)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 17.5c1-1.5 5.5-1.5 7 0"/></svg>
-            </button>
-            <button data-zepface="3" onclick="selectZepFace(3,this)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16.5h7"/></svg>
-            </button>
-            <button data-zepface="4" onclick="selectZepFace(4,this)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9.5 15.5c1 1.5 5.5 1.5 7 0"/></svg>
-            </button>
-            <button data-zepface="5" onclick="selectZepFace(5,this)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9 15c1 2.5 7 2.5 8 0"/></svg>
-            </button>
-            <button onclick="toggleZepChips()" id="zep-add-feelings-btn" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">+ Add feelings</button>
-          </div>
-          <!-- All chips — hidden until button tapped; only selected ones visible after Done -->
-          <div id="zep-sensation-chips" class="tags" style="gap:5px;display:none;margin-bottom:8px;">
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Felt nothing</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Slight sting</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Burning</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Bruising after</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Itchy after</button>
-            <button class="tag" style="font-size:11px;padding:5px 10px;" onclick="tog(this)">Lump/bump</button>
-          </div>
-          <!-- Selected chips summary — shown after Done, hidden while editing -->
-          <div id="zep-chips-summary" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:4px;"></div>
-        </div>
-
-        <!-- Notes -->
-        <textarea id="injection-notes" rows="2" placeholder="Anything notable — hunger levels, energy…" style="width:100%;padding:8px 10px;border-radius:10px;border:0.5px solid var(--border);font-size:13px;font-family:var(--sans);background:#fff;color:var(--text);resize:vertical;box-sizing:border-box;margin-bottom:10px;"></textarea>
-
-        <!-- Save — matches Today card Save button exactly -->
-        <div style="display:flex;justify-content:center;margin-top:4px;">
-          <button onclick="saveZepInjection()" style="padding:6px 24px;border-radius:20px;background:var(--accent);border:none;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Save</button>
-        </div>
-        <div class="toast-msg" id="zep-toast">💉 Saved!</div>
-      </div>
-    </div>
 
     <!-- Zepbound side effects -->
     <div class="card">
