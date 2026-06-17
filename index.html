@@ -1417,7 +1417,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card" id="sleep-coach-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:8px;">
-          <i class="ti ti-sparkles" style="font-size:16px;color:var(--accent);"></i>
+          <i class="ti ti-message-circle" style="font-size:16px;color:var(--accent);"></i>
           <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Sleep Coach</div>
         </div>
         <button onclick="openCoachHistory('Sleep')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
@@ -3497,13 +3497,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button onclick="editReflectionAnswer()" style="margin-top:8px;padding:4px 10px;border-radius:12px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Edit</button>
       </div>
       <!-- Checkboxes -->
-      <div class="med-row" id="journaled-today" onclick="toggleMindHabitCheck('journaled-today')" style="margin-top:14px;">
-        <div class="med-check">&#x2713;</div>
-        <div class="med-info"><div class="med-name">Completed journal</div></div>
-      </div>
-      <div class="med-row" id="wellspoken-today" onclick="toggleMindHabitCheck('wellspoken-today')">
-        <div class="med-check">&#x2713;</div>
-        <div class="med-info"><div class="med-name">Completed Wellspoken</div></div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <div class="med-row" id="journaled-today" onclick="toggleMindHabitCheck('journaled-today')" style="flex:1;margin:0;">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Day One</div></div>
+        </div>
+        <div class="med-row" id="wellspoken-today" onclick="toggleMindHabitCheck('wellspoken-today')" style="flex:1;margin:0;">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Wellspoken</div></div>
+        </div>
       </div>
       <!-- App links -->
       <div style="display:flex;gap:8px;margin-top:12px;">
@@ -3525,21 +3527,22 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <!-- Mind Coach -->
     <div class="card" id="mind-coach-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:8px;">
-          <i class="ti ti-sparkles" style="font-size:16px;color:var(--accent);"></i>
+          <i class="ti ti-message-circle" style="font-size:16px;color:var(--accent);"></i>
           <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Mind Coach</div>
         </div>
-        <button onclick="openCoachHistory('Mind')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
+        <button onclick="openCoachHistory('Mind')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-        <button onclick="mindCoachPrompt('Help me process this: ',true)" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Help me process this</button>
-        <button onclick="mindCoachPrompt('I need to mentally reset right now. Give me something short and grounding to help me shift my headspace.')" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Help me reset</button>
-        <button onclick="mindCoachPrompt('I am struggling to focus. Give me one clear, grounding way to redirect my attention and get present.')" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Help me focus</button>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
         <input id="mind-coach-input" type="text" placeholder="What's on your mind?" style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')mindCoach()">
         <button onclick="mindCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
+      </div>
+      <button onclick="toggleMindSuggestions()" id="mind-suggestions-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
+      <div id="mind-suggestions-panel" style="display:none;margin-top:8px;">
+        <button onclick="mindCoachPrompt('Help me process this: ',true)" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">Help me process this</button>
+        <button onclick="mindCoachPrompt('I need to mentally reset right now. Give me something short and grounding to help me shift my headspace.')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">Help me reset</button>
+        <button onclick="mindCoachPrompt('I am struggling to focus. Give me one clear, grounding way to redirect my attention and get present.')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Help me focus</button>
       </div>
       <div id="mind-coach-output" class="coach-response" style="display:none;margin-top:10px;"></div>
     </div>
@@ -17218,6 +17221,14 @@ function toggleSleepSuggestions(forceClose){
   panel.style.display = open ? 'block' : 'none';
   if(btn) btn.textContent = open ? 'Suggestions ↙' : 'Suggestions ↗';
 }
+function toggleMindSuggestions(forceClose){
+  const panel = document.getElementById('mind-suggestions-panel');
+  const btn = document.getElementById('mind-suggestions-btn');
+  if(!panel) return;
+  const open = forceClose === false ? false : panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  if(btn) btn.textContent = open ? 'Suggestions ↙' : 'Suggestions ↗';
+}
 function bpCoach(){ callCoach('Health · Blood Pressure','Review my recent BP readings and trends. What patterns do you see and what should I discuss with my doctor?','zep-coach-output'); }
 function zepCoach(){ callCoach('Body · Zepbound','How is my Zepbound journey going and what should I discuss with my doctor at my next visit?','zep-coach-output'); }
 function labCoach(){ callCoach('Health · Labs','Review my recent lab trends and tell me what they show and what I should discuss with my doctor.','lab-coach-output'); }
@@ -17378,6 +17389,7 @@ function mindCoach(){
 function mindCoachPrompt(text, focusOnly){
   const input = document.getElementById('mind-coach-input');
   if(input){ input.value = text; input.focus(); }
+  toggleMindSuggestions(false);
   if(!focusOnly) mindCoach();
 }
 
