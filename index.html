@@ -3278,7 +3278,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <button class="tag" onclick="tog(this);saveMindDraft()">Motivated</button><button class="tag" onclick="tog(this);saveMindDraft()">Focused</button><button class="tag" onclick="tog(this);saveMindDraft()">Grateful</button><button class="tag" onclick="tog(this);saveMindDraft()">Grounded</button><button class="tag" onclick="tog(this);saveMindDraft()">In my power</button><button class="tag" onclick="tog(this);saveMindDraft()">Clear-headed</button><button class="tag" onclick="tog(this);saveMindDraft()">Overwhelmed</button><button class="tag" onclick="tog(this);saveMindDraft()">Anxious</button><button class="tag" onclick="tog(this);saveMindDraft()">Scattered</button><button class="tag" onclick="tog(this);saveMindDraft()">Restless</button>
           </div>
         </div>
-        <div id="mind-ratings-panel" style="margin-bottom:14px;">
+        <div style="margin-bottom:8px;"><button id="mind-ratings-btn" onclick="toggleMindRatings()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Rate your mind today</button></div>
+        <div id="mind-ratings-panel" style="display:none;margin-bottom:14px;">
           <div class="mind-slider-row">
             <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">Energy</div>
             <input type="range" id="mind-energy-slider" class="mind-slider" min="1" max="5" step="1" value="3" oninput="saveMindDraft()">
@@ -3300,9 +3301,21 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <div class="mind-slider-ends"><span>Unsure</span><span>Grounded</span><span>Strong</span></div>
           </div>
         </div>
+        <div style="margin-bottom:8px;"><button id="mind-stress-btn" onclick="toggleMindStress()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Stress level</button></div>
+        <div id="mind-stress-panel" style="display:none;margin-bottom:14px;">
+          <input type="range" id="mind-stress-slider" class="mind-slider" min="1" max="5" step="1" value="1" oninput="updateStressLabel();saveMindDraft()">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px;"><span>Low</span><span>Mild</span><span>Moderate</span><span>High</span><span>Very high</span></div>
+          <div id="mind-stress-label" style="text-align:center;font-size:12px;color:var(--accent);font-weight:500;margin-top:8px;">Low</div>
+        </div>
+        <div style="margin-bottom:8px;"><button id="mind-needs-btn" onclick="toggleMindNeeds()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ What do I need today?</button></div>
+        <div id="mind-needs-panel" style="display:none;margin-bottom:12px;">
+          <div class="tags" id="mind-needs-tags">
+            <button class="tag" onclick="tog(this);saveMindDraft()">Rest</button><button class="tag" onclick="tog(this);saveMindDraft()">Focus</button><button class="tag" onclick="tog(this);saveMindDraft()">Peace</button><button class="tag" onclick="tog(this);saveMindDraft()">Clarity</button><button class="tag" onclick="tog(this);saveMindDraft()">Patience</button><button class="tag" onclick="tog(this);saveMindDraft()">Encouragement</button><button class="tag" onclick="tog(this);saveMindDraft()">Boundaries</button><button class="tag" onclick="tog(this);saveMindDraft()">Courage</button><button class="tag" onclick="tog(this);saveMindDraft()">Quiet</button><button class="tag" onclick="tog(this);saveMindDraft()">Momentum</button><button class="tag" onclick="tog(this);saveMindDraft()">Prayer/Reflection</button><button class="tag" onclick="tog(this);saveMindDraft()">Support</button>
+          </div>
+        </div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">One win today</div>
         <textarea id="win-note" rows="2" placeholder="Big or small — new low, wore something I love…" oninput="saveMindDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
-        <div style="margin-bottom:8px;"><button id="mind-gratitude-btn" onclick="toggleMindGratitude()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Gratitude · (select 3)</button></div>
+        <div style="margin-bottom:8px;"><button id="mind-gratitude-btn" onclick="toggleMindGratitude()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Gratitude (Choose one that feels true today + optional note)</button></div>
         <div id="mind-gratitude-panel" style="display:none;">
           <div class="tags" id="mind-gratitude-tags" style="margin-bottom:8px;">
             <button class="tag" onclick="tog(this);saveMindDraft()">My strength</button><button class="tag" onclick="tog(this);saveMindDraft()">My progress</button><button class="tag" onclick="tog(this);saveMindDraft()">My family</button><button class="tag" onclick="tog(this);saveMindDraft()">My body</button><button class="tag" onclick="tog(this);saveMindDraft()">A moment of peace</button><button class="tag" onclick="tog(this);saveMindDraft()">My support system</button><button class="tag" onclick="tog(this);saveMindDraft()">Small wins</button><button class="tag" onclick="tog(this);saveMindDraft()">My mindset</button><button class="tag" onclick="tog(this);saveMindDraft()">Being present</button><button class="tag" onclick="tog(this);saveMindDraft()">My health journey</button><button class="tag" onclick="tog(this);saveMindDraft()">Rest I got</button><button class="tag" onclick="tog(this);saveMindDraft()">My home</button>
@@ -8491,8 +8504,11 @@ async function restoreBodyCheckinState(){
 
 function soloMindFace(btn){document.getElementById('mind-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveMindDraft();}
 function toggleMindState(){const p=document.getElementById('mind-state-panel'),b=document.getElementById('mind-state-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– What\'s your mental state?':'+ What\'s your mental state?';}
-function toggleMindRatings(){}
-function toggleMindGratitude(){const p=document.getElementById('mind-gratitude-panel'),b=document.getElementById('mind-gratitude-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Gratitude · (select 3)':'+ Gratitude · (select 3)';}
+function toggleMindRatings(){const p=document.getElementById('mind-ratings-panel'),b=document.getElementById('mind-ratings-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Rate your mind today':'+ Rate your mind today';}
+function toggleMindStress(){const p=document.getElementById('mind-stress-panel'),b=document.getElementById('mind-stress-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Stress level':'+ Stress level';}
+function toggleMindNeeds(){const p=document.getElementById('mind-needs-panel'),b=document.getElementById('mind-needs-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– What do I need today?':'+ What do I need today?';}
+function updateStressLabel(){const el=document.getElementById('mind-stress-slider'),lbl=document.getElementById('mind-stress-label');if(!el||!lbl)return;const labels=['','Low','Mild','Moderate','High','Very high'];lbl.textContent=labels[parseInt(el.value)]||'';}
+function toggleMindGratitude(){const p=document.getElementById('mind-gratitude-panel'),b=document.getElementById('mind-gratitude-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Gratitude (Choose one that feels true today + optional note)':'+ Gratitude (Choose one that feels true today + optional note)';}
 
 function saveMindDraft(){
   savePillarDraft('mind',{
@@ -8502,6 +8518,8 @@ function saveMindDraft(){
     focus: getSlider('mind-focus-slider'),
     stress: getSlider('mind-calm-slider'),
     conf: getSlider('mind-conf-slider'),
+    stressLevel: getSlider('mind-stress-slider'),
+    needs: gT('mind-needs-tags'),
     win: document.getElementById('win-note')?.value||'',
     gratitudeChips: gT('mind-gratitude-tags'),
     gratitudeNote: document.getElementById('gratitude-note')?.value||'',
@@ -8520,6 +8538,9 @@ async function restoreMindDraft(){
     setSlider('mind-focus-slider',draft.focus);
     setSlider('mind-calm-slider',draft.stress);
     setSlider('mind-conf-slider',draft.conf);
+    if(draft.energy||draft.focus||draft.stress||draft.conf){const rp=document.getElementById('mind-ratings-panel');if(rp&&rp.style.display==='none')toggleMindRatings();}
+    if(draft.stressLevel){setSlider('mind-stress-slider',draft.stressLevel);updateStressLabel();const sp=document.getElementById('mind-stress-panel');if(sp&&sp.style.display==='none')toggleMindStress();}
+    if(draft.needs?.length){restoreTags('mind-needs-tags',draft.needs);const np=document.getElementById('mind-needs-panel');if(np&&np.style.display==='none')toggleMindNeeds();}
     if(draft.win && document.getElementById('win-note')) document.getElementById('win-note').value=draft.win;
     if(draft.gratitudeChips?.length||draft.gratitudeNote){
       if(draft.gratitudeChips?.length)restoreTags('mind-gratitude-tags',draft.gratitudeChips);
@@ -8547,7 +8568,10 @@ function showMindCheckinSaved(e){
   const stars = n => n?`<span style="color:var(--accent);font-size:11px;">${'★'.repeat(n)}</span>`:'';
   const editPill = `<button onclick="editMindCheckin()" style="padding:2px 10px;border-radius:10px;border:1px dashed var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin:2px 0 0 0;">+ edit</button>`;
   const slLbl = (v,lo,mid,hi) => { const n=parseInt(v)||3; return n<=2?lo:n>=4?hi:mid; };
-  const ratingHtml = `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;"><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Energy · ${slLbl(e.energy,'Drained','Steady','Energized')}</span><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Focus · ${slLbl(e.focus,'Scattered','Present','Clear')}</span><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Calm · ${slLbl(e.stress,'Tense','Settled','Peaceful')}</span><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Confidence · ${slLbl(e.conf,'Unsure','Grounded','Strong')}</span></div>`;
+  const stressLabels = ['','Low','Mild','Moderate','High','Very high'];
+  const ratingHtml = (e.energy||e.focus||e.stress||e.conf)?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;"><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Energy · ${slLbl(e.energy,'Drained','Steady','Energized')}</span><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Focus · ${slLbl(e.focus,'Scattered','Present','Clear')}</span><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Calm · ${slLbl(e.stress,'Tense','Settled','Peaceful')}</span><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Confidence · ${slLbl(e.conf,'Unsure','Grounded','Strong')}</span></div>`:'';
+  const stressHtml = e.stressLevel?`<div style="margin-top:6px;"><span style="background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:10px;color:var(--muted);">Stress · ${stressLabels[parseInt(e.stressLevel)]||''}</span></div>`:'';
+  const needsHtml = e.needs?.length?`<div style="margin-top:6px;">${vibeChips(e.needs)}</div>`:'';
   const winHtml = e.win?`<div style="font-family:var(--serif);font-size:13px;color:var(--muted);font-style:italic;margin-top:8px;">Win: ${e.win}</div>`:'';
   const gratitudeText = e.gratitudeNote||(e.gratitude||'');
   const gratitudeHtml = (e.gratitudeChips?.length||gratitudeText)?`<div style="font-size:11px;color:var(--muted);margin-top:6px;">${vibeChips(e.gratitudeChips)}${gratitudeText?`<span style="font-style:italic;"> ${gratitudeText}</span>`:''}</div>`:'';
@@ -8556,7 +8580,7 @@ function showMindCheckinSaved(e){
   const body = document.getElementById('mind-checkin-body');
   if(body) body.style.display = 'none';
   saved.style.display = 'block';
-  saved.innerHTML = `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">${mindFaces.map(f=>faceSvg(f,e.mindFace===f)).join('')}${vibeChips(e.vibe)}${editPill}</div>${ratingHtml}${winHtml}${gratitudeHtml}`;
+  saved.innerHTML = `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">${mindFaces.map(f=>faceSvg(f,e.mindFace===f)).join('')}${vibeChips(e.vibe)}${editPill}</div>${ratingHtml}${stressHtml}${needsHtml}${winHtml}${gratitudeHtml}`;
 }
 
 function editMindCheckin(){
@@ -8574,6 +8598,9 @@ function editMindCheckin(){
   setSlider('mind-focus-slider',state.focus);
   setSlider('mind-calm-slider',state.stress);
   setSlider('mind-conf-slider',state.conf);
+  if(state.energy||state.focus||state.stress||state.conf){const rp=document.getElementById('mind-ratings-panel');if(rp&&rp.style.display==='none')toggleMindRatings();}
+  if(state.stressLevel){setSlider('mind-stress-slider',state.stressLevel);updateStressLabel();const sp=document.getElementById('mind-stress-panel');if(sp&&sp.style.display==='none')toggleMindStress();}
+  if(state.needs?.length){restoreTags('mind-needs-tags',state.needs);const np=document.getElementById('mind-needs-panel');if(np&&np.style.display==='none')toggleMindNeeds();}
   if(state.win && document.getElementById('win-note')) document.getElementById('win-note').value=state.win;
   if(state.gratitudeChips?.length||state.gratitudeNote){
     if(state.gratitudeChips?.length)restoreTags('mind-gratitude-tags',state.gratitudeChips);
@@ -9651,12 +9678,14 @@ async function saveMind(){
   const focus=getSlider('mind-focus-slider');
   const stress=getSlider('mind-calm-slider');
   const conf=getSlider('mind-conf-slider');
+  const stressLevel=getSlider('mind-stress-slider');
+  const needs=gT('mind-needs-tags');
   const win=document.getElementById('win-note')?.value.trim()||'';
   const gratitudeChips=gT('mind-gratitude-tags');
   const gratitudeNote=document.getElementById('gratitude-note')?.value.trim()||'';
-  if(!mindFace && !vibe.length && !win && !gratitudeChips.length && !gratitudeNote){ showToast('Add at least one entry first'); return; }
+  if(!mindFace && !vibe.length && !win && !gratitudeChips.length && !gratitudeNote && !needs.length){ showToast('Add at least one entry first'); return; }
   const dateVal=document.getElementById('mind-log-date')?.value||logicalDayStr();
-  const mindEntry={mindFace,vibe,energy,focus,stress,conf,win,gratitudeChips,gratitudeNote,date:dateVal};
+  const mindEntry={mindFace,vibe,energy,focus,stress,conf,stressLevel,needs,win,gratitudeChips,gratitudeNote,date:dateVal};
   try {
     await dbAdd('minds',mindEntry);
     syncToBlob('minds');
@@ -9668,7 +9697,12 @@ async function saveMind(){
     if(document.getElementById('win-note')) document.getElementById('win-note').value='';
     if(document.getElementById('gratitude-note')) document.getElementById('gratitude-note').value='';
     setSlider('mind-energy-slider',3);setSlider('mind-focus-slider',3);setSlider('mind-calm-slider',3);setSlider('mind-conf-slider',3);
+    setSlider('mind-stress-slider',1);updateStressLabel();
+    document.getElementById('mind-needs-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     const sP=document.getElementById('mind-state-panel');if(sP&&sP.style.display!=='none')toggleMindState();
+    const rP=document.getElementById('mind-ratings-panel');if(rP&&rP.style.display!=='none')toggleMindRatings();
+    const stP=document.getElementById('mind-stress-panel');if(stP&&stP.style.display!=='none')toggleMindStress();
+    const nP=document.getElementById('mind-needs-panel');if(nP&&nP.style.display!=='none')toggleMindNeeds();
     const gP=document.getElementById('mind-gratitude-panel');if(gP&&gP.style.display!=='none')toggleMindGratitude();
     localStorage.setItem('glowMindCheckinState', JSON.stringify({...mindEntry, savedAt: Date.now()}));
     toast('mt');
