@@ -1885,12 +1885,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">🚶 Gait & Mobility · last 7 days</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Post hip replacement recovery · Walk asymmetry target &lt;5%</div>
-      <div class="chart-wrap" style="height:160px;" id="wrap-asymmetry-week-chart"></div>
-      <div style="font-size:11px;color:var(--muted);margin-top:12px;margin-bottom:6px;">Double support % · normal &lt;25% · higher may indicate gait caution</div>
-      <div class="chart-wrap" style="height:160px;" id="wrap-doublesupport-week-chart"></div>
+    <div class="card" id="gait-summary-card">
+      <div class="card-title">🚶 Gait & Mobility · 7-day avg</div>
+      <div id="gait-summary-content"><div class="log-empty">Loading...</div></div>
     </div>
 
     <!-- Zepbound weekly dose -->
@@ -2152,6 +2149,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <div class="card"><div class="card-title">Steps · this week</div><div class="chart-wrap" id="wrap-steps-week-chart"></div></div>
     <div class="card"><div class="card-title">Exercise this week</div><div id="weekly-exercise"><div class="log-empty">Log exercise daily to see weekly summary.</div></div></div>
+    <div class="card">
+      <div class="card-title">🚶 Gait & Mobility · last 7 days</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Post hip replacement recovery · Walk asymmetry target &lt;5%</div>
+      <div class="chart-wrap" style="height:160px;" id="wrap-asymmetry-week-chart"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:12px;margin-bottom:6px;">Double support % · normal &lt;25% · higher may indicate gait caution</div>
+      <div class="chart-wrap" style="height:160px;" id="wrap-doublesupport-week-chart"></div>
+    </div>
   </div>
 
   <div class="view-content" id="vc-body-monthly">
@@ -4056,7 +4060,7 @@ async function tab(id){
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
-  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitWeekCharts(); }
+  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitMobilitySummary(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld&&!_sld.value)_sld.value=logicalDayStr(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') {
@@ -4104,7 +4108,7 @@ function setView(v,btn){
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();}if(v==='monthly')buildZepMonthlyTracker();}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); if(v==='monthly') setTimeout(()=>switchSkinMetricChart(activeSkinMetric, document.querySelector('#skin-metric-tabs .chart-tab.on')||document.querySelector('#skin-metric-tabs .chart-tab')),100); }
   if(curTab==='hair'&&v!=='daily'){ buildHairCharts(); if(v==='weekly'){ loadHairAnalysesLog(); loadHairMilestones(); } }
-  if(curTab==='body'&&v!=='daily'){ buildBodyCompChartsForView(v); if(v==='weekly') buildWeeklyExercise(); if(v==='yearly') buildBodyYearlySummary(); }
+  if(curTab==='body'&&v!=='daily'){ buildBodyCompChartsForView(v); if(v==='weekly'){ buildWeeklyExercise(); buildGaitWeekCharts(); } if(v==='yearly') buildBodyYearlySummary(); }
   if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); buildSleepMyAirCombinedChart(); buildSleepStagesWeeklyChart(); }
   if(curTab==='sleep'&&v==='monthly') { buildMyAirCharts(); buildSleepMonthlyCalendar(); }
   if(curTab==='mind'){ loadIntentionHistory(); loadReflectionHistory(); if(v==='weekly') loadPillarsToday(); }
@@ -10337,18 +10341,35 @@ async function buildHealthClinicalMetrics(){
         <div class="snapshot-sub">breaths/min</div>
       </div>
     </div>
-    <div class="lab-section-title" style="margin-top:14px;">Gait & Mobility · 7-day avg</div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Post hip replacement recovery metrics</div>
+  `;
+}
+
+async function buildGaitMobilitySummary(){
+  const el = document.getElementById('gait-summary-content');
+  if(!el) return;
+  const rows = await getCSVRows();
+  if(!rows.length){ el.innerHTML='<div class="log-empty">Upload your weekly CSV to see gait metrics.</div>'; return; }
+  const avg = (field, n=7) => {
+    const vals = rows.slice(0,n).map(r=>parseFloat(r[field])).filter(v=>!isNaN(v)&&v>0);
+    return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+  };
+  const avgAsym = avg('walking_asymmetry');
+  const avgDS = avg('double_support');
+  if(!avgAsym && !avgDS){ el.innerHTML='<div class="log-empty">No gait data yet — upload your weekly CSV.</div>'; return; }
+  el.innerHTML = `
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Post hip replacement recovery · based on last 7 days</div>
     <div class="snapshot-grid">
       <div class="snapshot-item">
         <div class="snapshot-label">Walk Asymmetry</div>
-        <div class="snapshot-val" style="font-size:18px;">${avgAsym?avgAsym.toFixed(1)+'%':'—'}</div>
-        <div class="snapshot-sub ${avgAsym&&avgAsym<5?'snapshot-status-ok':avgAsym<10?'snapshot-status-watch':'snapshot-status-high'}">${avgAsym?(avgAsym<5?'Excellent':avgAsym<10?'Mild':'Notable'):'—'}</div>
+        <div class="snapshot-val" style="font-size:22px;">${avgAsym?avgAsym.toFixed(1)+'%':'—'}</div>
+        <div class="snapshot-sub ${avgAsym&&avgAsym<5?'snapshot-status-ok':avgAsym&&avgAsym<10?'snapshot-status-watch':'snapshot-status-high'}">${avgAsym?(avgAsym<5?'✅ Excellent':avgAsym<10?'Mild':'Notable'):'—'}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">target &lt;5%</div>
       </div>
       <div class="snapshot-item">
         <div class="snapshot-label">Double Support</div>
-        <div class="snapshot-val" style="font-size:18px;">${avgDS?avgDS.toFixed(1)+'%':'—'}</div>
-        <div class="snapshot-sub">${avgDS?(avgDS<25?'Normal':'Elevated'):'—'}</div>
+        <div class="snapshot-val" style="font-size:22px;">${avgDS?avgDS.toFixed(1)+'%':'—'}</div>
+        <div class="snapshot-sub ${avgDS&&avgDS<25?'snapshot-status-ok':'snapshot-status-watch'}">${avgDS?(avgDS<25?'✅ Normal':'Elevated'):'—'}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">normal &lt;25%</div>
       </div>
     </div>
   `;
