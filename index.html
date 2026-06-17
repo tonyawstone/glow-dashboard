@@ -4823,7 +4823,9 @@ async function buildDailyProgress(){
 
   // Mind — use logical day (3 AM reset)
   autoChecks['dp-activation'] = checkins.some(e=>e.type==='activation'&&(e.date===logical||e.date===today));
-  autoChecks['dp-reflection'] = refs.some(e=>e.type==='daily'&&(e.date===logical||e.date===today)&&e.answer?.length>0);
+  let _journaledToday=false,_wellspokenToday=false;
+  try{const _mh=JSON.parse(localStorage.getItem('glowMindHabits')||'{}');if(_mh.date===logical||_mh.date===today){_journaledToday=!!_mh.journaled;_wellspokenToday=!!_mh.wellspoken;}}catch(e){}
+  autoChecks['dp-reflection'] = refs.some(e=>e.type==='daily'&&(e.date===logical||e.date===today)&&e.answer?.length>0) || _journaledToday || _wellspokenToday;
   autoChecks['dp-mood'] = minds.some(e=>e.date===logical||e.date===today);
 
   // Sleep check-in (last night = yesterday or logical day before 3 AM)
@@ -16248,8 +16250,8 @@ function mindHabitTap(habit){
 }
 
 function saveMindHabits(){
-  const journaled = document.getElementById('journaled-today')?.classList.contains('on')||false;
-  const wellspoken = document.getElementById('wellspoken-today')?.classList.contains('on')||false;
+  const journaled = document.getElementById('journaled-today')?.classList.contains('done')||false;
+  const wellspoken = document.getElementById('wellspoken-today')?.classList.contains('done')||false;
   localStorage.setItem('glowMindHabits', JSON.stringify({date:logicalDayStr(), journaled, wellspoken}));
 }
 
@@ -16257,6 +16259,8 @@ function loadMindHabits(){
   const saved = localStorage.getItem('glowMindHabits');
   let journaled = false, wellspoken = false;
   if(saved){ try{ const d=JSON.parse(saved); if(d.date===logicalDayStr()){ journaled=!!d.journaled; wellspoken=!!d.wellspoken; } }catch(e){} }
+  if(journaled) document.getElementById('journaled-today')?.classList.add('done');
+  if(wellspoken) document.getElementById('wellspoken-today')?.classList.add('done');
   updateMindHabitsBanner(journaled, wellspoken);
 }
 
@@ -16265,14 +16269,13 @@ function updateMindHabitsBanner(journaled, wellspoken){
   const sub = document.getElementById('mind-habits-sub');
   const mindCheckSvg = document.getElementById('mind-check-svg');
   if(!banner) return;
-  // Sub text shows remaining items
   if(sub){
     const parts = [];
-    if(!journaled) parts.push('Journal');
+    if(!journaled) parts.push('Day One');
     if(!wellspoken) parts.push('Wellspoken');
-    sub.textContent = parts.length ? parts.join(' · ') : 'All done';
+    sub.textContent = parts.length < 2 ? 'All done' : parts.join(' · ');
   }
-  if(journaled && wellspoken){
+  if(journaled || wellspoken){
     banner.classList.add('done');
     if(mindCheckSvg) mindCheckSvg.style.display='inline';
   } else {
