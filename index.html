@@ -7368,17 +7368,17 @@ async function renderCheckinHub(){
   if(!sectionsEl) return;
   sectionsEl.innerHTML = PILLARS.map(p=>`
     <div class="ci-section">
-      <div class="ci-section-header" ${!p.formHtml?`onclick="checkinGoTo('${p.tab}','${p.scrollId}','${p.toggleFn}')"`:'style="cursor:default;"'}>
+      <div class="ci-section-header" onclick="${p.formHtml?`toggleHubForm('${p.name.toLowerCase()}')`:`checkinGoTo('${p.tab}','${p.scrollId}','${p.toggleFn}')`}" style="cursor:pointer;">
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="width:34px;height:34px;border-radius:50%;background:${p.done?'rgba(107,158,120,0.12)':'rgba(0,0,0,0.04)'};border:0.5px solid ${p.done?'rgba(107,158,120,0.3)':'var(--border)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <i class="ti ${p.icon}" style="font-size:15px;color:${p.done?'#6B9E78':'var(--muted)'};"></i>
           </div>
           <div class="ci-pillar-name">${p.name}</div>
         </div>
-        ${!p.formHtml?`<span class="ci-badge ${p.done?'done':'todo'}">${p.done?'✓ Done':'Log →'}</span>`:''}
+        ${p.formHtml?`<i class="ti ti-chevron-down" id="hub-chev-${p.name.toLowerCase()}" style="font-size:16px;color:var(--muted);transition:transform 0.2s;"></i>`:`<span class="ci-badge ${p.done?'done':'todo'}">${p.done?'✓ Done':'Log →'}</span>`}
       </div>
       ${p.done&&p.saved?`<div class="ci-saved"><div class="ci-saved-inner">${p.saved}</div></div>`:''}
-      ${!p.done&&p.formHtml?`<div style="padding:4px 16px 12px;">${p.formHtml}</div>`:''}
+      ${!p.done&&p.formHtml?`<div id="hub-form-${p.name.toLowerCase()}" style="display:none;padding:4px 16px 12px;">${p.formHtml}</div>`:''}
     </div>`).join('');
 }
 
@@ -7399,6 +7399,15 @@ function checkinGoTo(targetTab, scrollId, toggleFn){
     const el = document.getElementById(scrollId);
     if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
   }, 400);
+}
+
+function toggleHubForm(name){
+  const form=document.getElementById(`hub-form-${name}`);
+  const chev=document.getElementById(`hub-chev-${name}`);
+  if(!form) return;
+  const open=form.style.display==='none'||!form.style.display;
+  form.style.display=open?'block':'none';
+  if(chev) chev.style.transform=open?'rotate(180deg)':'';
 }
 
 // ── HUB MIND CHECK-IN ─────────────────────────────────────────────────────────
