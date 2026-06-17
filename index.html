@@ -3525,21 +3525,39 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div id="reflection-saved-text" style="font-size:13px;color:var(--text);line-height:1.5;white-space:pre-wrap;"></div>
         <button onclick="editReflectionAnswer()" style="margin-top:8px;padding:4px 10px;border-radius:12px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Edit</button>
       </div>
-      <!-- Checkboxes -->
-      <div style="display:flex;gap:8px;margin-top:14px;">
-        <div class="med-row" id="journaled-today" onclick="toggleMindHabitCheck('journaled-today')" style="flex:1;margin:0;">
-          <div class="med-check">&#x2713;</div>
-          <div class="med-info"><div class="med-name">Day One</div></div>
+      <!-- Checkboxes + icon links -->
+      <div style="display:flex;gap:12px;margin-top:14px;">
+        <!-- Day One column -->
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;">
+          <div class="med-row" id="journaled-today" onclick="toggleMindHabitCheck('journaled-today')" style="width:100%;margin:0;">
+            <div class="med-check">&#x2713;</div>
+            <div class="med-info"><div class="med-name">Day One</div></div>
+          </div>
+          <a href="javascript:void(0)" onclick="openDayOne()" style="display:block;border-radius:14px;overflow:hidden;line-height:0;box-shadow:0 2px 8px rgba(0,0,0,0.14);">
+            <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+              <rect width="64" height="64" rx="15" fill="#3EC3F2"/>
+              <path d="M15 9 L15 55 L32 44 L49 55 L49 9 Z" fill="white"/>
+            </svg>
+          </a>
         </div>
-        <div class="med-row" id="wellspoken-today" onclick="toggleMindHabitCheck('wellspoken-today')" style="flex:1;margin:0;">
-          <div class="med-check">&#x2713;</div>
-          <div class="med-info"><div class="med-name">Wellspoken</div></div>
+        <!-- Wellspoken column -->
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;">
+          <div class="med-row" id="wellspoken-today" onclick="toggleMindHabitCheck('wellspoken-today')" style="width:100%;margin:0;">
+            <div class="med-check">&#x2713;</div>
+            <div class="med-info"><div class="med-name">Wellspoken</div></div>
+          </div>
+          <a href="javascript:void(0)" onclick="window.location.href='shortcuts://run-shortcut?name=OpenWellspoken'" style="display:block;border-radius:14px;overflow:hidden;line-height:0;box-shadow:0 2px 8px rgba(0,0,0,0.14);">
+            <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+              <rect width="64" height="64" rx="15" fill="#5AAED8"/>
+              <ellipse cx="32" cy="36" rx="28" ry="28" fill="#7DC4EC"/>
+              <path d="M20 31 Q24 37 28 31" stroke="#2A2A2A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <path d="M36 31 Q40 37 44 31" stroke="#2A2A2A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <path d="M24 41 Q32 48 40 41" stroke="#2A2A2A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <circle cx="17" cy="38" r="5.5" fill="#B4DCF8" opacity="0.65"/>
+              <circle cx="47" cy="38" r="5.5" fill="#B4DCF8" opacity="0.65"/>
+            </svg>
+          </a>
         </div>
-      </div>
-      <!-- App links -->
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <a href="javascript:void(0)" onclick="openDayOne()" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">📖 Day One</a>
-        <a href="javascript:void(0)" onclick="window.location.href='shortcuts://run-shortcut?name=OpenWellspoken'" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">🗣 Wellspoken</a>
       </div>
       <div id="reflection-log-daily" style="display:none;margin-top:12px;border-top:0.5px solid var(--border);padding-top:10px;"><div class="log-empty">No reflections yet.</div></div>
     </div>
