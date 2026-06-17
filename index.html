@@ -53,6 +53,13 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .compact-wordmark sup{font-size:9px;color:var(--accent);vertical-align:super;line-height:0;}
 .compact-page-title{font-family:var(--sans);font-size:15px;font-weight:400;color:var(--text);text-align:center;flex:1;margin:0 8px;}
 .compact-settings-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:4px;display:flex;align-items:center;justify-content:center;}
+.profile-chip{width:28px;height:28px;border-radius:50%;background:rgba(139,115,85,0.12);border:0.5px solid rgba(139,115,85,0.3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--accent);cursor:pointer;user-select:none;flex-shrink:0;}
+.profile-menu{position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:0.5px solid var(--border);border-radius:12px;overflow:hidden;z-index:200;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,0.08);}
+.profile-menu-item{display:flex;align-items:center;gap:10px;padding:12px 14px;font-size:14px;color:var(--text);background:none;border:none;border-bottom:0.5px solid var(--border);cursor:pointer;width:100%;text-align:left;}
+.profile-menu-item:last-child{border-bottom:none;}
+.profile-menu-item i{font-size:17px;color:var(--accent);}
+.profile-menu-signout{color:var(--muted);font-size:13px;}
+.profile-menu-signout i{color:var(--muted);}
 .compact-nav{display:grid;grid-template-columns:repeat(8,1fr);background:var(--cream);border-bottom:0.5px solid var(--border);border-top:0.5px solid var(--border);}
 .compact-nav .tnav{font-size:10px;padding:8px 2px 7px;gap:2px;}
 .compact-nav .tnav i{font-size:18px;}
@@ -466,9 +473,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="compact-header-bar">
     <div class="compact-wordmark">Glow<sup>✦</sup></div>
     <div class="compact-page-title" id="compact-page-title"></div>
-    <div style="display:flex;align-items:center;gap:2px;">
-      <button class="compact-settings-btn glow-auth-btn" onclick="glowLogout()" title="Sign out" style="display:none;"><i class="ti ti-logout" aria-hidden="true"></i></button>
-      <button class="compact-settings-btn" onclick="openSettings()"><i class="ti ti-settings" aria-hidden="true"></i></button>
+    <div style="position:relative;">
+      <div class="profile-chip" id="profile-chip" onclick="toggleProfileMenu()" role="button" aria-label="Profile &amp; settings">T</div>
+      <div class="profile-menu" id="profile-menu" style="display:none;">
+        <button class="profile-menu-item" onclick="closeProfileMenu();openSettings();"><i class="ti ti-settings" aria-hidden="true"></i>Settings</button>
+        <button class="profile-menu-item profile-menu-signout glow-auth-btn" onclick="closeProfileMenu();glowLogout();" style="display:none;"><i class="ti ti-logout" aria-hidden="true"></i>Sign out</button>
+      </div>
     </div>
   </div>
   <div class="compact-nav">
@@ -486,8 +496,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- HERO -->
 <div class="hero-wrap" id="hero-wrap">
   <div class="hero">
-    <button class="hero-settings-btn" onclick="openSettings()"><i class="ti ti-settings" aria-hidden="true"></i></button>
-    <button class="hero-settings-btn glow-auth-btn" onclick="glowLogout()" title="Sign out" style="display:none;right:44px;"><i class="ti ti-logout" aria-hidden="true"></i></button>
     <div class="hero-avatar" onclick="pickPhoto('hero')" id="hero-avatar-wrap">
       <img id="hero-img" src="" alt="Tonya">
       <div class="hero-icon-fallback" id="hero-fallback">
@@ -2258,7 +2266,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- BP Log — collapsible, first card -->
     <div class="card" id="bp-entry-card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleBPForm()">
-        <div class="card-title" style="margin:0;">❤️ Blood pressure</div>
+        <div class="card-title" style="margin:0;display:flex;align-items:center;gap:7px;"><div id="bp-card-icon" style="width:24px;height:24px;border-radius:50%;background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-heart" style="font-size:11px;color:#A07850;"></i></div>Blood pressure</div>
         <button id="bp-form-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
       </div>
       <div id="bp-today-status" style="margin-top:8px;"></div>
@@ -2281,16 +2289,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <!-- Apple Health clinical metrics -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleClinicalMetrics()">
-        <div class="card-title" style="margin:0;">📊 Clinical metrics · 7-day avg</div>
-        <button id="clinical-metrics-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
-      </div>
-      <div id="clinical-metrics-body" style="display:none;margin-top:12px;">
-        <div id="health-clinical-metrics"><div class="log-empty">Upload your weekly CSV to see weight trend, resting HR, gait and respiratory data.</div></div>
-      </div>
-    </div>
 
 
     <!-- Medications & Vitamins -->
@@ -2453,6 +2451,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="margin-top:10px;" id="zep-side-history"></div>
     </div>
 
+    <!-- Apple Health clinical metrics -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleClinicalMetrics()">
+        <div class="card-title" style="margin:0;">📊 Clinical metrics · 7-day avg</div>
+        <button id="clinical-metrics-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
+      </div>
+      <div id="clinical-metrics-body" style="display:none;margin-top:12px;">
+        <div id="health-clinical-metrics"><div class="log-empty">Upload your weekly CSV to see weight trend, resting HR, gait and respiratory data.</div></div>
+      </div>
+    </div>
+
     <!-- Lab results -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
@@ -2500,15 +2509,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Hidden insights container for overlay -->
     <div id="health-insights-content" style="display:none;"></div>
 
-    <!-- Apple Health Upload -->
-    <div class="card">
-      <div class="card-title">Apple Health data · weekly upload</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Run your Python script weekly, then upload the CSV here to update your charts and AI coach with fresh data.</div>
-      <div id="csv-last-upload" style="font-size:12px;color:var(--muted);margin-bottom:10px;">Last upload: checking...</div>
-      <input type="file" id="health-csv-input" accept=".csv" style="display:none" onchange="uploadHealthCSV(this)">
-      <button class="btn-primary" onclick="document.getElementById('health-csv-input').click()">📂 Upload glow_health_data.csv</button>
-      <div id="csv-upload-status" style="display:none;margin-top:10px;font-size:13px;padding:10px;border-radius:10px;"></div>
-    </div>
   </div>
 
   <!-- ── WEEKLY ── -->
@@ -3682,9 +3682,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <span style="display:block;margin-top:6px;font-size:11px;">Run from: OneDrive / 08 App Projects / Glow Dashboard / Health Data</span>
         </div>
         <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">🔍 Check logs</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.8;">
+        <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:14px;">
           <code style="display:block;padding:8px 10px;background:rgba(0,0,0,0.05);border-radius:8px;font-size:11px;color:var(--text);word-break:break-all;">cat ~/Library/Logs/glow_auto_upload.log</code>
         </div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">📂 Upload CSV manually</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Run your Python script, then upload here to refresh charts and AI coach data.</div>
+        <div id="csv-last-upload" style="font-size:12px;color:var(--muted);margin-bottom:10px;">Last upload: checking...</div>
+        <input type="file" id="health-csv-input" accept=".csv" style="display:none" onchange="uploadHealthCSV(this)">
+        <button class="btn-primary" onclick="document.getElementById('health-csv-input').click()">📂 Upload glow_health_data.csv</button>
+        <div id="csv-upload-status" style="display:none;margin-top:10px;font-size:13px;padding:10px;border-radius:8px;"></div>
       </div>
 
       <!-- Daily Reset Schedule -->
@@ -7179,6 +7185,22 @@ function openSleepScoreInfo(){
   
 }
 
+function toggleProfileMenu(){
+  const m=document.getElementById('profile-menu');
+  if(!m) return;
+  m.style.display = m.style.display==='none' ? '' : 'none';
+}
+function closeProfileMenu(){
+  const m=document.getElementById('profile-menu');
+  if(m) m.style.display='none';
+}
+document.addEventListener('click',function(e){
+  const chip=document.getElementById('profile-chip');
+  const menu=document.getElementById('profile-menu');
+  if(menu && chip && !chip.contains(e.target) && !menu.contains(e.target)){
+    menu.style.display='none';
+  }
+});
 function openSettings(){
   const el = document.getElementById('about-changelog');
   if(el) el.innerHTML = CHANGELOG.map(v=>`
@@ -14769,6 +14791,7 @@ async function updateBPBanners(){
       if(bpTileVal){ bpTileVal.textContent=`${reading.sys}/${reading.dia}`; bpTileVal.style.color=valColor; }
       if(bpTileDate) bpTileDate.textContent = isToday ? (reading.time?fmtBPTime(reading.time):'Today') : (fmtOutfitDate(reading.date)||reading.date);
       if(bpTileIcon){ bpTileIcon.style.background=iconBg; bpTileIcon.style.borderColor=iconBorder; const i=bpTileIcon.querySelector('i'); if(i) i.style.color=iconColor; }
+      const bpCardIcon=document.getElementById('bp-card-icon'); if(bpCardIcon){ bpCardIcon.style.background=iconBg; bpCardIcon.style.borderColor=iconBorder; const ci=bpCardIcon.querySelector('i'); if(ci) ci.style.color=iconColor; }
     } else {
       if(bpTileVal){ bpTileVal.textContent='—'; bpTileVal.style.color='var(--muted)'; }
       if(bpTileDate) bpTileDate.textContent='No reading yet';
@@ -14790,7 +14813,23 @@ async function updateBPBanners(){
         const fmtTime = timeMatch ? `${parseInt(timeMatch[1])}:${timeMatch[2]} ${parseInt(timeMatch[1])>=12?'PM':'AM'}` : rawTime;
         const time = fmtTime ? ' · '+fmtTime : '';
         const src = todayReading.source ? ` · ${todayReading.source}` : '';
-        bpStatus.innerHTML=`<div style="padding:8px 12px;border-radius:10px;background:var(--warm);display:flex;justify-content:space-between;align-items:center;"><div><span style="font-size:20px;font-weight:700;color:${color};">${sys}/${dia}</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">${pulse}</span></div><div style="text-align:right;"><div style="font-size:12px;font-weight:600;color:${color};">${label}</div><div style="font-size:11px;color:var(--muted);">Today${time}${src}</div></div></div>`;
+        // Build mini sparkline (CSV newest-first, reverse to oldest-first for left→right)
+        const csvF=csvBPs.filter(b=>b.sys&&b.dia);
+        const sparkArr=csvF.length>=2?csvF.slice(0,7).reverse():manualBPs.filter(b=>b.sys&&b.dia).slice(-7);
+        let sparkSVG='';
+        if(sparkArr.length>=2){
+          const W=72,H=30,pad=3;
+          const sVals=sparkArr.map(b=>parseInt(b.sys)),dVals=sparkArr.map(b=>parseInt(b.dia));
+          const minV=Math.min(...sVals,...dVals)-pad,maxV=Math.max(...sVals,...dVals)+pad,rng=maxV-minV||1;
+          const n=sparkArr.length;
+          const sx=i=>Math.round(i*(W/(n-1)));
+          const sy=v=>Math.round(pad+(H-2*pad)*(1-(parseInt(v)-minV)/rng));
+          const sysPts=sparkArr.map((b,i)=>`${sx(i)},${sy(b.sys)}`).join(' ');
+          const diaPts=sparkArr.map((b,i)=>`${sx(i)},${sy(b.dia)}`).join(' ');
+          const lx=sx(n-1),lsy=sy(sparkArr[n-1].sys),ldy=sy(sparkArr[n-1].dia);
+          sparkSVG=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;"><polyline points="${sysPts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${diaPts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/><circle cx="${lx}" cy="${lsy}" r="2.5" fill="${color}"/><circle cx="${lx}" cy="${ldy}" r="2" fill="${color}" opacity="0.5"/></svg>`;
+        }
+        bpStatus.innerHTML=`<div style="padding:8px 12px;border-radius:10px;background:var(--warm);display:flex;align-items:center;gap:10px;"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;"><span style="font-size:22px;font-weight:700;color:${color};font-variant-numeric:tabular-nums;">${sys}/${dia}</span>${pulse?`<span style="font-size:11px;color:var(--muted);">· ${pulse}</span>`:''}</div><div style="font-size:12px;font-weight:600;color:${color};margin-top:2px;">${label}</div><div style="font-size:11px;color:var(--muted);margin-top:1px;">Today${time}${src}</div></div>${sparkSVG?`<div style="flex-shrink:0;padding-left:4px;">${sparkSVG}</div>`:''}</div>`;
       }
     } else {
       if(bpStatus) bpStatus.innerHTML='';
