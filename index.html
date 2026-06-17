@@ -109,7 +109,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 
 /* CARDS */
 .card{background:#fff;border:0.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
-.card-title{font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:16px;}
+.card-title{font-family:var(--serif);font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:16px;}
 .section-label{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;display:flex;align-items:center;justify-content:space-between;}
 .guide-btn{font-size:12px;font-family:var(--sans);font-weight:600;color:var(--accent);background:var(--warm);border:1.5px solid var(--accent);border-radius:50%;-webkit-border-radius:50%;width:24px;height:24px;min-width:24px;min-height:24px;cursor:pointer;letter-spacing:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.9;padding:0;line-height:1;-webkit-appearance:none;appearance:none;}
 .goal-label-input{font-size:10px;font-weight:600;color:var(--accent);background:transparent;border:none;border-bottom:0.5px solid transparent;text-align:center;width:100%;margin-top:3px;font-family:var(--sans);cursor:text;padding:1px 2px;border-radius:0;}
@@ -2399,58 +2399,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
 
 
-    <!-- Zepbound side effects -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;" onclick="toggleSideEffectsForm()">
-          <div class="card-title" style="margin:0;">💊 Zepbound · side effects</div>
-          <span id="side-effects-toggle" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</span>
-        </div>
-        <button onclick="openZepSideHistory()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past notes</button>
-      </div>
-      <div id="zep-side-history" style="margin-top:10px;"></div>
-      <!-- Collapsible form -->
-      <div id="side-effects-body" style="display:none;margin-top:12px;">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Track GI and other symptoms · important for dose discussions with your doctor</div>
-      <div class="fl">GI symptoms today</div>
-      <div class="tags" id="zep-gi-tags">
-        <button class="tag" onclick="tog(this)">Constipation</button>
-        <button class="tag" onclick="tog(this)">Nausea</button>
-        <button class="tag" onclick="tog(this)">Stomach upset</button>
-        <button class="tag" onclick="tog(this)">Bloating</button>
-        <button class="tag" onclick="tog(this)">Diarrhea</button>
-        <button class="tag" onclick="tog(this)">Acid reflux</button>
-        <button class="tag" onclick="tog(this)">Loss of appetite</button>
-        <button class="tag" onclick="tog(this)">None today ✓</button>
-      </div>
-      <div class="fl">Other symptoms</div>
-      <div class="tags" id="zep-other-tags">
-        <button class="tag" onclick="tog(this)">Fatigue</button>
-        <button class="tag" onclick="tog(this)">Injection site reaction</button>
-        <button class="tag" onclick="tog(this)">Headache</button>
-        <button class="tag" onclick="tog(this)">Hair thinning</button>
-        <button class="tag" onclick="tog(this)">Muscle loss concern</button>
-        <button class="tag" onclick="tog(this)">Low energy</button>
-        <button class="tag" onclick="tog(this)">No symptoms ✓</button>
-      </div>
-      <div class="fl">Severity</div>
-      <div class="tags" id="zep-severity-tags">
-        <button class="tag" onclick="solo('zep-severity-tags',this)">Mild</button>
-        <button class="tag" onclick="solo('zep-severity-tags',this)">Moderate</button>
-        <button class="tag" onclick="solo('zep-severity-tags',this)">Severe</button>
-      </div>
-      <div class="fl">Miralax taken today</div>
-      <div class="toggle-row" onclick="ts('zep-miralax-today')" style="border:none;padding:0;">
-        <div><div class="tl">Miralax chews</div><div class="ts">GI support · Zepbound constipation</div></div>
-        <div class="tog" id="zep-miralax-today"><div class="tok"></div></div>
-      </div>
-      <div class="fl">Note</div>
-      <textarea id="zep-side-note" rows="2" placeholder="Any patterns, timing, what helped..."></textarea>
-      <button class="btn-primary" onclick="saveZepSideEffects()">Log symptoms</button>
-      <div class="toast-msg" id="zep-side-toast">Logged!</div>
-      </div><!-- end side-effects-body -->
-      <div style="margin-top:10px;" id="zep-side-history"></div>
-    </div>
 
     <!-- Apple Health clinical metrics -->
     <div class="card">
@@ -14822,23 +14770,42 @@ async function updateBPBanners(){
         const fmtTime = timeMatch ? `${parseInt(timeMatch[1])}:${timeMatch[2]} ${parseInt(timeMatch[1])>=12?'PM':'AM'}` : rawTime;
         const time = fmtTime ? ' · '+fmtTime : '';
         const src = todayReading.source ? ` · ${todayReading.source}` : '';
-        // Build mini sparkline (CSV newest-first, reverse to oldest-first for left→right)
+        // Build sparkline (CSV newest-first → reverse to oldest-first for left→right display)
         const csvF=csvBPs.filter(b=>b.sys&&b.dia);
         const sparkArr=csvF.length>=2?csvF.slice(0,7).reverse():manualBPs.filter(b=>b.sys&&b.dia).slice(-7);
         let sparkSVG='';
         if(sparkArr.length>=2){
-          const W=72,H=30,pad=3;
+          const W=130,H=64,lpad=28,rpad=5,tpad=7,bpad=16;
+          const chartW=W-lpad-rpad, chartH=H-tpad-bpad;
           const sVals=sparkArr.map(b=>parseInt(b.sys)),dVals=sparkArr.map(b=>parseInt(b.dia));
-          const minV=Math.min(...sVals,...dVals)-pad,maxV=Math.max(...sVals,...dVals)+pad,rng=maxV-minV||1;
+          const dataMin=Math.min(...sVals,...dVals), dataMax=Math.max(...sVals,...dVals);
+          const padV=Math.max(6,Math.round((dataMax-dataMin)*0.2));
+          const minV=Math.floor((dataMin-padV)/10)*10, maxV=Math.ceil((dataMax+padV)/10)*10, rng=maxV-minV||1;
+          const midV=Math.round((minV+maxV)/2);
           const n=sparkArr.length;
-          const sx=i=>Math.round(i*(W/(n-1)));
-          const sy=v=>Math.round(pad+(H-2*pad)*(1-(parseInt(v)-minV)/rng));
+          const sx=i=>Math.round(lpad+i*(chartW/(n-1)));
+          const sy=v=>Math.round(tpad+chartH*(1-(parseInt(v)-minV)/rng));
           const sysPts=sparkArr.map((b,i)=>`${sx(i)},${sy(b.sys)}`).join(' ');
           const diaPts=sparkArr.map((b,i)=>`${sx(i)},${sy(b.dia)}`).join(' ');
-          const lx=sx(n-1),lsy=sy(sparkArr[n-1].sys),ldy=sy(sparkArr[n-1].dia);
-          sparkSVG=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;"><polyline points="${sysPts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${diaPts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/><circle cx="${lx}" cy="${lsy}" r="2.5" fill="${color}"/><circle cx="${lx}" cy="${ldy}" r="2" fill="${color}" opacity="0.5"/></svg>`;
+          const lx=sx(n-1), lsy=sy(sparkArr[n-1].sys), ldy=sy(sparkArr[n-1].dia);
+          const sysLY=Math.max(lsy-5,tpad+9);
+          const diaLY=Math.min(ldy+10,tpad+chartH+13);
+          sparkSVG=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">`+
+            `<line x1="${lpad}" y1="${tpad}" x2="${lpad}" y2="${tpad+chartH}" stroke="${color}" stroke-width="0.5" opacity="0.25"/>`+
+            `<line x1="${lpad}" y1="${tpad+chartH}" x2="${lpad+chartW}" y2="${tpad+chartH}" stroke="${color}" stroke-width="0.5" opacity="0.25"/>`+
+            `<line x1="${lpad}" y1="${sy(midV)}" x2="${lpad+chartW}" y2="${sy(midV)}" stroke="${color}" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.15"/>`+
+            `<text x="${lpad-3}" y="${tpad+5}" text-anchor="end" font-size="8" fill="${color}" opacity="0.6">${maxV}</text>`+
+            `<text x="${lpad-3}" y="${sy(midV)+3}" text-anchor="end" font-size="8" fill="${color}" opacity="0.55">${midV}</text>`+
+            `<text x="${lpad-3}" y="${tpad+chartH}" text-anchor="end" font-size="8" fill="${color}" opacity="0.6">${minV}</text>`+
+            `<polyline points="${sysPts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`+
+            `<polyline points="${diaPts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>`+
+            `<circle cx="${lx}" cy="${lsy}" r="3" fill="${color}"/>`+
+            `<circle cx="${lx}" cy="${ldy}" r="2.5" fill="${color}" opacity="0.5"/>`+
+            `<text x="${lx}" y="${sysLY}" text-anchor="middle" font-size="8" font-weight="600" fill="${color}">${sparkArr[n-1].sys}</text>`+
+            `<text x="${lx}" y="${diaLY}" text-anchor="middle" font-size="7" fill="${color}" opacity="0.55">${sparkArr[n-1].dia}</text>`+
+            `</svg>`;
         }
-        bpStatus.innerHTML=`<div style="padding:8px 12px;border-radius:10px;background:var(--warm);display:flex;align-items:center;gap:10px;"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;"><span style="font-size:22px;font-weight:700;color:${color};font-variant-numeric:tabular-nums;">${sys}/${dia}</span>${pulse?`<span style="font-size:11px;color:var(--muted);">· ${pulse}</span>`:''}</div><div style="font-size:12px;font-weight:600;color:${color};margin-top:2px;">${label}</div><div style="font-size:11px;color:var(--muted);margin-top:1px;">Today${time}${src}</div></div>${sparkSVG?`<div style="flex-shrink:0;padding-left:4px;">${sparkSVG}</div>`:''}</div>`;
+        bpStatus.innerHTML=`<div style="padding:10px 12px;border-radius:10px;background:#fff;border:0.5px solid var(--border);display:flex;align-items:center;gap:10px;"><div style="flex:1;min-width:0;"><div style="display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;"><span style="font-size:22px;font-weight:700;color:${color};font-variant-numeric:tabular-nums;">${sys}/${dia}</span>${pulse?`<span style="font-size:11px;color:var(--muted);">· ${pulse}</span>`:''}</div><div style="font-size:12px;font-weight:600;color:${color};margin-top:2px;">${label}</div><div style="font-size:11px;color:var(--muted);margin-top:1px;">Today${time}${src}</div></div>${sparkSVG?`<div style="flex-shrink:0;">${sparkSVG}</div>`:''}</div>`;
       }
     } else {
       if(bpStatus) bpStatus.innerHTML='';
