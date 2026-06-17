@@ -7428,7 +7428,6 @@ function toggleHubForm(name){
 // ── HUB MIND CHECK-IN ─────────────────────────────────────────────────────────
 function getHubMindFormHtml(){
   const today = logicalDayStr();
-  const stars = id => [1,2,3,4,5].map(n=>`<span class="star" onclick="setHubMindStars('${id}',${n})">&#x2605;</span>`).join('');
   return `
     <div style="padding:4px 0;">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
@@ -7446,15 +7445,43 @@ function getHubMindFormHtml(){
       <div style="margin-bottom:8px;"><button id="hm-state-btn" onclick="toggleHubMindState()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ What's your mental state?</button></div>
       <div id="hm-state-panel" style="display:none;"><div class="tags" id="hm-vibe-tags" style="margin-bottom:12px;"><button class="tag" onclick="tog(this)">Motivated</button><button class="tag" onclick="tog(this)">Focused</button><button class="tag" onclick="tog(this)">Grateful</button><button class="tag" onclick="tog(this)">Grounded</button><button class="tag" onclick="tog(this)">In my power</button><button class="tag" onclick="tog(this)">Clear-headed</button><button class="tag" onclick="tog(this)">Overwhelmed</button><button class="tag" onclick="tog(this)">Anxious</button><button class="tag" onclick="tog(this)">Scattered</button><button class="tag" onclick="tog(this)">Restless</button></div></div>
       <div style="margin-bottom:8px;"><button id="hm-ratings-btn" onclick="toggleHubMindRatings()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Rate your mind today</button></div>
-      <div id="hm-ratings-panel" style="display:none;border:0.5px solid var(--border);border-radius:10px;padding:0 12px;margin-bottom:12px;">
-        <div class="stars-row" style="margin-top:0;"><div class="stars-row-label">Energy</div><div class="stars" id="hm-energy-stars">${stars('hm-energy-stars')}</div></div>
-        <div class="stars-row"><div class="stars-row-label">Confidence</div><div class="stars" id="hm-conf-stars">${stars('hm-conf-stars')}</div></div>
-        <div class="stars-row"><div class="stars-row-label">Calm</div><div class="stars" id="hm-stress-stars">${stars('hm-stress-stars')}</div></div>
-        <div class="stars-row"><div class="stars-row-label">Body image</div><div class="stars" id="hm-body-image-stars">${stars('hm-body-image-stars')}</div></div>
+      <div id="hm-ratings-panel" style="display:none;margin-bottom:14px;">
+        <div class="mind-slider-row">
+          <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">Energy</div>
+          <input type="range" id="hm-energy-slider" class="mind-slider" min="1" max="5" step="1" value="3">
+          <div class="mind-slider-ends"><span>Drained</span><span>Steady</span><span>Energized</span></div>
+        </div>
+        <div class="mind-slider-row">
+          <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">Focus</div>
+          <input type="range" id="hm-focus-slider" class="mind-slider" min="1" max="5" step="1" value="3">
+          <div class="mind-slider-ends"><span>Scattered</span><span>Present</span><span>Clear</span></div>
+        </div>
+        <div class="mind-slider-row">
+          <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">Calm</div>
+          <input type="range" id="hm-calm-slider" class="mind-slider" min="1" max="5" step="1" value="3">
+          <div class="mind-slider-ends"><span>Tense</span><span>Settled</span><span>Peaceful</span></div>
+        </div>
+        <div class="mind-slider-row" style="margin-bottom:0;">
+          <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;">Confidence</div>
+          <input type="range" id="hm-conf-slider" class="mind-slider" min="1" max="5" step="1" value="3">
+          <div class="mind-slider-ends"><span>Unsure</span><span>Grounded</span><span>Strong</span></div>
+        </div>
+      </div>
+      <div style="margin-bottom:8px;"><button id="hm-stress-btn" onclick="toggleHubMindStress()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Stress level</button></div>
+      <div id="hm-stress-panel" style="display:none;margin-bottom:14px;">
+        <input type="range" id="hm-stress-slider" class="mind-slider" min="1" max="5" step="1" value="1" oninput="updateHubStressLabel()">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px;"><span>Low</span><span>Mild</span><span>Moderate</span><span>High</span><span>Very high</span></div>
+        <div id="hm-stress-label" style="text-align:center;font-size:12px;color:var(--accent);font-weight:500;margin-top:8px;">Low</div>
+      </div>
+      <div style="margin-bottom:8px;"><button id="hm-needs-btn" onclick="toggleHubMindNeeds()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ What do I need today?</button></div>
+      <div id="hm-needs-panel" style="display:none;margin-bottom:12px;">
+        <div class="tags" id="hm-needs-tags">
+          <button class="tag" onclick="tog(this)">Rest</button><button class="tag" onclick="tog(this)">Focus</button><button class="tag" onclick="tog(this)">Peace</button><button class="tag" onclick="tog(this)">Clarity</button><button class="tag" onclick="tog(this)">Patience</button><button class="tag" onclick="tog(this)">Encouragement</button><button class="tag" onclick="tog(this)">Boundaries</button><button class="tag" onclick="tog(this)">Courage</button><button class="tag" onclick="tog(this)">Quiet</button><button class="tag" onclick="tog(this)">Momentum</button><button class="tag" onclick="tog(this)">Prayer/Reflection</button><button class="tag" onclick="tog(this)">Support</button>
+        </div>
       </div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">One win today</div>
       <textarea id="hm-win-note" rows="2" placeholder="Big or small — new low, wore something I love…" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
-      <div style="margin-bottom:8px;"><button id="hm-gratitude-btn" onclick="toggleHubMindGratitude()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Gratitude · (select 3)</button></div>
+      <div style="margin-bottom:8px;"><button id="hm-gratitude-btn" onclick="toggleHubMindGratitude()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Gratitude (Choose one that feels true today + optional note)</button></div>
       <div id="hm-gratitude-panel" style="display:none;">
         <div class="tags" id="hm-gratitude-tags" style="margin-bottom:8px;"><button class="tag" onclick="tog(this)">My strength</button><button class="tag" onclick="tog(this)">My progress</button><button class="tag" onclick="tog(this)">My family</button><button class="tag" onclick="tog(this)">My body</button><button class="tag" onclick="tog(this)">A moment of peace</button><button class="tag" onclick="tog(this)">My support system</button><button class="tag" onclick="tog(this)">Small wins</button><button class="tag" onclick="tog(this)">My mindset</button><button class="tag" onclick="tog(this)">Being present</button><button class="tag" onclick="tog(this)">My health journey</button><button class="tag" onclick="tog(this)">Rest I got</button><button class="tag" onclick="tog(this)">My home</button></div>
         <textarea id="hm-gratitude-note" rows="2" placeholder="Write what you're grateful for…" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;"></textarea>
@@ -7466,23 +7493,27 @@ function getHubMindFormHtml(){
     </div>`;
 }
 function soloHubMindFace(btn){document.getElementById('hm-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
-function setHubMindStars(id,n){document.getElementById(id)?.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n));}
 function toggleHubMindState(){const p=document.getElementById('hm-state-panel'),b=document.getElementById('hm-state-btn'),open=p.style.display==='none'||!p.style.display;p.style.display=open?'block':'none';b.textContent=open?'− Mental state':"+ What's your mental state?";}
-function toggleHubMindRatings(){const p=document.getElementById('hm-ratings-panel'),b=document.getElementById('hm-ratings-btn'),open=p.style.display==='none'||!p.style.display;p.style.display=open?'block':'none';b.textContent=open?'− Ratings':'+ Rate your mind today';}
-function toggleHubMindGratitude(){const p=document.getElementById('hm-gratitude-panel'),b=document.getElementById('hm-gratitude-btn'),open=p.style.display==='none'||!p.style.display;p.style.display=open?'block':'none';b.textContent=open?'− Gratitude':'+ Gratitude · (select 3)';}
+function toggleHubMindRatings(){const p=document.getElementById('hm-ratings-panel'),b=document.getElementById('hm-ratings-btn'),open=p.style.display==='none'||!p.style.display;p.style.display=open?'block':'none';b.textContent=open?'− Rate your mind today':'+ Rate your mind today';}
+function toggleHubMindStress(){const p=document.getElementById('hm-stress-panel'),b=document.getElementById('hm-stress-btn'),open=p.style.display==='none'||!p.style.display;p.style.display=open?'block':'none';b.textContent=open?'− Stress level':'+ Stress level';}
+function toggleHubMindNeeds(){const p=document.getElementById('hm-needs-panel'),b=document.getElementById('hm-needs-btn'),open=p.style.display==='none'||!p.style.display;p.style.display=open?'block':'none';b.textContent=open?'− What do I need today?':'+ What do I need today?';}
+function updateHubStressLabel(){const el=document.getElementById('hm-stress-slider'),lbl=document.getElementById('hm-stress-label');if(!el||!lbl)return;const labels=['','Low','Mild','Moderate','High','Very high'];lbl.textContent=labels[parseInt(el.value)]||'';}
+function toggleHubMindGratitude(){const p=document.getElementById('hm-gratitude-panel'),b=document.getElementById('hm-gratitude-btn'),open=p.style.display==='none'||!p.style.display;p.style.display=open?'block':'none';b.textContent=open?'− Gratitude (Choose one that feels true today + optional note)':'+ Gratitude (Choose one that feels true today + optional note)';}
 async function saveHubMind(){
   const mindFace=document.getElementById('hm-face-tags')?.querySelector('.on')?.dataset.mind||'';
   const vibe=gT('hm-vibe-tags');
-  const energy=getStars('hm-energy-stars');
-  const conf=getStars('hm-conf-stars');
-  const stress=getStars('hm-stress-stars');
-  const bodyImage=getStars('hm-body-image-stars');
+  const energy=getSlider('hm-energy-slider');
+  const focus=getSlider('hm-focus-slider');
+  const stress=getSlider('hm-calm-slider');
+  const conf=getSlider('hm-conf-slider');
+  const stressLevel=getSlider('hm-stress-slider');
+  const needs=gT('hm-needs-tags');
   const win=document.getElementById('hm-win-note')?.value.trim()||'';
   const gratitudeChips=gT('hm-gratitude-tags');
   const gratitudeNote=document.getElementById('hm-gratitude-note')?.value.trim()||'';
-  if(!mindFace&&!vibe.length&&!energy&&!conf&&!stress&&!bodyImage&&!win&&!gratitudeChips.length&&!gratitudeNote){showToast('Add at least one entry first');return;}
+  if(!mindFace&&!vibe.length&&!win&&!gratitudeChips.length&&!gratitudeNote&&!needs.length){showToast('Add at least one entry first');return;}
   const dateVal=document.getElementById('hm-log-date')?.value||logicalDayStr();
-  const entry={mindFace,vibe,energy,conf,stress,bodyImage,win,gratitudeChips,gratitudeNote,date:dateVal};
+  const entry={mindFace,vibe,energy,focus,stress,conf,stressLevel,needs,win,gratitudeChips,gratitudeNote,date:dateVal};
   try{
     await dbAdd('minds',entry);
     syncToBlob('minds');
