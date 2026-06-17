@@ -3477,24 +3477,27 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Daily Reflection Prompt -->
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <div class="card-title" style="margin:0;">💭 Today's reflection prompt</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button onclick="newReflectionPrompt()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Different prompt</button>
-          <button onclick="toggleReflectionLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
-        </div>
+        <button onclick="toggleReflectionLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
       </div>
-      <div id="reflection-prompt" style="font-size:14px;color:var(--text);line-height:1.5;padding:4px 0 12px;font-style:italic;"></div>
-      <textarea id="reflection-answer" rows="3" placeholder="Write your thoughts here..."></textarea>
-      <button onclick="saveReflectionAnswer()" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);margin-top:6px;">Save reflection</button>
+      <div style="font-size:11px;color:var(--muted);font-family:Arial,var(--sans);text-align:center;margin-bottom:10px;">A few gentle thoughts for today</div>
+      <div id="reflection-prompt" style="font-family:var(--serif);font-size:17px;font-style:italic;color:var(--text);line-height:1.65;text-align:center;padding:0 4px 14px;"></div>
+      <div style="text-align:center;margin-bottom:14px;">
+        <button onclick="newReflectionPrompt()" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Different prompt</button>
+      </div>
+      <textarea id="reflection-answer" rows="3" placeholder="A sentence or two is enough..."></textarea>
+      <div style="text-align:center;margin-top:10px;">
+        <button onclick="saveReflectionAnswer()" style="padding:9px 32px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save reflection</button>
+      </div>
       <!-- Saved reflection display -->
-      <div id="reflection-saved-view" style="display:none;margin-top:10px;background:var(--warm);border-radius:10px;padding:10px 12px;">
+      <div id="reflection-saved-view" style="display:none;margin-top:14px;background:var(--warm);border-radius:10px;padding:10px 12px;">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Saved today ✓</div>
         <div id="reflection-saved-text" style="font-size:13px;color:var(--text);line-height:1.5;white-space:pre-wrap;"></div>
         <button onclick="editReflectionAnswer()" style="margin-top:8px;padding:4px 10px;border-radius:12px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Edit</button>
       </div>
       <!-- Checkboxes -->
-      <div class="med-row" id="journaled-today" onclick="toggleMindHabitCheck('journaled-today')" style="margin-top:10px;">
+      <div class="med-row" id="journaled-today" onclick="toggleMindHabitCheck('journaled-today')" style="margin-top:14px;">
         <div class="med-check">&#x2713;</div>
         <div class="med-info"><div class="med-name">Completed journal</div></div>
       </div>
@@ -3504,7 +3507,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <!-- App links -->
       <div style="display:flex;gap:8px;margin-top:12px;">
-        <a href="javascript:void(0)" onclick="openDayOne()" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">📖 Open Day One</a>
+        <a href="javascript:void(0)" onclick="openDayOne()" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">📖 Day One</a>
         <a href="javascript:void(0)" onclick="window.location.href='shortcuts://run-shortcut?name=OpenWellspoken'" class="ext-link" style="flex:1;justify-content:center;background:var(--warm);">🗣 Wellspoken</a>
       </div>
       <div id="reflection-log-daily" style="display:none;margin-top:12px;border-top:0.5px solid var(--border);padding-top:10px;"><div class="log-empty">No reflections yet.</div></div>
