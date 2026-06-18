@@ -5418,15 +5418,19 @@ function openOverlay(id){
   if(!el) return;
   el.style.display = 'block';
   document.body.style.overflow = 'hidden';
-  document.getElementById('compact-header')?.style.setProperty('visibility','hidden');
-  document.getElementById('time-tabs-bar')?.style.setProperty('visibility','hidden');
+  const ch = document.getElementById('compact-header');
+  if(ch) ch.style.display = 'none';
+  const ttb = document.getElementById('time-tabs-bar');
+  if(ttb) ttb.style.display = 'none';
 }
 function closeOverlay(id){
   const el = document.getElementById(id);
   if(el) el.style.display = 'none';
   document.body.style.overflow = '';
-  document.getElementById('compact-header')?.style.removeProperty('visibility');
-  document.getElementById('time-tabs-bar')?.style.removeProperty('visibility');
+  const ch = document.getElementById('compact-header');
+  if(ch){ ch.style.removeProperty('display'); }
+  const ttb = document.getElementById('time-tabs-bar');
+  if(ttb) ttb.style.display = 'flex';
 }
 function closeCurrentOverlay(){
   if(document.body.dataset.currentOverlay){ closeOverlay(document.body.dataset.currentOverlay); }
