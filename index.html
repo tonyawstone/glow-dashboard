@@ -1052,6 +1052,37 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
+    <!-- DailyLook Box -->
+    <div class="card" id="dailylook-box-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-package" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">DailyLook Box</div>
+        </div>
+        <button onclick="openDailyLookHistory()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past boxes →</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+        <span style="font-size:11px;color:var(--muted);">Received</span>
+        <input type="date" id="dl-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
+      </div>
+      <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;">Stylist note</div>
+      <textarea id="dl-stylist-note" rows="2" placeholder="Type or paste your stylist's note here..." style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
+      <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:8px;">Items in this box</div>
+      <div id="dl-items-list"></div>
+      <button onclick="addDailyLookItem()" style="width:100%;padding:10px;border-radius:10px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);margin-bottom:14px;">+ Add item</button>
+      <div id="dl-cart-total" style="display:none;background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:var(--muted);font-weight:500;">Cart total</span>
+          <span id="dl-cart-amount" style="font-family:var(--serif);font-size:20px;font-weight:400;color:var(--text);">$0.00</span>
+        </div>
+        <div id="dl-cart-summary" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
+      </div>
+      <div style="text-align:center;">
+        <button onclick="saveDailyLookBox()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save box</button>
+      </div>
+      <div class="toast-msg" id="dl-toast">Saved!</div>
+    </div>
+
     <!-- 2. Your Looks -->
     
     <div class="card" id="lookbook-card" style="display:none;">
@@ -4596,6 +4627,80 @@ function fmtOutfitDate(d){
   }
   return d; // already friendly format from old saves
 }
+// ── DailyLook Box ─────────────────────────────────────────────────────────
+let dlItems=[],dlItemIdCounter=0;
+function initDailyLookBox(){
+  const d=document.getElementById('dl-date');
+  if(d&&!d.value) d.value=logicalDayStr();
+}
+function addDailyLookItem(){
+  const id=dlItemIdCounter++;
+  dlItems.push({id,desc:'',price:'',keepReturn:''});
+  const container=document.getElementById('dl-items-list');
+  if(!container) return;
+  const div=document.createElement('div');
+  div.id='dl-item-'+id;
+  div.style.cssText='margin-bottom:10px;padding:12px;background:var(--cream);border:0.5px solid var(--border);border-radius:10px;';
+  div.innerHTML=`<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;"><div class="photo-slot" style="width:70px;height:88px;flex-shrink:0;" onclick="pickPhoto('dl-photo-${id}')" id="dl-photo-${id}"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><div style="flex:1;min-width:0;"><input type="text" placeholder="Item name..." oninput="dlUpdateItem(${id},'desc',this.value)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;"><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:13px;color:var(--muted);">$</span><input type="number" placeholder="0.00" step="0.01" min="0" oninput="dlUpdateItem(${id},'price',this.value)" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"><button onclick="removeDailyLookItem(${id})" style="padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;flex-shrink:0;font-family:var(--sans);">✕</button></div></div></div><div style="display:flex;gap:6px;"><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Keeping',this)" style="flex:1;text-align:center;">Keeping</button><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Returned',this)" style="flex:1;text-align:center;">Returned</button></div>`;
+  container.appendChild(div);
+  updateDailyLookCartTotal();
+}
+function removeDailyLookItem(id){
+  dlItems=dlItems.filter(i=>i.id!==id);
+  const el=document.getElementById('dl-item-'+id);
+  if(el) el.remove();
+  updateDailyLookCartTotal();
+}
+function dlUpdateItem(id,field,value){
+  const item=dlItems.find(i=>i.id===id);
+  if(item){item[field]=value;if(field==='price')updateDailyLookCartTotal();}
+}
+function dlSetKeepReturn(id,val,btn){
+  const item=dlItems.find(i=>i.id===id);
+  if(!item) return;
+  if(item.keepReturn===val){item.keepReturn='';btn.classList.remove('on');}
+  else{
+    item.keepReturn=val;
+    const row=document.getElementById('dl-item-'+id);
+    if(row) row.querySelectorAll('.dl-kr-btn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+  updateDailyLookCartTotal();
+}
+function updateDailyLookCartTotal(){
+  const keeping=dlItems.filter(i=>i.keepReturn==='Keeping');
+  const returned=dlItems.filter(i=>i.keepReturn==='Returned');
+  const undecided=dlItems.filter(i=>!i.keepReturn);
+  const total=keeping.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const totalEl=document.getElementById('dl-cart-total');
+  const amountEl=document.getElementById('dl-cart-amount');
+  const summaryEl=document.getElementById('dl-cart-summary');
+  if(!totalEl) return;
+  if(dlItems.length>0){
+    totalEl.style.display='block';
+    if(amountEl) amountEl.textContent='$'+total.toFixed(2);
+    const parts=[];
+    if(keeping.length) parts.push(keeping.length+' keeping');
+    if(returned.length) parts.push(returned.length+' returned');
+    if(undecided.length) parts.push(undecided.length+' undecided');
+    if(summaryEl) summaryEl.textContent=parts.join(' · ');
+  } else {
+    totalEl.style.display='none';
+  }
+}
+async function saveDailyLookBox(){
+  const date=document.getElementById('dl-date')?.value||logicalDayStr();
+  const stylistNote=document.getElementById('dl-stylist-note')?.value.trim()||'';
+  if(!dlItems.length&&!stylistNote){showToast('Add at least one item first');return;}
+  const entry={type:'dailylook-box',date,stylistNote,items:dlItems.map(i=>({...i}))};
+  try{
+    await dbAdd('outfits',entry);syncToBlob('outfits');
+    toast('dl-toast');
+  }catch(e){showToast('Could not save — please try again');}
+}
+function openDailyLookHistory(){showToast('Past boxes coming soon');}
+// ──────────────────────────────────────────────────────────────────────────
+
 function selectOutfitType(btn, type){
   solo('src-tags', btn);
   // Show keep/return only for DailyLook
@@ -4694,6 +4799,7 @@ async function submitLogin(){
   }
 }
 document.addEventListener('DOMContentLoaded', updateAuthUI);
+document.addEventListener('DOMContentLoaded', initDailyLookBox);
 // ── DATE NAVIGATION ───────────────────────────────────────────────────
 let viewingDate = new Date();
 viewingDate.setHours(0,0,0,0);
