@@ -13634,13 +13634,12 @@ async function buildHydrationStatus(){
     }
   } catch(e){}
 
-  // Use most recent entry — persists until replaced (no midnight reset)
+  // Reset at 3 AM — only show as completed if entry matches today's logical day
   const logical = logicalDayStr();
   const saved = JSON.parse(localStorage.getItem('glowBodyWater')||'{}');
-  // Use localStorage if it matches logical day, otherwise fall back to most recent Blob entry
-  const localValid = saved.pct && (saved.date === logical || saved.date === nowStr());
-  const mostRecent = entries[0] || null;
-  const activeEntry = localValid ? saved : mostRecent;
+  const localValid = saved.pct && saved.date === logical;
+  const blobToday = entries.find(e => e.date === logical);
+  const activeEntry = localValid ? saved : (blobToday || null);
   const waterPct = activeEntry ? parseFloat(activeEntry.pct) : null;
   const waterDate = activeEntry?.date
     ? safeDate(activeEntry.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})
