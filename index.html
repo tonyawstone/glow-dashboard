@@ -1907,14 +1907,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <span style="font-size:11px;color:var(--muted);font-weight:500;">Appetite today</span>
             <span id="body-appetite-val" style="font-size:11px;font-weight:600;color:var(--accent);"></span>
           </div>
-          <input type="range" id="body-appetite-slider" min="0" max="3" step="1" value="2"
+          <input type="range" id="body-appetite-slider" min="0" max="4" step="1" value="2"
             data-set="false" style="width:100%;accent-color:var(--accent);opacity:0.35;cursor:pointer;"
             oninput="onBodySlider('appetite',this)">
           <div style="display:flex;justify-content:space-between;margin-top:2px;">
             <span style="font-size:9px;color:var(--muted);">Much less</span>
             <span style="font-size:9px;color:var(--muted);">Slightly less</span>
             <span style="font-size:9px;color:var(--muted);">Normal</span>
-            <span style="font-size:9px;color:var(--muted);">More than usual</span>
+            <span style="font-size:9px;color:var(--muted);">Slightly more</span>
+            <span style="font-size:9px;color:var(--muted);">Much more</span>
           </div>
         </div>
         <!-- Fullness cues — chips -->
@@ -4607,7 +4608,7 @@ function soloBody(btn){document.getElementById('body-face-tags').querySelectorAl
 function soloConfidence(btn){document.getElementById('body-confidence-tags')?.querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
 function soloAppetite(btn){document.getElementById('body-appetite-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
 function soloDigestion(btn){document.getElementById('body-digestion-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
-const BODY_SLIDER_OPTS={clothesFit:['Looser','Same','Tighter'],bloating:['None','Mild','Moderate','Significant'],confidence:['Struggling','Neutral','Good','Loving it'],appetite:['Much less','Slightly less','Normal','More than usual']};
+const BODY_SLIDER_OPTS={clothesFit:['Looser','Same','Tighter'],bloating:['None','Mild','Moderate','Significant'],confidence:['Struggling','Neutral','Good','Loving it'],appetite:['Much less','Slightly less','Normal','Slightly more than usual','Much more than usual']};
 function onBodySlider(field,el){
   el.dataset.set='true'; el.style.opacity='1';
   const val=BODY_SLIDER_OPTS[field][parseInt(el.value)];
