@@ -2310,10 +2310,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Clinical Snapshot -->
     <div class="card" style="padding:12px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--text);">Clinical Snapshot</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:1px;">7-day averages from Apple Health</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-activity" style="font-size:14px;color:var(--accent);"></i>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text);">Clinical Snapshot</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:1px;">7-day averages from Apple Health</div>
+          </div>
         </div>
+        <div id="clinical-snapshot-date" style="font-size:11px;color:var(--muted);font-family:var(--sans);"></div>
       </div>
       <div id="health-clinical-metrics"><div style="font-size:11px;color:var(--muted);padding:4px 0;">Upload your weekly CSV to see metrics.</div></div>
     </div>
@@ -2557,7 +2561,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
 
     <div class="card">
-      <div class="card-title">❤️ Resting HR · last 7 days</div>
+      <div class="card-title" id="hr-resp-weekly-card">❤️ Resting HR · last 7 days</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Normal resting HR: 60–100 bpm · lower is often better for cardiovascular health</div>
       <div class="chart-wrap" style="height:180px;" id="wrap-hr-week-chart"></div>
       <div style="font-size:11px;color:var(--muted);margin-top:14px;margin-bottom:6px;">Respiratory rate · breaths/min</div>
@@ -10333,6 +10337,12 @@ async function buildHealthClinicalMetrics(){
   const linkStyle = 'padding:3px 8px;border-radius:12px;border:0.5px solid var(--border);background:var(--warm);font-size:10px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;';
   const valStyle = 'font-size:16px;font-weight:600;color:var(--text);margin:0 3px;';
 
+  const today = logicalDayStr();
+  const latestDate = rows[0]?.date;
+  const dateLabel = latestDate === today ? 'Today' : (latestDate ? safeDate(latestDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '');
+  const dateEl = document.getElementById('clinical-snapshot-date');
+  if(dateEl) dateEl.textContent = dateLabel;
+
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;">
       <div style="flex:1;display:flex;align-items:baseline;gap:3px;flex-wrap:wrap;">
@@ -10345,7 +10355,7 @@ async function buildHealthClinicalMetrics(){
         <span style="${valStyle.replace('var(--text)',trendColor)}">${trend?trendSign+trend:'—'}</span>
         <span style="font-size:11px;color:var(--muted);">lbs</span>
       </div>
-      <button onclick="tab('body')" style="${linkStyle}">Body →</button>
+      <button onclick="tab('body')" style="${linkStyle}">Weight trends →</button>
     </div>
     <div style="display:flex;align-items:center;gap:4px;">
       <div style="flex:1;display:flex;align-items:baseline;gap:3px;flex-wrap:wrap;">
@@ -10358,7 +10368,7 @@ async function buildHealthClinicalMetrics(){
         <span style="${valStyle}">${avgResp?avgResp.toFixed(1):'—'}</span>
         <span style="font-size:11px;color:var(--muted);">br/min</span>
       </div>
-      <button onclick="setView('weekly')" style="${linkStyle}">Trends →</button>
+      <button onclick="setView('weekly');setTimeout(()=>{const t=document.getElementById('hr-resp-weekly-card');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});},400)" style="${linkStyle}">Trends →</button>
     </div>
   `;
 }
