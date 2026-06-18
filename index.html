@@ -3973,9 +3973,31 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
       </div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:0.5px solid var(--border);cursor:pointer;opacity:0.5;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:0.5px solid var(--border);cursor:pointer;" onclick="toggleSettingsReminders()">
         <div style="display:flex;align-items:center;gap:10px;"><i class="ti ti-bell" style="color:var(--accent);font-size:18px;" aria-hidden="true"></i><span style="font-size:14px;color:var(--text);">Reminders &amp; Notifications</span></div>
-        <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:var(--muted);background:var(--warm);padding:2px 8px;border-radius:10px;">Coming soon</span><i class="ti ti-chevron-right" style="color:var(--muted);font-size:16px;" aria-hidden="true"></i></div>
+        <i class="ti ti-chevron-right" style="color:var(--muted);font-size:16px;transition:transform 0.2s;" id="reminders-chevron" aria-hidden="true"></i>
+      </div>
+      <div id="settings-reminders-body" style="display:none;border-bottom:0.5px solid var(--border);">
+        <!-- Daily reminders -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 42px;border-bottom:0.5px solid var(--border);cursor:pointer;opacity:0.5;">
+          <div style="display:flex;align-items:center;gap:8px;"><i class="ti ti-sun" style="color:var(--accent);font-size:15px;" aria-hidden="true"></i><span style="font-size:13px;color:var(--text);">Daily reminders</span></div>
+          <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:var(--muted);background:var(--warm);padding:2px 8px;border-radius:10px;">Coming soon</span><i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;" aria-hidden="true"></i></div>
+        </div>
+        <!-- Weekly reminders -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 42px;border-bottom:0.5px solid var(--border);cursor:pointer;" onclick="openWeeklyReminders()">
+          <div style="display:flex;align-items:center;gap:8px;"><i class="ti ti-calendar-week" style="color:var(--accent);font-size:15px;" aria-hidden="true"></i><span style="font-size:13px;color:var(--text);">Weekly reminders</span></div>
+          <i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;" aria-hidden="true"></i>
+        </div>
+        <!-- Check-in reminders -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 42px;border-bottom:0.5px solid var(--border);cursor:pointer;opacity:0.5;">
+          <div style="display:flex;align-items:center;gap:8px;"><i class="ti ti-clipboard-check" style="color:var(--accent);font-size:15px;" aria-hidden="true"></i><span style="font-size:13px;color:var(--text);">Check-in reminders</span></div>
+          <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:var(--muted);background:var(--warm);padding:2px 8px;border-radius:10px;">Coming soon</span><i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;" aria-hidden="true"></i></div>
+        </div>
+        <!-- Coach Nudges -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 42px;cursor:pointer;opacity:0.5;">
+          <div style="display:flex;align-items:center;gap:8px;"><i class="ti ti-sparkles" style="color:var(--accent);font-size:15px;" aria-hidden="true"></i><span style="font-size:13px;color:var(--text);">Coach Nudges</span></div>
+          <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:var(--muted);background:var(--warm);padding:2px 8px;border-radius:10px;">Coming soon</span><i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;" aria-hidden="true"></i></div>
+        </div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:0.5px solid var(--border);cursor:pointer;opacity:0.5;">
         <div style="display:flex;align-items:center;gap:10px;"><i class="ti ti-checklist" style="color:var(--accent);font-size:18px;" aria-hidden="true"></i><span style="font-size:14px;color:var(--text);">Check-in Requirements</span></div>
@@ -7592,6 +7614,18 @@ function toggleSettingsSync(){
   const open = body.style.display==='block';
   body.style.display = open ? 'none' : 'block';
   if(chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
+}
+
+function toggleSettingsReminders(){
+  const body = document.getElementById('settings-reminders-body');
+  const chevron = document.getElementById('reminders-chevron');
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  if(chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
+}
+
+function openWeeklyReminders(){
+  // Placeholder — weekly reminders config panel coming next
 }
 
 function toggleSettingsAbout(){
