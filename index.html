@@ -14792,9 +14792,15 @@ function renderTodayIntentionStrip(word, dateSet){
 async function loadWeekIntention(){
   const weekStart = getMondayWeekStart();
   try{
-    // Always read from IndexedDB (synced from Blob)
-    const all = await dbAll('intentions');
-    const thisWeek = all.find(e=>e.weekStart===weekStart);
+    // Read from IndexedDB first (populated by syncAllFromBlob on page load)
+    let all = await dbAll('intentions');
+    let thisWeek = all.find(e=>e.weekStart===weekStart);
+    // IDB miss — fetch from backend directly (cross-device sync fallback)
+    if(!thisWeek){
+      await loadFromBlob('intentions');
+      all = await dbAll('intentions');
+      thisWeek = all.find(e=>e.weekStart===weekStart);
+    }
     if(thisWeek){
       showIntentionSetView(thisWeek.word, thisWeek.date||thisWeek.weekStart);
       renderTodayIntentionStrip(thisWeek.word, thisWeek.date||thisWeek.weekStart);
