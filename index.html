@@ -1918,17 +1918,16 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <span style="font-size:9px;color:var(--muted);">Much more</span>
           </div>
         </div>
-        <!-- Fullness cues — chips -->
-        <div style="margin-bottom:14px;">
-          <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:8px;">Fullness cues</div>
-          <div class="tags" id="body-fullness-tags">
-            <button class="tag" onclick="tog(this);saveBodyDraft()">Full quickly</button><button class="tag" onclick="tog(this);saveBodyDraft()">Satisfied</button><button class="tag" onclick="tog(this);saveBodyDraft()">Still hungry</button><button class="tag" onclick="tog(this);saveBodyDraft()">Ate too much</button>
-          </div>
-        </div>
-        <!-- Pill toggles: Digestion, Zepbound side effects -->
+        <!-- Pill toggles: Fullness cues, Digestion, Zepbound side effects -->
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          <button id="body-fullness-btn" onclick="toggleBodyPanel('fullness','Fullness cues')" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Fullness cues</button>
           <button id="body-digestion-btn" onclick="toggleBodyPanel('digestion','Digestion')" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Digestion</button>
           <button id="body-zep-side-btn" onclick="toggleBodyPanel('zep-side','Zepbound side effects')" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Zepbound side effects</button>
+        </div>
+        <div id="body-fullness-panel" style="display:none;">
+          <div class="tags" id="body-fullness-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="tog(this);saveBodyDraft()">Full quickly</button><button class="tag" onclick="tog(this);saveBodyDraft()">Satisfied</button><button class="tag" onclick="tog(this);saveBodyDraft()">Still hungry</button><button class="tag" onclick="tog(this);saveBodyDraft()">Ate too much</button>
+          </div>
         </div>
         <div id="body-digestion-panel" style="display:none;">
           <div class="tags" id="body-digestion-tags" style="margin-bottom:12px;">
@@ -2368,7 +2367,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <span style="font-size:11px;color:var(--muted);">Date</span>
           <input type="date" id="wellness-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Any symptoms, BP concerns, medication issues, or hydration concerns today?</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Overall health feeling</div>
         <div style="display:flex;justify-content:space-between;margin-bottom:16px;" id="wellness-face-tags">
           <button class="sqb" data-wellness="Low" onclick="soloWellnessFace(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
             <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/></svg></div>
@@ -2391,13 +2390,19 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <span class="sqb-lbl">Amazing</span>
           </button>
         </div>
-        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Health status / symptoms</div>
-        <div class="tags" id="wellness-symptom-tags" style="margin-bottom:14px;">
-          <button class="tag" onclick="tog(this);saveWellnessDraft()">Normal</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Steady</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Headache</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Fatigue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Dizzy</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Nausea</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Pain</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Bloating</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Constipation</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Brain fog</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Injection site soreness</button>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          <button id="wellness-symptom-btn" onclick="toggleWellnessPanel('symptom','Health symptoms')" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Health symptoms</button>
+          <button id="wellness-concerns-btn" onclick="toggleWellnessPanel('concerns','Other health concerns')" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Other health concerns</button>
         </div>
-        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">BP / medication / hydration</div>
-        <div class="tags" id="wellness-concerns-tags" style="margin-bottom:14px;">
-          <button class="tag" onclick="tog(this);saveWellnessDraft()">BP concern</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Medication issue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Hydration concern</button>
+        <div id="wellness-symptom-panel" style="display:none;">
+          <div class="tags" id="wellness-symptom-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="tog(this);saveWellnessDraft()">Normal</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Steady</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Headache</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Fatigue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Dizzy</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Nausea</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Pain</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Bloating</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Constipation</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Brain fog</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Injection site soreness</button>
+          </div>
+        </div>
+        <div id="wellness-concerns-panel" style="display:none;">
+          <div class="tags" id="wellness-concerns-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="tog(this);saveWellnessDraft()">BP concern</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Medication issue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Hydration concern</button>
+          </div>
         </div>
         <textarea id="wellness-note" rows="2" placeholder="Any symptoms, BP, medication, or hydration notes today?" oninput="saveWellnessDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
         <div style="text-align:center;">
@@ -4511,7 +4516,7 @@ function restoreBodyDraft(){
   if(d.bloating) setBodySlider('bloating', d.bloating);
   if(d.confidence) setBodySlider('confidence', d.confidence);
   if(d.appetite) setBodySlider('appetite', d.appetite);
-  if(d.fullnessCues?.length) restoreTags('body-fullness-tags', d.fullnessCues);
+  if(d.fullnessCues?.length){restoreTags('body-fullness-tags',d.fullnessCues);const p=document.getElementById('body-fullness-panel');if(p&&p.style.display==='none')toggleBodyPanel('fullness','Fullness cues');}
   if(d.digestion){const b=Array.from(document.getElementById('body-digestion-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.digestion);if(b){soloDigestion(b);const p=document.getElementById('body-digestion-panel');if(p&&p.style.display==='none')toggleBodyPanel('digestion','Digestion');}}
   if(d.zepSideEffects?.length){restoreTags('body-zep-side-tags',d.zepSideEffects);const p=document.getElementById('body-zep-side-panel');if(p&&p.style.display==='none')toggleBodyPanel('zep-side','Zepbound side effects');}
   if(d.nsv?.length){restoreTags('nsv-tags', d.nsv);const p=document.getElementById('body-nsv-panel');if(p&&p.style.display==='none')toggleBodyNsvTags();}
@@ -9030,7 +9035,7 @@ function editBodyCheckin(){
   if(state.bloating) setBodySlider('bloating', state.bloating);
   if(state.confidence) setBodySlider('confidence', state.confidence);
   if(state.appetite) setBodySlider('appetite', state.appetite);
-  if(state.fullnessCues?.length) restoreTags('body-fullness-tags', state.fullnessCues);
+  if(state.fullnessCues?.length){restoreTags('body-fullness-tags',state.fullnessCues);const p=document.getElementById('body-fullness-panel');if(p&&p.style.display==='none')toggleBodyPanel('fullness','Fullness cues');}
   if(state.digestion){const b=Array.from(document.getElementById('body-digestion-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.digestion);if(b){soloDigestion(b);const p=document.getElementById('body-digestion-panel');if(p&&p.style.display==='none')toggleBodyPanel('digestion','Digestion');}}
   if(state.zepSideEffects?.length){restoreTags('body-zep-side-tags',state.zepSideEffects);const p=document.getElementById('body-zep-side-panel');if(p&&p.style.display==='none')toggleBodyPanel('zep-side','Zepbound side effects');}
   if(state.nsv?.length){restoreTags('nsv-tags', state.nsv);const p=document.getElementById('body-nsv-panel');if(p&&p.style.display==='none')toggleBodyNsvTags();}
@@ -9883,6 +9888,12 @@ async function saveBody(){
 // ── WELLNESS CHECK-IN ──────────────────────────────────────────────────────
 function soloWellnessFace(btn){document.getElementById('wellness-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveWellnessDraft();}
 function soloWellnessGroup(id,btn){document.getElementById(id).querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveWellnessDraft();}
+function toggleWellnessPanel(panel,label){
+  const p=document.getElementById('wellness-'+panel+'-panel'),b=document.getElementById('wellness-'+panel+'-btn');
+  if(!p) return; const o=p.style.display==='none';
+  p.style.display=o?'block':'none';
+  if(b) b.textContent=(o?'– ':'+ ')+label;
+}
 function toggleWellnessEnergy(){const p=document.getElementById('wellness-energy-panel'),b=document.getElementById('wellness-energy-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Energy level':'+ Energy level';}
 function toggleWellnessAppetite(){const p=document.getElementById('wellness-appetite-panel'),b=document.getElementById('wellness-appetite-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Appetite today':'+ Appetite today';}
 function toggleWellnessSymptoms(){const p=document.getElementById('wellness-symptoms-panel'),b=document.getElementById('wellness-symptoms-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Add symptoms':'+ Add symptoms';}
@@ -9898,8 +9909,8 @@ function saveWellnessDraft(){
 function restoreWellnessDraft(){
   const d = getPillarDraft('wellness'); if(!d) return;
   if(d.wellnessFace){const b=document.getElementById('wellness-face-tags')?.querySelector('[data-wellness="'+d.wellnessFace+'"]');if(b)soloWellnessFace(b);}
-  if(d.symptoms?.length) restoreTags('wellness-symptom-tags',d.symptoms);
-  if(d.concerns?.length) restoreTags('wellness-concerns-tags',d.concerns);
+  if(d.symptoms?.length){restoreTags('wellness-symptom-tags',d.symptoms);const p=document.getElementById('wellness-symptom-panel');if(p&&p.style.display==='none')toggleWellnessPanel('symptom','Health symptoms');}
+  if(d.concerns?.length){restoreTags('wellness-concerns-tags',d.concerns);const p=document.getElementById('wellness-concerns-panel');if(p&&p.style.display==='none')toggleWellnessPanel('concerns','Other health concerns');}
   if(d.note && document.getElementById('wellness-note')) document.getElementById('wellness-note').value = d.note;
 }
 function showWellnessCheckinSaved(e){
@@ -9938,8 +9949,8 @@ function editWellnessCheckin(){
   if(!state) return;
   if(state.wellnessFace){const b=document.getElementById('wellness-face-tags')?.querySelector('[data-wellness="'+state.wellnessFace+'"]');if(b)soloWellnessFace(b);}
   if(state.date && document.getElementById('wellness-log-date')) document.getElementById('wellness-log-date').value = state.date;
-  if(state.symptoms?.length) restoreTags('wellness-symptom-tags',state.symptoms);
-  if(state.concerns?.length) restoreTags('wellness-concerns-tags',state.concerns);
+  if(state.symptoms?.length){restoreTags('wellness-symptom-tags',state.symptoms);const p=document.getElementById('wellness-symptom-panel');if(p&&p.style.display==='none')toggleWellnessPanel('symptom','Health symptoms');}
+  if(state.concerns?.length){restoreTags('wellness-concerns-tags',state.concerns);const p=document.getElementById('wellness-concerns-panel');if(p&&p.style.display==='none')toggleWellnessPanel('concerns','Other health concerns');}
   if(state.note && document.getElementById('wellness-note')) document.getElementById('wellness-note').value = state.note;
 }
 async function restoreWellnessCheckinState(){
