@@ -1788,28 +1788,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <div class="view-content on" id="vc-body-daily">
     <div class="section-label">Body & Zepbound Journey <button class="guide-btn" onclick="openGuide('body')">?</button></div>
     <div class="success-banner"><strong>Zepbound started Oct 25, 2025</strong><br>201.4 → 170.7 lbs · <strong>30.7 lbs lost</strong> · 7 months · All-time low 168.7 (May 19)</div>
-    <!-- Unified body stats card — populated dynamically -->
-    <div class="card" id="body-stats-card">
-      <div id="body-stats-content">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-          <div style="text-align:center;">
-            <div style="font-family:var(--serif);font-size:28px;font-weight:300;color:var(--text);">—<span style="font-size:14px;font-weight:400;color:var(--muted);"> lbs</span></div>
-            <div style="font-size:11px;color:var(--muted);">Current</div>
-          </div>
-          <div style="text-align:center;">
-            <div style="font-family:var(--serif);font-size:28px;font-weight:300;color:var(--text);">—<span style="font-size:14px;font-weight:400;color:var(--muted);"> lbs</span></div>
-            <div style="font-size:11px;color:var(--muted);">All-time low</div>
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);text-align:center;">Upload CSV to see latest values</div>
-      </div>
-    </div>
-
     <div class="card" id="body-checkin-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <i class="ti ti-barbell" style="font-size:13px;color:var(--accent);"></i>
-          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">How is your transformation going?</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-barbell" style="font-size:11px;color:#A07850;"></i></div>
+          <div>
+            <div class="card-title" style="margin:0;">Body check-in</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:1px;">How do you feel in your body today?</div>
+          </div>
         </div>
         <div id="body-checkin-header-right" style="display:flex;align-items:center;gap:8px;">
           <button onclick="openBodyLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
@@ -1821,7 +1807,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <span style="font-size:11px;color:var(--muted);">Date</span>
           <input type="date" id="body-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">How do you feel in your body today?</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:500;">Body feeling</div>
         <div style="display:flex;justify-content:space-between;margin-bottom:14px;" id="body-face-tags">
           <button class="sqb" data-body="Low" onclick="soloBody(this)" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px;">
             <div class="sqb-face"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><circle cx="9.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><path d="M9.5 18 Q13 15.5 16.5 18"/></svg></div>
@@ -1844,16 +1830,39 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <span class="sqb-lbl">Amazing</span>
           </button>
         </div>
-        <div style="margin-bottom:8px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;">Clothes fit</div>
+        <div class="tags" id="body-clothes-tags" style="margin-bottom:12px;">
+          <button class="tag" onclick="soloClothes(this)">Looser</button><button class="tag" onclick="soloClothes(this)">Same</button><button class="tag" onclick="soloClothes(this)">Tighter</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;">Bloating</div>
+        <div class="tags" id="body-bloating-tags" style="margin-bottom:12px;">
+          <button class="tag" onclick="soloBloating(this)">None</button><button class="tag" onclick="soloBloating(this)">Mild</button><button class="tag" onclick="soloBloating(this)">Moderate</button><button class="tag" onclick="soloBloating(this)">Significant</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;">Appetite & fullness</div>
+        <div class="tags" id="body-appetite-tags" style="margin-bottom:12px;">
+          <button class="tag" onclick="soloAppetite(this)">Not hungry</button><button class="tag" onclick="soloAppetite(this)">Satisfied</button><button class="tag" onclick="soloAppetite(this)">Normal</button><button class="tag" onclick="soloAppetite(this)">Extra hungry</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;">Digestion</div>
+        <div class="tags" id="body-digestion-tags" style="margin-bottom:12px;">
+          <button class="tag" onclick="soloDigestion(this)">Normal</button><button class="tag" onclick="soloDigestion(this)">Constipated</button><button class="tag" onclick="soloDigestion(this)">Nausea</button><button class="tag" onclick="soloDigestion(this)">Heartburn</button><button class="tag" onclick="soloDigestion(this)">Loose</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;">Zepbound side effects</div>
+        <div class="tags" id="body-zep-side-tags" style="margin-bottom:12px;">
+          <button class="tag" onclick="tog(this);saveBodyDraft()">None</button><button class="tag" onclick="tog(this);saveBodyDraft()">Nausea</button><button class="tag" onclick="tog(this);saveBodyDraft()">Fatigue</button><button class="tag" onclick="tog(this);saveBodyDraft()">Constipation</button><button class="tag" onclick="tog(this);saveBodyDraft()">Hair thinning</button><button class="tag" onclick="tog(this);saveBodyDraft()">Injection site</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:500;">Body confidence</div>
+        <div class="tags" id="body-confidence-tags" style="margin-bottom:12px;">
+          <button class="tag" onclick="soloConfidence(this)">Loving it</button><button class="tag" onclick="soloConfidence(this)">Good</button><button class="tag" onclick="soloConfidence(this)">Neutral</button><button class="tag" onclick="soloConfidence(this)">Struggling</button>
+        </div>
+        <textarea id="zep-note" rows="2" placeholder="Quick note…" oninput="saveBodyDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:10px;"></textarea>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
           <button id="body-nsv-btn" onclick="toggleBodyNsvTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Any wins today</button>
+          <button id="body-measure-btn" onclick="toggleBodyMeasureTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Measurements</button>
         </div>
         <div id="body-nsv-panel" style="display:none;">
           <div class="tags" id="nsv-tags" style="margin-bottom:12px;">
             <button class="tag" onclick="tog(this);saveBodyDraft()">Clothes looser</button><button class="tag" onclick="tog(this);saveBodyDraft()">Compliment</button><button class="tag" onclick="tog(this);saveBodyDraft()">New low</button><button class="tag" onclick="tog(this);saveBodyDraft()">Less bloated</button><button class="tag" onclick="tog(this);saveBodyDraft()">More energy</button><button class="tag" onclick="tog(this);saveBodyDraft()">Feeling strong</button><button class="tag" onclick="tog(this);saveBodyDraft()">Waist smaller</button>
           </div>
-        </div>
-        <div style="margin-bottom:8px;">
-          <button id="body-measure-btn" onclick="toggleBodyMeasureTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Measurements</button>
         </div>
         <div id="body-measure-panel" style="display:none;">
           <div class="two-col" style="margin-bottom:12px;">
@@ -1861,30 +1870,28 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Hips (in)</div><input type="number" id="hips" placeholder="—" step="0.5" oninput="saveBodyDraft()"></div>
           </div>
         </div>
-        <div style="margin-bottom:8px;">
-          <button id="body-confidence-btn" onclick="toggleBodyConfidenceTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Confidence in your body</button>
-        </div>
-        <div id="body-confidence-panel" style="display:none;">
-          <div class="tags" id="body-confidence-tags" style="margin-bottom:12px;">
-            <button class="tag" onclick="soloConfidence(this)">Loving it</button><button class="tag" onclick="soloConfidence(this)">Good</button><button class="tag" onclick="soloConfidence(this)">Neutral</button><button class="tag" onclick="soloConfidence(this)">Struggling</button>
-          </div>
-        </div>
-        <div style="margin-bottom:10px;">
-          <button id="body-clothes-btn" onclick="toggleBodyClothesTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Clothes fit today</button>
-        </div>
-        <div id="body-clothes-panel" style="display:none;">
-          <div class="tags" id="body-clothes-tags" style="margin-bottom:12px;">
-            <button class="tag" onclick="soloClothes(this)">Looser</button><button class="tag" onclick="soloClothes(this)">Same</button><button class="tag" onclick="soloClothes(this)">Tighter</button>
-          </div>
-        </div>
-        <textarea id="zep-note" rows="2" placeholder="How is your body responding this week? Appetite, energy, physical changes…" oninput="saveBodyDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
         <div style="text-align:center;">
           <button onclick="saveBody()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
         </div>
         <div class="toast-msg" id="bt">Saved!</div>
       </div>
     </div>
-
+    <!-- Unified body stats card — populated dynamically -->
+    <div class="card" id="body-stats-card">
+      <div id="body-stats-content">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div style="text-align:center;">
+            <div style="font-family:var(--serif);font-size:28px;font-weight:300;color:var(--text);">—<span style="font-size:14px;font-weight:400;color:var(--muted);"> lbs</span></div>
+            <div style="font-size:11px;color:var(--muted);">Current</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:var(--serif);font-size:28px;font-weight:300;color:var(--text);">—<span style="font-size:14px;font-weight:400;color:var(--muted);"> lbs</span></div>
+            <div style="font-size:11px;color:var(--muted);">All-time low</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;">Upload CSV to see latest values</div>
+      </div>
+    </div>
     <div class="card" id="gait-summary-card">
       <div class="card-title">🚶 Gait & Mobility · 7-day avg</div>
       <div id="gait-summary-content"><div class="log-empty">Loading...</div></div>
@@ -4222,21 +4229,29 @@ function restoreSleepDraft(){
 function saveBodyDraft(){
   savePillarDraft('body',{
     bodyFace: document.getElementById('body-face-tags')?.querySelector('.on')?.dataset.body||'',
+    clothesFit: document.getElementById('body-clothes-tags')?.querySelector('.on')?.textContent?.trim()||'',
+    bloating: document.getElementById('body-bloating-tags')?.querySelector('.on')?.textContent?.trim()||'',
+    appetite: document.getElementById('body-appetite-tags')?.querySelector('.on')?.textContent?.trim()||'',
+    digestion: document.getElementById('body-digestion-tags')?.querySelector('.on')?.textContent?.trim()||'',
+    zepSideEffects: getTags('body-zep-side-tags'),
+    confidence: document.getElementById('body-confidence-tags')?.querySelector('.on')?.textContent?.trim()||'',
     nsv: getTags('nsv-tags'),
     waist: document.getElementById('waist')?.value||'',
     hips: document.getElementById('hips')?.value||'',
-    confidence: document.getElementById('body-confidence-tags')?.querySelector('.on')?.textContent?.trim()||'',
-    clothesFit: document.getElementById('body-clothes-tags')?.querySelector('.on')?.textContent?.trim()||'',
     noteZep: document.getElementById('zep-note')?.value||''
   });
 }
 function restoreBodyDraft(){
   const d = getPillarDraft('body'); if(!d) return;
   if(d.bodyFace){const b=document.getElementById('body-face-tags')?.querySelector('[data-body="'+d.bodyFace+'"]');if(b) soloBody(b);}
+  if(d.clothesFit){const b=Array.from(document.getElementById('body-clothes-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.clothesFit);if(b) soloClothes(b);}
+  if(d.bloating){const b=Array.from(document.getElementById('body-bloating-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.bloating);if(b) soloBloating(b);}
+  if(d.appetite){const b=Array.from(document.getElementById('body-appetite-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.appetite);if(b) soloAppetite(b);}
+  if(d.digestion){const b=Array.from(document.getElementById('body-digestion-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.digestion);if(b) soloDigestion(b);}
+  if(d.zepSideEffects?.length) restoreTags('body-zep-side-tags', d.zepSideEffects);
+  if(d.confidence){const b=Array.from(document.getElementById('body-confidence-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.confidence);if(b) soloConfidence(b);}
   if(d.nsv?.length){restoreTags('nsv-tags', d.nsv);const p=document.getElementById('body-nsv-panel');if(p&&p.style.display==='none')toggleBodyNsvTags();}
   if(d.waist||d.hips){if(d.waist&&document.getElementById('waist'))document.getElementById('waist').value=d.waist;if(d.hips&&document.getElementById('hips'))document.getElementById('hips').value=d.hips;const p=document.getElementById('body-measure-panel');if(p&&p.style.display==='none')toggleBodyMeasureTags();}
-  if(d.confidence){const b=Array.from(document.getElementById('body-confidence-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.confidence);if(b){soloConfidence(b);const p=document.getElementById('body-confidence-panel');if(p&&p.style.display==='none')toggleBodyConfidenceTags();}}
-  if(d.clothesFit){const b=Array.from(document.getElementById('body-clothes-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.clothesFit);if(b){soloClothes(b);const p=document.getElementById('body-clothes-panel');if(p&&p.style.display==='none')toggleBodyClothesTags();}}
   if(d.noteZep && document.getElementById('zep-note')) document.getElementById('zep-note').value = d.noteZep;
 }
 
@@ -4328,6 +4343,9 @@ function soloSkin(btn){document.getElementById('skin-face-tags').querySelectorAl
 function soloBody(btn){document.getElementById('body-face-tags').querySelectorAll('.sqb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
 function soloConfidence(btn){document.getElementById('body-confidence-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
 function soloClothes(btn){document.getElementById('body-clothes-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
+function soloBloating(btn){document.getElementById('body-bloating-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
+function soloAppetite(btn){document.getElementById('body-appetite-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
+function soloDigestion(btn){document.getElementById('body-digestion-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
 function toggleBodyNsvTags(){const p=document.getElementById('body-nsv-panel'),b=document.getElementById('body-nsv-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Any wins today':'+ Any wins today';}
 function toggleBodyMeasureTags(){const p=document.getElementById('body-measure-panel'),b=document.getElementById('body-measure-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Measurements':'+ Measurements';}
 function toggleBodyConfidenceTags(){const p=document.getElementById('body-confidence-panel'),b=document.getElementById('body-confidence-btn');if(!p)return;const o=p.style.display==='none';p.style.display=o?'block':'none';if(b)b.textContent=o?'– Confidence in your body':'+ Confidence in your body';}
@@ -8589,7 +8607,8 @@ function showBodyCheckinSaved(e){
   const body = document.getElementById('body-checkin-body');
   if(body) body.style.display = 'none';
   saved.style.display = 'block';
-  saved.innerHTML = `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">${bodyFaces.map(f=>faceSvg(f,e.bodyFace===f)).join('')}${nsvChips(e.nsv)}${measureChip}${warmChip(e.confidence)}${warmChip(e.clothesFit)}${editPill}</div>${noteHtml}`;
+  const sideChips = (e.zepSideEffects||[]).filter(Boolean).map(v=>warmChip(v)).join('');
+  saved.innerHTML = `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">${bodyFaces.map(f=>faceSvg(f,e.bodyFace===f)).join('')}${warmChip(e.clothesFit)}${warmChip(e.bloating)}${warmChip(e.appetite)}${warmChip(e.digestion)}${sideChips}${warmChip(e.confidence)}${nsvChips(e.nsv)}${measureChip}${editPill}</div>${noteHtml}`;
 }
 
 function editBodyCheckin(){
@@ -8603,10 +8622,14 @@ function editBodyCheckin(){
   if(!state) return;
   if(state.bodyFace){const b=document.getElementById('body-face-tags')?.querySelector('[data-body="'+state.bodyFace+'"]');if(b) soloBody(b);}
   if(state.date && document.getElementById('body-log-date')) document.getElementById('body-log-date').value = state.date;
+  if(state.clothesFit){const b=Array.from(document.getElementById('body-clothes-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.clothesFit);if(b) soloClothes(b);}
+  if(state.bloating){const b=Array.from(document.getElementById('body-bloating-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.bloating);if(b) soloBloating(b);}
+  if(state.appetite){const b=Array.from(document.getElementById('body-appetite-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.appetite);if(b) soloAppetite(b);}
+  if(state.digestion){const b=Array.from(document.getElementById('body-digestion-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.digestion);if(b) soloDigestion(b);}
+  if(state.zepSideEffects?.length) restoreTags('body-zep-side-tags', state.zepSideEffects);
+  if(state.confidence){const b=Array.from(document.getElementById('body-confidence-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.confidence);if(b) soloConfidence(b);}
   if(state.nsv?.length){restoreTags('nsv-tags', state.nsv);const p=document.getElementById('body-nsv-panel');if(p&&p.style.display==='none')toggleBodyNsvTags();}
   if(state.waist||state.hips){if(state.waist&&document.getElementById('waist'))document.getElementById('waist').value=state.waist;if(state.hips&&document.getElementById('hips'))document.getElementById('hips').value=state.hips;const p=document.getElementById('body-measure-panel');if(p&&p.style.display==='none')toggleBodyMeasureTags();}
-  if(state.confidence){const b=Array.from(document.getElementById('body-confidence-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.confidence);if(b){soloConfidence(b);const p=document.getElementById('body-confidence-panel');if(p&&p.style.display==='none')toggleBodyConfidenceTags();}}
-  if(state.clothesFit){const b=Array.from(document.getElementById('body-clothes-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.clothesFit);if(b){soloClothes(b);const p=document.getElementById('body-clothes-panel');if(p&&p.style.display==='none')toggleBodyClothesTags();}}
   if(state.noteZep && document.getElementById('zep-note')) document.getElementById('zep-note').value = state.noteZep;
 }
 
@@ -9400,29 +9423,35 @@ async function openHairLog(){
 
 async function saveBody(){
   const bodyFace = document.getElementById('body-face-tags')?.querySelector('.on')?.dataset.body||'';
+  const clothesFit = document.getElementById('body-clothes-tags')?.querySelector('.on')?.textContent?.trim()||'';
+  const bloating = document.getElementById('body-bloating-tags')?.querySelector('.on')?.textContent?.trim()||'';
+  const appetite = document.getElementById('body-appetite-tags')?.querySelector('.on')?.textContent?.trim()||'';
+  const digestion = document.getElementById('body-digestion-tags')?.querySelector('.on')?.textContent?.trim()||'';
+  const zepSideEffects = getTags('body-zep-side-tags');
+  const confidence = document.getElementById('body-confidence-tags')?.querySelector('.on')?.textContent?.trim()||'';
   const nsv = getTags('nsv-tags');
   const waist = document.getElementById('waist')?.value||'';
   const hips = document.getElementById('hips')?.value||'';
-  const confidence = document.getElementById('body-confidence-tags')?.querySelector('.on')?.textContent?.trim()||'';
-  const clothesFit = document.getElementById('body-clothes-tags')?.querySelector('.on')?.textContent?.trim()||'';
   const noteZep = document.getElementById('zep-note')?.value.trim()||'';
   const dateVal = document.getElementById('body-log-date')?.value||nowStr();
-  if(!bodyFace && !nsv.length && !waist && !hips && !confidence && !clothesFit && !noteZep){ showToast('Add at least one entry first'); return; }
-  const entry={type:'body',bodyFace,nsv,waist,hips,confidence,clothesFit,noteZep,note:noteZep,date:dateVal};
+  if(!bodyFace && !clothesFit && !bloating && !appetite && !digestion && !zepSideEffects.length && !confidence && !nsv.length && !waist && !hips && !noteZep){ showToast('Add at least one entry first'); return; }
+  const entry={type:'body',bodyFace,clothesFit,bloating,appetite,digestion,zepSideEffects,confidence,nsv,waist,hips,noteZep,note:noteZep,date:dateVal};
   try{
     await dbAdd('bodies',entry);
     syncToBlob('bodies');
     document.getElementById('body-face-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('body-clothes-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('body-bloating-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('body-appetite-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('body-digestion-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('body-zep-side-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    document.getElementById('body-confidence-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     document.getElementById('nsv-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     if(document.getElementById('waist')) document.getElementById('waist').value='';
     if(document.getElementById('hips')) document.getElementById('hips').value='';
-    document.getElementById('body-confidence-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
-    document.getElementById('body-clothes-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     if(document.getElementById('zep-note')) document.getElementById('zep-note').value='';
     const nsvP=document.getElementById('body-nsv-panel');if(nsvP&&nsvP.style.display!=='none')toggleBodyNsvTags();
     const mP=document.getElementById('body-measure-panel');if(mP&&mP.style.display!=='none')toggleBodyMeasureTags();
-    const cP=document.getElementById('body-confidence-panel');if(cP&&cP.style.display!=='none')toggleBodyConfidenceTags();
-    const clP=document.getElementById('body-clothes-panel');if(clP&&clP.style.display!=='none')toggleBodyClothesTags();
     localStorage.setItem('glowBodyCheckinState', JSON.stringify({...entry, savedAt: Date.now()}));
     clearPillarDraft('body');
     toast('bt');
