@@ -2307,7 +2307,16 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-
+    <!-- Clinical Snapshot -->
+    <div class="card" style="padding:12px 14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);">Clinical Snapshot</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:1px;">7-day averages from Apple Health</div>
+        </div>
+      </div>
+      <div id="health-clinical-metrics"><div style="font-size:11px;color:var(--muted);padding:4px 0;">Upload your weekly CSV to see metrics.</div></div>
+    </div>
 
     <!-- Medications & Vitamins -->
     <div class="card">
@@ -2449,17 +2458,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
 
 
-    <!-- Apple Health clinical metrics -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleClinicalMetrics()">
-        <div class="card-title" style="margin:0;">📊 Clinical metrics · 7-day avg</div>
-        <button id="clinical-metrics-toggle" style="background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0 4px;">▾</button>
-      </div>
-      <div id="clinical-metrics-body" style="display:none;margin-top:12px;">
-        <div id="health-clinical-metrics"><div class="log-empty">Upload your weekly CSV to see weight trend, resting HR, gait and respiratory data.</div></div>
-      </div>
-    </div>
-
     <!-- Lab results -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
@@ -2556,6 +2554,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="card-title">💧 Body water % · this week</div>
       <div class="chart-wrap" style="height:200px;" id="wrap-bodywater-week-chart"></div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">Healthy range for women: 45–60% · Estimated from Withings scale data</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">❤️ Resting HR · last 7 days</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Normal resting HR: 60–100 bpm · lower is often better for cardiovascular health</div>
+      <div class="chart-wrap" style="height:180px;" id="wrap-hr-week-chart"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:14px;margin-bottom:6px;">Respiratory rate · breaths/min</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Normal range: 12–20 breaths/min</div>
+      <div class="chart-wrap" style="height:180px;" id="wrap-resp-week-chart"></div>
     </div>
 
   </div>
@@ -2793,7 +2800,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="med-row" id="r-musely-game" onclick="toggleSkinStep('r-musely-game')" style="flex:1;margin:0;">
             <div class="med-check">&#x2713;</div>
-            <div class="med-info"><div class="med-name">Musely</div><div class="med-note">Daily skin health activity</div></div>
+            <div class="med-info"><div class="med-name">Musely avatar game</div><div class="med-note">Daily skin health activity</div></div>
           </div>
           <a href="javascript:void(0)" onclick="window.location.href='shortcuts://run-shortcut?name=OpenMusely'" style="display:block;border-radius:50%;overflow:hidden;line-height:0;box-shadow:0 2px 8px rgba(0,0,0,0.14);flex-shrink:0;">
             <svg width="52" height="52" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
@@ -4112,7 +4119,7 @@ function setView(v,btn){
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
-  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();}if(v==='monthly')buildZepMonthlyTracker();}
+  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildHRRespWeekCharts();}if(v==='monthly')buildZepMonthlyTracker();}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); if(v==='monthly') setTimeout(()=>switchSkinMetricChart(activeSkinMetric, document.querySelector('#skin-metric-tabs .chart-tab.on')||document.querySelector('#skin-metric-tabs .chart-tab')),100); }
   if(curTab==='hair'&&v!=='daily'){ buildHairCharts(); if(v==='weekly'){ loadHairAnalysesLog(); loadHairMilestones(); } }
   if(curTab==='body'&&v!=='daily'){ buildBodyCompChartsForView(v); if(v==='weekly'){ buildWeeklyExercise(); buildGaitWeekCharts(); } if(v==='yearly') buildBodyYearlySummary(); }
@@ -10321,34 +10328,85 @@ async function buildHealthClinicalMetrics(){
   };
   const trend = weightTrend();
 
+  const trendColor = trend && parseFloat(trend) < 0 ? '#27500A' : trend && parseFloat(trend) > 0 ? '#92400E' : 'var(--text)';
+  const trendSign = trend && parseFloat(trend) > 0 ? '+' : '';
+  const linkStyle = 'padding:3px 8px;border-radius:12px;border:0.5px solid var(--border);background:var(--warm);font-size:10px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;';
+  const valStyle = 'font-size:16px;font-weight:600;color:var(--text);margin:0 3px;';
+
   el.innerHTML = `
-    <div class="lab-section-title">Weight · 7-day avg</div>
-    <div class="snapshot-grid">
-      <div class="snapshot-item">
-        <div class="snapshot-label">7-day avg</div>
-        <div class="snapshot-val">${avgWeight?avgWeight.toFixed(1):'—'}</div>
-        <div class="snapshot-sub">lbs</div>
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;">
+      <div style="flex:1;display:flex;align-items:baseline;gap:3px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--muted);">Weight</span>
+        <span style="${valStyle}">${avgWeight?avgWeight.toFixed(1):'—'}</span>
+        <span style="font-size:11px;color:var(--muted);">lbs</span>
       </div>
-      <div class="snapshot-item">
-        <div class="snapshot-label">7-day change</div>
-        <div class="snapshot-val" style="font-size:18px;color:${trend&&parseFloat(trend)<0?'#27500A':trend&&parseFloat(trend)>0?'#92400E':'var(--text)'};">${trend?(parseFloat(trend)>0?'+':'')+trend:'—'}</div>
-        <div class="snapshot-sub">lbs ${trend&&parseFloat(trend)<0?'↓ lost':trend&&parseFloat(trend)>0?'↑ gained':''}</div>
+      <div style="flex:1;display:flex;align-items:baseline;gap:3px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--muted);">Change</span>
+        <span style="${valStyle.replace('var(--text)',trendColor)}">${trend?trendSign+trend:'—'}</span>
+        <span style="font-size:11px;color:var(--muted);">lbs</span>
       </div>
+      <button onclick="tab('body')" style="${linkStyle}">Body →</button>
     </div>
-    <div class="lab-section-title" style="margin-top:14px;">Heart & Breathing · 7-day avg</div>
-    <div class="snapshot-grid">
-      <div class="snapshot-item">
-        <div class="snapshot-label">Resting HR</div>
-        <div class="snapshot-val">${avgHR?Math.round(avgHR):'—'}</div>
-        <div class="snapshot-sub">bpm</div>
+    <div style="display:flex;align-items:center;gap:4px;">
+      <div style="flex:1;display:flex;align-items:baseline;gap:3px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--muted);">Resting HR</span>
+        <span style="${valStyle}">${avgHR?Math.round(avgHR):'—'}</span>
+        <span style="font-size:11px;color:var(--muted);">bpm</span>
       </div>
-      <div class="snapshot-item">
-        <div class="snapshot-label">Resp. Rate</div>
-        <div class="snapshot-val">${avgResp?avgResp.toFixed(1):'—'}</div>
-        <div class="snapshot-sub">breaths/min</div>
+      <div style="flex:1;display:flex;align-items:baseline;gap:3px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--muted);">Resp. Rate</span>
+        <span style="${valStyle}">${avgResp?avgResp.toFixed(1):'—'}</span>
+        <span style="font-size:11px;color:var(--muted);">br/min</span>
       </div>
+      <button onclick="setView('weekly')" style="${linkStyle}">Trends →</button>
     </div>
   `;
+}
+
+async function buildHRRespWeekCharts(){
+  const rows = await getCSVRows();
+  const now = new Date();
+  const days = [];
+  for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+  const labels = days.map(d=>safeDate(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+
+  const wrapHR = document.getElementById('wrap-hr-week-chart');
+  if(wrapHR){
+    const cid='hr-week-chart';
+    if(!wrapHR.querySelector('canvas')){const c=document.createElement('canvas');c.id=cid;wrapHR.appendChild(c);}
+    if(chartInstances[cid]){chartInstances[cid].destroy();delete chartInstances[cid];}
+    const hrData=days.map(d=>{const r=rows.find(e=>e.date===d);return r&&parseFloat(r.resting_hr)>0?parseFloat(r.resting_hr):null;});
+    if(!rows.length||!hrData.some(v=>v!==null)){wrapHR.innerHTML='<div class="log-empty">Upload your weekly CSV to see HR data.</div>';}
+    else{
+      chartInstances[cid]=new Chart(wrapHR.querySelector('canvas').getContext('2d'),{
+        type:'line',
+        data:{labels,datasets:[{label:'Resting HR',data:hrData,borderColor:'#C4735A',backgroundColor:'rgba(196,115,90,0.1)',borderWidth:2,pointRadius:4,fill:true,tension:0.3,spanGaps:true}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`HR: ${Math.round(c.parsed.y)} bpm`}}},
+          scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}},
+            y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',callback:v=>v+' bpm'},suggestedMin:50,suggestedMax:90}}}
+      });
+    }
+  }
+
+  const wrapResp = document.getElementById('wrap-resp-week-chart');
+  if(wrapResp){
+    const cid2='resp-week-chart';
+    if(!wrapResp.querySelector('canvas')){const c=document.createElement('canvas');c.id=cid2;wrapResp.appendChild(c);}
+    if(chartInstances[cid2]){chartInstances[cid2].destroy();delete chartInstances[cid2];}
+    const respData=days.map(d=>{const r=rows.find(e=>e.date===d);return r&&parseFloat(r.respiratory_rate)>0?parseFloat(r.respiratory_rate):null;});
+    if(!rows.length||!respData.some(v=>v!==null)){wrapResp.innerHTML='<div class="log-empty">Upload your weekly CSV to see respiratory data.</div>';}
+    else{
+      chartInstances[cid2]=new Chart(wrapResp.querySelector('canvas').getContext('2d'),{
+        type:'line',
+        data:{labels,datasets:[{label:'Resp. Rate',data:respData,borderColor:'#6B9E78',backgroundColor:'rgba(107,158,120,0.1)',borderWidth:2,pointRadius:4,fill:true,tension:0.3,spanGaps:true}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Resp: ${c.parsed.y.toFixed(1)} breaths/min`}}},
+          scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'}},
+            y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B',callback:v=>v+'/min'},suggestedMin:10,suggestedMax:25}}}
+      });
+    }
+  }
 }
 
 async function buildGaitMobilitySummary(){
