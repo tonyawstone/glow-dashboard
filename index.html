@@ -4041,10 +4041,10 @@ async function getRealAge(){
 
 // ── DB ────────────────────────────────────────────────────────────────
 let db;
-const req=indexedDB.open('GlowDashboard',7);
+const req=indexedDB.open('GlowDashboard',8);
 req.onupgradeneeded=e=>{
   db=e.target.result;
-  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries','water','intentions','myair','bodies'].forEach(s=>{
+  ['checkins','outfits','sleeps','skins','hairs','minds','reflections','bps','labs','exercises','wardrobeplans','boxsummaries','water','intentions','myair','bodies','wellness_checkins'].forEach(s=>{
     if(!db.objectStoreNames.contains(s)) db.createObjectStore(s,{keyPath:'id',autoIncrement:true});
   });
   if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});
@@ -5494,22 +5494,32 @@ async function openSkinLog(){
   openOverlay(overlay.id);
   el.innerHTML='<div class="log-empty">Loading...</div>';
   try {
-    const skins = await dbAll('skins');
-    // Deduplicate — keep last entry per date (most complete)
+    let skins = await dbAll('skins');
+    if(!skins.length){
+      try{
+        const res = await fetch(`${BACKEND}/api/sync?pillar=skins&t=${Date.now()}`);
+        if(res.ok){ const d=await res.json(); skins=Array.isArray(d.data)?d.data:[]; }
+      }catch(e){}
+    }
     const seen = new Set();
     const entries = [...skins].filter(s=>s.type==='checkin').reverse().filter(e=>{
       if(seen.has(e.date)) return false;
       seen.add(e.date); return true;
     });
     if(!entries.length){ el.innerHTML='<div class="log-empty">No skin check-ins yet.</div>'; return; }
+    const chip = (v,accent)=>`<span style="background:${accent?'rgba(160,120,80,0.1)':'var(--warm)'};border:0.5px solid ${accent?'rgba(160,120,80,0.25)':'var(--border)'};border-radius:20px;padding:3px 10px;font-size:11px;color:${accent?'var(--accent)':'inherit'};">${v}</span>`;
     let html='';
     for(const e of entries){
+      const stateChips=(e.skinState||[]).map(c=>chip(c,false)).join('');
+      const concernChips=(e.concerns||[]).map(c=>chip(c,true)).join('');
+      const muselyChip=e.musely?chip('Musely: '+e.musely,true):'';
       html+='<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
-        +'<div style="font-size:12px;color:var(--muted);">'+e.date+'</div>'
-        +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
-        +[...(e.skinT||[]),...(e.concerns||[])].map(c=>'<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;">'+c+'</span>').join('')
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+        +'<div style="font-size:12px;color:var(--muted);">'+fmtOutfitDate(e.date)+'</div>'
+        +(e.skinFace?'<span style="font-size:12px;font-weight:500;color:var(--text);">'+e.skinFace+'</span>':'')
         +'</div>'
-        +(e.derm?'<div style="font-size:12px;color:var(--muted);margin-top:4px;">'+e.derm+'</div>':'')
+        +((stateChips||concernChips||muselyChip)?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">'+stateChips+concernChips+muselyChip+'</div>':'')
+        +(e.note?'<div style="font-size:12px;color:var(--muted);margin-top:2px;">'+e.note+'</div>':'')
         +'</div>';
     }
     el.innerHTML=html;
@@ -7534,7 +7544,7 @@ async function renderCheckinHub(){
 
   const PILLARS = [
     { icon:'ti-brain', name:'Mind', done:!!mindEntry,
-      saved: mindEntry ? `${(mindEntry.vibe||[]).length?`<div style="margin-bottom:4px;">${chips(mindEntry.vibe)}</div>`:''}${mindEntry.win?`<div>Win: ${mindEntry.win}</div>`:''}` : null,
+      saved: mindEntry ? `${mindEntry.mindFace?`<div style="margin-bottom:2px;font-weight:500;">${mindEntry.mindFace}</div>`:''}${(mindEntry.vibe||[]).length?`<div style="margin-bottom:4px;">${chips(mindEntry.vibe)}</div>`:''}${(mindEntry.needs||[]).length?`<div style="margin-bottom:4px;">${chips(mindEntry.needs)}</div>`:''}${mindEntry.win?`<div style="font-style:italic;">Win: ${mindEntry.win}</div>`:''}` : null,
       formHtml: !mindEntry ? getHubMindFormHtml() : null,
       tab:'mind', scrollId:'mind-checkin-card', toggleFn:'' },
     { icon:'ti-moon', name:'Sleep', done:!!sleepEntry,
@@ -7542,15 +7552,15 @@ async function renderCheckinHub(){
       formHtml: !sleepEntry ? getHubSleepFormHtml() : null,
       tab:'sleep', scrollId:'sleep-checkin-chevron', toggleFn:'toggleSleepCheckin' },
     { icon:'ti-leaf', name:'Wellness', done:!!wellnessEntry,
-      saved: wellnessEntry ? `${wellnessEntry.wellnessFace?`<div style="margin-bottom:2px;">${wellnessEntry.wellnessFace}</div>`:''}${wellnessEntry.energy?`<div style="margin-bottom:2px;">${wellnessEntry.energy}</div>`:''}${(wellnessEntry.symptoms||[]).length?`<div style="margin-bottom:4px;">${chips(wellnessEntry.symptoms)}</div>`:''}${wellnessEntry.note?`<div style="color:var(--muted);">${wellnessEntry.note}</div>`:''}` : null,
+      saved: wellnessEntry ? `${wellnessEntry.wellnessFace?`<div style="margin-bottom:2px;font-weight:500;">${wellnessEntry.wellnessFace}</div>`:''}${(wellnessEntry.energy||wellnessEntry.appetite)?`<div style="margin-bottom:2px;color:var(--muted);">${[wellnessEntry.energy,wellnessEntry.appetite].filter(Boolean).join(' · ')}</div>`:''}${(wellnessEntry.symptoms||[]).length?`<div style="margin-bottom:4px;">${chips(wellnessEntry.symptoms)}</div>`:''}${(wellnessEntry.feelings||[]).length?`<div style="margin-bottom:4px;">${chips(wellnessEntry.feelings)}</div>`:''}${wellnessEntry.note?`<div style="color:var(--muted);">${wellnessEntry.note}</div>`:''}` : null,
       formHtml: !wellnessEntry ? getHubWellnessFormHtml() : null,
       tab:'health', scrollId:'wellness-checkin-card', toggleFn:'' },
     { icon:'ti-sparkles', name:'Skin', done:!!skinEntry,
-      saved: skinEntry ? `${skinEntry.skinFace?`<div style="margin-bottom:2px;">${skinEntry.skinFace}</div>`:''}${(skinEntry.skinState||[]).length?`<div style="margin-bottom:4px;">${chips(skinEntry.skinState)}</div>`:''}${skinEntry.note?`<div style="color:var(--muted);">${skinEntry.note}</div>`:''}` : null,
+      saved: skinEntry ? `${skinEntry.skinFace?`<div style="margin-bottom:2px;font-weight:500;">${skinEntry.skinFace}</div>`:''}${(skinEntry.skinState||[]).length?`<div style="margin-bottom:4px;">${chips(skinEntry.skinState)}</div>`:''}${(skinEntry.concerns||[]).length?`<div style="margin-bottom:4px;">${chips(skinEntry.concerns)}</div>`:''}${skinEntry.musely?`<div style="margin-bottom:2px;color:var(--muted);">Musely: ${skinEntry.musely}</div>`:''}${skinEntry.note?`<div style="color:var(--muted);">${skinEntry.note}</div>`:''}` : null,
       formHtml: !skinEntry ? getHubSkinFormHtml() : null,
       tab:'skin', scrollId:'skin-checkin-chevron', toggleFn:'toggleSkinCheckin' },
     { icon:'ti-barbell', name:'Body', done:!!bodyEntry,
-      saved: bodyEntry ? `${(bodyEntry.nsv||[]).length?`<div style="margin-bottom:4px;">${chips(bodyEntry.nsv)}</div>`:''}${(bodyEntry.waist||bodyEntry.hips)?`<div>${[bodyEntry.waist?'Waist: '+bodyEntry.waist+'"':'',bodyEntry.hips?'Hips: '+bodyEntry.hips+'"':''].filter(Boolean).join(' · ')}</div>`:''}` : null,
+      saved: bodyEntry ? `${bodyEntry.bodyFace?`<div style="margin-bottom:2px;font-weight:500;">${bodyEntry.bodyFace}</div>`:''}${(bodyEntry.nsv||[]).length?`<div style="margin-bottom:4px;">${chips(bodyEntry.nsv)}</div>`:''}${(bodyEntry.clothesFit||bodyEntry.bloating)?`<div style="margin-bottom:2px;color:var(--muted);">${[bodyEntry.clothesFit?'Fit: '+bodyEntry.clothesFit:'',bodyEntry.bloating?'Bloating: '+bodyEntry.bloating:''].filter(Boolean).join(' · ')}</div>`:''}${(bodyEntry.waist||bodyEntry.hips)?`<div style="color:var(--muted);">${[bodyEntry.waist?'Waist: '+bodyEntry.waist+'"':'',bodyEntry.hips?'Hips: '+bodyEntry.hips+'"':''].filter(Boolean).join(' · ')}</div>`:''}` : null,
       formHtml: !bodyEntry ? getHubBodyFormHtml() : null,
       tab:'body', scrollId:'body-log-chevron', toggleFn:'toggleBodyLog' },
     { icon:'ti-hanger', name:'Style', done:!!styleCheckinEntry||!!outfitEntry,
@@ -8723,21 +8733,23 @@ function editBodyCheckin(){
 
 async function restoreBodyCheckinState(){
   try{
-    const today = nowStr();
+    const today = logicalDayStr();
     const dateEl = document.getElementById('body-log-date');
     if(dateEl && !dateEl.value) dateEl.value = today;
     const cached = JSON.parse(localStorage.getItem('glowBodyCheckinState')||'null');
-    if(cached && cached.savedAt && cached.date===today && (Date.now()-cached.savedAt)<86400000){
+    if(cached && cached.date===today){
       showBodyCheckinSaved(cached); return;
     }
     let entry = null;
     const bodies = await dbAll('bodies');
     entry = bodies.filter(e=>e.type==='body'&&e.date===today).pop();
     if(!entry){
-      const res = await fetch(`${BACKEND}/api/sync?pillar=bodies&t=${Date.now()}`);
-      if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
-        entry = data.filter(e=>e.type==='body'&&e.date===today).pop();
-      }
+      try{
+        const res = await fetch(`${BACKEND}/api/sync?pillar=bodies&t=${Date.now()}`);
+        if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
+          entry = data.filter(e=>e.type==='body'&&e.date===today).pop();
+        }
+      }catch(e){}
     }
     if(entry) showBodyCheckinSaved(entry);
   }catch(e){}
@@ -8852,9 +8864,9 @@ function editMindCheckin(){
 
 async function restoreMindCheckinState(){
   try{
-    const today = nowStr();
+    const today = logicalDayStr();
     const cached = JSON.parse(localStorage.getItem('glowMindCheckinState')||'null');
-    if(cached && cached.savedAt && cached.date===today && (Date.now()-cached.savedAt)<86400000){
+    if(cached && cached.date===today){
       showMindCheckinSaved(cached); return;
     }
     let entry = null;
@@ -8872,7 +8884,39 @@ async function restoreMindCheckinState(){
   }catch(e){}
 }
 
-function openMindLog(){ showToast('Mind history coming soon'); }
+async function openMindLog(){
+  const overlay = document.getElementById('mind-log-overlay');
+  const el = document.getElementById('mind-log-overlay-content');
+  openOverlay(overlay.id);
+  el.innerHTML='<div class="log-empty">Loading...</div>';
+  try{
+    let entries = await dbAll('minds');
+    if(!entries.length){
+      try{
+        const res = await fetch(`${BACKEND}/api/sync?pillar=minds&t=${Date.now()}`);
+        if(res.ok){ const d=await res.json(); entries=Array.isArray(d.data)?d.data:[]; }
+      }catch(e){}
+    }
+    entries = entries.sort((a,b)=>b.date.localeCompare(a.date));
+    if(!entries.length){ el.innerHTML='<div class="log-empty">No mind check-ins yet.</div>'; return; }
+    const chip=(v,green)=>`<span style="background:${green?'rgba(107,158,120,0.12)':'var(--warm)'};border:0.5px solid ${green?'rgba(107,158,120,0.3)':'var(--border)'};border-radius:20px;padding:3px 10px;font-size:11px;color:${green?'#27500A':'inherit'};">${v}</span>`;
+    const slLbl=(v,lo,mid,hi)=>{const n=parseInt(v)||3;return n<=2?lo:n>=4?hi:mid;};
+    const stressLabels=['','Low','Mild','Moderate','High','Very high'];
+    el.innerHTML=entries.map(e=>`
+      <div style="padding:12px 0;border-bottom:0.5px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <div style="font-size:12px;color:var(--muted);">${fmtOutfitDate(e.date)}</div>
+          ${e.mindFace?`<span style="font-size:12px;font-weight:500;color:var(--text);">${e.mindFace}</span>`:''}
+        </div>
+        ${(e.vibe||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">${(e.vibe||[]).map(v=>chip(v,true)).join('')}</div>`:''}
+        ${(e.needs||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">${(e.needs||[]).map(v=>chip(v,false)).join('')}</div>`:''}
+        ${(e.energy||e.focus||e.stress||e.conf)?`<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Energy: ${slLbl(e.energy,'Drained','Steady','Energized')} · Focus: ${slLbl(e.focus,'Scattered','Present','Clear')} · Calm: ${slLbl(e.stress,'Tense','Settled','Peaceful')}</div>`:''}
+        ${e.stressLevel?`<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Stress: ${stressLabels[parseInt(e.stressLevel)]||''}</div>`:''}
+        ${e.win?`<div style="font-size:12px;color:var(--text);font-style:italic;margin-bottom:2px;">Win: ${e.win}</div>`:''}
+        ${(e.gratitudeChips?.length||e.gratitudeNote)?`<div style="font-size:12px;color:var(--muted);">${(e.gratitudeChips||[]).map(v=>chip(v,false)).join(' ')} ${e.gratitudeNote||''}</div>`:''}
+      </div>`).join('');
+  }catch(err){ el.innerHTML='<div class="log-empty">Could not load entries.</div>'; }
+}
 
 function toggleSkinAM(forceOpen){
   const body = document.getElementById('skin-am-body');
@@ -8981,31 +9025,26 @@ function editSkinCheckin(){
 
 async function restoreSkinCheckinState(){
   try{
-    const now = new Date();
-    const localHour = now.getHours();
+    const today = logicalDayStr();
     const stored = localStorage.getItem('glowSkinCheckinState');
     if(stored){
       const s = JSON.parse(stored);
-      const savedAt = s.savedAt ? new Date(s.savedAt) : null;
-      const hoursAgo = savedAt ? (now - savedAt) / 3600000 : 999;
-      if(hoursAgo < 27){
-        showSkinCheckinSaved(s);
-        return;
+      if(s.date === today){
+        showSkinCheckinSaved(s); return;
       } else {
         localStorage.removeItem('glowSkinCheckinState');
       }
     }
-    const logical = logicalDayStr();
     const skins = await dbAll('skins');
-    const entry = skins.filter(e=>e.type==='checkin').find(e=>e.date===logical);
+    const entry = skins.filter(e=>e.type==='checkin').find(e=>e.date===today);
     if(entry){ showSkinCheckinSaved(entry); return; }
-    if(!entry){
+    try{
       const res = await fetch(`${BACKEND}/api/sync?pillar=skins&t=${Date.now()}`);
       if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
-        const found = data.filter(e=>e.type==='checkin').find(e=>e.date===logical);
+        const found = data.filter(e=>e.type==='checkin').find(e=>e.date===today);
         if(found) showSkinCheckinSaved(found);
       }
-    }
+    }catch(e){}
   }catch(e){}
 }
 
@@ -9521,7 +9560,7 @@ async function saveBody(){
   const waist = document.getElementById('waist')?.value||'';
   const hips = document.getElementById('hips')?.value||'';
   const noteZep = document.getElementById('zep-note')?.value.trim()||'';
-  const dateVal = document.getElementById('body-log-date')?.value||nowStr();
+  const dateVal = document.getElementById('body-log-date')?.value||logicalDayStr();
   if(!bodyFace && !clothesFit && !bloating && !appetite && !digestion && !zepSideEffects.length && !confidence && !nsv.length && !waist && !hips && !noteZep){ showToast('Add at least one entry first'); return; }
   const entry={type:'body',bodyFace,clothesFit,bloating,appetite,digestion,zepSideEffects,confidence,nsv,waist,hips,noteZep,note:noteZep,date:dateVal};
   try{
@@ -9668,7 +9707,33 @@ async function saveWellness(){
     buildDailyProgress();
   }catch(err){ showToast('Could not save — please try again'); }
 }
-function openWellnessLog(){ showToast('Wellness history coming soon'); }
+async function openWellnessLog(){
+  const overlay = document.getElementById('wellness-log-overlay');
+  const el = document.getElementById('wellness-log-overlay-content');
+  openOverlay(overlay.id);
+  el.innerHTML='<div class="log-empty">Loading...</div>';
+  try {
+    let entries = await dbAll('wellness_checkins');
+    if(!entries.length){
+      try{
+        const res = await fetch(`${BACKEND}/api/sync?pillar=wellness_checkins&t=${Date.now()}`);
+        if(res.ok){ const d=await res.json(); entries=Array.isArray(d.data)?d.data:[]; }
+      }catch(e){}
+    }
+    entries = entries.sort((a,b)=>b.date.localeCompare(a.date));
+    if(!entries.length){ el.innerHTML='<div class="log-empty">No wellness check-ins yet.</div>'; return; }
+    const chips = arr=>(arr||[]).filter(Boolean).map(v=>`<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;">${v}</span>`).join('');
+    el.innerHTML = entries.map(e=>`
+      <div style="padding:12px 0;border-bottom:0.5px solid var(--border);">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${fmtOutfitDate(e.date)}</div>
+        ${e.wellnessFace?`<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;">${e.wellnessFace}</div>`:''}
+        ${(e.energy||e.appetite)?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${[e.energy?'Energy: '+e.energy:'',e.appetite?'Appetite: '+e.appetite:''].filter(Boolean).join(' · ')}</div>`:''}
+        ${(e.symptoms||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">${chips(e.symptoms)}</div>`:''}
+        ${(e.feelings||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">${chips(e.feelings)}</div>`:''}
+        ${e.note?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">${e.note}</div>`:''}
+      </div>`).join('');
+  }catch(err){ el.innerHTML='<div class="log-empty">Could not load entries.</div>'; }
+}
 
 async function saveExercise(){
   const walk=document.getElementById('ex-walk').value;
@@ -17902,6 +17967,26 @@ async function weeklyMindInsight(){
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Exercise Log</div>
     </div>
     <div id="exercise-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="wellness-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('wellness-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Wellness History</div>
+    </div>
+    <div id="wellness-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="mind-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('mind-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Mind History</div>
+    </div>
+    <div id="mind-log-overlay-content"><div class="log-empty">Loading...</div></div>
   </div>
 </div>
 
