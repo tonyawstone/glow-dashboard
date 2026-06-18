@@ -2208,6 +2208,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div onclick="pickPhoto('body-may26-side')" id="body-may26-side" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Side</div></div>
         <div onclick="pickPhoto('body-may26-back')" id="body-may26-back" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Back</div></div>
       </div>
+    </div>
     <!-- Body Coach -->
     <div class="card" id="body-coach-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -4579,7 +4580,7 @@ function logicalDayStr(){
   return nowStr(now);
 }
 // Steps & exercise from CSV always use yesterday's complete data, not today's partial data
-function getStepsRow(rows){ return rows.find(r=>r.date===yesterdayStr()&&parseInt(r.steps)>0) || rows.find(r=>parseInt(r.steps)>0); }
+function getStepsRow(rows){ return rows.find(r=>r.date===nowStr()&&parseInt(r.steps)>0) || rows.find(r=>r.date===yesterdayStr()&&parseInt(r.steps)>0) || rows.find(r=>parseInt(r.steps)>0); }
 function getExerciseRows(rows, sinceDate){ return rows.filter(r=>r.date!==nowStr()&&(r.exercise_types||parseInt(r.exercise_minutes)>0)&&(!sinceDate||r.date>=sinceDate)); }
 function logItem(date,chips,note){return`<div class="log-item"><div class="log-date">${date}</div><div class="chips">${chips.filter(Boolean).map(c=>'<span class="chip">'+c+'</span>').join('')}</div>${note?'<div class="log-note">'+note.replace(/\n/g,'<br>')+'</div>':''}</div>`;}
 function renderLog(id,items,fn){
@@ -15220,11 +15221,12 @@ async function loadTodaySleepFromCSV(){
       if(weightSrcEl) weightSrcEl.textContent = 'Withings';
     }
 
-    // Steps — always use yesterday's complete data (today's is still accumulating)
+    // Steps — show today if available (still accumulating), else yesterday's complete data
     const latestSteps = getStepsRow(rows);
     if(latestSteps){
+      const isToday = latestSteps.date === nowStr();
       if(stepsEl) stepsEl.textContent = parseInt(latestSteps.steps).toLocaleString();
-      if(stepsSrcEl) stepsSrcEl.textContent = latestSteps.date===yesterdayStr()?'Yesterday':smartDate(latestSteps.date);
+      if(stepsSrcEl) stepsSrcEl.textContent = isToday ? 'Today · still collecting' : (latestSteps.date===yesterdayStr()?'Yesterday':smartDate(latestSteps.date));
     }
 
     // Sleep from CSV
