@@ -5418,11 +5418,15 @@ function openOverlay(id){
   if(!el) return;
   el.style.display = 'block';
   document.body.style.overflow = 'hidden';
+  const ch = document.getElementById('compact-header');
+  if(ch) ch.style.visibility = 'hidden';
 }
 function closeOverlay(id){
   const el = document.getElementById(id);
   if(el) el.style.display = 'none';
   document.body.style.overflow = '';
+  const ch = document.getElementById('compact-header');
+  if(ch) ch.style.visibility = '';
 }
 function closeCurrentOverlay(){
   if(document.body.dataset.currentOverlay){ closeOverlay(document.body.dataset.currentOverlay); }
