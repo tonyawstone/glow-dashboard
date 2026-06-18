@@ -5326,7 +5326,20 @@ async function saveDailyLookBox(){
       await new Promise(r=>tx.oncomplete=r);
       _editingBoxRecord=updatedRecord;
     } else {
-      await dbAdd('outfits',{type:'dailylook-box',date,stylistNote,stylistPhoto,items:itemsWithPhotos,tryOns:tryOnsWithPhotos});
+      const newTs=Date.now();
+      await dbAdd('outfits',{type:'dailylook-box',date,stylistNote,stylistPhoto,items:itemsWithPhotos,tryOns:tryOnsWithPhotos,ts:newTs});
+      // Switch to edit mode so future saves update this box instead of creating new ones
+      const all=await dbAll('outfits');
+      const saved=all.find(e=>e.ts===newTs&&e.type==='dailylook-box');
+      if(saved){
+        _editingBoxRecord=saved;
+        const banner=document.getElementById('dl-editing-banner');
+        const label=document.getElementById('dl-editing-label');
+        const saveBtn=document.getElementById('dl-save-btn');
+        if(banner)banner.style.display='flex';
+        if(label)label.textContent='Box saved · tap to keep updating';
+        if(saveBtn)saveBtn.textContent='Update box';
+      }
     }
     syncToBlob('outfits');
     toast('dl-toast');
