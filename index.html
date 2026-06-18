@@ -1065,6 +1065,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <span style="font-size:11px;color:var(--muted);">Received</span>
         <input type="date" id="dl-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
       </div>
+      <div id="dl-editing-banner" style="display:none;background:var(--accent);color:#fff;border-radius:10px;padding:8px 12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <span id="dl-editing-label" style="font-size:12px;"></span>
+        <button onclick="resetDailyLookBox()" style="background:rgba(255,255,255,0.25);border:none;border-radius:6px;padding:3px 8px;font-size:11px;color:#fff;cursor:pointer;font-family:var(--sans);">+ New box</button>
+      </div>
       <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;">Stylist note</div>
       <textarea id="dl-stylist-note" rows="2" placeholder="Type or paste your stylist's note here..." style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
       <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:8px;">Items in this box</div>
@@ -1077,10 +1081,29 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <div id="dl-cart-summary" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
       </div>
+      <!-- Try-on looks section -->
+      <div id="dl-tryons-section" style="display:none;border-top:0.5px solid var(--border);padding-top:12px;margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:8px;">Try-on looks</div>
+        <div id="dl-tryons-list" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px;"></div>
+        <button onclick="addDailyLookTryOn()" style="width:100%;padding:8px;border-radius:10px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">+ Add try-on photo</button>
+      </div>
       <div style="text-align:center;">
-        <button onclick="saveDailyLookBox()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save box</button>
+        <button id="dl-save-btn" onclick="saveDailyLookBox()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save box</button>
       </div>
       <div class="toast-msg" id="dl-toast">Saved!</div>
+    </div>
+
+    <!-- Past Boxes overlay -->
+    <div id="dl-history-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:600;overflow-y:auto;">
+      <div style="min-height:100%;padding:16px;box-sizing:border-box;padding-top:40px;padding-bottom:40px;max-width:420px;margin:0 auto;">
+        <div style="background:#fff;border-radius:16px;padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="font-family:var(--serif);font-size:20px;color:var(--text);">Past Boxes</div>
+            <button onclick="closeDailyLookHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;line-height:1;">×</button>
+          </div>
+          <div id="dl-history-list"></div>
+        </div>
+      </div>
     </div>
 
 
@@ -5121,14 +5144,17 @@ async function deleteClosetItem(){
   loadCloset();
 }
 
-let dlItems=[],dlItemIdCounter=0;
+let dlItems=[],dlItemIdCounter=0,dlTryOns=[],dlTryOnCounter=0,_editingBoxRecord=null;
+
 function initDailyLookBox(){
   const d=document.getElementById('dl-date');
   if(d&&!d.value) d.value=logicalDayStr();
 }
-function addDailyLookItem(){
+
+function addDailyLookItem(existingItem=null){
   const id=dlItemIdCounter++;
-  dlItems.push({id,desc:'',price:'',keepReturn:''});
+  const item=existingItem?{...existingItem,id}:{id,desc:'',price:'',keepReturn:''};
+  dlItems.push(item);
   const container=document.getElementById('dl-items-list');
   if(!container) return;
   const div=document.createElement('div');
@@ -5136,18 +5162,30 @@ function addDailyLookItem(){
   div.style.cssText='margin-bottom:10px;padding:12px;background:var(--cream);border:0.5px solid var(--border);border-radius:10px;';
   div.innerHTML=`<div style="display:flex;gap:8px;margin-bottom:8px;"><div style="flex:1;text-align:center;"><div class="photo-slot" style="width:100%;height:110px;" onclick="pickPhoto('dl-photo-${id}-front')" id="dl-photo-${id}-front"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div></div><div style="flex:1;text-align:center;"><div class="photo-slot" style="width:100%;height:110px;" onclick="pickPhoto('dl-photo-${id}-back')" id="dl-photo-${id}-back"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div></div></div><input type="text" placeholder="Item name..." oninput="dlUpdateItem(${id},'desc',this.value)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:13px;color:var(--muted);">$</span><input type="number" placeholder="0.00" step="0.01" min="0" oninput="dlUpdateItem(${id},'price',this.value)" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"><button onclick="removeDailyLookItem(${id})" style="padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;flex-shrink:0;font-family:var(--sans);">✕</button></div><div style="display:flex;gap:6px;"><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Keeping',this)" style="flex:1;text-align:center;">Keeping</button><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Returned',this)" style="flex:1;text-align:center;">Returned</button></div>`;
   container.appendChild(div);
+  // Restore saved data if loading from history
+  if(item.desc){const inp=div.querySelector('input[type="text"]');if(inp)inp.value=item.desc;}
+  if(item.price){const inp=div.querySelector('input[type="number"]');if(inp)inp.value=item.price;}
+  if(item.keepReturn){div.querySelectorAll('.dl-kr-btn').forEach(b=>{if(b.textContent.trim()===item.keepReturn)b.classList.add('on');});}
+  if(item.photoFront){const s=document.getElementById(`dl-photo-${id}-front`);if(s){s.style.backgroundImage=`url('${item.photoFront}')`;s.style.backgroundSize='cover';s.style.backgroundPosition='center';s.innerHTML='';}}
+  if(item.photoBack){const s=document.getElementById(`dl-photo-${id}-back`);if(s){s.style.backgroundImage=`url('${item.photoBack}')`;s.style.backgroundSize='cover';s.style.backgroundPosition='center';s.innerHTML='';}}
   updateDailyLookCartTotal();
+  // Show try-on section once items exist
+  const ts=document.getElementById('dl-tryons-section');if(ts)ts.style.display='block';
 }
+
 function removeDailyLookItem(id){
   dlItems=dlItems.filter(i=>i.id!==id);
   const el=document.getElementById('dl-item-'+id);
   if(el) el.remove();
   updateDailyLookCartTotal();
+  if(!dlItems.length){const ts=document.getElementById('dl-tryons-section');if(ts)ts.style.display='none';}
 }
+
 function dlUpdateItem(id,field,value){
   const item=dlItems.find(i=>i.id===id);
   if(item){item[field]=value;if(field==='price')updateDailyLookCartTotal();}
 }
+
 function dlSetKeepReturn(id,val,btn){
   const item=dlItems.find(i=>i.id===id);
   if(!item) return;
@@ -5160,6 +5198,7 @@ function dlSetKeepReturn(id,val,btn){
   }
   updateDailyLookCartTotal();
 }
+
 function updateDailyLookCartTotal(){
   const keeping=dlItems.filter(i=>i.keepReturn==='Keeping');
   const returned=dlItems.filter(i=>i.keepReturn==='Returned');
@@ -5181,17 +5220,156 @@ function updateDailyLookCartTotal(){
     totalEl.style.display='none';
   }
 }
+
+function addDailyLookTryOn(existingTryOn=null){
+  const id=dlTryOnCounter++;
+  const tryOn=existingTryOn?{...existingTryOn,id}:{id,photo:null};
+  dlTryOns.push(tryOn);
+  const list=document.getElementById('dl-tryons-list');
+  if(!list) return;
+  const div=document.createElement('div');
+  div.id='dl-tryon-'+id;
+  div.style.cssText='position:relative;';
+  div.innerHTML=`<div class="photo-slot" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('dl-tryon-photo-${id}')" id="dl-tryon-photo-${id}"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><button onclick="removeDailyLookTryOn(${id})" style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(196,115,90,0.85);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>`;
+  list.appendChild(div);
+  if(tryOn.photo){const s=document.getElementById(`dl-tryon-photo-${id}`);if(s){s.style.backgroundImage=`url('${tryOn.photo}')`;s.style.backgroundSize='cover';s.style.backgroundPosition='center';s.innerHTML='';}}
+}
+
+function removeDailyLookTryOn(id){
+  dlTryOns=dlTryOns.filter(t=>t.id!==id);
+  const el=document.getElementById('dl-tryon-'+id);
+  if(el) el.remove();
+}
+
 async function saveDailyLookBox(){
   const date=document.getElementById('dl-date')?.value||logicalDayStr();
   const stylistNote=document.getElementById('dl-stylist-note')?.value.trim()||'';
   if(!dlItems.length&&!stylistNote){showToast('Add at least one item first');return;}
-  const entry={type:'dailylook-box',date,stylistNote,items:dlItems.map(i=>({...i}))};
+  // Capture photos from DOM before saving
+  const itemsWithPhotos=dlItems.map(i=>({
+    ...i,
+    photoFront:getSlotPhotoUrl(`dl-photo-${i.id}-front`)||i.photoFront||null,
+    photoBack:getSlotPhotoUrl(`dl-photo-${i.id}-back`)||i.photoBack||null,
+  }));
+  const tryOnsWithPhotos=dlTryOns.map(t=>({
+    ...t,
+    photo:getSlotPhotoUrl(`dl-tryon-photo-${t.id}`)||t.photo||null,
+  }));
+  // Auto-add newly kept items to closet
+  for(const item of itemsWithPhotos){
+    if(item.keepReturn==='Keeping'&&!item.closetAdded){
+      await autoAddToCloset(item);
+      item.closetAdded=true;
+    }
+  }
   try{
-    await dbAdd('outfits',entry);syncToBlob('outfits');
+    if(_editingBoxRecord){
+      // Update existing record
+      const updatedRecord={..._editingBoxRecord,date,stylistNote,items:itemsWithPhotos,tryOns:tryOnsWithPhotos};
+      const tx=db.transaction('outfits','readwrite');
+      tx.objectStore('outfits').put(updatedRecord);
+      await new Promise(r=>tx.oncomplete=r);
+      _editingBoxRecord=updatedRecord;
+    } else {
+      await dbAdd('outfits',{type:'dailylook-box',date,stylistNote,items:itemsWithPhotos,tryOns:tryOnsWithPhotos});
+    }
+    syncToBlob('outfits');
     toast('dl-toast');
   }catch(e){showToast('Could not save — please try again');}
 }
-function openDailyLookHistory(){showToast('Past boxes coming soon');}
+
+async function autoAddToCloset(item){
+  if(!item.desc&&!item.photoFront) return;
+  const entry={name:item.desc||'DailyLook item',photoFront:item.photoFront||null,photoBack:item.photoBack||null,category:'other',colors:[],price:item.price?parseFloat(item.price):null,source:'DailyLook'};
+  await dbAdd('closet',entry);
+  syncToBlob('closet');
+  // Reload closet cache
+  closetItems=await dbAll('closet');
+}
+
+async function openDailyLookHistory(){
+  const overlay=document.getElementById('dl-history-overlay');
+  const listEl=document.getElementById('dl-history-list');
+  if(!overlay||!listEl) return;
+  listEl.innerHTML='<div style="font-size:12px;color:var(--muted);text-align:center;padding:16px;">Loading...</div>';
+  overlay.style.display='block';
+  const all=await dbAll('outfits');
+  const boxes=all.filter(e=>e.type==='dailylook-box').sort((a,b)=>b.ts-a.ts);
+  if(!boxes.length){
+    listEl.innerHTML='<div style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">No saved boxes yet</div>';
+    return;
+  }
+  listEl.innerHTML=boxes.map(box=>{
+    const items=box.items||[];
+    const keeping=items.filter(i=>i.keepReturn==='Keeping').length;
+    const returned=items.filter(i=>i.keepReturn==='Returned').length;
+    const undecided=items.filter(i=>!i.keepReturn).length;
+    const tryOns=(box.tryOns||[]).length;
+    const allDecided=items.length>0&&undecided===0;
+    const parts=[];
+    if(keeping) parts.push(keeping+' keeping');
+    if(returned) parts.push(returned+' returned');
+    if(undecided) parts.push(undecided+' deciding');
+    const statusBg=allDecided?'#EAF3DE':'var(--warm)';
+    const statusColor=allDecided?'#27500A':'var(--muted)';
+    const statusText=allDecided?'All decided ✓':'In progress';
+    const thumb=items.find(i=>i.photoFront);
+    const thumbHtml=thumb?`<div style="width:44px;height:55px;border-radius:6px;background-image:url('${thumb.photoFront}');background-size:cover;background-position:center;flex-shrink:0;"></div>`:'<div style="width:44px;height:55px;border-radius:6px;background:var(--warm);border:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;">📦</div>';
+    return `<div onclick="loadBoxForEditing(${box.id})" style="display:flex;gap:10px;align-items:center;background:var(--cream);border:0.5px solid var(--border);border-radius:10px;padding:10px;margin-bottom:10px;cursor:pointer;">
+      ${thumbHtml}
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:var(--serif);font-size:15px;color:var(--text);margin-bottom:2px;">${fmtOutfitDate(box.date)}</div>
+        <div style="font-size:11px;color:var(--muted);">${items.length} item${items.length!==1?'s':''} · ${parts.join(' · ')||'none decided'}${tryOns?' · '+tryOns+' try-on'+(tryOns!==1?'s':''):''}</div>
+        <div style="display:inline-block;margin-top:4px;font-size:10px;padding:2px 8px;border-radius:8px;background:${statusBg};color:${statusColor};">${statusText}</div>
+      </div>
+      <div style="font-size:18px;color:var(--border);">›</div>
+    </div>`;
+  }).join('');
+}
+
+function closeDailyLookHistory(){
+  const overlay=document.getElementById('dl-history-overlay');
+  if(overlay) overlay.style.display='none';
+}
+
+async function loadBoxForEditing(boxId){
+  const all=await dbAll('outfits');
+  const box=all.find(e=>e.id===boxId);
+  if(!box) return;
+  closeDailyLookHistory();
+  // Reset then load
+  dlItems=[];dlItemIdCounter=0;dlTryOns=[];dlTryOnCounter=0;
+  document.getElementById('dl-items-list').innerHTML='';
+  document.getElementById('dl-tryons-list').innerHTML='';
+  // Fill header fields
+  const dateEl=document.getElementById('dl-date');if(dateEl)dateEl.value=box.date||'';
+  const noteEl=document.getElementById('dl-stylist-note');if(noteEl)noteEl.value=box.stylistNote||'';
+  // Restore items
+  for(const item of (box.items||[])) addDailyLookItem(item);
+  // Restore try-ons
+  for(const t of (box.tryOns||[])) addDailyLookTryOn(t);
+  // Set editing state
+  _editingBoxRecord=box;
+  const banner=document.getElementById('dl-editing-banner');
+  const label=document.getElementById('dl-editing-label');
+  const saveBtn=document.getElementById('dl-save-btn');
+  if(banner) banner.style.display='flex';
+  if(label) label.textContent='Editing box from '+fmtOutfitDate(box.date);
+  if(saveBtn) saveBtn.textContent='Update box';
+}
+
+function resetDailyLookBox(){
+  _editingBoxRecord=null;
+  dlItems=[];dlItemIdCounter=0;dlTryOns=[];dlTryOnCounter=0;
+  document.getElementById('dl-items-list').innerHTML='';
+  document.getElementById('dl-tryons-list').innerHTML='';
+  const dateEl=document.getElementById('dl-date');if(dateEl)dateEl.value=logicalDayStr();
+  const noteEl=document.getElementById('dl-stylist-note');if(noteEl)noteEl.value='';
+  const banner=document.getElementById('dl-editing-banner');if(banner)banner.style.display='none';
+  const saveBtn=document.getElementById('dl-save-btn');if(saveBtn)saveBtn.textContent='Save box';
+  const ts=document.getElementById('dl-tryons-section');if(ts)ts.style.display='none';
+  updateDailyLookCartTotal();
+}
 // ──────────────────────────────────────────────────────────────────────────
 
 function selectOutfitType(btn, type){
