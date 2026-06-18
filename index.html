@@ -1101,18 +1101,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="dl-toast">Saved!</div>
     </div>
 
-    <!-- Past Boxes overlay -->
-    <div id="dl-history-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:600;overflow-y:auto;">
-      <div style="min-height:100%;padding:16px;box-sizing:border-box;padding-top:40px;padding-bottom:40px;max-width:420px;margin:0 auto;">
-        <div style="background:#fff;border-radius:16px;padding:16px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <div style="font-family:var(--serif);font-size:20px;color:var(--text);">Past Boxes</div>
-            <button onclick="closeDailyLookHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;line-height:1;">×</button>
-          </div>
-          <div id="dl-history-list"></div>
-        </div>
-      </div>
-    </div>
 
 
     <!-- Closet item detail overlay -->
@@ -4388,6 +4376,20 @@ textarea:focus,input:focus{border-color:var(--accent);}
 </div>
 
 <!-- overlays at end of body -->
+
+<!-- Past Boxes overlay -->
+<div id="dl-history-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:600;overflow-y:auto;">
+  <div style="min-height:100%;padding:16px;box-sizing:border-box;padding-top:max(60px,env(safe-area-inset-top) + 20px);padding-bottom:40px;max-width:420px;margin:0 auto;">
+    <div style="background:#fff;border-radius:16px;padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-family:var(--serif);font-size:20px;color:var(--text);">Past Boxes</div>
+        <button onclick="closeDailyLookHistory()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;line-height:1;">×</button>
+      </div>
+      <div id="dl-history-list"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Shopping look lightbox -->
 <div id="shopping-lightbox" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);z-index:1000;overflow-y:auto;">
   <div style="padding:16px;max-width:600px;margin:0 auto;">
@@ -11517,27 +11519,37 @@ async function handlePhoto(event){
 async function ocrStylistNote(dataUrl){
   const noteEl=document.getElementById('dl-stylist-note');
   if(!noteEl)return;
-  noteEl.placeholder='Reading screenshot...';
+  const prev=noteEl.value;
+  noteEl.value='Reading screenshot…';
+  noteEl.disabled=true;
   try{
     const base64=dataUrl.split(',')[1];
-    const mimeMatch=dataUrl.match(/^data:([^;]+);/);
-    const mimeType=mimeMatch?mimeMatch[1]:'image/jpeg';
     const res=await fetch(`${BACKEND}/api/skin-analysis`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        images:[{media_type:mimeType,data:base64}],
-        prompt:'This is a screenshot of a stylist note or styling card. Extract ALL text exactly as written — every word, bullet point, recommendation, and note. Return only the extracted text, preserving the original structure as closely as possible using line breaks.',
-        mode:'ocr'
+        images:[{media_type:'image/jpeg',data:base64}],
+        prompt:'This is a screenshot of a stylist note or styling card. Extract ALL the text from it exactly as written — every word, recommendation, bullet point, and note. Return only the extracted text, preserving line breaks and structure as closely as possible.',
+        mode:'skin'
       })
     });
+    if(!res.ok) throw new Error('Status '+res.status);
     const d=await res.json();
+    console.log('Stylist OCR raw response:',JSON.stringify(d).slice(0,300));
     const text=d.result||d.content?.find(b=>b.type==='text')?.text||'';
     if(text.trim()){
       noteEl.value=text.trim();
+      showToast('Notes extracted from screenshot ✓');
+    }else{
+      noteEl.value=prev;
+      showToast('Could not read screenshot — type notes manually');
     }
-  }catch(e){console.error('Stylist OCR failed:',e);}
-  noteEl.placeholder='Type notes or leave blank if using screenshot →';
+  }catch(e){
+    console.error('Stylist OCR failed:',e);
+    noteEl.value=prev;
+    showToast('Could not read screenshot — type notes manually');
+  }
+  noteEl.disabled=false;
 }
 
 async function uploadPhotoToBlob(slotId,dataUrl){
