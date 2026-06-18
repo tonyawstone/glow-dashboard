@@ -1901,16 +1901,26 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <span style="font-size:9px;color:var(--muted);">Significant</span>
           </div>
         </div>
-        <!-- Pill toggles: Appetite, Digestion, Zepbound side effects -->
+        <!-- Appetite today — slider -->
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span style="font-size:11px;color:var(--muted);font-weight:500;">Appetite today</span>
+            <span id="body-appetite-val" style="font-size:11px;font-weight:600;color:var(--accent);"></span>
+          </div>
+          <input type="range" id="body-appetite-slider" min="0" max="3" step="1" value="2"
+            data-set="false" style="width:100%;accent-color:var(--accent);opacity:0.35;cursor:pointer;"
+            oninput="onBodySlider('appetite',this)">
+          <div style="display:flex;justify-content:space-between;margin-top:2px;">
+            <span style="font-size:9px;color:var(--muted);">Much less</span>
+            <span style="font-size:9px;color:var(--muted);">Slightly less</span>
+            <span style="font-size:9px;color:var(--muted);">Normal</span>
+            <span style="font-size:9px;color:var(--muted);">More than usual</span>
+          </div>
+        </div>
+        <!-- Pill toggles: Digestion, Zepbound side effects -->
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-          <button id="body-appetite-btn" onclick="toggleBodyPanel('appetite','Appetite & fullness')" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Appetite & fullness</button>
           <button id="body-digestion-btn" onclick="toggleBodyPanel('digestion','Digestion')" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Digestion</button>
           <button id="body-zep-side-btn" onclick="toggleBodyPanel('zep-side','Zepbound side effects')" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Zepbound side effects</button>
-        </div>
-        <div id="body-appetite-panel" style="display:none;">
-          <div class="tags" id="body-appetite-tags" style="margin-bottom:12px;">
-            <button class="tag" onclick="soloAppetite(this)">Not hungry</button><button class="tag" onclick="soloAppetite(this)">Satisfied</button><button class="tag" onclick="soloAppetite(this)">Normal</button><button class="tag" onclick="soloAppetite(this)">Extra hungry</button>
-          </div>
         </div>
         <div id="body-digestion-panel" style="display:none;">
           <div class="tags" id="body-digestion-tags" style="margin-bottom:12px;">
@@ -4476,7 +4486,7 @@ function saveBodyDraft(){
     clothesFit: getBodySliderVal('clothesFit'),
     bloating: getBodySliderVal('bloating'),
     confidence: getBodySliderVal('confidence'),
-    appetite: document.getElementById('body-appetite-tags')?.querySelector('.on')?.textContent?.trim()||'',
+    appetite: getBodySliderVal('appetite'),
     digestion: document.getElementById('body-digestion-tags')?.querySelector('.on')?.textContent?.trim()||'',
     zepSideEffects: getTags('body-zep-side-tags'),
     nsv: getTags('nsv-tags'),
@@ -4491,7 +4501,7 @@ function restoreBodyDraft(){
   if(d.clothesFit) setBodySlider('clothesFit', d.clothesFit);
   if(d.bloating) setBodySlider('bloating', d.bloating);
   if(d.confidence) setBodySlider('confidence', d.confidence);
-  if(d.appetite){const b=Array.from(document.getElementById('body-appetite-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.appetite);if(b){soloAppetite(b);const p=document.getElementById('body-appetite-panel');if(p&&p.style.display==='none')toggleBodyPanel('appetite','Appetite & fullness');}}
+  if(d.appetite) setBodySlider('appetite', d.appetite);
   if(d.digestion){const b=Array.from(document.getElementById('body-digestion-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===d.digestion);if(b){soloDigestion(b);const p=document.getElementById('body-digestion-panel');if(p&&p.style.display==='none')toggleBodyPanel('digestion','Digestion');}}
   if(d.zepSideEffects?.length){restoreTags('body-zep-side-tags',d.zepSideEffects);const p=document.getElementById('body-zep-side-panel');if(p&&p.style.display==='none')toggleBodyPanel('zep-side','Zepbound side effects');}
   if(d.nsv?.length){restoreTags('nsv-tags', d.nsv);const p=document.getElementById('body-nsv-panel');if(p&&p.style.display==='none')toggleBodyNsvTags();}
@@ -4588,7 +4598,7 @@ function soloBody(btn){document.getElementById('body-face-tags').querySelectorAl
 function soloConfidence(btn){document.getElementById('body-confidence-tags')?.querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
 function soloAppetite(btn){document.getElementById('body-appetite-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
 function soloDigestion(btn){document.getElementById('body-digestion-tags').querySelectorAll('.tag').forEach(b=>b.classList.remove('on'));btn.classList.add('on');saveBodyDraft();}
-const BODY_SLIDER_OPTS={clothesFit:['Looser','Same','Tighter'],bloating:['None','Mild','Moderate','Significant'],confidence:['Struggling','Neutral','Good','Loving it']};
+const BODY_SLIDER_OPTS={clothesFit:['Looser','Same','Tighter'],bloating:['None','Mild','Moderate','Significant'],confidence:['Struggling','Neutral','Good','Loving it'],appetite:['Much less','Slightly less','Normal','More than usual']};
 function onBodySlider(field,el){
   el.dataset.set='true'; el.style.opacity='1';
   const val=BODY_SLIDER_OPTS[field][parseInt(el.value)];
@@ -9008,7 +9018,7 @@ function editBodyCheckin(){
   if(state.clothesFit) setBodySlider('clothesFit', state.clothesFit);
   if(state.bloating) setBodySlider('bloating', state.bloating);
   if(state.confidence) setBodySlider('confidence', state.confidence);
-  if(state.appetite){const b=Array.from(document.getElementById('body-appetite-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.appetite);if(b){soloAppetite(b);const p=document.getElementById('body-appetite-panel');if(p&&p.style.display==='none')toggleBodyPanel('appetite','Appetite & fullness');}}
+  if(state.appetite) setBodySlider('appetite', state.appetite);
   if(state.digestion){const b=Array.from(document.getElementById('body-digestion-tags')?.querySelectorAll('.tag')||[]).find(t=>t.textContent.trim()===state.digestion);if(b){soloDigestion(b);const p=document.getElementById('body-digestion-panel');if(p&&p.style.display==='none')toggleBodyPanel('digestion','Digestion');}}
   if(state.zepSideEffects?.length){restoreTags('body-zep-side-tags',state.zepSideEffects);const p=document.getElementById('body-zep-side-panel');if(p&&p.style.display==='none')toggleBodyPanel('zep-side','Zepbound side effects');}
   if(state.nsv?.length){restoreTags('nsv-tags', state.nsv);const p=document.getElementById('body-nsv-panel');if(p&&p.style.display==='none')toggleBodyNsvTags();}
@@ -9821,7 +9831,7 @@ async function saveBody(){
   const clothesFit = getBodySliderVal('clothesFit');
   const bloating = getBodySliderVal('bloating');
   const confidence = getBodySliderVal('confidence');
-  const appetite = document.getElementById('body-appetite-tags')?.querySelector('.on')?.textContent?.trim()||'';
+  const appetite = getBodySliderVal('appetite');
   const digestion = document.getElementById('body-digestion-tags')?.querySelector('.on')?.textContent?.trim()||'';
   const zepSideEffects = getTags('body-zep-side-tags');
   const nsv = getTags('nsv-tags');
@@ -9836,7 +9846,7 @@ async function saveBody(){
     syncToBlob('bodies');
     document.getElementById('body-face-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     ['clothesFit','bloating','confidence'].forEach(f=>{const el=document.getElementById('body-'+f+'-slider');if(el){el.dataset.set='false';el.style.opacity='0.35';}const lbl=document.getElementById('body-'+f+'-val');if(lbl)lbl.textContent='';});
-    document.getElementById('body-appetite-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
+    const _apS=document.getElementById('body-appetite-slider');if(_apS){_apS.dataset.set='false';_apS.style.opacity='0.35';_apS.value='2';}const _apV=document.getElementById('body-appetite-val');if(_apV)_apV.textContent='';
     document.getElementById('body-digestion-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     document.getElementById('body-zep-side-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     document.getElementById('nsv-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
