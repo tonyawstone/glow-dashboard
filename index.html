@@ -3985,9 +3985,46 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:var(--muted);background:var(--warm);padding:2px 8px;border-radius:10px;">Coming soon</span><i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;" aria-hidden="true"></i></div>
         </div>
         <!-- Weekly reminders -->
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 42px;border-bottom:0.5px solid var(--border);cursor:pointer;" onclick="openWeeklyReminders()">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 42px;border-bottom:0.5px solid var(--border);cursor:pointer;" onclick="toggleWeeklyRemindersSettings()">
           <div style="display:flex;align-items:center;gap:8px;"><i class="ti ti-calendar-week" style="color:var(--accent);font-size:15px;" aria-hidden="true"></i><span style="font-size:13px;color:var(--text);">Weekly reminders</span></div>
-          <i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;" aria-hidden="true"></i>
+          <i class="ti ti-chevron-right" id="weekly-reminders-chevron" style="color:var(--muted);font-size:14px;transition:transform 0.2s;" aria-hidden="true"></i>
+        </div>
+        <div id="weekly-reminders-settings-body" style="display:none;border-bottom:0.5px solid var(--border);padding:4px 16px 14px 42px;">
+          <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:10px;padding-top:6px;">A bottom-sheet popup appears every Saturday and Sunday reminding you to complete your weekly review. "Got it →" means you saw it — not that you finished everything. Each day fires independently and resets every week.</div>
+          <!-- Items -->
+          <div style="background:var(--cream);border-radius:10px;overflow:hidden;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:0.5px solid var(--border);">
+              <i class="ti ti-sparkles" style="font-size:13px;color:var(--accent);flex-shrink:0;"></i>
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Recalculate Glow Score</div><div style="font-size:10px;color:var(--muted);">Today → Glow Score → Recalculate</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:0.5px solid var(--border);">
+              <i class="ti ti-chart-line" style="font-size:13px;color:var(--accent);flex-shrink:0;"></i>
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Review weekly progress</div><div style="font-size:10px;color:var(--muted);">Tap each pillar → Weekly tab</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:0.5px solid var(--border);">
+              <i class="ti ti-run" style="font-size:13px;color:var(--accent);flex-shrink:0;"></i>
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Log any missed workouts</div><div style="font-size:10px;color:var(--muted);">Body → Exercise log</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:0.5px solid var(--border);">
+              <i class="ti ti-camera" style="font-size:13px;color:var(--accent);flex-shrink:0;"></i>
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Hair & skin scan</div><div style="font-size:10px;color:var(--muted);">Hair → AI analysis · Skin → Scan</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:0.5px solid var(--border);">
+              <i class="ti ti-brain" style="font-size:13px;color:var(--accent);flex-shrink:0;"></i>
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Weekly mind reflection</div><div style="font-size:10px;color:var(--muted);">Mind → Weekly tab → Weekly insight</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;">
+              <i class="ti ti-target" style="font-size:13px;color:var(--accent);flex-shrink:0;"></i>
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Set weekly intention word</div><div style="font-size:10px;color:var(--muted);">Mind → Weekly tab → Intention word</div></div>
+            </div>
+          </div>
+          <!-- Behavior notes -->
+          <div style="font-size:10px;color:var(--muted);line-height:1.7;">
+            <div>🗓 Fires Saturday <em>and</em> Sunday independently</div>
+            <div>✓ Saturday dismissal doesn't prevent Sunday popup</div>
+            <div>↺ Resets automatically each new week</div>
+            <div>⏱ 2.5 s delay on app open — skips the very first load</div>
+          </div>
         </div>
         <!-- Check-in reminders -->
         <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 42px;border-bottom:0.5px solid var(--border);cursor:pointer;opacity:0.5;">
@@ -7730,8 +7767,12 @@ function toggleSettingsReminders(){
   if(chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
 }
 
-function openWeeklyReminders(){
-  // Placeholder — weekly reminders config panel coming next
+function toggleWeeklyRemindersSettings(){
+  const body = document.getElementById('weekly-reminders-settings-body');
+  const chevron = document.getElementById('weekly-reminders-chevron');
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  if(chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
 }
 
 function toggleSettingsAbout(){
