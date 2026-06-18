@@ -1413,28 +1413,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <span class="sqb-lbl">Refreshed</span>
           </button>
         </div>
-        <!-- + Morning energy button sits below faces -->
-        <div style="margin-bottom:10px;">
-          <button id="sleep-energy-btn" onclick="toggleSleepEnergyTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Morning energy</button>
-        </div>
         <!-- Sleep aids: always visible, auto-populated from yesterday's meds -->
         <div id="sleep-aids-info" style="margin-bottom:10px;font-size:12px;color:var(--muted);"></div>
-        <!-- Morning energy chips (selected ones shown inline) -->
-        <div id="sleep-energy-chips" style="display:none;margin-bottom:6px;flex-wrap:wrap;gap:4px;"></div>
-        <!-- Morning energy tag grid + notes — revealed together when + Morning energy is tapped -->
-        <div id="sleep-energy-panel" style="display:none;">
-          <div class="tags" id="energy-am-tags" style="margin-bottom:10px;">
-            <button class="tag" onclick="togSleepEnergy(this)">Rested</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Energized</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Tired</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Groggy</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Foggy</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Refreshed</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Exhausted</button>
-            <button class="tag" onclick="togSleepEnergy(this)">Wired</button>
-          </div>
-          <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..." oninput="saveSleepDraft()" style="margin-bottom:10px;"></textarea>
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Morning energy</div>
+        <div class="tags" id="energy-am-tags" style="margin-bottom:12px;">
+          <button class="tag" onclick="tog(this);saveSleepDraft()">High</button><button class="tag" onclick="tog(this);saveSleepDraft()">Steady</button><button class="tag" onclick="tog(this);saveSleepDraft()">Low</button><button class="tag" onclick="tog(this);saveSleepDraft()">Exhausted</button>
         </div>
+        <textarea id="sleep-note" rows="2" placeholder="AHI, mask comfort, events..." oninput="saveSleepDraft()" style="margin-bottom:10px;"></textarea>
         <div style="text-align:center;margin-top:4px;">
           <button onclick="saveSleep()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save</button>
         </div>
@@ -8833,12 +8818,6 @@ async function saveSleep(){
     if(document.getElementById('sleep-note')) document.getElementById('sleep-note').value='';
     document.getElementById('energy-am-tags')?.querySelectorAll('.on').forEach(t=>t.classList.remove('on'));
     document.getElementById('sq-tags')?.querySelectorAll('[data-quality]').forEach(b=>b.classList.remove('on'));
-    const chipsEl = document.getElementById('sleep-energy-chips');
-    if(chipsEl){ chipsEl.style.display='none'; chipsEl.innerHTML=''; }
-    const epanel = document.getElementById('sleep-energy-panel');
-    if(epanel) epanel.style.display='none';
-    const ebtn = document.getElementById('sleep-energy-btn');
-    if(ebtn) ebtn.textContent='+ Morning energy';
     toast('slp-t');
     loadLogs();
     toggleSleepCheckin(false);
@@ -9662,19 +9641,9 @@ function editSleepCheckin(){
     }
     // Restore energy tags
     if(s.energy?.length){
-      const panel = document.getElementById('sleep-energy-panel');
-      const btn = document.getElementById('sleep-energy-btn');
-      if(panel) panel.style.display = 'block';
-      if(btn) btn.textContent = '– Morning energy';
       document.getElementById('energy-am-tags')?.querySelectorAll('.tag').forEach(t=>{
         if(s.energy.includes(t.textContent.trim())) t.classList.add('on');
       });
-      // Rebuild chips
-      const chips = document.getElementById('sleep-energy-chips');
-      if(chips){
-        chips.style.display = 'flex';
-        chips.innerHTML = s.energy.map(v=>`<span style="background:var(--accent-light,rgba(107,158,120,0.15));border-radius:14px;padding:3px 10px;font-size:11px;color:var(--accent);">${v}</span>`).join('');
-      }
     }
     // Restore note
     const noteEl = document.getElementById('sleep-note');
