@@ -791,13 +791,19 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <i class="ti ti-message-circle" style="font-size:16px;color:var(--accent);"></i>
-          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Ask Your Coach</div>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Ask My Glow Coach</div>
         </div>
         <button onclick="openCoachHistory('Today')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input id="coach-question-input" type="text" placeholder="What's on your mind today?" style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')aiCoach()">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+        <input id="coach-question-input" type="text" placeholder="Ask about today's focus, your Glow Score, or what needs attention..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')aiCoach()">
         <button onclick="aiCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
+      </div>
+      <button onclick="toggleGlowSuggestions()" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
+      <div id="glow-suggestions-panel" style="display:none;margin-top:8px;">
+        <button onclick="glowCoachPrompt('What should I focus on today?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">What should I focus on today?</button>
+        <button onclick="glowCoachPrompt('How is my overall Glow Score trending and what's driving it?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">How is my Glow Score trending?</button>
+        <button onclick="glowCoachPrompt('What area of my health needs the most attention right now?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">What needs my attention most?</button>
       </div>
       <div id="coach-output" class="coach-response" style="display:none;margin-top:10px;"></div>
       <!-- Last conversation — collapsed by default -->
@@ -1038,7 +1044,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <span class="star" onclick="setStars('outfit-stars',1)">★</span><span class="star" onclick="setStars('outfit-stars',2)">★</span><span class="star" onclick="setStars('outfit-stars',3)">★</span><span class="star" onclick="setStars('outfit-stars',4)">★</span><span class="star" onclick="setStars('outfit-stars',5)">★</span>
         </div>
         <button class="btn-primary" onclick="saveOutfit()">Log outfit</button>
-        <button class="btn-ai" onclick="styleCoach()">Style coaching ↗</button>
+        <button class="btn-ai" onclick="styleCoach()">Ask My Style Coach ↗</button>
         <div id="style-coach-output" class="coach-response" style="display:none"></div>
         <button onclick="openCoachHistory('Style')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:4px 0 0;font-family:var(--sans);">Past conversations →</button>
         <div class="toast-msg" id="st">Logged!</div>
@@ -1418,16 +1424,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <i class="ti ti-message-circle" style="font-size:16px;color:var(--accent);"></i>
-          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Sleep Coach</div>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Ask My Sleep Coach</div>
         </div>
         <button onclick="openCoachHistory('Sleep')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <input id="sleep-coach-input" type="text" placeholder="Ask about your sleep…" style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')sleepCoach()">
+        <input id="sleep-coach-input" type="text" placeholder="Ask about sleep quality, CPAP trends, energy, or bedtime routines..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')sleepCoach()">
         <button onclick="sleepCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <button onclick="toggleSleepSuggestions()" id="sleep-suggestions-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
       <div id="sleep-suggestions-panel" style="display:none;margin-top:8px;display:none;">
+        <button onclick="sleepCoachPrompt('How can I sleep and recover better based on my recent data?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">How can I sleep and recover better?</button>
         <button onclick="sleepCoachPrompt('How is my sleep quality trending over the past few weeks?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">How is my sleep quality trending?</button>
         <button onclick="sleepCoachPrompt('What patterns are affecting my sleep quality?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">What patterns are affecting my sleep?</button>
         <button onclick="sleepCoachPrompt('How do Melatonin and sleep gummies correlate with my sleep quality scores?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">Sleep aids vs quality</button>
@@ -2214,7 +2221,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <i class="ti ti-sparkles" style="font-size:16px;color:var(--accent);"></i>
-          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Body Coach</div>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Ask My Body Coach</div>
         </div>
         <button onclick="openCoachHistory('Body')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
@@ -2222,7 +2229,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <textarea id="body-goal-text" rows="2" placeholder="What I'm working toward…" oninput="saveBodyGoal()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;outline:none;"></textarea>
       <!-- Coach input -->
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
-        <input id="body-coach-input" type="text" placeholder="Ask about your body journey…" style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')bodyCoach()">
+        <input id="body-coach-input" type="text" placeholder="Ask about your body journey, movement, Zepbound, weight, or mobility..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')bodyCoach()">
         <button onclick="bodyCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <!-- Disclosure links -->
@@ -2245,6 +2252,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <!-- Suggestions panel -->
       <div id="body-suggestions-panel" style="display:none;margin-top:10px;">
+        <button onclick="bodyCoachPrompt('How is my body journey unfolding? Reflect on my progress, patterns, and what I should focus on next.')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">How is my body journey unfolding?</button>
         <button onclick="bodyCoachPrompt('How is my Zepbound journey going? What patterns do you see in my body check-ins?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">How is my Zepbound journey going?</button>
         <button onclick="bodyCoachPrompt('Celebrate my recent wins and non-scale victories. Be specific and warm.')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">Celebrate my wins</button>
         <button onclick="bodyCoachPrompt('Based on my recent body data, what should I bring up with my doctor at my next Zepbound follow-up?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Prep for my next doctor visit</button>
@@ -2560,16 +2568,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <i class="ti ti-message-circle" style="font-size:16px;color:var(--accent);"></i>
-          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Wellness Coach</div>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Ask My Wellness Coach</div>
         </div>
         <button onclick="openCoachHistory('Health')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <input id="wellness-coach-input" type="text" placeholder="Ask about hydration, body composition…" style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')wellnessCoach()">
+        <input id="wellness-coach-input" type="text" placeholder="Ask about BP, meds, hydration, labs, or clinical trends..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')wellnessCoach()">
         <button onclick="wellnessCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <button onclick="toggleWellnessSuggestions()" id="wellness-suggestions-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
       <div id="wellness-suggestions-panel" style="display:none;margin-top:8px;">
+        <button onclick="wellnessCoachPrompt('What health trends or habits need my attention right now?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">What health trends or habits need attention?</button>
         <button onclick="wellnessCoachPrompt('How is my hydration trending and what can I improve?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">How is my hydration trending?</button>
         <button onclick="wellnessCoachPrompt('I take Zepbound and HCTZ — what are my specific hydration needs?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">Hydration on Zepbound + HCTZ</button>
         <button onclick="wellnessCoachPrompt('What should my body water % goal be and how can I reach it consistently?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Body water % goal</button>
@@ -3717,16 +3726,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <i class="ti ti-message-circle" style="font-size:16px;color:var(--accent);"></i>
-          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Mind Coach</div>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Ask My Mind Coach</div>
         </div>
         <button onclick="openCoachHistory('Mind')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <input id="mind-coach-input" type="text" placeholder="What's on your mind?" style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')mindCoach()">
+        <input id="mind-coach-input" type="text" placeholder="Ask about your mood, stress, focus, or reflection prompts..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')mindCoach()">
         <button onclick="mindCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <button onclick="toggleMindSuggestions()" id="mind-suggestions-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
       <div id="mind-suggestions-panel" style="display:none;margin-top:8px;">
+        <button onclick="mindCoachPrompt('What\'s on my mind, and what do I need today? Review my recent mood and reflections.')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">What's on my mind, and what do I need today?</button>
         <button onclick="mindCoachPrompt('Help me process this: ',true)" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">Help me process this</button>
         <button onclick="mindCoachPrompt('I need to mentally reset right now. Give me something short and grounding to help me shift my headspace.')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">Help me reset</button>
         <button onclick="mindCoachPrompt('I am struggling to focus. Give me one clear, grounding way to redirect my attention and get present.')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Help me focus</button>
@@ -17702,6 +17712,18 @@ async function loadCoachingInsights() {
   } catch(e) {}
 }
 
+function toggleGlowSuggestions(){
+  const panel = document.getElementById('glow-suggestions-panel');
+  if(!panel) return;
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+function glowCoachPrompt(text){
+  const input = document.getElementById('coach-question-input');
+  if(input) input.value = text;
+  const panel = document.getElementById('glow-suggestions-panel');
+  if(panel) panel.style.display = 'none';
+  aiCoach();
+}
 function aiCoach(){
   const input = document.getElementById('coach-question-input');
   const question = input?.value?.trim();
