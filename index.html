@@ -2543,7 +2543,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card" id="body-water-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
         <div style="display:flex;align-items:center;gap:6px;">
-          <i class="ti ti-percentage" style="font-size:13px;color:var(--accent);"></i>
+          <i class="ti ti-droplet-half" style="font-size:13px;color:var(--accent);"></i>
           <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Body Water %</div>
         </div>
         <button onclick="openWaterLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
@@ -15857,10 +15857,11 @@ function updateMedsProgress(){
   saveMedsToBlob();
 
   // Show saved state cards when sections complete
+  const formOpen = document.getElementById('meds-form-body')?.style.display === 'block';
   if(amAllDone){
     showMedsSavedCard('meds-am-saved','☀️ AM meds & supplements',[...AM_MEDS,...AM_SUPPLEMENTS],'editMedsAM');
-  } else if(amRxDone){
-    // Rx done but not supplements yet — show partial saved card
+  } else if(amRxDone && !formOpen){
+    // Partial card only when form is closed — avoids page jump while user is still checking vitamins
     showMedsSavedCard('meds-am-saved','☀️ AM Rx meds ✓ (supplements pending)',AM_MEDS,'editMedsAM');
   }
 
@@ -16362,6 +16363,9 @@ function toggleMedsForm(){
     loadMedsChecklist();
     const d = document.getElementById('meds-log-date');
     if(d && !d.value) d.value = logicalDayStr();
+  } else {
+    // Update saved cards now that form is closed
+    updateMedsProgress();
   }
 }
 
