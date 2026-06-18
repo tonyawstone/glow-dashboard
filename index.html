@@ -2310,10 +2310,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Clinical Snapshot -->
     <div class="card" style="padding:12px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <i class="ti ti-activity" style="font-size:14px;color:var(--accent);"></i>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-activity" style="font-size:11px;color:#A07850;"></i></div>
           <div>
-            <div style="font-size:13px;font-weight:600;color:var(--text);">Clinical Snapshot</div>
+            <div class="card-title" style="margin:0;">Clinical Snapshot</div>
             <div style="font-size:10px;color:var(--muted);margin-top:1px;">7-day averages from Apple Health</div>
           </div>
         </div>
@@ -2326,8 +2326,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
       <div style="cursor:pointer;" onclick="toggleMedsForm()">
         <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div class="card-title" style="margin:0;">💊 Medications & supplements · daily</div>
+          <div style="display:flex;align-items:center;gap:7px;">
+            <div style="width:24px;height:24px;border-radius:50%;background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-pill" style="font-size:11px;color:#A07850;"></i></div>
+            <div class="card-title" style="margin:0;">Medications & supplements · daily</div>
             <div id="meds-form-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
           </div>
         </div>
@@ -2465,8 +2466,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <!-- Lab results -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;" onclick="toggleLabForm()">
-          <div class="card-title" style="margin:0;">🧪 Lab work</div>
+        <div style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;" onclick="toggleLabForm()">
+          <div style="width:24px;height:24px;border-radius:50%;background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-flask" style="font-size:11px;color:#A07850;"></i></div>
+          <div class="card-title" style="margin:0;">Lab work</div>
           <span id="lab-form-toggle" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</span>
         </div>
       </div>
