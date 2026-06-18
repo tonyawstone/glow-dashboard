@@ -2211,18 +2211,28 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <!-- Body Coach -->
     <div class="card" id="body-coach-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <i class="ti ti-sparkles" style="font-size:16px;color:var(--accent);"></i>
           <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Body Coach</div>
         </div>
         <button onclick="openCoachHistory('Body')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
-      <!-- Goals -->
-      <div style="margin-bottom:16px;padding:14px;background:var(--warm);border-radius:12px;border:0.5px solid var(--border);">
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">What I'm working toward</div>
-        <textarea id="body-goal-text" rows="2" placeholder="e.g. Fit into my size 12 jeans, feel strong in my skin…" oninput="saveBodyGoal()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:10px;outline:none;"></textarea>
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Milestones</div>
+      <!-- Goal textarea — feeds coach context -->
+      <textarea id="body-goal-text" rows="2" placeholder="What I'm working toward…" oninput="saveBodyGoal()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;outline:none;"></textarea>
+      <!-- Coach input -->
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+        <input id="body-coach-input" type="text" placeholder="Ask about your body journey…" style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')bodyCoach()">
+        <button onclick="bodyCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
+      </div>
+      <!-- Disclosure links -->
+      <div style="display:flex;gap:8px;">
+        <button onclick="toggleBodyMilestones()" id="body-milestones-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Milestones ↗</button>
+        <button onclick="toggleBodyCoachSuggestions()" id="body-suggestions-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
+      </div>
+      <!-- Milestones panel -->
+      <div id="body-milestones-panel" style="display:none;margin-top:10px;padding:12px;background:var(--warm);border-radius:10px;border:0.5px solid var(--border);">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Tap to mark reached</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;" id="body-milestone-tags">
           <button class="tag" id="bm-1" onclick="toggleBodyMilestone(this)">First 25 lbs</button>
           <button class="tag" id="bm-2" onclick="toggleBodyMilestone(this)">Clothes shopping w/o dread</button>
@@ -2233,13 +2243,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <button class="tag" id="bm-7" onclick="toggleBodyMilestone(this)">New size milestone</button>
         </div>
       </div>
-      <!-- Ask body coach -->
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <input id="body-coach-input" type="text" placeholder="Ask about your body journey…" style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')bodyCoach()">
-        <button onclick="bodyCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
-      </div>
-      <button onclick="toggleBodyCoachSuggestions()" id="body-suggestions-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
-      <div id="body-suggestions-panel" style="display:none;margin-top:8px;">
+      <!-- Suggestions panel -->
+      <div id="body-suggestions-panel" style="display:none;margin-top:10px;">
         <button onclick="bodyCoachPrompt('How is my Zepbound journey going? What patterns do you see in my body check-ins?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">How is my Zepbound journey going?</button>
         <button onclick="bodyCoachPrompt('Celebrate my recent wins and non-scale victories. Be specific and warm.')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">Celebrate my wins</button>
         <button onclick="bodyCoachPrompt('Based on my recent body data, what should I bring up with my doctor at my next Zepbound follow-up?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Prep for my next doctor visit</button>
@@ -17903,11 +17908,19 @@ function loadBodyGoals(){
     milestones.forEach(id=>{ const b=document.getElementById(id); if(b) b.classList.add('on'); });
   }catch(e){}
 }
+function toggleBodyMilestones(show){
+  const panel = document.getElementById('body-milestones-panel');
+  if(!panel) return;
+  const open = show !== undefined ? show : panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+  if(open) toggleBodyCoachSuggestions(false);
+}
 function toggleBodyCoachSuggestions(show){
   const panel = document.getElementById('body-suggestions-panel');
   if(!panel) return;
   const open = show !== undefined ? show : panel.style.display === 'none';
   panel.style.display = open ? 'block' : 'none';
+  if(open) toggleBodyMilestones(false);
 }
 function bodyCoachPrompt(text){
   const input = document.getElementById('body-coach-input');
