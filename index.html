@@ -6646,6 +6646,7 @@ async function deleteOutfit(ts){
   } catch(e){}
   await renderLookbook();
   if(curView==='monthly') renderStyleCalendar();
+  if(closetViewOpen) renderCloset(_closetFilter);
 }
 
 async function repairOutfitPhotos(){
@@ -6877,22 +6878,13 @@ async function renderCloset(filter){
     grid.innerHTML='<div class="lookbook-empty" style="grid-column:1/-1"><i class="ti ti-shirt"></i>No "My outfit" looks logged yet</div>';
     return;
   }
-  // Check recent wear dates (within 14 days)
-  const now=new Date(); const cutoff=new Date(now-14*86400000);
   window._closetMap=sorted;
   grid.innerHTML=sorted.map((e,i)=>{
-    const worn=safeDate(e.date);
-    const recentWarn=worn&&worn>cutoff;
-    const daysAgo=worn?Math.round((now-worn)/86400000):null;
-    const tapFn=_pickerDay ? `pickOutfitForDayIdx(${i})` : `selectFromCloset(${i})`;
-    return `<div class="outfit-card" style="position:relative;cursor:pointer;" onclick="${tapFn}">
-      ${e.photo?`<img src="${e.photo}" class="outfit-thumb" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'">`
-        :'<div style="width:100%;aspect-ratio:4/5;border-radius:10px;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:28px;">👗</div>'}
-      ${recentWarn?`<div style="position:absolute;top:4px;right:4px;background:rgba(196,115,90,0.9);color:#fff;font-size:10px;padding:2px 6px;border-radius:8px;">⚠️ ${daysAgo}d ago</div>`:''}
-      ${_pickerDay?'<div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:10px;color:#fff;background:rgba(0,0,0,0.35);padding:2px;">Tap to pick</div>':''}
-      <div style="font-size:11px;color:var(--muted);margin-top:4px;">${e.date||''}</div>
-      ${e.desc?`<div style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.desc}</div>`:''}
-    </div>`;
+    const cardHtml=outfitCardHTML(e,i);
+    if(_pickerDay){
+      return `<div style="position:relative;cursor:pointer;" onclick="pickOutfitForDayIdx(${i})">${cardHtml}<div style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;pointer-events:none;"><div style="background:rgba(0,0,0,0.45);color:#fff;font-size:10px;padding:3px 10px;border-radius:8px;">Tap to pick</div></div></div>`;
+    }
+    return cardHtml;
   }).join('');
 }
 
