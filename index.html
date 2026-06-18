@@ -1806,15 +1806,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <span style="font-size:11px;color:var(--muted);">Date</span>
           <input type="date" id="body-log-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
         </div>
-        <!-- Any wins today — at top -->
-        <div style="margin-bottom:8px;">
-          <button id="body-nsv-btn" onclick="toggleBodyNsvTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Any wins today</button>
-        </div>
-        <div id="body-nsv-panel" style="display:none;">
-          <div class="tags" id="nsv-tags" style="margin-bottom:12px;">
-            <button class="tag" onclick="tog(this);saveBodyDraft()">Clothes looser</button><button class="tag" onclick="tog(this);saveBodyDraft()">Compliment</button><button class="tag" onclick="tog(this);saveBodyDraft()">New low</button><button class="tag" onclick="tog(this);saveBodyDraft()">Less bloated</button><button class="tag" onclick="tog(this);saveBodyDraft()">More energy</button><button class="tag" onclick="tog(this);saveBodyDraft()">Feeling strong</button><button class="tag" onclick="tog(this);saveBodyDraft()">Waist smaller</button>
-          </div>
-        </div>
         <!-- How do you feel in your body today? (face picker) -->
         <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:500;">How do you feel in your body today?</div>
         <div style="display:flex;justify-content:space-between;margin-bottom:18px;" id="body-face-tags">
@@ -1838,6 +1829,31 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <div class="sqb-face"><svg width="26" height="26" viewBox="-2 -2 30 30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--muted);"><circle cx="13" cy="13" r="11"/><path d="M9 11.5 Q10.5 9.5 12 11.5"/><path d="M14 11.5 Q15.5 9.5 17 11.5"/><path d="M8.5 16 Q13 20.5 17.5 16"/><path d="M21 0 L21.5 1.8 L23.3 2.3 L21.5 2.8 L21 4.6 L20.5 2.8 L18.7 2.3 L20.5 1.8 Z" fill="currentColor" stroke="none"/></svg></div>
             <span class="sqb-lbl">Amazing</span>
           </button>
+        </div>
+        <!-- Any wins today -->
+        <div style="margin-bottom:8px;">
+          <button id="body-nsv-btn" onclick="toggleBodyNsvTags()" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">+ Any wins today</button>
+        </div>
+        <div id="body-nsv-panel" style="display:none;">
+          <div class="tags" id="nsv-tags" style="margin-bottom:12px;">
+            <button class="tag" onclick="tog(this);saveBodyDraft()">Clothes looser</button><button class="tag" onclick="tog(this);saveBodyDraft()">Compliment</button><button class="tag" onclick="tog(this);saveBodyDraft()">New low</button><button class="tag" onclick="tog(this);saveBodyDraft()">Less bloated</button><button class="tag" onclick="tog(this);saveBodyDraft()">More energy</button><button class="tag" onclick="tog(this);saveBodyDraft()">Feeling strong</button><button class="tag" onclick="tog(this);saveBodyDraft()">Waist smaller</button>
+          </div>
+        </div>
+        <!-- Confidence — slider -->
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span style="font-size:11px;color:var(--muted);font-weight:500;">Confidence in your body</span>
+            <span id="body-confidence-val" style="font-size:11px;font-weight:600;color:var(--accent);"></span>
+          </div>
+          <input type="range" id="body-confidence-slider" min="0" max="3" step="1" value="2"
+            data-set="false" style="width:100%;accent-color:var(--accent);opacity:0.35;cursor:pointer;"
+            oninput="onBodySlider('confidence',this)">
+          <div style="display:flex;justify-content:space-between;margin-top:2px;">
+            <span style="font-size:9px;color:var(--muted);">Struggling</span>
+            <span style="font-size:9px;color:var(--muted);">Neutral</span>
+            <span style="font-size:9px;color:var(--muted);">Good</span>
+            <span style="font-size:9px;color:var(--muted);">Loving it</span>
+          </div>
         </div>
         <!-- Clothes fit — slider -->
         <div style="margin-bottom:16px;">
@@ -1868,22 +1884,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
             <span style="font-size:9px;color:var(--muted);">Mild</span>
             <span style="font-size:9px;color:var(--muted);">Moderate</span>
             <span style="font-size:9px;color:var(--muted);">Significant</span>
-          </div>
-        </div>
-        <!-- Confidence — slider -->
-        <div style="margin-bottom:16px;">
-          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
-            <span style="font-size:11px;color:var(--muted);font-weight:500;">Confidence in your body</span>
-            <span id="body-confidence-val" style="font-size:11px;font-weight:600;color:var(--accent);"></span>
-          </div>
-          <input type="range" id="body-confidence-slider" min="0" max="3" step="1" value="2"
-            data-set="false" style="width:100%;accent-color:var(--accent);opacity:0.35;cursor:pointer;"
-            oninput="onBodySlider('confidence',this)">
-          <div style="display:flex;justify-content:space-between;margin-top:2px;">
-            <span style="font-size:9px;color:var(--muted);">Struggling</span>
-            <span style="font-size:9px;color:var(--muted);">Neutral</span>
-            <span style="font-size:9px;color:var(--muted);">Good</span>
-            <span style="font-size:9px;color:var(--muted);">Loving it</span>
           </div>
         </div>
         <!-- Pill toggles: Appetite, Digestion, Zepbound side effects -->
@@ -2208,7 +2208,44 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div onclick="pickPhoto('body-may26-side')" id="body-may26-side" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Side</div></div>
         <div onclick="pickPhoto('body-may26-back')" id="body-may26-back" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Back</div></div>
       </div>
-    </div>  </div>  <div class="view-content" id="vc-body-weekly">
+    <!-- Body Coach -->
+    <div class="card" id="body-coach-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="ti ti-sparkles" style="font-size:16px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Body Coach</div>
+        </div>
+        <button onclick="openCoachHistory('Body')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
+      </div>
+      <!-- Goals -->
+      <div style="margin-bottom:16px;padding:14px;background:var(--warm);border-radius:12px;border:0.5px solid var(--border);">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">What I'm working toward</div>
+        <textarea id="body-goal-text" rows="2" placeholder="e.g. Fit into my size 12 jeans, feel strong in my skin…" oninput="saveBodyGoal()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:10px;outline:none;"></textarea>
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;">Milestones</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;" id="body-milestone-tags">
+          <button class="tag" id="bm-1" onclick="toggleBodyMilestone(this)">First 25 lbs</button>
+          <button class="tag" id="bm-2" onclick="toggleBodyMilestone(this)">Clothes shopping w/o dread</button>
+          <button class="tag" id="bm-3" onclick="toggleBodyMilestone(this)">Doctor noticed</button>
+          <button class="tag" id="bm-4" onclick="toggleBodyMilestone(this)">Goal outfit fits</button>
+          <button class="tag" id="bm-5" onclick="toggleBodyMilestone(this)">Consistent energy</button>
+          <button class="tag" id="bm-6" onclick="toggleBodyMilestone(this)">50 lbs lost</button>
+          <button class="tag" id="bm-7" onclick="toggleBodyMilestone(this)">New size milestone</button>
+        </div>
+      </div>
+      <!-- Ask body coach -->
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <input id="body-coach-input" type="text" placeholder="Ask about your body journey…" style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')bodyCoach()">
+        <button onclick="bodyCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
+      </div>
+      <button onclick="toggleBodyCoachSuggestions()" id="body-suggestions-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
+      <div id="body-suggestions-panel" style="display:none;margin-top:8px;">
+        <button onclick="bodyCoachPrompt('How is my Zepbound journey going? What patterns do you see in my body check-ins?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">How is my Zepbound journey going?</button>
+        <button onclick="bodyCoachPrompt('Celebrate my recent wins and non-scale victories. Be specific and warm.')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">Celebrate my wins</button>
+        <button onclick="bodyCoachPrompt('Based on my recent body data, what should I bring up with my doctor at my next Zepbound follow-up?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Prep for my next doctor visit</button>
+      </div>
+      <div id="body-coach-output" class="coach-response" style="display:none;margin-top:10px;"></div>
+    </div>
+    </div>  <div class="view-content" id="vc-body-weekly">
     <div class="section-label">Body · this week</div>
     <div class="card"><div class="card-title">Daily weight this week</div><div class="chart-wrap" id="wrap-body-week-chart"></div></div>
     <div class="card">
@@ -4153,7 +4190,7 @@ async function tab(id){
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
-  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitMobilitySummary(); buildZepSideEffectsSummary(); }
+  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitMobilitySummary(); buildZepSideEffectsSummary(); loadBodyGoals(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld&&!_sld.value)_sld.value=logicalDayStr(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') {
@@ -4548,7 +4585,7 @@ function logItem(date,chips,note){return`<div class="log-item"><div class="log-d
 function renderLog(id,items,fn){
   const el=document.getElementById(id);if(!el)return;
   if(!items||!items.length){el.innerHTML='<div class="log-empty">Nothing logged yet.</div>';return;}
-  const sorted=items.slice().reverse();
+  const sorted=[...items].sort((a,b)=>((b.date||b.isoDate||'').localeCompare(a.date||a.isoDate||'')));
   const visible=sorted.slice(0,2);
   let html=visible.map(fn).join('');
   if(sorted.length>2){
@@ -9467,7 +9504,7 @@ async function restoreHairCheckinState(){
   try{
     const today = logicalDayStr();
     const cached = JSON.parse(localStorage.getItem('glowHairCheckinState')||'null');
-    if(cached && cached.savedAt && cached.date===today && (Date.now()-cached.savedAt)<86400000){
+    if(cached && cached.date===today){
       showHairCheckinSaved(cached); return;
     }
     let entry = null;
@@ -9932,7 +9969,7 @@ async function restoreStyleCheckinState(){
   try{
     const today = logicalDayStr();
     const cached = JSON.parse(localStorage.getItem('glowStyleCheckinState')||'null');
-    if(cached && cached.savedAt && cached.date===today && (Date.now()-cached.savedAt)<86400000){
+    if(cached && cached.date===today){
       showStyleCheckinSaved(cached); return;
     }
     let entry = null;
@@ -10039,7 +10076,7 @@ async function loadLogs(){
   const skins=await dbAll('skins');
   renderLog('skin-log',skins.filter(s=>s.type==='checkin'),e=>logItem(e.date,[...e.skinT,...e.concerns,...(e.musely_aa?['Musely Anti-Age']:[]),...(e.musely_spot?['Musely Spot']:[])],e.derm));
   renderLog('facial-log',skins.filter(s=>s.type==='facial'),e=>logItem(e.date,[e.next?'Next: '+e.next:''],e.notes));
-  const bodies=await dbAll('skins');
+  const bodies=await dbAll('bodies');
   renderLog('body-log',bodies.filter(s=>s.type==='body'),e=>logItem(e.date,[...(e.nsv||[]),...(e.waist?['Waist '+e.waist+'"']:[]),...(e.hips?['Hips '+e.hips+'"']:[])],e.note));
   const hairs=await dbAll('hairs');
   renderLog('hair-log',hairs,e=>logItem(e.date,[...(e.hairFace?[e.hairFace]:[]),...(e.hairT||e.hairState||[]),...(e.care||[]),...(e.prods||[])],e.note));
@@ -16479,8 +16516,8 @@ async function saveZepInjection(){
   fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({pillar:'zepbound',data:existing})}).catch(()=>{});
 
-  // Save to localStorage
-  localStorage.setItem('glowZepDose', JSON.stringify(entry));
+  // Save to localStorage with timestamp so buildZepboundStatus can prefer it when fresh
+  localStorage.setItem('glowZepDose', JSON.stringify({...entry, _savedAt: Date.now()}));
 
   // Save pain/notes to site history, keyed to the injection date (not today's date)
   if(siteHistory.length){
@@ -16962,37 +16999,45 @@ async function buildZepboundStatus(){
   if(!el) return;
   let lastDose = null;
 
-  // Always fetch from Blob first — it's the source of truth across devices
-  try{
-    const res = await fetch(`${BACKEND}/api/sync?pillar=zepbound&t=${Date.now()}`);
-    if(res.ok){
-      const {data}=await res.json();
-      if(data&&data.length){
-        // Sort by isoDate ascending
-        const sorted = [...data].sort((a,b)=>(a.isoDate||'').localeCompare(b.isoDate||''));
-        const withDose = sorted.filter(e=>e.mg);
-        if(withDose.length){
-          const doseEntry = withDose[withDose.length-1];
-          // Get site/notes from the most recent entry (may be a notes-only update)
-          const newest = sorted[sorted.length-1];
-          // Merge site/notes from newest into dose entry if newer
-          lastDose = {
-            ...doseEntry,
-            injectionSite: newest.injectionSite || doseEntry.injectionSite,
-            injectionSiteLabel: newest.injectionSiteLabel || doseEntry.injectionSiteLabel,
-            injectionPain: newest.injectionPain || doseEntry.injectionPain,
-            injectionNotes: newest.injectionNotes || doseEntry.injectionNotes,
-          };
-          localStorage.setItem('glowZepDose', JSON.stringify({...lastDose, _userSaved:true}));
+  // If localStorage has a very recently saved injection (within 5 min), use it directly
+  // to avoid the race condition where the blob POST hasn't completed yet
+  const localRaw = localStorage.getItem('glowZepDose');
+  let localDose = null;
+  if(localRaw) try{ localDose = JSON.parse(localRaw); }catch(e){}
+  if(localDose && localDose._savedAt && (Date.now() - localDose._savedAt) < 300000){
+    lastDose = localDose;
+  }
+
+  if(!lastDose){
+    // Fetch from Blob — source of truth across devices
+    try{
+      const res = await fetch(`${BACKEND}/api/sync?pillar=zepbound&t=${Date.now()}`);
+      if(res.ok){
+        const {data}=await res.json();
+        if(data&&data.length){
+          // Sort by isoDate ascending
+          const sorted = [...data].sort((a,b)=>(a.isoDate||'').localeCompare(b.isoDate||''));
+          const withDose = sorted.filter(e=>e.mg);
+          if(withDose.length){
+            const doseEntry = withDose[withDose.length-1];
+            // Get site/notes from the most recent entry (may be a notes-only update)
+            const newest = sorted[sorted.length-1];
+            // Merge site/notes from newest into dose entry if newer
+            lastDose = {
+              ...doseEntry,
+              injectionSite: newest.injectionSite || doseEntry.injectionSite,
+              injectionSiteLabel: newest.injectionSiteLabel || doseEntry.injectionSiteLabel,
+              injectionPain: newest.injectionPain || doseEntry.injectionPain,
+              injectionNotes: newest.injectionNotes || doseEntry.injectionNotes,
+            };
+            localStorage.setItem('glowZepDose', JSON.stringify({...lastDose, _userSaved:true}));
+          }
         }
       }
-    }
-  }catch(e){}
+    }catch(e){}
 
-  // Fall back to localStorage only if Blob unavailable
-  if(!lastDose){
-    const local = localStorage.getItem('glowZepDose');
-    if(local) try{ lastDose = JSON.parse(local); }catch(e){}
+    // Fall back to localStorage if blob unavailable
+    if(!lastDose && localDose) lastDose = localDose;
   }
   document.querySelectorAll('.zep-dose-btn').forEach(btn=>{
     btn.classList.remove('selected');
@@ -17794,6 +17839,74 @@ async function dermCoach(){
   callCoach('Skin · Derm Prep','Based on my recent skin check-ins, routine completion, and Musely treatment schedule, what questions should I bring to my next derm appointment?','derm-coach-output', logData);
 }
 function hairCoach(){ callCoach('Hair','I am growing my hair from chin to collarbone length. What should I focus on for healthy growth?','hair-coach-output'); }
+
+function saveBodyGoal(){
+  const text = document.getElementById('body-goal-text')?.value || '';
+  const milestones = Array.from(document.querySelectorAll('#body-milestone-tags .tag.on')).map(b=>b.id);
+  localStorage.setItem('glowBodyGoals', JSON.stringify({text, milestones}));
+}
+function toggleBodyMilestone(btn){ btn.classList.toggle('on'); saveBodyGoal(); }
+function loadBodyGoals(){
+  const raw = localStorage.getItem('glowBodyGoals');
+  if(!raw) return;
+  try{
+    const {text='', milestones=[]} = JSON.parse(raw);
+    const el = document.getElementById('body-goal-text');
+    if(el && text) el.value = text;
+    milestones.forEach(id=>{ const b=document.getElementById(id); if(b) b.classList.add('on'); });
+  }catch(e){}
+}
+function toggleBodyCoachSuggestions(show){
+  const panel = document.getElementById('body-suggestions-panel');
+  if(!panel) return;
+  const open = show !== undefined ? show : panel.style.display === 'none';
+  panel.style.display = open ? 'block' : 'none';
+}
+function bodyCoachPrompt(text){
+  const input = document.getElementById('body-coach-input');
+  if(input) input.value = text;
+  toggleBodyCoachSuggestions(false);
+  bodyCoach();
+}
+async function bodyCoach(){
+  const input = document.getElementById('body-coach-input');
+  const question = input?.value?.trim();
+  if(!question){ showToast('Type something or tap a suggestion'); return; }
+  if(input) input.value = '';
+  let context = '';
+  try{
+    const bodies = await dbAll('bodies');
+    const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+    const weekAgoStr = weekAgo.toISOString().slice(0,10);
+    const recent = bodies.filter(e=>e.type==='body'&&e.date>=weekAgoStr);
+    if(recent.length){
+      const CONF = ['Struggling','Neutral','Good','Loving it'];
+      const FIT  = ['Looser','Same','Tighter'];
+      const BLOAT= ['None','Mild','Moderate','Significant'];
+      context += 'Recent body check-ins (last 7 days):\n';
+      context += recent.map(e=>`${e.date}: feel=${e.bodyFace||''} confidence=${CONF[e.confidence]||''} clothesFit=${FIT[e.clothesFit]||''} bloating=${BLOAT[e.bloating]||''} wins=[${(e.nsv||[]).join(',')}]`).join('\n');
+      context += '\n\n';
+    }
+  }catch(e){}
+  try{
+    const zep = JSON.parse(localStorage.getItem('glowZepDose')||'null');
+    if(zep?.mg){
+      const daysSince = Math.floor((new Date()-new Date(zep.isoDate))/(1000*60*60*24));
+      const weeksOn = Math.floor((new Date()-new Date('2025-10-25'))/(1000*60*60*24*7));
+      context += `Zepbound: ${zep.mg}mg dose, last injected ${daysSince} day${daysSince!==1?'s':''} ago, week ${weeksOn} on Zepbound.\n`;
+    }
+  }catch(e){}
+  try{
+    const goals = JSON.parse(localStorage.getItem('glowBodyGoals')||'null');
+    if(goals?.text) context += `My body goal: ${goals.text}\n`;
+    if(goals?.milestones?.length){
+      const labels = goals.milestones.map(id=>document.getElementById(id)?.textContent||'').filter(Boolean);
+      if(labels.length) context += `Milestones I've hit: ${labels.join(', ')}\n`;
+    }
+  }catch(e){}
+  const prompt = context ? `Context about my body journey:\n${context}\nMy question: ${question}` : question;
+  callCoach('Body', prompt, 'body-coach-output');
+}
 function mindCoach(){
   const input = document.getElementById('mind-coach-input');
   const msg = input ? input.value.trim() : '';
