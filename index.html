@@ -5163,14 +5163,14 @@ function initDailyLookBox(){
 
 function addDailyLookItem(existingItem=null){
   const id=dlItemIdCounter++;
-  const item=existingItem?{...existingItem,id}:{id,desc:'',price:'',keepReturn:''};
+  const item=existingItem?{...existingItem,id}:{id,desc:'',color:'',size:'',price:'',keepReturn:''};
   dlItems.push(item);
   const container=document.getElementById('dl-items-list');
   if(!container) return;
   const div=document.createElement('div');
   div.id='dl-item-'+id;
-  div.style.cssText='margin-bottom:10px;padding:12px;background:var(--cream);border:0.5px solid var(--border);border-radius:10px;';
-  div.innerHTML=`<div style="display:flex;gap:8px;margin-bottom:8px;"><div style="flex:1;text-align:center;"><div class="photo-slot" style="width:100%;aspect-ratio:2/3;" onclick="pickPhoto('dl-photo-${id}-front')" id="dl-photo-${id}-front"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div></div><div style="flex:1;text-align:center;"><div class="photo-slot" style="width:100%;aspect-ratio:2/3;" onclick="pickPhoto('dl-photo-${id}-back')" id="dl-photo-${id}-back"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div></div></div><input type="text" placeholder="Item name..." oninput="dlUpdateItem(${id},'desc',this.value)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;"><div style="display:flex;gap:6px;margin-bottom:6px;"><input type="text" placeholder="Color" oninput="dlUpdateItem(${id},'color',this.value)" id="dl-color-${id}" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"><input type="text" placeholder="Size" oninput="dlUpdateItem(${id},'size',this.value)" id="dl-size-${id}" style="width:80px;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"></div><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:13px;color:var(--muted);">$</span><input type="number" placeholder="0.00" step="0.01" min="0" oninput="dlUpdateItem(${id},'price',this.value)" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"><button onclick="removeDailyLookItem(${id})" style="padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;flex-shrink:0;font-family:var(--sans);">✕</button></div><div style="display:flex;gap:6px;"><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Keeping',this)" style="flex:1;text-align:center;">Keeping</button><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Returned',this)" style="flex:1;text-align:center;">Returned</button></div>`;
+  div.style.cssText='margin-bottom:10px;border-radius:10px;border:0.5px solid var(--border);overflow:hidden;';
+  div.innerHTML=`<div id="dl-item-form-${id}" style="padding:12px;background:var(--cream);"><div style="display:flex;gap:8px;margin-bottom:8px;"><div style="flex:1;text-align:center;"><div class="photo-slot" style="width:100%;aspect-ratio:2/3;" onclick="pickPhoto('dl-photo-${id}-front')" id="dl-photo-${id}-front"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div></div><div style="flex:1;text-align:center;"><div class="photo-slot" style="width:100%;aspect-ratio:2/3;" onclick="pickPhoto('dl-photo-${id}-back')" id="dl-photo-${id}-back"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div></div></div><input type="text" placeholder="Item name..." oninput="dlUpdateItem(${id},'desc',this.value)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;"><div style="display:flex;gap:6px;margin-bottom:6px;"><input type="text" placeholder="Color" oninput="dlUpdateItem(${id},'color',this.value)" id="dl-color-${id}" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"><input type="text" placeholder="Size" oninput="dlUpdateItem(${id},'size',this.value)" id="dl-size-${id}" style="width:80px;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"></div><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:13px;color:var(--muted);">$</span><input type="number" placeholder="0.00" step="0.01" min="0" oninput="dlUpdateItem(${id},'price',this.value)" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"></div><div style="display:flex;gap:6px;margin-bottom:10px;"><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Keeping',this)" style="flex:1;text-align:center;">Keeping</button><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Returned',this)" style="flex:1;text-align:center;">Returned</button></div><div style="display:flex;gap:8px;"><button onclick="saveItemCard(${id})" style="flex:1;padding:9px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;">Save item</button><button onclick="removeDailyLookItem(${id})" style="padding:9px 14px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Remove</button></div></div><div id="dl-item-summary-${id}" style="display:none;padding:10px 12px;background:#fff;"></div>`;
   container.appendChild(div);
   // Restore saved data if loading from history
   if(item.desc){const inp=div.querySelector('input[type="text"]');if(inp)inp.value=item.desc;}
@@ -5180,9 +5180,50 @@ function addDailyLookItem(existingItem=null){
   if(item.keepReturn){div.querySelectorAll('.dl-kr-btn').forEach(b=>{if(b.textContent.trim()===item.keepReturn)b.classList.add('on');});}
   if(item.photoFront){const s=document.getElementById(`dl-photo-${id}-front`);if(s){s.style.backgroundImage=`url('${item.photoFront}')`;s.style.backgroundSize='cover';s.style.backgroundPosition='center';s.innerHTML='';}}
   if(item.photoBack){const s=document.getElementById(`dl-photo-${id}-back`);if(s){s.style.backgroundImage=`url('${item.photoBack}')`;s.style.backgroundSize='cover';s.style.backgroundPosition='center';s.innerHTML='';}}
+  if(existingItem) saveItemCard(id);
   updateDailyLookCartTotal();
-  // Show try-on section once items exist
   const ts=document.getElementById('dl-tryons-section');if(ts)ts.style.display='block';
+}
+
+function saveItemCard(id){
+  const item=dlItems.find(i=>i.id===id);
+  if(!item) return;
+  const formDiv=document.getElementById(`dl-item-form-${id}`);
+  const summaryDiv=document.getElementById(`dl-item-summary-${id}`);
+  if(!formDiv||!summaryDiv) return;
+  // Read from form into item
+  const descInp=formDiv.querySelector('input[type="text"]');
+  const colorInp=document.getElementById(`dl-color-${id}`);
+  const sizeInp=document.getElementById(`dl-size-${id}`);
+  const priceInp=formDiv.querySelector('input[type="number"]');
+  const activeKr=formDiv.querySelector('.dl-kr-btn.on');
+  item.desc=descInp?descInp.value.trim():'';
+  item.color=colorInp?colorInp.value.trim():'';
+  item.size=sizeInp?sizeInp.value.trim():'';
+  item.price=priceInp?priceInp.value:'';
+  item.keepReturn=activeKr?activeKr.textContent.trim():'';
+  const pf=getSlotPhotoUrl(`dl-photo-${id}-front`);if(pf)item.photoFront=pf;
+  const pb=getSlotPhotoUrl(`dl-photo-${id}-back`);if(pb)item.photoBack=pb;
+  // Render summary
+  const krColor=item.keepReturn==='Keeping'?'#27500A':item.keepReturn==='Returned'?'var(--rose)':'var(--muted)';
+  const krBg=item.keepReturn==='Keeping'?'#EAF3DE':item.keepReturn==='Returned'?'rgba(196,115,90,0.12)':'var(--warm)';
+  const photoHtml=item.photoFront
+    ?`<div style="width:40px;height:54px;border-radius:6px;background-image:url('${item.photoFront}');background-size:cover;background-position:center;flex-shrink:0;"></div>`
+    :'<div style="width:40px;height:54px;border-radius:6px;background:var(--warm);border:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;">👗</div>';
+  const meta=[item.color,item.size].filter(Boolean).join(' · ');
+  const priceStr=item.price?`$${parseFloat(item.price).toFixed(2)}`:'';
+  summaryDiv.innerHTML=`<div style="display:flex;gap:10px;align-items:center;">${photoHtml}<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;">${item.desc||'Unnamed item'}</div>${meta?`<div style="font-size:11px;color:var(--muted);margin-bottom:2px;">${meta}</div>`:''}<div style="display:flex;gap:6px;align-items:center;">${priceStr?`<span style="font-size:12px;color:var(--text);">${priceStr}</span>`:''}${item.keepReturn?`<span style="font-size:10px;padding:2px 7px;border-radius:8px;background:${krBg};color:${krColor};">${item.keepReturn}</span>`:''}</div></div><div style="display:flex;gap:6px;flex-shrink:0;align-items:center;"><button onclick="editItemCard(${id})" style="padding:5px 12px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Edit</button><button onclick="removeDailyLookItem(${id})" style="width:26px;height:26px;border-radius:50%;background:rgba(196,115,90,0.12);border:none;color:var(--rose);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button></div></div>`;
+  summaryDiv.style.display='block';
+  formDiv.style.display='none';
+  updateDailyLookCartTotal();
+}
+
+function editItemCard(id){
+  const formDiv=document.getElementById(`dl-item-form-${id}`);
+  const summaryDiv=document.getElementById(`dl-item-summary-${id}`);
+  if(!formDiv||!summaryDiv) return;
+  summaryDiv.style.display='none';
+  formDiv.style.display='block';
 }
 
 function removeDailyLookItem(id){
@@ -5327,7 +5368,7 @@ async function openDailyLookHistory(){
     const statusText=allDecided?'All decided ✓':'In progress';
     const thumb=items.find(i=>i.photoFront);
     const thumbHtml=thumb?`<div style="width:44px;height:55px;border-radius:6px;background-image:url('${thumb.photoFront}');background-size:cover;background-position:center;flex-shrink:0;"></div>`:'<div style="width:44px;height:55px;border-radius:6px;background:var(--warm);border:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;">📦</div>';
-    return `<div onclick="loadBoxForEditing(${box.id})" style="display:flex;gap:10px;align-items:center;background:var(--cream);border:0.5px solid var(--border);border-radius:10px;padding:10px;margin-bottom:10px;cursor:pointer;">
+    return `<div style="position:relative;background:var(--cream);border:0.5px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;"><div onclick="loadBoxForEditing(${box.id})" style="display:flex;gap:10px;align-items:center;padding:10px;cursor:pointer;">
       ${thumbHtml}
       <div style="flex:1;min-width:0;">
         <div style="font-family:var(--serif);font-size:15px;color:var(--text);margin-bottom:2px;">${fmtOutfitDate(box.date)}</div>
@@ -5335,13 +5376,22 @@ async function openDailyLookHistory(){
         <div style="display:inline-block;margin-top:4px;font-size:10px;padding:2px 8px;border-radius:8px;background:${statusBg};color:${statusColor};">${statusText}</div>
       </div>
       <div style="font-size:18px;color:var(--border);">›</div>
-    </div>`;
+    </div><button onclick="deleteDailyLookBox(${box.id},event)" style="width:100%;padding:7px;border:none;border-top:0.5px solid var(--border);background:transparent;color:var(--rose);font-size:12px;font-family:var(--sans);cursor:pointer;">Delete box</button></div>`;
   }).join('');
 }
 
 function closeDailyLookHistory(){
   const overlay=document.getElementById('dl-history-overlay');
   if(overlay) overlay.style.display='none';
+}
+
+async function deleteDailyLookBox(boxId,event){
+  event.stopPropagation();
+  if(!confirm('Delete this box? This cannot be undone.')) return;
+  await dbDelete('outfits',boxId);
+  const remaining=await dbAll('outfits');
+  try{await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'outfits',data:remaining})});}catch(e){}
+  openDailyLookHistory();
 }
 
 async function loadBoxForEditing(boxId){
