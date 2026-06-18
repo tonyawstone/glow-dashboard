@@ -16835,10 +16835,40 @@ function editZepDose(){
   if(form) form.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
-function openInjectionNotes(){
-  const el = document.getElementById('injection-notes-overlay-content');
+async function openInjectionNotes(){
   openOverlay('injection-notes-overlay');
   renderInjectionNotesOverlay();
+  // Merge any entries from the zepbound blob that aren't in localStorage
+  try{
+    const res = await fetch(`${BACKEND}/api/sync?pillar=zepbound&t=${Date.now()}`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!Array.isArray(data)||!data.length) return;
+    const history = JSON.parse(localStorage.getItem('glowInjectionSites')||'[]');
+    let changed = false;
+    for(const entry of data){
+      if(!entry.injectionSite && !entry.injectionNotes && !entry.injectionPain) continue;
+      const isoDay = (entry.isoDate||'').slice(0,10);
+      const alreadyHave = history.find(h=>(h.isoDate||'').slice(0,10)===isoDay || h.date===isoDay);
+      if(!alreadyHave){
+        history.push({
+          date: isoDay,
+          isoDate: entry.isoDate,
+          site: entry.injectionSite||'',
+          label: entry.injectionSiteLabel||'',
+          pain: entry.injectionPain||'',
+          notes: entry.injectionNotes||'',
+          sensation: entry.injectionSensation||[]
+        });
+        changed = true;
+      }
+    }
+    if(changed){
+      history.sort((a,b)=>(a.isoDate||a.date||'').localeCompare(b.isoDate||b.date||''));
+      localStorage.setItem('glowInjectionSites', JSON.stringify(history));
+      renderInjectionNotesOverlay();
+    }
+  }catch(e){}
 }
 
 function renderInjectionNotesOverlay(){
@@ -18039,12 +18069,14 @@ async function weeklyMindInsight(){
   </div>
 </div>
 
-<div id="injection-notes-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+<div id="injection-notes-overlay" class="fullscreen-overlay" style="padding:0;">
+  <div style="position:sticky;top:0;background:#F5F0EB;padding:max(16px,env(safe-area-inset-top)) 16px 12px;z-index:1;border-bottom:0.5px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:12px;">
       <button onclick="closeOverlay('injection-notes-overlay')" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
       <div style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Injection Notes</div>
     </div>
+  </div>
+  <div style="padding:16px;">
     <div id="injection-notes-overlay-content"><div class="log-empty">Loading...</div></div>
   </div>
 </div>
