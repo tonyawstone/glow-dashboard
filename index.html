@@ -1102,6 +1102,100 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
+    <!-- Look Detail Popup -->
+    <div id="look-detail-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:600;overflow-y:auto;">
+      <div style="min-height:100%;padding:16px;box-sizing:border-box;display:flex;align-items:flex-start;justify-content:center;padding-top:40px;padding-bottom:40px;">
+        <div style="background:#fff;border-radius:16px;width:100%;max-width:420px;overflow:hidden;">
+          <!-- Photo area -->
+          <div style="background:var(--warm);position:relative;">
+            <img id="ld-photo" src="" style="width:100%;display:block;max-height:55vh;object-fit:contain;">
+            <div id="ld-no-photo" style="display:none;width:100%;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;font-size:48px;">👗</div>
+            <div id="ld-wear-overlay" style="display:none;position:absolute;bottom:8px;left:8px;background:rgba(160,120,80,0.9);color:#fff;font-size:10px;padding:3px 8px;border-radius:8px;">↩ Wear again</div>
+          </div>
+          <!-- View mode -->
+          <div id="ld-view-mode" style="padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+              <div style="flex:1;">
+                <div id="ld-name" style="font-family:var(--serif);font-size:18px;color:var(--text);margin-bottom:2px;"></div>
+                <div id="ld-meta" style="font-size:11px;color:var(--muted);"></div>
+              </div>
+              <button onclick="closeLookDetail()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;margin-left:8px;line-height:1;">×</button>
+            </div>
+            <div id="ld-tags" style="margin-bottom:8px;"></div>
+            <div id="ld-notes" style="margin-bottom:12px;"></div>
+            <div style="margin-bottom:14px;">
+              <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;">Pieces in this look</div>
+              <div id="ld-pieces" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;min-height:16px;"></div>
+              <button onclick="openPiecePicker()" style="font-size:11px;color:var(--accent);background:none;border:0.5px solid var(--border);padding:5px 12px;border-radius:12px;cursor:pointer;font-family:var(--sans);">+ Tag pieces</button>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="enterLookEditMode()" style="flex:1;padding:9px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:13px;font-family:var(--sans);cursor:pointer;font-weight:500;">✎ Edit</button>
+              <button onclick="deleteLookFromDetail()" style="flex:1;padding:9px;border-radius:20px;border:0.5px solid var(--rose);background:transparent;color:var(--rose);font-size:13px;font-family:var(--sans);cursor:pointer;">Delete</button>
+            </div>
+          </div>
+          <!-- Edit mode -->
+          <div id="ld-edit-mode" style="display:none;padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <div style="font-size:11px;color:var(--muted);font-weight:500;">Edit look</div>
+              <button onclick="exitLookEditMode()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;line-height:1;">×</button>
+            </div>
+            <div style="margin-bottom:12px;">
+              <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Photo</div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="photo-slot" style="width:72px;height:90px;flex-shrink:0;" onclick="pickPhoto('ld-edit-photo')" id="ld-edit-photo"><i class="ti ti-camera" style="font-size:16px;color:var(--border);position:relative;z-index:1;"></i></div>
+                <div style="font-size:11px;color:var(--muted);">Tap to replace photo</div>
+              </div>
+            </div>
+            <input type="text" id="ld-edit-desc" placeholder="Description..." style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:10px;background:#fff;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Rating</div>
+            <div style="display:flex;gap:6px;margin-bottom:10px;" id="ld-edit-stars">
+              <button class="tag" onclick="setLookStar(1)">★</button>
+              <button class="tag" onclick="setLookStar(2)">★★</button>
+              <button class="tag" onclick="setLookStar(3)">★★★</button>
+              <button class="tag" onclick="setLookStar(4)">★★★★</button>
+              <button class="tag" onclick="setLookStar(5)">★★★★★</button>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Occasion</div>
+            <div class="tags" id="ld-edit-occ" style="margin-bottom:10px;">
+              <button class="tag" onclick="tog(this)">Work</button>
+              <button class="tag" onclick="tog(this)">Weekend</button>
+              <button class="tag" onclick="tog(this)">Casual</button>
+              <button class="tag" onclick="tog(this)">Event</button>
+              <button class="tag" onclick="tog(this)">Date night</button>
+              <button class="tag" onclick="tog(this)">Church</button>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Vibe</div>
+            <div class="tags" id="ld-edit-vibe" style="margin-bottom:10px;">
+              <button class="tag" onclick="tog(this)">Polished</button>
+              <button class="tag" onclick="tog(this)">Chic</button>
+              <button class="tag" onclick="tog(this)">Casual</button>
+              <button class="tag" onclick="tog(this)">Boho</button>
+              <button class="tag" onclick="tog(this)">Sporty</button>
+              <button class="tag" onclick="tog(this)">Romantic</button>
+              <button class="tag" onclick="tog(this)">Classic</button>
+              <button class="tag" onclick="tog(this)">Bold</button>
+            </div>
+            <textarea id="ld-edit-notes" rows="2" placeholder="Notes..." style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;resize:none;margin-bottom:10px;background:#fff;"></textarea>
+            <div style="margin-bottom:14px;">
+              <button id="ld-edit-wear" class="tag" onclick="this.classList.toggle('on')">↩ Wear again</button>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="exitLookEditMode()" style="flex:1;padding:9px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-family:var(--sans);cursor:pointer;">Cancel</button>
+              <button onclick="saveLookEdit()" style="flex:2;padding:9px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save changes</button>
+            </div>
+          </div>
+          <!-- Piece picker -->
+          <div id="ld-piece-picker" style="display:none;padding:16px;border-top:0.5px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div style="font-size:11px;color:var(--muted);font-weight:500;">Tag pieces in this look</div>
+              <button onclick="closePiecePicker()" style="background:none;border:none;font-size:13px;color:var(--accent);cursor:pointer;font-family:var(--sans);font-weight:500;padding:0;">Done</button>
+            </div>
+            <div id="ld-piece-picker-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:300px;overflow-y:auto;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 2. Your Looks -->
     
     <div class="card" id="lookbook-card" style="display:none;">
@@ -4808,6 +4902,155 @@ function filterClosetLooks(occ,btn){
   renderCloset(occ);
 }
 
+// ── LOOK DETAIL POPUP ─────────────────────────────────────────────────
+let _lookDetailIdx=null,_lookEditStars=0;
+
+function openLookDetail(idx){
+  const e=window._closetMap&&window._closetMap[idx];
+  if(!e)return;
+  _lookDetailIdx=idx;
+  const photo=document.getElementById('ld-photo');
+  const noPhoto=document.getElementById('ld-no-photo');
+  if(e.photo){if(photo){photo.src=e.photo;photo.style.display='block';}if(noPhoto)noPhoto.style.display='none';}
+  else{if(photo)photo.style.display='none';if(noPhoto){noPhoto.style.display='flex';}}
+  const wb=document.getElementById('ld-wear-overlay');
+  if(wb)wb.style.display=e.wearAgain?'block':'none';
+  const stars=e.stars?'★'.repeat(e.stars):'';
+  const keepLabel={Keeping:'Keeping ✓',Returned:'Returned','Inspo only':'Inspo'}[e.keep]||'';
+  document.getElementById('ld-name').textContent=e.desc||'Unnamed look';
+  document.getElementById('ld-meta').textContent=[fmtOutfitDate(e.date),keepLabel,stars].filter(Boolean).join(' · ');
+  const allTags=[...(e.occ||[]),...(e.vibe||[]),...(e.colors||[]),...(Array.isArray(e.season)?e.season:(e.season?[e.season]:[]))].filter(Boolean);
+  document.getElementById('ld-tags').innerHTML=allTags.length?`<div class="outfit-tags">${allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('')}</div>`:'';
+  document.getElementById('ld-notes').innerHTML=e.notes?`<div style="font-size:12px;color:var(--muted);font-style:italic;line-height:1.5;">"${e.notes}"</div>`:'';
+  renderLookDetailPieces(e);
+  document.getElementById('ld-view-mode').style.display='block';
+  document.getElementById('ld-edit-mode').style.display='none';
+  document.getElementById('ld-piece-picker').style.display='none';
+  document.getElementById('look-detail-overlay').style.display='block';
+}
+
+function closeLookDetail(){
+  document.getElementById('look-detail-overlay').style.display='none';
+  _lookDetailIdx=null;
+}
+
+function renderLookDetailPieces(e){
+  const el=document.getElementById('ld-pieces');
+  if(!el)return;
+  const tagged=(e.pieceIds||[]).map(pid=>closetItems.find(c=>c.id===pid)).filter(Boolean);
+  if(!tagged.length){el.innerHTML='<span style="font-size:11px;color:var(--muted);">None tagged yet</span>';return;}
+  el.innerHTML=tagged.map(p=>{
+    const bg=p.photoFront?`background-image:url('${p.photoFront}');background-size:cover;background-position:center;`:'';
+    return `<div style="width:48px;height:60px;border-radius:6px;background:var(--warm);border:0.5px solid var(--border);${bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;" title="${p.name||''}">${!p.photoFront?'<i class="ti ti-hanger" style="font-size:12px;color:var(--border);"></i>':''}</div>`;
+  }).join('');
+}
+
+function enterLookEditMode(){
+  const e=window._closetMap&&window._closetMap[_lookDetailIdx];
+  if(!e)return;
+  _lookEditStars=e.stars||0;
+  document.getElementById('ld-edit-desc').value=e.desc||'';
+  document.getElementById('ld-edit-notes').value=e.notes||'';
+  document.querySelectorAll('#ld-edit-stars .tag').forEach((b,i)=>b.classList.toggle('on',e.stars===i+1));
+  const occ=e.occ||[];
+  document.querySelectorAll('#ld-edit-occ .tag').forEach(b=>b.classList.toggle('on',occ.includes(b.textContent.trim())));
+  const vibe=e.vibe||[];
+  document.querySelectorAll('#ld-edit-vibe .tag').forEach(b=>b.classList.toggle('on',vibe.includes(b.textContent.trim())));
+  const wearBtn=document.getElementById('ld-edit-wear');
+  if(wearBtn)wearBtn.classList.toggle('on',!!e.wearAgain);
+  const slot=document.getElementById('ld-edit-photo');
+  if(slot){
+    if(e.photo){slot.style.backgroundImage=`url('${e.photo}')`;slot.style.backgroundSize='cover';slot.style.backgroundPosition='center';slot.innerHTML='';}
+    else{slot.style.backgroundImage='';slot.innerHTML='<i class="ti ti-camera" style="font-size:16px;color:var(--border);position:relative;z-index:1;"></i>';}
+  }
+  document.getElementById('ld-view-mode').style.display='none';
+  document.getElementById('ld-edit-mode').style.display='block';
+}
+
+function exitLookEditMode(){
+  document.getElementById('ld-view-mode').style.display='block';
+  document.getElementById('ld-edit-mode').style.display='none';
+}
+
+function setLookStar(n){
+  _lookEditStars=n;
+  document.querySelectorAll('#ld-edit-stars .tag').forEach((b,i)=>b.classList.toggle('on',i===n-1));
+}
+
+async function saveLookEdit(){
+  const e=window._closetMap&&window._closetMap[_lookDetailIdx];
+  if(!e)return;
+  const desc=(document.getElementById('ld-edit-desc')?.value||'').trim();
+  const notes=(document.getElementById('ld-edit-notes')?.value||'').trim();
+  const occ=getTags('ld-edit-occ');
+  const vibe=getTags('ld-edit-vibe');
+  const wearAgain=document.getElementById('ld-edit-wear')?.classList.contains('on')||false;
+  const stars=_lookEditStars;
+  const newPhoto=getSlotPhotoUrl('ld-edit-photo');
+  const all=await dbAll('outfits');
+  const entry=all.find(r=>r.ts===e.ts||(r.id&&r.id===e.id));
+  if(!entry)return;
+  Object.assign(entry,{desc,notes,stars,occ,vibe,wearAgain});
+  if(newPhoto)entry.photo=newPhoto;
+  const tx=db.transaction('outfits','readwrite');
+  tx.objectStore('outfits').put(entry);
+  await new Promise(r=>tx.oncomplete=r);
+  syncToBlob('outfits');
+  _closetOutfits=[];
+  await renderCloset(_closetFilter);
+  await renderLookbook();
+  if(curView==='monthly')renderStyleCalendar();
+  closeLookDetail();
+}
+
+async function deleteLookFromDetail(){
+  const e=window._closetMap&&window._closetMap[_lookDetailIdx];
+  if(!e)return;
+  if(!confirm('Delete this look?'))return;
+  await deleteOutfit(e.ts||e.id);
+  closeLookDetail();
+}
+
+function openPiecePicker(){
+  const e=window._closetMap&&window._closetMap[_lookDetailIdx];
+  const grid=document.getElementById('ld-piece-picker-grid');
+  if(!grid||!e)return;
+  const taggedIds=new Set(e.pieceIds||[]);
+  if(!closetItems.length){
+    grid.innerHTML='<div style="font-size:12px;color:var(--muted);grid-column:1/-1;text-align:center;padding:16px;">No pieces in your closet yet.<br>Add pieces in the Pieces tab first.</div>';
+  }else{
+    grid.innerHTML=closetItems.map(p=>{
+      const isOn=taggedIds.has(p.id);
+      const bg=p.photoFront?`background-image:url('${p.photoFront}');background-size:cover;background-position:center;`:'';
+      return `<div onclick="togglePieceTag(${p.id})" style="cursor:pointer;"><div style="width:100%;aspect-ratio:3/4;border-radius:8px;background:var(--warm);border:${isOn?'2px solid var(--accent)':'0.5px solid var(--border)'};overflow:hidden;${bg};display:flex;align-items:center;justify-content:center;position:relative;">${!p.photoFront?'<i class="ti ti-hanger" style="font-size:16px;color:var(--border);"></i>':''}${isOn?'<div style="position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="font-size:9px;color:#fff;"></i></div>':''}</div><div style="font-size:10px;color:var(--text);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name||'—'}</div></div>`;
+    }).join('');
+  }
+  document.getElementById('ld-piece-picker').style.display='block';
+}
+
+async function togglePieceTag(pieceId){
+  const e=window._closetMap&&window._closetMap[_lookDetailIdx];
+  if(!e)return;
+  if(!e.pieceIds)e.pieceIds=[];
+  const idx=e.pieceIds.indexOf(pieceId);
+  if(idx===-1)e.pieceIds.push(pieceId);else e.pieceIds.splice(idx,1);
+  const all=await dbAll('outfits');
+  const entry=all.find(r=>r.ts===e.ts||(r.id&&r.id===e.id));
+  if(entry){
+    entry.pieceIds=e.pieceIds;
+    const tx=db.transaction('outfits','readwrite');
+    tx.objectStore('outfits').put(entry);
+    await new Promise(r=>tx.oncomplete=r);
+    syncToBlob('outfits');
+  }
+  openPiecePicker();
+  renderLookDetailPieces(e);
+}
+
+function closePiecePicker(){
+  document.getElementById('ld-piece-picker').style.display='none';
+}
+
 function toggleClosetAdd(){
   const panel=document.getElementById('closet-add-panel');
   const addBtn=document.getElementById('closet-add-btn');
@@ -6880,11 +7123,11 @@ async function renderCloset(filter){
   }
   window._closetMap=sorted;
   grid.innerHTML=sorted.map((e,i)=>{
-    const cardHtml=outfitCardHTML(e,i);
+    const photoHtml=e.photo?`<img src="${e.photo}" style="width:100%;height:100%;object-fit:cover;">`:'<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:28px;">👗</div>';
     if(_pickerDay){
-      return `<div style="position:relative;cursor:pointer;" onclick="pickOutfitForDayIdx(${i})">${cardHtml}<div style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;pointer-events:none;"><div style="background:rgba(0,0,0,0.45);color:#fff;font-size:10px;padding:3px 10px;border-radius:8px;">Tap to pick</div></div></div>`;
+      return `<div onclick="pickOutfitForDayIdx(${i})" style="cursor:pointer;"><div style="width:100%;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);overflow:hidden;position:relative;">${photoHtml}<div style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;"><div style="background:rgba(0,0,0,0.45);color:#fff;font-size:10px;padding:3px 10px;border-radius:8px;">Tap to pick</div></div></div><div style="font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.desc||''}</div></div>`;
     }
-    return cardHtml;
+    return `<div onclick="openLookDetail(${i})" style="cursor:pointer;"><div style="width:100%;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);overflow:hidden;position:relative;">${photoHtml}${e.wearAgain?'<div style="position:absolute;bottom:4px;left:4px;background:rgba(160,120,80,0.85);color:#fff;font-size:9px;padding:2px 5px;border-radius:6px;">↩</div>':''}${e.stars?`<div style="position:absolute;top:4px;left:4px;font-size:10px;color:#D4A96A;text-shadow:0 0 3px rgba(0,0,0,0.4);">${'★'.repeat(e.stars)}</div>`:''}</div><div style="font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.desc||''}</div></div>`;
   }).join('');
 }
 
