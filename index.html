@@ -536,10 +536,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
 <!-- TIME TABS (shown on all pages, just below header) -->
 <div class="time-tabs-bar" id="time-tabs-bar">
-  <button class="vtab on" onclick="setView('daily',this)">Daily</button>
-  <button class="vtab" onclick="setView('weekly',this)">Weekly</button>
-  <button class="vtab" onclick="setView('monthly',this)">Monthly</button>
-  <button class="vtab" onclick="setView('yearly',this)">Yearly</button>
+  <button class="vtab on" data-view="daily" onclick="setView('daily',this)">Daily</button>
+  <button class="vtab" data-view="weekly" onclick="setView('weekly',this)">Weekly</button>
+  <button class="vtab" data-view="monthly" onclick="setView('monthly',this)">Monthly</button>
+  <button class="vtab" data-view="yearly" onclick="setView('yearly',this)">Yearly</button>
 </div>
 
 <div class="scroll-area" id="main-scroll">
@@ -1083,77 +1083,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toast-msg" id="dl-toast">Saved!</div>
     </div>
 
-    <!-- 1b. My Closet -->
-    <div class="card" id="closet-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <i class="ti ti-hanger" style="font-size:13px;color:var(--accent);"></i>
-          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">My Closet</div>
-        </div>
-        <span id="closet-count" style="font-size:11px;color:var(--muted);"></span>
-      </div>
-      <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
-        <button class="tag on" data-cat-filter onclick="filterCloset('all',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">All</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('top',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Tops</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('bottom',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Bottoms</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('dress',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Dresses</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('shoes',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Shoes</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('bag',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Bags</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('accessory',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Accessories</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('other',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Other</button>
-      </div>
-      <div id="closet-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;"></div>
-      <div id="closet-empty" style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">No pieces yet — add your first below</div>
-      <div id="closet-add-panel" style="display:none;border-top:0.5px solid var(--border);padding-top:14px;margin-top:4px;">
-        <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:10px;">New piece</div>
-        <div style="display:flex;gap:8px;margin-bottom:12px;">
-          <div style="flex:1;text-align:center;">
-            <div class="photo-slot" style="width:100%;height:110px;" onclick="pickPhoto('cp-front')" id="cp-front"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div>
-          </div>
-          <div style="flex:1;text-align:center;">
-            <div class="photo-slot" style="width:100%;height:110px;" onclick="pickPhoto('cp-back')" id="cp-back"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div>
-          </div>
-        </div>
-        <input type="text" id="cp-name" placeholder="Item name..." style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:8px;background:#fff;">
-        <input type="text" id="cp-brand" placeholder="Brand (optional)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:10px;background:#fff;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Category</div>
-        <div class="tags" id="cp-cat-tags" style="margin-bottom:10px;">
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Top</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Bottom</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Dress</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Shoes</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Bag</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Accessory</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Other</button>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Color</div>
-        <div class="tags" id="cp-color-tags" style="margin-bottom:10px;">
-          <button class="tag" onclick="tog(this)">Black</button>
-          <button class="tag" onclick="tog(this)">White</button>
-          <button class="tag" onclick="tog(this)">Gray</button>
-          <button class="tag" onclick="tog(this)">Navy</button>
-          <button class="tag" onclick="tog(this)">Blue</button>
-          <button class="tag" onclick="tog(this)">Green</button>
-          <button class="tag" onclick="tog(this)">Brown</button>
-          <button class="tag" onclick="tog(this)">Beige</button>
-          <button class="tag" onclick="tog(this)">Pink</button>
-          <button class="tag" onclick="tog(this)">Red</button>
-          <button class="tag" onclick="tog(this)">Pattern</button>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
-          <span style="font-size:13px;color:var(--muted);">$</span>
-          <input type="number" id="cp-price" placeholder="Price paid (opt)" step="0.01" min="0" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);background:#fff;">
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="toggleClosetAdd()" style="flex:1;padding:9px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-family:var(--sans);cursor:pointer;">Cancel</button>
-          <button onclick="saveClosetItem()" style="flex:2;padding:9px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save piece</button>
-        </div>
-        <div class="toast-msg" id="cp-toast">Saved!</div>
-      </div>
-      <button id="closet-add-btn" onclick="toggleClosetAdd()" style="width:100%;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">+ Add piece</button>
-    </div>
 
     <!-- Closet item detail overlay -->
     <div id="closet-detail-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:500;padding:20px;box-sizing:border-box;overflow-y:auto;">
@@ -1412,24 +1341,95 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <button onclick="cancelClosetPick()" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 10px;font-size:12px;color:#fff;cursor:pointer;">✕ Cancel</button>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 8px;">
-      <div class="section-label" style="margin:0;">👗 My Closet</div>
+    <!-- Sub-tabs: Pieces | Looks -->
+    <div style="display:flex;border-bottom:0.5px solid var(--border);margin-bottom:16px;">
+      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="flex:1;padding:10px 0;background:none;border:none;border-bottom:2px solid var(--accent);font-size:13px;font-weight:500;color:var(--accent);font-family:var(--sans);cursor:pointer;">Pieces</button>
+      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="flex:1;padding:10px 0;background:none;border:none;border-bottom:2px solid transparent;font-size:13px;font-weight:400;color:var(--muted);font-family:var(--sans);cursor:pointer;">Looks</button>
     </div>
-    <!-- Filter bar -->
-    <div style="padding:0 0 10px;overflow-x:auto;white-space:nowrap;">
-      <div style="display:inline-flex;gap:6px;">
-        <button class="tag on" id="closet-filter-all" onclick="filterCloset('all',this)" style="white-space:nowrap;">All</button>
-        <button class="tag" onclick="filterCloset('Work',this)" style="white-space:nowrap;">Work</button>
-        <button class="tag" onclick="filterCloset('Weekend',this)" style="white-space:nowrap;">Weekend</button>
-        <button class="tag" onclick="filterCloset('Casual',this)" style="white-space:nowrap;">Casual</button>
-        <button class="tag" onclick="filterCloset('Event',this)" style="white-space:nowrap;">Event</button>
-        <button class="tag" onclick="filterCloset('Date night',this)" style="white-space:nowrap;">Date night</button>
-        <button class="tag" onclick="filterCloset('Church',this)" style="white-space:nowrap;">Church</button>
-        <button class="tag" onclick="filterCloset('Polished',this)" style="white-space:nowrap;">Polished</button>
-        <button class="tag" onclick="filterCloset('Chic',this)" style="white-space:nowrap;">Chic</button>
+    <!-- Pieces section -->
+    <div id="closet-pieces-section">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <span id="closet-count" style="font-size:11px;color:var(--muted);"></span>
       </div>
+      <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+        <button class="tag on" data-cat-filter onclick="filterCloset('all',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">All</button>
+        <button class="tag" data-cat-filter onclick="filterCloset('top',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Tops</button>
+        <button class="tag" data-cat-filter onclick="filterCloset('bottom',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Bottoms</button>
+        <button class="tag" data-cat-filter onclick="filterCloset('dress',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Dresses</button>
+        <button class="tag" data-cat-filter onclick="filterCloset('shoes',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Shoes</button>
+        <button class="tag" data-cat-filter onclick="filterCloset('bag',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Bags</button>
+        <button class="tag" data-cat-filter onclick="filterCloset('accessory',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Accessories</button>
+        <button class="tag" data-cat-filter onclick="filterCloset('other',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Other</button>
+      </div>
+      <div id="closet-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;"></div>
+      <div id="closet-empty" style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">No pieces yet — add your first below</div>
+      <div id="closet-add-panel" style="display:none;border-top:0.5px solid var(--border);padding-top:14px;margin-top:4px;">
+        <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:10px;">New piece</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <div style="flex:1;text-align:center;">
+            <div class="photo-slot" style="width:100%;height:110px;" onclick="pickPhoto('cp-front')" id="cp-front"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div>
+          </div>
+          <div style="flex:1;text-align:center;">
+            <div class="photo-slot" style="width:100%;height:110px;" onclick="pickPhoto('cp-back')" id="cp-back"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div>
+          </div>
+        </div>
+        <input type="text" id="cp-name" placeholder="Item name..." style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:8px;background:#fff;">
+        <input type="text" id="cp-brand" placeholder="Brand (optional)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:10px;background:#fff;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Category</div>
+        <div class="tags" id="cp-cat-tags" style="margin-bottom:10px;">
+          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Top</button>
+          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Bottom</button>
+          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Dress</button>
+          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Shoes</button>
+          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Bag</button>
+          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Accessory</button>
+          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Other</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Color</div>
+        <div class="tags" id="cp-color-tags" style="margin-bottom:10px;">
+          <button class="tag" onclick="tog(this)">Black</button>
+          <button class="tag" onclick="tog(this)">White</button>
+          <button class="tag" onclick="tog(this)">Gray</button>
+          <button class="tag" onclick="tog(this)">Navy</button>
+          <button class="tag" onclick="tog(this)">Blue</button>
+          <button class="tag" onclick="tog(this)">Green</button>
+          <button class="tag" onclick="tog(this)">Brown</button>
+          <button class="tag" onclick="tog(this)">Beige</button>
+          <button class="tag" onclick="tog(this)">Pink</button>
+          <button class="tag" onclick="tog(this)">Red</button>
+          <button class="tag" onclick="tog(this)">Pattern</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+          <span style="font-size:13px;color:var(--muted);">$</span>
+          <input type="number" id="cp-price" placeholder="Price paid (opt)" step="0.01" min="0" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);background:#fff;">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="toggleClosetAdd()" style="flex:1;padding:9px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-family:var(--sans);cursor:pointer;">Cancel</button>
+          <button onclick="saveClosetItem()" style="flex:2;padding:9px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save piece</button>
+        </div>
+        <div class="toast-msg" id="cp-toast">Saved!</div>
+      </div>
+      <button id="closet-add-btn" onclick="toggleClosetAdd()" style="width:100%;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);margin-top:4px;">+ Add piece</button>
     </div>
-    <div id="closet-grid" class="outfit-grid"></div>
+    <!-- Looks section -->
+    <div id="closet-looks-section" style="display:none;">
+      <div style="overflow-x:auto;white-space:nowrap;padding-bottom:10px;margin-bottom:10px;">
+        <div style="display:inline-flex;gap:6px;">
+          <button class="tag on" onclick="filterClosetLooks('all',this)" style="white-space:nowrap;">All</button>
+          <button class="tag" onclick="filterClosetLooks('Work',this)" style="white-space:nowrap;">Work</button>
+          <button class="tag" onclick="filterClosetLooks('Weekend',this)" style="white-space:nowrap;">Weekend</button>
+          <button class="tag" onclick="filterClosetLooks('Casual',this)" style="white-space:nowrap;">Casual</button>
+          <button class="tag" onclick="filterClosetLooks('Event',this)" style="white-space:nowrap;">Event</button>
+          <button class="tag" onclick="filterClosetLooks('Date night',this)" style="white-space:nowrap;">Date night</button>
+          <button class="tag" onclick="filterClosetLooks('Church',this)" style="white-space:nowrap;">Church</button>
+          <button class="tag" onclick="filterClosetLooks('Polished',this)" style="white-space:nowrap;">Polished</button>
+          <button class="tag" onclick="filterClosetLooks('Chic',this)" style="white-space:nowrap;">Chic</button>
+        </div>
+      </div>
+      <div id="closet-looks-grid" class="outfit-grid"></div>
+    </div>
   </div>
 
   <div class="view-content" id="vc-style-shopping">
@@ -4450,6 +4450,10 @@ async function tab(id){
   const compactHeader = document.getElementById('compact-header');
   if(isToday){ compactHeader.classList.remove('on'); }
   else { compactHeader.classList.add('on'); document.getElementById('compact-page-title').textContent = PILLAR_TITLES[id]||''; }
+  const STYLE_VTAB={daily:'Today',weekly:'This Week',monthly:'Month',yearly:'Wardrobe'};
+  const DEFAULT_VTAB={daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly'};
+  const vtabLabels=id==='style'?STYLE_VTAB:DEFAULT_VTAB;
+  document.querySelectorAll('.vtab[data-view]').forEach(b=>{b.textContent=vtabLabels[b.dataset.view]||b.textContent;});
 
   // Update bottom nav — Home active on Today, no bnav active on pillar pages
   document.querySelectorAll('.bnav').forEach(b=>b.classList.remove('on'));
@@ -4515,7 +4519,7 @@ function setView(v,btn){
   curView=v;
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   // Mark matching buttons in both the time-tabs-bar and any legacy vtabs
-  document.querySelectorAll('.vtab').forEach(b=>{ if(b.textContent.trim().toLowerCase()===v) b.classList.add('on'); });
+  document.querySelectorAll('.vtab').forEach(b=>{ if(b.dataset.view===v) b.classList.add('on'); });
   applyView();
   if(curTab==='style'){ closetViewOpen=false; renderLookbook(); if(v==='weekly') loadWeekPlan(); if(v==='monthly'){ renderStyleCalendar(); buildStylePurchaseHistory('style-purchase-history-monthly',false); } if(v==='yearly') buildStyleYearlyView(); }
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
@@ -4774,9 +4778,34 @@ function renderClosetGrid(){
 
 function filterCloset(cat,btn){
   closetCatFilter=cat;
-  document.querySelectorAll('#closet-card [data-cat-filter]').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('[data-cat-filter]').forEach(b=>b.classList.remove('on'));
   if(btn)btn.classList.add('on');
   renderClosetGrid();
+}
+
+function switchClosetTab(tab){
+  const pSec=document.getElementById('closet-pieces-section');
+  const lSec=document.getElementById('closet-looks-section');
+  const pBtn=document.getElementById('closet-tab-pieces');
+  const lBtn=document.getElementById('closet-tab-looks');
+  if(tab==='pieces'){
+    if(pSec)pSec.style.display='block';
+    if(lSec)lSec.style.display='none';
+    if(pBtn){pBtn.style.borderBottomColor='var(--accent)';pBtn.style.color='var(--accent)';pBtn.style.fontWeight='500';}
+    if(lBtn){lBtn.style.borderBottomColor='transparent';lBtn.style.color='var(--muted)';lBtn.style.fontWeight='400';}
+  }else{
+    if(pSec)pSec.style.display='none';
+    if(lSec)lSec.style.display='block';
+    if(lBtn){lBtn.style.borderBottomColor='var(--accent)';lBtn.style.color='var(--accent)';lBtn.style.fontWeight='500';}
+    if(pBtn){pBtn.style.borderBottomColor='transparent';pBtn.style.color='var(--muted)';pBtn.style.fontWeight='400';}
+    renderCloset('all');
+  }
+}
+
+function filterClosetLooks(occ,btn){
+  document.querySelectorAll('#closet-looks-section .tag').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  renderCloset(occ);
 }
 
 function toggleClosetAdd(){
@@ -6810,7 +6839,7 @@ function toggleClosetView(){
     btn.textContent='← Back';
     if(shopBtn) shopBtn.style.display='none';
     if(inspoBtn) inspoBtn.textContent='✨ Inspo Board';
-    renderCloset('all');
+    loadCloset();switchClosetTab(_pickerDay?'looks':'pieces');
   }
 }
 
@@ -6837,7 +6866,7 @@ var _closetOutfits=[], _closetFilter='all';
 
 async function renderCloset(filter){
   _closetFilter=filter||'all';
-  const grid=document.getElementById('closet-grid');
+  const grid=document.getElementById('closet-looks-grid');
   if(!grid) return;
   if(!_closetOutfits.length) _closetOutfits=await dbAll('outfits');
   const myOutfits=_closetOutfits.filter(e=>e.src==='My outfit'||(!e.src&&e.photo));
