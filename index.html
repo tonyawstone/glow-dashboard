@@ -795,8 +795,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <button onclick="openCoachHistory('Today')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
-        <input id="coach-question-input" type="text" placeholder="Ask about today's focus, your Glow Score, or what needs attention..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')aiCoach()">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;">
+        <textarea id="coach-question-input" rows="2" placeholder="Ask about today's focus, your Glow Score, or what needs attention..." style="flex:1;padding:10px 14px;border-radius:12px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;resize:none;line-height:1.4;box-sizing:border-box;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiCoach();}"></textarea>
         <button onclick="aiCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <button onclick="toggleGlowSuggestions()" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
@@ -1127,8 +1127,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <button onclick="openCoachHistory('Style')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <input id="style-coach-input" type="text" placeholder="Ask about outfits, style ideas, colors, fit, or what to wear..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')styleCoachFull()">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;">
+        <textarea id="style-coach-input" rows="2" placeholder="Ask about outfits, style ideas, colors, fit, or what to wear..." style="flex:1;padding:10px 14px;border-radius:12px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;resize:none;line-height:1.4;box-sizing:border-box;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();styleCoachFull();}"></textarea>
         <button onclick="styleCoachFull()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <button onclick="toggleStyleCoachSuggestions()" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
@@ -1450,8 +1450,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <button onclick="openCoachHistory('Sleep')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <input id="sleep-coach-input" type="text" placeholder="Ask about sleep quality, CPAP trends, energy, or bedtime routines..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')sleepCoach()">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;">
+        <textarea id="sleep-coach-input" rows="2" placeholder="Ask about sleep quality, CPAP trends, energy, or bedtime routines..." style="flex:1;padding:10px 14px;border-radius:12px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;resize:none;line-height:1.4;box-sizing:border-box;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sleepCoach();}"></textarea>
         <button onclick="sleepCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <button onclick="toggleSleepSuggestions()" id="sleep-suggestions-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
@@ -2250,8 +2250,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <!-- Goal textarea — feeds coach context -->
       <textarea id="body-goal-text" rows="2" placeholder="What I'm working toward…" oninput="saveBodyGoal()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:12px;outline:none;"></textarea>
       <!-- Coach input -->
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
-        <input id="body-coach-input" type="text" placeholder="Ask about your body journey, movement, Zepbound, weight, or mobility..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')bodyCoach()">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;">
+        <textarea id="body-coach-input" rows="2" placeholder="Ask about your body journey, movement, Zepbound, weight, or mobility..." style="flex:1;padding:10px 14px;border-radius:12px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;resize:none;line-height:1.4;box-sizing:border-box;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();bodyCoach();}"></textarea>
         <button onclick="bodyCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <!-- Disclosure links -->
@@ -2594,8 +2594,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <button onclick="openCoachHistory('Health')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <input id="wellness-coach-input" type="text" placeholder="Ask about BP, meds, hydration, labs, or clinical trends..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')wellnessCoach()">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;">
+        <textarea id="wellness-coach-input" rows="2" placeholder="Ask about BP, meds, hydration, labs, or clinical trends..." style="flex:1;padding:10px 14px;border-radius:12px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;resize:none;line-height:1.4;box-sizing:border-box;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();wellnessCoach();}"></textarea>
         <button onclick="wellnessCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <button onclick="toggleWellnessSuggestions()" id="wellness-suggestions-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
@@ -3019,8 +3019,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <button onclick="openCoachHistory('Skin')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <input id="skin-coach-input" type="text" placeholder="Ask about your routine, products, skin changes, or progress photos..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')skinCoach()">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;">
+        <textarea id="skin-coach-input" rows="2" placeholder="Ask about your routine, products, skin changes, or progress photos..." style="flex:1;padding:10px 14px;border-radius:12px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;resize:none;line-height:1.4;box-sizing:border-box;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();skinCoach();}"></textarea>
         <button onclick="skinCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <button onclick="toggleSkinCoachSuggestions()" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
@@ -3364,8 +3364,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <button onclick="openCoachHistory('Hair')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <input id="hair-coach-input" type="text" placeholder="Ask about growth, wash day, products, styles, or curl care..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')hairCoachFull()">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;">
+        <textarea id="hair-coach-input" rows="2" placeholder="Ask about growth, wash day, products, styles, or curl care..." style="flex:1;padding:10px 14px;border-radius:12px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;resize:none;line-height:1.4;box-sizing:border-box;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();hairCoachFull();}"></textarea>
         <button onclick="hairCoachFull()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <button onclick="toggleHairCoachSuggestions()" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
@@ -3796,8 +3796,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <button onclick="openCoachHistory('Mind')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <input id="mind-coach-input" type="text" placeholder="Ask about your mood, stress, focus, or reflection prompts..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')mindCoach()">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;">
+        <textarea id="mind-coach-input" rows="2" placeholder="Ask about your mood, stress, focus, or reflection prompts..." style="flex:1;padding:10px 14px;border-radius:12px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;resize:none;line-height:1.4;box-sizing:border-box;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();mindCoach();}"></textarea>
         <button onclick="mindCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
       </div>
       <button onclick="toggleMindSuggestions()" id="mind-suggestions-btn" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
