@@ -109,6 +109,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 
 /* CARDS */
 .card{background:#fff;border:0.5px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.card.coach-nudge-active{border-top:2.5px solid #D97706;}
 .card-title{font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);margin-bottom:16px;}
 .section-label{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;display:flex;align-items:center;justify-content:space-between;}
 .guide-btn{font-size:12px;font-family:var(--sans);font-weight:600;color:var(--accent);background:var(--warm);border:1.5px solid var(--accent);border-radius:50%;-webkit-border-radius:50%;width:24px;height:24px;min-width:24px;min-height:24px;cursor:pointer;letter-spacing:0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.9;padding:0;line-height:1;-webkit-appearance:none;appearance:none;}
@@ -787,7 +788,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
 
     <!-- Ask your coach -->
-    <div class="card">
+    <div class="card" id="glow-coach-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <i class="ti ti-message-circle" style="font-size:16px;color:var(--accent);"></i>
@@ -4328,6 +4329,7 @@ async function tab(id){
     ['skin-log-date','water-log-date','wellness-log-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=today; });
     restoreWellnessDraft(); restoreWellnessCheckinState();
   }
+  applyCoachNudges();
 }
 function setView(v,btn){
   curView=v;
@@ -7614,6 +7616,64 @@ function toggleSettingsSync(){
   const open = body.style.display==='block';
   body.style.display = open ? 'none' : 'block';
   if(chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
+}
+
+function parseCoachDate(str){
+  if(!str) return null;
+  const clean = str.replace(/^[A-Za-z]+,\s*/,'');
+  const d = new Date(clean);
+  return isNaN(d) ? null : d;
+}
+
+const COACH_NUDGE_CONFIG = [
+  { pillar:'Today',  cardId:'glow-coach-card',     days:7  },
+  { pillar:'Mind',   cardId:'mind-coach-card',     days:10 },
+  { pillar:'Body',   cardId:'body-coach-card',     days:10 },
+  { pillar:'Health', cardId:'wellness-coach-card', days:14 },
+  { pillar:'Sleep',  cardId:'sleep-coach-card',    days:14 },
+  { pillar:'Style',  cardId:'style-coach-card',    days:21 },
+  { pillar:'Skin',   cardId:'skin-coach-card',     days:21 },
+  { pillar:'Hair',   cardId:'hair-coach-card',     days:30 },
+];
+
+async function applyCoachNudges(){
+  try{
+    const res = await fetch(`${BACKEND}/api/sync?pillar=coach_history&t=${Date.now()}`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    const history = Array.isArray(data) ? data : [];
+    const now = Date.now();
+    for(const cfg of COACH_NUDGE_CONFIG){
+      const card = document.getElementById(cfg.cardId);
+      if(!card) continue;
+      const entries = history.filter(e=>(e.pillar||'').startsWith(cfg.pillar));
+      let daysSince = Infinity;
+      if(entries.length){
+        const dates = entries.map(e=>parseCoachDate(e.date)).filter(Boolean);
+        if(dates.length){
+          const latestMs = Math.max(...dates.map(d=>d.getTime()));
+          daysSince = Math.floor((now - latestMs)/(1000*60*60*24));
+        }
+      }
+      const needsNudge = daysSince >= cfg.days;
+      const hasNudge = card.classList.contains('coach-nudge-active');
+      const existingBadge = card.querySelector('.coach-nudge-badge');
+      if(needsNudge && !hasNudge){
+        card.classList.add('coach-nudge-active');
+        const headerRow = card.querySelector('[style*="justify-content:space-between"]');
+        if(headerRow && !existingBadge){
+          const badge = document.createElement('div');
+          badge.className = 'coach-nudge-badge';
+          badge.innerHTML = '<i class="ti ti-sparkles" style="font-size:10px;"></i> Gentle Nudge';
+          badge.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#92400E;background:#FEF3C7;border:0.5px solid #D97706;border-radius:10px;padding:3px 9px;margin-top:6px;font-family:var(--sans);width:fit-content;';
+          headerRow.insertAdjacentElement('afterend', badge);
+        }
+      } else if(!needsNudge && hasNudge){
+        card.classList.remove('coach-nudge-active');
+        if(existingBadge) existingBadge.remove();
+      }
+    }
+  }catch(e){}
 }
 
 function toggleSettingsReminders(){
