@@ -1787,7 +1787,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <div id="s-body" class="sec">
   <div class="view-content on" id="vc-body-daily">
     <div class="section-label">Body & Zepbound Journey <button class="guide-btn" onclick="openGuide('body')">?</button></div>
-    <div class="success-banner"><strong>Zepbound started Oct 25, 2025</strong><br>201.4 → 170.7 lbs · <strong>30.7 lbs lost</strong> · 7 months · All-time low 168.7 (May 19)</div>
     <div class="card" id="body-checkin-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:7px;">
@@ -1876,8 +1875,92 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="toast-msg" id="bt">Saved!</div>
       </div>
     </div>
-    <!-- Unified body stats card — populated dynamically -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-run" style="font-size:11px;color:#A07850;"></i></div>
+          <div>
+            <div class="card-title" style="margin:0;">Exercise check-in</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:1px;">Treadmill · Pilates · movement</div>
+          </div>
+        </div>
+        <button onclick="openExerciseLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
+      </div>
+      <!-- Saved state -->
+      <div id="exercise-checkin-saved" style="display:none;margin-bottom:10px;"></div>
+      <div id="exercise-checkin-body">
+        <!-- Steps + active energy from Apple Health CSV -->
+        <div id="exercise-stats-strip"><div class="log-empty" style="font-size:12px;">Upload CSV to see activity data.</div></div>
+        <!-- Quick accountability checkboxes — Treadmill + Pilates -->
+        <div style="background:var(--warm);border-radius:12px;padding:12px;margin-top:10px;margin-bottom:12px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Today's workout goals · 60 min total</div>
+          <!-- Treadmill -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div id="ex-treadmill-check" onclick="toggleExerciseBox('treadmill')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--accent);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;cursor:pointer;transition:background 0.15s;"></div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:500;">Treadmill</div>
+              <div style="font-size:11px;color:var(--muted);">Goal: 40 min</div>
+            </div>
+            <input type="number" id="ex-treadmill-min" placeholder="min" min="0" max="180"
+              style="width:60px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;"
+              oninput="onExerciseMinInput('treadmill')">
+          </div>
+          <!-- Pilates -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div id="ex-pilates-check" onclick="toggleExerciseBox('pilates')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--accent);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;cursor:pointer;transition:background 0.15s;"></div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:500;">Pilates</div>
+              <div style="font-size:11px;color:var(--muted);">Goal: 20 min</div>
+            </div>
+            <input type="number" id="ex-pilates-min" placeholder="min" min="0" max="180"
+              style="width:60px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;"
+              oninput="onExerciseMinInput('pilates')">
+          </div>
+          <!-- Progress note -->
+          <div id="exercise-goal-note" style="font-size:12px;color:var(--muted);margin-bottom:8px;"></div>
+          <button class="btn-primary" onclick="saveExerciseCheckin()" style="width:100%;">Save workout ✓</button>
+          <div class="toast-msg" id="exc-toast">Workout saved! 💪</div>
+        </div>
+        <div id="exercise-today-status" style="margin:8px 0;"></div>
+        <div style="border-top:0.5px solid var(--border);padding-top:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleManualExercise()">
+            <div style="font-size:12px;font-weight:500;color:var(--text);">✏️ Log other movement</div>
+            <span id="manual-exercise-arrow" style="font-size:14px;color:var(--muted);">▾</span>
+          </div>
+          <div id="manual-exercise-body" style="display:none;margin-top:10px;">
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+              <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">AM</button>
+              <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">PM</button>
+            </div>
+            <div id="ex-time-tags" style="display:none;"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Treadmill</div><input type="number" id="ex-walk" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Pilates</div><input type="number" id="ex-pilates" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Strength</div><input type="number" id="ex-strength" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Abs</div><input type="number" id="ex-abs" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Yoga</div><input type="number" id="ex-yoga" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Other</div><input type="number" id="ex-other" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+            </div>
+            <div style="display:flex;gap:6px;margin:8px 0;">
+              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">Low</button>
+              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">Medium</button>
+              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">High</button>
+            </div>
+            <div id="ex-intensity" style="display:none;"></div>
+            <textarea id="ex-note" rows="1" placeholder="Notes: hip, energy, how it felt..." style="font-size:12px;"></textarea>
+            <button class="btn-primary" style="margin-top:8px;" onclick="saveExercise()">Log exercise</button>
+            <div class="toast-msg" id="ext">Saved!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Body & Zepbound journey snapshot -->
     <div class="card" id="body-stats-card">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;">
+        <div style="width:24px;height:24px;border-radius:50%;background:rgba(107,158,120,0.12);border:0.5px solid rgba(107,158,120,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-award" style="font-size:11px;color:#6B9E78;"></i></div>
+        <div class="card-title" style="margin:0;color:var(--text);">Body & Zepbound journey</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Zepbound started Oct 25, 2025 · 7 months in</div>
       <div id="body-stats-content">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
           <div style="text-align:center;">
@@ -1892,12 +1975,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="font-size:11px;color:var(--muted);text-align:center;">Upload CSV to see latest values</div>
       </div>
     </div>
-    <div class="card" id="gait-summary-card">
-      <div class="card-title">🚶 Gait & Mobility · 7-day avg</div>
-      <div id="gait-summary-content"><div class="log-empty">Loading...</div></div>
-    </div>
-
     <!-- Zepbound weekly dose -->
+    <div id="zep-dose-card-wrapper">
+
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
         <div class="card-title" style="margin:0;">💉 Zepbound · weekly dose</div>
@@ -2014,84 +2094,22 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="toast-msg" id="zep-toast">💉 Saved!</div>
       </div>
     </div>
-
-    <!-- Exercise check-in — collapsible -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;" onclick="toggleExerciseCheckin()">
-          <div class="card-title" style="margin:0;">Exercise check-in</div>
-          <div id="exercise-checkin-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">›</div>
-        </div>
-        <button onclick="openExerciseLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
-      </div>
-      <!-- Saved state — always visible -->
-      <div id="exercise-checkin-saved" style="display:none;margin-top:10px;"></div>
-      <div id="exercise-checkin-body" style="display:none;margin-top:12px;">
-        <!-- Quick accountability checkboxes — Treadmill + Pilates -->
-        <div style="background:var(--warm);border-radius:12px;padding:12px;margin-bottom:12px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Today's workout goals · 60 min total</div>
-          <!-- Treadmill -->
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div id="ex-treadmill-check" onclick="toggleExerciseBox('treadmill')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--accent);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;cursor:pointer;transition:background 0.15s;"></div>
-            <div style="flex:1;">
-              <div style="font-size:13px;font-weight:500;">Treadmill</div>
-              <div style="font-size:11px;color:var(--muted);">Goal: 40 min</div>
-            </div>
-            <input type="number" id="ex-treadmill-min" placeholder="min" min="0" max="180"
-              style="width:60px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;"
-              oninput="onExerciseMinInput('treadmill')">
-          </div>
-          <!-- Pilates -->
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <div id="ex-pilates-check" onclick="toggleExerciseBox('pilates')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--accent);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;cursor:pointer;transition:background 0.15s;"></div>
-            <div style="flex:1;">
-              <div style="font-size:13px;font-weight:500;">Pilates</div>
-              <div style="font-size:11px;color:var(--muted);">Goal: 20 min</div>
-            </div>
-            <input type="number" id="ex-pilates-min" placeholder="min" min="0" max="180"
-              style="width:60px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;"
-              oninput="onExerciseMinInput('pilates')">
-          </div>
-          <!-- Progress note -->
-          <div id="exercise-goal-note" style="font-size:12px;color:var(--muted);margin-bottom:8px;"></div>
-          <button class="btn-primary" onclick="saveExerciseCheckin()" style="width:100%;">Save workout ✓</button>
-          <div class="toast-msg" id="exc-toast">Workout saved! 💪</div>
-        </div>
-        <div id="exercise-stats-strip"><div class="log-empty" style="font-size:12px;">Upload CSV to see activity data.</div></div>
-        <div id="exercise-today-status" style="margin:8px 0;"></div>
-        <div style="border-top:0.5px solid var(--border);margin-top:10px;padding-top:10px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleManualExercise()">
-            <div style="font-size:12px;font-weight:500;color:var(--text);">✏️ Log other exercise</div>
-            <span id="manual-exercise-arrow" style="font-size:14px;color:var(--muted);">▾</span>
-          </div>
-          <div id="manual-exercise-body" style="display:none;margin-top:10px;">
-            <div style="display:flex;gap:6px;margin-bottom:8px;">
-              <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">AM</button>
-              <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">PM</button>
-            </div>
-            <div id="ex-time-tags" style="display:none;"></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Treadmill</div><input type="number" id="ex-walk" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Pilates</div><input type="number" id="ex-pilates" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Strength</div><input type="number" id="ex-strength" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Abs</div><input type="number" id="ex-abs" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Yoga</div><input type="number" id="ex-yoga" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Other</div><input type="number" id="ex-other" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-            </div>
-            <div style="display:flex;gap:6px;margin:8px 0;">
-              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">Low</button>
-              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">Medium</button>
-              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">High</button>
-            </div>
-            <div id="ex-intensity" style="display:none;"></div>
-            <textarea id="ex-note" rows="1" placeholder="Notes: hip, energy, how it felt..." style="font-size:12px;"></textarea>
-            <button class="btn-primary" style="margin-top:8px;" onclick="saveExercise()">Log exercise</button>
-            <div class="toast-msg" id="ext">Saved!</div>
-          </div>
-        </div>
-      </div>
     </div>
-
+    <!-- Zepbound side effects summary -->
+    <div class="card" id="zep-side-effects-card" style="padding:12px 14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-pill" style="font-size:11px;color:#A07850;"></i></div>
+          <div class="card-title" style="margin:0;">Zepbound side effects</div>
+        </div>
+        <button onclick="openBodyLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">View log →</button>
+      </div>
+      <div id="zep-side-effects-summary"><div style="font-size:12px;color:var(--muted);">Loading recent pattern…</div></div>
+    </div>
+    <div class="card" id="gait-summary-card">
+      <div class="card-title">🚶 Gait & Mobility · 7-day avg</div>
+      <div id="gait-summary-content"><div class="log-empty">Loading...</div></div>
+    </div>
     <div class="card">
       <div class="card-title">Weight charts</div>
       <div class="chart-tabs">
@@ -2140,9 +2158,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div onclick="pickPhoto('body-may26-side')" id="body-may26-side" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Side</div></div>
         <div onclick="pickPhoto('body-may26-back')" id="body-may26-back" class="photo-slot"><i class="ti ti-plus" aria-hidden="true"></i><div class="photo-slot-label">Back</div></div>
       </div>
-    </div>
-  </div>
-  <div class="view-content" id="vc-body-weekly">
+    </div>  </div>  <div class="view-content" id="vc-body-weekly">
     <div class="section-label">Body · this week</div>
     <div class="card"><div class="card-title">Daily weight this week</div><div class="chart-wrap" id="wrap-body-week-chart"></div></div>
     <div class="card">
@@ -4087,7 +4103,7 @@ async function tab(id){
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
-  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitMobilitySummary(); }
+  if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitMobilitySummary(); buildZepSideEffectsSummary(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld&&!_sld.value)_sld.value=logicalDayStr(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') {
@@ -10448,6 +10464,38 @@ async function buildHRRespWeekCharts(){
       });
     }
   }
+}
+
+async function buildZepSideEffectsSummary(){
+  const el = document.getElementById('zep-side-effects-summary');
+  if(!el) return;
+  try {
+    const today = nowStr();
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
+    const cutoffStr = cutoff.toISOString().slice(0,10);
+    const bodies = await dbAll('bodies');
+    const recent = bodies.filter(e=>e.type==='body' && e.date >= cutoffStr && e.date <= today);
+    if(!recent.length){
+      el.innerHTML = '<div style="font-size:12px;color:var(--muted);">No check-ins logged in the past 7 days.</div>';
+      return;
+    }
+    // Aggregate side effects across recent entries
+    const counts = {};
+    for(const entry of recent){
+      const sides = entry.zepSideEffects || [];
+      for(const s of sides){
+        if(s && s !== 'None') counts[s] = (counts[s]||0) + 1;
+      }
+    }
+    const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+    if(!sorted.length){
+      el.innerHTML = '<div style="font-size:12px;color:var(--muted);">No side effects logged in the past 7 days. ✓</div>';
+      return;
+    }
+    const chipStyle = 'background:var(--warm);color:var(--muted);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;font-size:11px;margin:2px 2px 0 0;display:inline-block;';
+    const chips = sorted.map(([name, n]) => `<span style="${chipStyle}">${name}${n>1?' ×'+n:''}</span>`).join('');
+    el.innerHTML = `<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Recent pattern · past 7 days</div><div style="display:flex;flex-wrap:wrap;">${chips}</div>`;
+  } catch(e){ el.innerHTML = '<div style="font-size:12px;color:var(--muted);">Unable to load.</div>'; }
 }
 
 async function buildGaitMobilitySummary(){
