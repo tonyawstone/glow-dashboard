@@ -3995,9 +3995,46 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:var(--muted);background:var(--warm);padding:2px 8px;border-radius:10px;">Coming soon</span><i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;" aria-hidden="true"></i></div>
         </div>
         <!-- Coach Nudges -->
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 42px;cursor:pointer;opacity:0.5;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 42px;cursor:pointer;" onclick="toggleCoachNudgesSettings()">
           <div style="display:flex;align-items:center;gap:8px;"><i class="ti ti-sparkles" style="color:var(--accent);font-size:15px;" aria-hidden="true"></i><span style="font-size:13px;color:var(--text);">Coach Nudges</span></div>
-          <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:var(--muted);background:var(--warm);padding:2px 8px;border-radius:10px;">Coming soon</span><i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;" aria-hidden="true"></i></div>
+          <i class="ti ti-chevron-right" id="coach-nudges-chevron" style="color:var(--muted);font-size:14px;transition:transform 0.2s;" aria-hidden="true"></i>
+        </div>
+        <div id="coach-nudges-settings-body" style="display:none;padding:4px 16px 12px 42px;">
+          <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:10px;padding-top:6px;">A gentle amber nudge appears on each coach card when it hasn't been used in a while. On/off controls coming soon.</div>
+          <div style="background:var(--cream);border-radius:10px;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:0.5px solid var(--border);">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Glow Coach</div><div style="font-size:11px;color:var(--muted);">Nudge after 7 days</div></div>
+              <label style="position:relative;display:inline-block;width:40px;height:24px;opacity:0.35;flex-shrink:0;" title="On/off controls coming soon"><input type="checkbox" disabled style="opacity:0;width:0;height:0;position:absolute;"><span style="position:absolute;cursor:not-allowed;inset:0;background:var(--border);border-radius:24px;"><span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;"></span></span></label>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:0.5px solid var(--border);">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Mind Coach</div><div style="font-size:11px;color:var(--muted);">Nudge after 10 days</div></div>
+              <label style="position:relative;display:inline-block;width:40px;height:24px;opacity:0.35;flex-shrink:0;" title="On/off controls coming soon"><input type="checkbox" disabled style="opacity:0;width:0;height:0;position:absolute;"><span style="position:absolute;cursor:not-allowed;inset:0;background:var(--border);border-radius:24px;"><span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;"></span></span></label>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:0.5px solid var(--border);">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Body Coach</div><div style="font-size:11px;color:var(--muted);">Nudge after 10 days</div></div>
+              <label style="position:relative;display:inline-block;width:40px;height:24px;opacity:0.35;flex-shrink:0;" title="On/off controls coming soon"><input type="checkbox" disabled style="opacity:0;width:0;height:0;position:absolute;"><span style="position:absolute;cursor:not-allowed;inset:0;background:var(--border);border-radius:24px;"><span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;"></span></span></label>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:0.5px solid var(--border);">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Wellness Coach</div><div style="font-size:11px;color:var(--muted);">Nudge after 14 days</div></div>
+              <label style="position:relative;display:inline-block;width:40px;height:24px;opacity:0.35;flex-shrink:0;" title="On/off controls coming soon"><input type="checkbox" disabled style="opacity:0;width:0;height:0;position:absolute;"><span style="position:absolute;cursor:not-allowed;inset:0;background:var(--border);border-radius:24px;"><span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;"></span></span></label>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:0.5px solid var(--border);">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Sleep Coach</div><div style="font-size:11px;color:var(--muted);">Nudge after 14 days</div></div>
+              <label style="position:relative;display:inline-block;width:40px;height:24px;opacity:0.35;flex-shrink:0;" title="On/off controls coming soon"><input type="checkbox" disabled style="opacity:0;width:0;height:0;position:absolute;"><span style="position:absolute;cursor:not-allowed;inset:0;background:var(--border);border-radius:24px;"><span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;"></span></span></label>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:0.5px solid var(--border);">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Style Coach</div><div style="font-size:11px;color:var(--muted);">Nudge after 21 days</div></div>
+              <label style="position:relative;display:inline-block;width:40px;height:24px;opacity:0.35;flex-shrink:0;" title="On/off controls coming soon"><input type="checkbox" disabled style="opacity:0;width:0;height:0;position:absolute;"><span style="position:absolute;cursor:not-allowed;inset:0;background:var(--border);border-radius:24px;"><span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;"></span></span></label>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:0.5px solid var(--border);">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Skin Coach</div><div style="font-size:11px;color:var(--muted);">Nudge after 21 days</div></div>
+              <label style="position:relative;display:inline-block;width:40px;height:24px;opacity:0.35;flex-shrink:0;" title="On/off controls coming soon"><input type="checkbox" disabled style="opacity:0;width:0;height:0;position:absolute;"><span style="position:absolute;cursor:not-allowed;inset:0;background:var(--border);border-radius:24px;"><span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;"></span></span></label>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text);">Hair Coach</div><div style="font-size:11px;color:var(--muted);">Nudge after 30 days</div></div>
+              <label style="position:relative;display:inline-block;width:40px;height:24px;opacity:0.35;flex-shrink:0;" title="On/off controls coming soon"><input type="checkbox" disabled style="opacity:0;width:0;height:0;position:absolute;"><span style="position:absolute;cursor:not-allowed;inset:0;background:var(--border);border-radius:24px;"><span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;"></span></span></label>
+            </div>
+          </div>
         </div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:0.5px solid var(--border);cursor:pointer;opacity:0.5;">
@@ -7675,6 +7712,14 @@ async function applyCoachNudges(){
       }
     }
   }catch(e){}
+}
+
+function toggleCoachNudgesSettings(){
+  const body = document.getElementById('coach-nudges-settings-body');
+  const chevron = document.getElementById('coach-nudges-chevron');
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  if(chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
 }
 
 function toggleSettingsReminders(){
