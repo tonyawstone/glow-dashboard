@@ -13681,7 +13681,6 @@ async function buildHydrationStatus(){
   el.innerHTML = `
     <div class="toast-msg" id="bw-toast">Saved!</div>
 
-    ${/* Input row — visible at top when today not yet entered */}
     <div id="bw-entry-row" style="display:${hasToday?'none':'flex'};align-items:center;gap:8px;margin-bottom:12px;">
       <button onclick="window.location.href='shortcuts://run-shortcut?name=OpenWithings'" style="padding:5px 8px;border-radius:8px;border:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap;">📱 Withings</button>
       <input type="number" id="body-water-input" placeholder="e.g. 52.3" step="0.1" min="30" max="75"
@@ -13691,7 +13690,6 @@ async function buildHydrationStatus(){
       <button onclick="saveBodyWater()" style="padding:6px 12px;border-radius:8px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans);">Save</button>
     </div>
 
-    ${/* Completed card — always visible if any entry exists (today or historical) */}
     ${waterPct !== null ? `
     <div id="bw-completed-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:8px 12px;background:var(--warm);border-radius:10px;">
       <div style="font-size:13px;color:var(--muted);">Logged ${waterDate}</div>
