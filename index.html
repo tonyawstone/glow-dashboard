@@ -1065,12 +1065,20 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <span style="font-size:11px;color:var(--muted);">Received</span>
         <input type="date" id="dl-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
       </div>
-      <div id="dl-editing-banner" style="display:none;background:var(--accent);color:#fff;border-radius:10px;padding:8px 12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+      <div id="dl-editing-banner" style="display:none;background:var(--accent);color:#fff;border-radius:10px;padding:8px 12px;margin-bottom:12px;align-items:center;justify-content:space-between;">
         <span id="dl-editing-label" style="font-size:12px;"></span>
         <button onclick="resetDailyLookBox()" style="background:rgba(255,255,255,0.25);border:none;border-radius:6px;padding:3px 8px;font-size:11px;color:#fff;cursor:pointer;font-family:var(--sans);">+ New box</button>
       </div>
       <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;">Stylist note</div>
-      <textarea id="dl-stylist-note" rows="2" placeholder="Type or paste your stylist's note here..." style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:14px;">
+        <div style="flex:1;">
+          <textarea id="dl-stylist-note" rows="3" placeholder="Type notes or leave blank if using screenshot →" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;"></textarea>
+        </div>
+        <div style="flex-shrink:0;text-align:center;">
+          <div class="photo-slot" style="width:70px;height:88px;" onclick="pickPhoto('dl-stylist-photo')" id="dl-stylist-photo"><i class="ti ti-camera" style="font-size:16px;color:var(--border);position:relative;z-index:1;"></i></div>
+          <div style="font-size:9px;color:var(--muted);margin-top:3px;">Screenshot</div>
+        </div>
+      </div>
       <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:8px;">Items in this box</div>
       <div id="dl-items-list"></div>
       <button onclick="addDailyLookItem()" style="width:100%;padding:10px;border-radius:10px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);margin-bottom:14px;">+ Add item</button>
@@ -5246,6 +5254,7 @@ async function saveDailyLookBox(){
   const stylistNote=document.getElementById('dl-stylist-note')?.value.trim()||'';
   if(!dlItems.length&&!stylistNote){showToast('Add at least one item first');return;}
   // Capture photos from DOM before saving
+  const stylistPhoto=getSlotPhotoUrl('dl-stylist-photo')||(_editingBoxRecord?.stylistPhoto)||null;
   const itemsWithPhotos=dlItems.map(i=>({
     ...i,
     photoFront:getSlotPhotoUrl(`dl-photo-${i.id}-front`)||i.photoFront||null,
@@ -5264,18 +5273,17 @@ async function saveDailyLookBox(){
   }
   try{
     if(_editingBoxRecord){
-      // Update existing record
-      const updatedRecord={..._editingBoxRecord,date,stylistNote,items:itemsWithPhotos,tryOns:tryOnsWithPhotos};
+      const updatedRecord={..._editingBoxRecord,date,stylistNote,stylistPhoto,items:itemsWithPhotos,tryOns:tryOnsWithPhotos};
       const tx=db.transaction('outfits','readwrite');
       tx.objectStore('outfits').put(updatedRecord);
       await new Promise(r=>tx.oncomplete=r);
       _editingBoxRecord=updatedRecord;
     } else {
-      await dbAdd('outfits',{type:'dailylook-box',date,stylistNote,items:itemsWithPhotos,tryOns:tryOnsWithPhotos});
+      await dbAdd('outfits',{type:'dailylook-box',date,stylistNote,stylistPhoto,items:itemsWithPhotos,tryOns:tryOnsWithPhotos});
     }
     syncToBlob('outfits');
     toast('dl-toast');
-  }catch(e){showToast('Could not save — please try again');}
+  }catch(e){console.error('saveDailyLookBox error',e);showToast('Could not save — please try again');}
 }
 
 async function autoAddToCloset(item){
@@ -5344,6 +5352,11 @@ async function loadBoxForEditing(boxId){
   // Fill header fields
   const dateEl=document.getElementById('dl-date');if(dateEl)dateEl.value=box.date||'';
   const noteEl=document.getElementById('dl-stylist-note');if(noteEl)noteEl.value=box.stylistNote||'';
+  const stylistSlot=document.getElementById('dl-stylist-photo');
+  if(stylistSlot){
+    if(box.stylistPhoto){stylistSlot.style.backgroundImage=`url('${box.stylistPhoto}')`;stylistSlot.style.backgroundSize='cover';stylistSlot.style.backgroundPosition='center';stylistSlot.innerHTML='';}
+    else{stylistSlot.style.backgroundImage='';stylistSlot.innerHTML='<i class="ti ti-camera" style="font-size:16px;color:var(--border);position:relative;z-index:1;"></i>';}
+  }
   // Restore items
   for(const item of (box.items||[])) addDailyLookItem(item);
   // Restore try-ons
@@ -5365,6 +5378,8 @@ function resetDailyLookBox(){
   document.getElementById('dl-tryons-list').innerHTML='';
   const dateEl=document.getElementById('dl-date');if(dateEl)dateEl.value=logicalDayStr();
   const noteEl=document.getElementById('dl-stylist-note');if(noteEl)noteEl.value='';
+  const stylistSlot=document.getElementById('dl-stylist-photo');
+  if(stylistSlot){stylistSlot.style.backgroundImage='';stylistSlot.innerHTML='<i class="ti ti-camera" style="font-size:16px;color:var(--border);position:relative;z-index:1;"></i>';}
   const banner=document.getElementById('dl-editing-banner');if(banner)banner.style.display='none';
   const saveBtn=document.getElementById('dl-save-btn');if(saveBtn)saveBtn.textContent='Save box';
   const ts=document.getElementById('dl-tryons-section');if(ts)ts.style.display='none';
