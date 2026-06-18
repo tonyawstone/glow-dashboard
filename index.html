@@ -7662,9 +7662,10 @@ async function applyCoachNudges(){
         card.classList.add('coach-nudge-active');
         const headerRow = card.querySelector('[style*="justify-content:space-between"]');
         if(headerRow && !existingBadge){
+          const timingNote = daysSince === Infinity ? 'Not yet used' : `${daysSince} day${daysSince!==1?'s':''} since last check-in`;
           const badge = document.createElement('div');
           badge.className = 'coach-nudge-badge';
-          badge.innerHTML = '<i class="ti ti-sparkles" style="font-size:10px;"></i> Gentle Nudge';
+          badge.innerHTML = `<i class="ti ti-sparkles" style="font-size:10px;"></i> Gentle Nudge <span style="opacity:0.75;margin-left:2px;">· ${timingNote}</span>`;
           badge.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#92400E;background:#FEF3C7;border:0.5px solid #D97706;border-radius:10px;padding:3px 9px;margin-top:6px;font-family:var(--sans);width:fit-content;';
           headerRow.insertAdjacentElement('afterend', badge);
         }
@@ -17827,7 +17828,8 @@ async function callCoach(pillar, userMessage, outputId, logData) {
       const isDupe = history.some(e=>e.prompt===userMessage&&e.date===dateStr&&e.pillar===pillar);
       if(!isDupe){
         history.push({ date: dateStr, pillar, prompt: userMessage, response });
-        fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'coach_history',data:history})});
+        fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'coach_history',data:history})})
+          .then(()=>setTimeout(applyCoachNudges, 800)).catch(()=>{});
       }
     }).catch(()=>{});
   } catch (err) {
