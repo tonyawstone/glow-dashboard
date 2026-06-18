@@ -2496,7 +2496,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button onclick="undoWater()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);flex-shrink:0;margin-left:8px;">Undo</button>
       </div>
       <!-- Notes -->
-      <textarea id="water-notes" rows="1" placeholder="Notes: Gatorade, tea, electrolytes…" style="margin-top:8px;font-size:12px;width:100%;box-sizing:border-box;padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;"></textarea>
+      <textarea id="water-notes" rows="1" placeholder="Notes: Gatorade, tea, electrolytes…" onblur="autoSaveWater();saveWaterIntake();" style="margin-top:8px;font-size:12px;width:100%;box-sizing:border-box;padding:6px 10px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;"></textarea>
       <input type="date" id="water-log-date" style="display:none;">
       <div class="toast-msg" id="wt">Saved!</div>
     </div>
@@ -4181,7 +4181,7 @@ async function tab(id){
     try { restoreWashDates(); } catch(e){}
     try { buildProductTags(); } catch(e){}
   }
-  if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); loadSkinRoutineState(); loadMuselyHistoryFromBlob().then(()=>{ renderSkincareLog(); showSkinPMSavedView(); loadPMLastNight(); }); }
+  if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); loadSkinRoutineState(); loadMuselyHistoryFromBlob().then(()=>{ renderSkincareLog(); showSkinPMSavedView(); loadPMLastNight(); }); loadAvatarGameFromBlob(); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
     const today = logicalDayStr();
     ['skin-log-date','water-log-date','wellness-log-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=today; });
@@ -5620,6 +5620,7 @@ function addSkincareLog(){
     if(h.find(e=>e.date===date)){ showToast('Game entry already exists for that date'); return; }
     h.push({date});
     localStorage.setItem('glowAvatarGameHistory', JSON.stringify(h));
+    saveAvatarGameToBlob(h);
   }
   renderSkincareLog();
 }
@@ -5636,6 +5637,7 @@ function deleteSkincareLog(date, type){
   } else if(type==='game'){
     const h = JSON.parse(localStorage.getItem('glowAvatarGameHistory')||'[]').filter(e=>e.date!==date);
     localStorage.setItem('glowAvatarGameHistory', JSON.stringify(h));
+    saveAvatarGameToBlob(h);
   }
   renderSkincareLog();
 }
@@ -8613,6 +8615,7 @@ function toggleSkinStep(id){
       if(idx>=0) gameHistory.splice(idx,1);
     }
     localStorage.setItem('glowAvatarGameHistory', JSON.stringify(gameHistory));
+    saveAvatarGameToBlob(gameHistory);
     showAvatarGameSaved();
   }
   updateSkinProgress();
@@ -9378,26 +9381,19 @@ function editSleepCheckin(){
 
 async function restoreSleepCheckinState(){
   try{
-    // Valid window: entry savedAt within the last 27 hours (covers logging at wake-up until 3 AM next morning)
-    const now = new Date();
-    const localHour = now.getHours();
-    // Check localStorage first — instant, no DB race
+    // Sleep entries are dated with logicalDayStr() at save time.
+    // Valid dates: yesterday (most common) and logical today (covers early-morning logs before 3 AM reset).
+    const validDates = new Set([yesterdayStr(), logicalDayStr()]);
     const stored = localStorage.getItem('glowSleepCheckinState');
     if(stored){
       const s = JSON.parse(stored);
-      const savedAt = s.savedAt ? new Date(s.savedAt) : null;
-      const hoursAgo = savedAt ? (now - savedAt) / 3600000 : 999;
-      // Valid if saved within 27 hours AND we haven't passed 3 AM after the save date
-      if(hoursAgo < 27 && !(hoursAgo >= 3 && localHour >= 3 && localHour - hoursAgo < 0)){
+      if(validDates.has(s.date)){
         showSleepCheckinSaved(s);
         return;
-      } else if(hoursAgo >= 27 || (localHour >= 3 && hoursAgo > localHour)) {
+      } else {
         localStorage.removeItem('glowSleepCheckinState');
       }
     }
-    // Fall back to DB
-    const validDates = new Set([yesterdayStr()]);
-    if(localHour < 3) validDates.add(nowStr(now));
     const sleeps = await dbAll('sleeps');
     let entry = sleeps.find(e=>validDates.has(e.date));
     if(!entry){
@@ -10159,6 +10155,29 @@ function saveMuselyHistoryToBlob(history){
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({pillar:'musely_log', data: history})
   }).catch(e=>console.warn('musely_log sync error:',e));
+}
+
+function saveAvatarGameToBlob(history){
+  fetch(`${BACKEND}/api/sync`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'avatar_game_log', data: history})
+  }).catch(e=>console.warn('avatar_game_log sync error:',e));
+}
+
+async function loadAvatarGameFromBlob(){
+  try{
+    const res = await fetch(`${BACKEND}/api/sync?pillar=avatar_game_log&t=${Date.now()}`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!Array.isArray(data)||!data.length) return;
+    const local = JSON.parse(localStorage.getItem('glowAvatarGameHistory')||'[]');
+    const merged = [...local];
+    for(const e of data){
+      if(!merged.find(l=>l.date===e.date)) merged.push(e);
+    }
+    localStorage.setItem('glowAvatarGameHistory', JSON.stringify(merged));
+  }catch(e){}
 }
 
 function updateMuselyTracker(){ loadMuselyHistory(); } // legacy alias
@@ -13290,6 +13309,8 @@ async function loadTodayWater(){
         todayWaterOz = state.oz || 0;
         todayWaterEntries = state.entries || [];
         updateWaterDisplay();
+        const notesEl = document.getElementById('water-notes');
+        if(notesEl && state.notes) notesEl.value = state.notes;
         return; // localStorage is fresh — use it
       } else {
         // Past the 3 AM reset — clear old state
@@ -13303,6 +13324,8 @@ async function loadTodayWater(){
   todayWaterOz = todayEntry ? (todayEntry.oz || (todayEntry.glasses||0)*8) : 0;
   todayWaterEntries = todayEntry?.entries || [];
   updateWaterDisplay();
+  const notesEl = document.getElementById('water-notes');
+  if(notesEl && todayEntry?.notes) notesEl.value = todayEntry.notes;
 }
 
 function addWater(oz, label=''){
@@ -13335,10 +13358,12 @@ function undoWater(){
 }
 
 function autoSaveWater(){
+  const notes = document.getElementById('water-notes')?.value?.trim() || '';
   const state = {
     date: logicalDayStr(),
     oz: todayWaterOz,
-    entries: todayWaterEntries
+    entries: todayWaterEntries,
+    notes
   };
   localStorage.setItem('glowWaterToday', JSON.stringify(state));
 }
@@ -13431,10 +13456,8 @@ async function saveWaterIntake(){
   const existing = water.findIndex(w=>w.date===today);
   const entry = {date:today, oz:todayWaterOz, glasses:Math.round(todayWaterOz/8), entries:todayWaterEntries, notes};
   if(existing>=0){
-    const t = db.transaction('water','readwrite');
-    const store = t.objectStore('water');
-    const all = await new Promise(r=>{const rq=store.getAll();rq.onsuccess=()=>r(rq.result);});
-    all[existing] = {...all[existing], ...entry};
+    const updatedEntry = {...water[existing], ...entry};
+    await dbUpdate('water', updatedEntry);
   } else {
     await dbAdd('water', entry);
   }
@@ -14875,7 +14898,7 @@ async function saveMyAirLog(){
       + (cpapUsed && cpapDuration?` · CPAP ${cpapDuration}`:'');
   }
 
-  const existing = await fetch(`${BACKEND}/api/sync?pillar=myair`).then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
+  const existing = await fetch(`${BACKEND}/api/sync?pillar=myair&t=${Date.now()}`).then(r=>r.json()).then(d=>Array.isArray(d.data)?d.data:[]).catch(()=>[]);
   const idx = existing.findIndex(e=>e.isoDate===isoStr);
   if(idx>=0) existing[idx] = entry;
   else existing.push(entry);
@@ -14903,6 +14926,7 @@ function toggleCPAPUsed(){
     check.style.color = '#fff';
   }
   if(dur) dur.style.display = _cpapUsed ? 'block' : 'none';
+  saveMyAirLog();
 }
 
 function restoreCPAPUsedState(cpapUsed, cpapDuration){
@@ -15783,8 +15807,6 @@ function updateMedsProgress(){
   // Show saved state cards when sections complete
   if(amAllDone){
     showMedsSavedCard('meds-am-saved','☀️ AM meds & supplements',[...AM_MEDS,...AM_SUPPLEMENTS],'editMedsAM');
-    // Auto-collapse if all sections done
-    if(afternoonDone && pmDone){ const b=document.getElementById('meds-form-body'); if(b) b.style.display='none'; const c=document.getElementById('meds-form-chevron'); if(c) c.style.transform=''; }
   } else if(amRxDone){
     // Rx done but not supplements yet — show partial saved card
     showMedsSavedCard('meds-am-saved','☀️ AM Rx meds ✓ (supplements pending)',AM_MEDS,'editMedsAM');
@@ -16287,7 +16309,7 @@ function toggleMedsForm(){
   if(open){
     loadMedsChecklist();
     const d = document.getElementById('meds-log-date');
-    if(d && !d.value) d.value = nowStr();
+    if(d && !d.value) d.value = logicalDayStr();
   }
 }
 
