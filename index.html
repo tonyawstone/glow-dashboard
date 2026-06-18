@@ -1117,6 +1117,28 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- 4. Shopping List -->
     <button id="style-shopping-btn" class="btn-secondary" style="width:100%;font-size:14px;margin-top:4px;" onclick="toggleShoppingView()">🛍 Shopping List</button>
+
+    <!-- Style Coach -->
+    <div class="card" id="style-coach-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="ti ti-message-circle" style="font-size:16px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Ask My Style Coach</div>
+        </div>
+        <button onclick="openCoachHistory('Style')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <input id="style-coach-input" type="text" placeholder="Ask about outfits, style ideas, colors, fit, or what to wear..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')styleCoachFull()">
+        <button onclick="styleCoachFull()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
+      </div>
+      <button onclick="toggleStyleCoachSuggestions()" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
+      <div id="style-coach-suggestions-panel" style="display:none;margin-top:8px;">
+        <button onclick="styleCoachPrompt('What helps me feel put together today? Consider my recent outfits and style goals.')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">What helps me feel put together today?</button>
+        <button onclick="styleCoachPrompt('What outfit styles and fits work best for my changing body on Zepbound?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">Dressing my changing body</button>
+        <button onclick="styleCoachPrompt('What should my next DailyLook box focus on for my current size and style goals?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Next DailyLook box focus</button>
+      </div>
+      <div id="style-coach-output-full" class="coach-response" style="display:none;margin-top:10px;"></div>
+    </div>
   </div>
   <div class="view-content" id="vc-style-weekly">
     <div class="section-label">This week's looks</div>
@@ -2988,6 +3010,28 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="toggle-row"><div><div class="tl">Facials (every 8 weeks)</div><div class="ts" id="start-facials-display">Tap to set start date</div></div><input type="text" id="start-facials" placeholder="e.g. Jun 2024" style="width:110px;padding:6px 8px;font-size:12px;" onchange="saveStartDate('facials',this.value)"></div>
     </div>
 
+    <!-- Skin Coach -->
+    <div class="card" id="skin-coach-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="ti ti-message-circle" style="font-size:16px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Ask My Skin Coach</div>
+        </div>
+        <button onclick="openCoachHistory('Skin')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <input id="skin-coach-input" type="text" placeholder="Ask about your routine, products, skin changes, or progress photos..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')skinCoach()">
+        <button onclick="skinCoach()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
+      </div>
+      <button onclick="toggleSkinCoachSuggestions()" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
+      <div id="skin-coach-suggestions-panel" style="display:none;margin-top:8px;">
+        <button onclick="skinCoachPrompt('What does my skin need right now based on my recent check-ins and routine completion?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">What does my skin need right now?</button>
+        <button onclick="skinCoachPrompt('How has my skin been responding to my Musely treatments? What progress do you see?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">How is my skin responding to treatments?</button>
+        <button onclick="skinCoachPrompt('Based on my skin check-ins and routine, what questions should I bring to my next derm appointment?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Prep for my derm visit</button>
+      </div>
+      <div id="skin-coach-output" class="coach-response" style="display:none;margin-top:10px;"></div>
+    </div>
+
   </div>
 
   <div class="view-content" id="vc-skin-weekly">
@@ -3309,6 +3353,28 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <div id="hair-analysis-output" class="coach-response" style="display:none;margin-top:10px;"></div>
       </div>
+    </div>
+
+    <!-- Hair Coach -->
+    <div class="card" id="hair-coach-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="ti ti-message-circle" style="font-size:16px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Ask My Hair Coach</div>
+        </div>
+        <button onclick="openCoachHistory('Hair')" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past conversations →</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <input id="hair-coach-input" type="text" placeholder="Ask about growth, wash day, products, styles, or curl care..." style="flex:1;padding:10px 14px;border-radius:20px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;" onkeydown="if(event.key==='Enter')hairCoachFull()">
+        <button onclick="hairCoachFull()" style="padding:10px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;flex-shrink:0;">Ask</button>
+      </div>
+      <button onclick="toggleHairCoachSuggestions()" style="padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Suggestions ↗</button>
+      <div id="hair-coach-suggestions-panel" style="display:none;margin-top:8px;">
+        <button onclick="hairCoachPrompt('What does my hair need next based on my recent check-ins and growth progress?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">What does my hair need next?</button>
+        <button onclick="hairCoachPrompt('How is my hair growth progressing? What patterns or improvements do you notice?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);margin-bottom:6px;">How is my growth progressing?</button>
+        <button onclick="hairCoachPrompt('What products or techniques should I try for my curl type and current hair goals?')" style="display:block;width:100%;text-align:left;padding:8px 12px;border-radius:10px;border:0.5px solid var(--border);background:var(--warm);font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Products and techniques for my curls</button>
+      </div>
+      <div id="hair-coach-output-full" class="coach-response" style="display:none;margin-top:10px;"></div>
     </div>
 
   </div>
@@ -17930,6 +17996,57 @@ function loadBodyGoals(){
     milestones.forEach(id=>{ const b=document.getElementById(id); if(b) b.classList.add('on'); });
   }catch(e){}
 }
+function skinCoach(){
+  const input = document.getElementById('skin-coach-input');
+  if(!input?.value.trim()) return;
+  callCoach('Skin', input.value.trim(), 'skin-coach-output');
+  input.value = '';
+}
+function skinCoachPrompt(text){
+  const input = document.getElementById('skin-coach-input');
+  if(input) input.value = text;
+  document.getElementById('skin-coach-suggestions-panel').style.display = 'none';
+  skinCoach();
+}
+function toggleSkinCoachSuggestions(){
+  const p = document.getElementById('skin-coach-suggestions-panel');
+  if(p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+function styleCoachFull(){
+  const input = document.getElementById('style-coach-input');
+  if(!input?.value.trim()) return;
+  callCoach('Style', input.value.trim(), 'style-coach-output-full');
+  input.value = '';
+}
+function styleCoachPrompt(text){
+  const input = document.getElementById('style-coach-input');
+  if(input) input.value = text;
+  document.getElementById('style-coach-suggestions-panel').style.display = 'none';
+  styleCoachFull();
+}
+function toggleStyleCoachSuggestions(){
+  const p = document.getElementById('style-coach-suggestions-panel');
+  if(p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+function hairCoachFull(){
+  const input = document.getElementById('hair-coach-input');
+  if(!input?.value.trim()) return;
+  callCoach('Hair', input.value.trim(), 'hair-coach-output-full');
+  input.value = '';
+}
+function hairCoachPrompt(text){
+  const input = document.getElementById('hair-coach-input');
+  if(input) input.value = text;
+  document.getElementById('hair-coach-suggestions-panel').style.display = 'none';
+  hairCoachFull();
+}
+function toggleHairCoachSuggestions(){
+  const p = document.getElementById('hair-coach-suggestions-panel');
+  if(p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
 function toggleBodyMilestones(show){
   const panel = document.getElementById('body-milestones-panel');
   if(!panel) return;
