@@ -5218,6 +5218,7 @@ function saveItemCard(id){
   summaryDiv.style.display='block';
   formDiv.style.display='none';
   updateDailyLookCartTotal();
+  autoSaveDailyLookBox().catch(()=>{});
 }
 
 function editItemCard(id){
@@ -5226,6 +5227,29 @@ function editItemCard(id){
   if(!formDiv||!summaryDiv) return;
   summaryDiv.style.display='none';
   formDiv.style.display='block';
+}
+
+async function autoSaveDailyLookBox(){
+  if(!dlItems.length) return;
+  const date=document.getElementById('dl-date')?.value||logicalDayStr();
+  const stylistNote=document.getElementById('dl-stylist-note')?.value.trim()||'';
+  const stylistPhoto=getSlotPhotoUrl('dl-stylist-photo')||(_editingBoxRecord?.stylistPhoto)||null;
+  const itemsSnapshot=dlItems.map(i=>({...i}));
+  const tryOnsSnapshot=dlTryOns.map(t=>({...t,photo:getSlotPhotoUrl(`dl-tryon-photo-${t.id}`)||t.photo||null}));
+  if(_editingBoxRecord){
+    const updated={..._editingBoxRecord,date,stylistNote,stylistPhoto,items:itemsSnapshot,tryOns:tryOnsSnapshot};
+    const tx=db.transaction('outfits','readwrite');
+    tx.objectStore('outfits').put(updated);
+    await new Promise(r=>tx.oncomplete=r);
+    _editingBoxRecord=updated;
+  } else {
+    const newTs=Date.now();
+    await dbAdd('outfits',{type:'dailylook-box',date,stylistNote,stylistPhoto,items:itemsSnapshot,tryOns:tryOnsSnapshot,ts:newTs});
+    const all=await dbAll('outfits');
+    const saved=all.find(e=>e.ts===newTs&&e.type==='dailylook-box');
+    if(saved) _editingBoxRecord=saved;
+  }
+  syncToBlob('outfits');
 }
 
 function removeDailyLookItem(id){
