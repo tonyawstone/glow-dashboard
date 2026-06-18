@@ -6021,6 +6021,20 @@ async function restoreActivationState(){
     });
     const msg = document.getElementById('act-complete-msg');
     if(msg) msg.style.display = 'block';
+  } else {
+    // Restore partial step progress from localStorage
+    try{
+      const raw = localStorage.getItem('glowActivationSteps');
+      if(raw){
+        const saved = JSON.parse(raw);
+        if(saved.date === today && Array.isArray(saved.done)){
+          saved.done.forEach(id=>{
+            const row = document.getElementById(id);
+            if(row) row.classList.add('done');
+          });
+        }
+      }
+    }catch(e){}
   }
 }
 
@@ -6033,6 +6047,10 @@ function doneActivationStep(rowId, widgetId){
   const row = document.getElementById(rowId);
   if(row) row.classList.add('done');
   if(widgetId) document.getElementById(widgetId).style.display = 'none';
+  // Persist partial progress so returning mid-ritual restores completed steps
+  const steps = ['act-breathe','act-ground','act-cool','act-move','act-march'];
+  const done = steps.filter(id => document.getElementById(id)?.classList.contains('done'));
+  localStorage.setItem('glowActivationSteps', JSON.stringify({date: nowStr(), done}));
   checkActivationComplete();
 }
 
