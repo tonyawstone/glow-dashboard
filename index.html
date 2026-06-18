@@ -4858,6 +4858,8 @@ function togSingle(btn,containerId){
 function getSlotPhotoUrl(slotId){
   const el=document.getElementById(slotId);
   if(!el)return null;
+  const img=el.querySelector('img');
+  if(img&&img.src&&img.src.startsWith('data:'))return img.src;
   const bg=el.style.backgroundImage;
   if(!bg||bg==='none'||bg==='')return null;
   return bg.replace(/^url\(['"]?/,'').replace(/['"]?\)$/,'');
@@ -11455,8 +11457,35 @@ async function handlePhoto(event){
       await dbPutPhoto(curPhotoTarget,compressed);
       uploadPhotoToBlob(curPhotoTarget,compressed);
     }
+    if(curPhotoTarget==='dl-stylist-photo') ocrStylistNote(compressed);
   }catch(err){alert('Could not save photo: '+err.message);}
   event.target.value='';
+}
+
+async function ocrStylistNote(dataUrl){
+  const noteEl=document.getElementById('dl-stylist-note');
+  if(!noteEl)return;
+  noteEl.placeholder='Reading screenshot...';
+  try{
+    const base64=dataUrl.split(',')[1];
+    const mimeMatch=dataUrl.match(/^data:([^;]+);/);
+    const mimeType=mimeMatch?mimeMatch[1]:'image/jpeg';
+    const res=await fetch(`${BACKEND}/api/skin-analysis`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        images:[{media_type:mimeType,data:base64}],
+        prompt:'This is a screenshot of a stylist note or styling card. Extract ALL text exactly as written — every word, bullet point, recommendation, and note. Return only the extracted text, preserving the original structure as closely as possible using line breaks.',
+        mode:'ocr'
+      })
+    });
+    const d=await res.json();
+    const text=d.result||d.content?.find(b=>b.type==='text')?.text||'';
+    if(text.trim()){
+      noteEl.value=text.trim();
+    }
+  }catch(e){console.error('Stylist OCR failed:',e);}
+  noteEl.placeholder='Type notes or leave blank if using screenshot →';
 }
 
 async function uploadPhotoToBlob(slotId,dataUrl){
