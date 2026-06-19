@@ -5122,9 +5122,10 @@ async function togglePieceTag(pieceId){
   const idx=e.pieceIds.indexOf(pieceId);
   if(idx===-1)e.pieceIds.push(pieceId);else e.pieceIds.splice(idx,1);
   const all=await dbAll('outfits');
-  const entry=all.find(r=>r.ts===e.ts||(r.id&&r.id===e.id));
+  const entry=all.find(r=>r.id&&r.id===e.id)||all.find(r=>r.ts===e.ts);
   if(entry){
     entry.pieceIds=e.pieceIds;
+    e.id=entry.id; // keep closetMap in sync with IDB id
     const tx=db.transaction('outfits','readwrite');
     tx.objectStore('outfits').put(entry);
     await new Promise(r=>tx.oncomplete=r);
