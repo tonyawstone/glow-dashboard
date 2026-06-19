@@ -5987,17 +5987,30 @@ async function syncToBlob(store) {
       const res = await fetch(`${BACKEND}/api/sync?pillar=${store}&t=${Date.now()}`);
       if(res.ok){ const d=await res.json(); blobData=Array.isArray(d.data)?d.data:[]; }
     } catch(e){}
-    // Merge: blob entries + local entries, dedup by id or date+type key
-    const merged = [...blobData];
+    // Merge: local wins for updates; blob fills in entries not present locally.
+    // This ensures mutations (pieceIds, tags, etc.) always propagate to blob.
+    const outfitKey = e => (e.source==='dailylook'&&e.tryOnId!=null) ? 'dl-'+e.dailylookBoxTs+'-'+e.tryOnId : (e.ts ? String(e.ts) : e.date+(e.src||'')+(e.desc||'').slice(0,20));
+    const entryKey = (e,s) => s==='outfits' ? outfitKey(e) : (e.id || ((e.type||'')+(e.date||'')+(e.sys||'')+(e.mood||'')+(e.isoDate||'')));
+    // Build blob lookup
+    const blobMap = {};
+    blobData.forEach(e=>{ blobMap[entryKey(e,store)]=e; });
+    const merged = [];
     for(const entry of local){
-      const outfitKey = e => (e.source==='dailylook'&&e.tryOnId!=null) ? 'dl-'+e.dailylookBoxTs+'-'+e.tryOnId : (e.ts ? String(e.ts) : e.date+(e.src||'')+(e.desc||'').slice(0,20));
-      const key = store==='outfits' ? outfitKey(entry) : (entry.id || ((entry.type||'')+(entry.date||'')+(entry.sys||'')+(entry.mood||'')+(entry.isoDate||'')));
-      const exists = merged.some(e=>{
-        const ek = store==='outfits' ? outfitKey(e) : (e.id || ((e.type||'')+(e.date||'')+(e.sys||'')+(e.mood||'')+(e.isoDate||'')));
-        return ek === key;
-      });
-      if(!exists) merged.push(entry);
+      const k = entryKey(entry,store);
+      const blobEntry = blobMap[k];
+      if(blobEntry && store==='outfits'){
+        // Preserve blob's uploaded photo URL if local only has data: URI
+        const bestPhoto = (entry.photo&&!entry.photo.startsWith('data:')) ? entry.photo
+          : (blobEntry.photo&&blobEntry.photo.startsWith('https://')) ? blobEntry.photo
+          : (entry.photo||'');
+        merged.push({...entry, photo:bestPhoto});
+      } else {
+        merged.push(entry);
+      }
+      delete blobMap[k];
     }
+    // Add blob-only entries (added from another device, not yet in local IDB)
+    for(const blobOnly of Object.values(blobMap)) merged.push(blobOnly);
     // For outfits/skins/hairs — strip base64 photos only, keep Blob URLs
     let payload = merged;
     if(['outfits','skins','hairs'].includes(store)){
