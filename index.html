@@ -1082,13 +1082,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:8px;">Items in this box</div>
       <div id="dl-items-list"></div>
       <button onclick="addDailyLookItem()" style="width:100%;padding:10px;border-radius:10px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);margin-bottom:14px;">+ Add item</button>
-      <div id="dl-cart-total" style="display:none;background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:12px;color:var(--muted);font-weight:500;">Cart total</span>
-          <span id="dl-cart-amount" style="font-family:var(--serif);font-size:20px;font-weight:400;color:var(--text);">$0.00</span>
-        </div>
-        <div id="dl-cart-summary" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
-      </div>
+      <div id="dl-cart-total" style="display:none;background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;"></div>
       <!-- Try-on looks section -->
       <div id="dl-tryons-section" style="display:none;border-top:0.5px solid var(--border);padding-top:12px;margin-bottom:14px;">
         <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:8px;">Try-on looks</div>
@@ -5408,22 +5402,66 @@ function updateDailyLookCartTotal(){
   const keeping=dlItems.filter(i=>i.keepReturn==='Keeping');
   const returned=dlItems.filter(i=>i.keepReturn==='Returned');
   const undecided=dlItems.filter(i=>!i.keepReturn);
-  const total=keeping.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
   const totalEl=document.getElementById('dl-cart-total');
-  const amountEl=document.getElementById('dl-cart-amount');
-  const summaryEl=document.getElementById('dl-cart-summary');
   if(!totalEl) return;
-  if(dlItems.length>0){
-    totalEl.style.display='block';
-    if(amountEl) amountEl.textContent='$'+total.toFixed(2);
-    const parts=[];
-    if(keeping.length) parts.push(keeping.length+' keeping');
-    if(returned.length) parts.push(returned.length+' returned');
-    if(undecided.length) parts.push(undecided.length+' undecided');
-    if(summaryEl) summaryEl.textContent=parts.join(' · ');
-  } else {
-    totalEl.style.display='none';
+  if(!dlItems.length){totalEl.style.display='none';return;}
+  totalEl.style.display='block';
+
+  // Discount: 3-4 keeping → 50% off 1 cheapest; 5+ → 50% off 2 cheapest
+  const keepingPriced=keeping.map(i=>({...i,p:parseFloat(i.price)||0}));
+  const sortedAsc=[...keepingPriced].sort((a,b)=>a.p-b.p);
+  const n=keeping.length;
+  const discCount=n>=5?2:n>=3?1:0;
+  const discIds=new Set(sortedAsc.slice(0,discCount).map(i=>i.id));
+
+  const subtotal=keepingPriced.reduce((s,i)=>s+i.p,0);
+  const discAmt=sortedAsc.slice(0,discCount).reduce((s,i)=>s+i.p*0.5,0);
+  const taxAmt=(subtotal-discAmt)*0.07;
+  const total=subtotal-discAmt+taxAmt;
+
+  let html='';
+
+  if(keeping.length){
+    // Item lines
+    html+=keepingPriced.map(i=>{
+      const isDisc=discIds.has(i.id);
+      const badge=isDisc?'<span style="font-size:9px;background:#EAF3DE;color:#27500A;padding:1px 6px;border-radius:5px;margin-left:5px;white-space:nowrap;">50% off</span>':'';
+      const discLine=isDisc?`<span style="font-size:10px;color:var(--rose);margin-right:4px;">-$${(i.p*0.5).toFixed(2)}</span>`:'';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px;">
+        <div style="flex:1;min-width:0;font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i.desc||'Item'}${badge}</div>
+        <div style="flex-shrink:0;text-align:right;">${discLine}<span style="font-size:12px;color:var(--text);">$${i.p.toFixed(2)}</span></div>
+      </div>`;
+    }).join('');
+
+    // Divider
+    html+='<div style="border-top:0.5px solid var(--border);margin:8px 0;"></div>';
+
+    // Subtotal
+    html+=`<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px;"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>`;
+
+    // Discount line
+    if(discAmt>0){
+      const discLabel=discCount===2?'DL discount (50% off 2 items)':'DL discount (50% off 1 item)';
+      html+=`<div style="display:flex;justify-content:space-between;font-size:11px;color:#27500A;margin-bottom:3px;"><span>${discLabel}</span><span>-$${discAmt.toFixed(2)}</span></div>`;
+    } else if(n>0&&n<3){
+      html+=`<div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Keep 3+ items to unlock 50% off discount</div>`;
+    }
+
+    // Tax
+    html+=`<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px;"><span>MS Tax (7%)</span><span>+$${taxAmt.toFixed(2)}</span></div>`;
+
+    // Total
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--border);padding-top:8px;"><span style="font-size:13px;font-weight:500;color:var(--text);">Total</span><span style="font-family:var(--serif);font-size:22px;color:var(--text);">$${total.toFixed(2)}</span></div>`;
   }
+
+  // Status summary
+  const parts=[];
+  if(keeping.length) parts.push(keeping.length+' keeping');
+  if(returned.length) parts.push(returned.length+' returned');
+  if(undecided.length) parts.push(undecided.length+' undecided');
+  if(parts.length) html+=`<div style="font-size:11px;color:var(--muted);margin-top:6px;">${parts.join(' · ')}</div>`;
+
+  totalEl.innerHTML=html;
 }
 
 function addDailyLookTryOn(existingTryOn=null){
