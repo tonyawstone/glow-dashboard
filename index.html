@@ -1105,20 +1105,45 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
 
     <!-- Closet item detail overlay -->
-    <div id="closet-detail-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:500;padding:20px;box-sizing:border-box;overflow-y:auto;">
-      <div style="background:#fff;border-radius:16px;padding:20px;max-width:420px;margin:0 auto;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
-          <div>
-            <div id="cd-name" style="font-family:var(--serif);font-size:20px;font-weight:400;color:var(--text);margin-bottom:2px;"></div>
-            <div id="cd-meta" style="font-size:11px;color:var(--muted);line-height:1.5;"></div>
-          </div>
+    <div id="closet-detail-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:9500;overflow-y:auto;">
+      <div style="min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:20px;padding-bottom:80px;box-sizing:border-box;">
+      <div style="background:#fff;border-radius:16px;padding:20px;width:100%;max-width:420px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div style="font-family:var(--serif);font-size:18px;color:var(--text);">Edit item</div>
           <button onclick="closeClosetDetail()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;line-height:1;margin-left:12px;">×</button>
         </div>
-        <div style="display:flex;gap:8px;margin-bottom:16px;">
-          <div id="cd-front" style="flex:1;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;"></div>
-          <div id="cd-back" style="flex:1;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;"></div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <div style="flex:1;text-align:center;">
+            <div class="photo-slot" id="cd-front" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cd-front')"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div>
+          </div>
+          <div style="flex:1;text-align:center;">
+            <div class="photo-slot" id="cd-back" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cd-back')"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div>
+          </div>
         </div>
+        <input id="cd-name-input" type="text" placeholder="Item name..." style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;">
+        <input id="cd-brand-input" type="text" placeholder="Store / Brand" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:8px;">
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;" id="cd-cat-row">
+          <button class="tag cd-cat-btn" onclick="cdSetCategory('top',this)">Top</button>
+          <button class="tag cd-cat-btn" onclick="cdSetCategory('bottom',this)">Bottom</button>
+          <button class="tag cd-cat-btn" onclick="cdSetCategory('dress',this)">Dress</button>
+          <button class="tag cd-cat-btn" onclick="cdSetCategory('shoes',this)">Shoes</button>
+          <button class="tag cd-cat-btn" onclick="cdSetCategory('bag',this)">Bag</button>
+          <button class="tag cd-cat-btn" onclick="cdSetCategory('accessory',this)">Accessory</button>
+          <button class="tag cd-cat-btn" onclick="cdSetCategory('other',this)">Other</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:6px;">
+          <input id="cd-color-input" type="text" placeholder="Color" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
+          <input id="cd-size-input" type="text" placeholder="Size" style="width:80px;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+          <span style="font-size:13px;color:var(--muted);">$</span>
+          <input id="cd-price-input" type="number" placeholder="0.00" step="0.01" min="0" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
+        </div>
+        <button onclick="saveClosetDetail()" style="width:100%;padding:10px;border-radius:12px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;margin-bottom:8px;">Save</button>
         <button onclick="deleteClosetItem()" style="width:100%;padding:10px;border-radius:12px;border:0.5px solid var(--rose);background:transparent;color:var(--rose);font-size:13px;font-family:var(--sans);cursor:pointer;">Remove from closet</button>
+      </div>
       </div>
     </div>
 
@@ -5157,25 +5182,59 @@ function openClosetDetail(id){
   const item=closetItems.find(i=>i.id===id);
   if(!item)return;
   closetDetailItemId=id;
-  document.getElementById('cd-name').textContent=item.name||'Unnamed piece';
-  const parts=[];
-  if(item.brand)parts.push(item.brand);
-  if(item.color)parts.push(item.color);
-  if(item.price)parts.push('$'+parseFloat(item.price).toFixed(2));
-  if(item.dateAdded)parts.push('Added '+item.dateAdded);
-  document.getElementById('cd-meta').textContent=parts.join(' · ');
-  const front=document.getElementById('cd-front');
-  const back=document.getElementById('cd-back');
-  if(item.photoFront){front.style.backgroundImage=`url('${item.photoFront}')`;front.innerHTML='';}
-  else{front.style.backgroundImage='';front.innerHTML='<i class="ti ti-hanger" style="font-size:24px;color:var(--border);"></i>';}
-  if(item.photoBack){back.style.backgroundImage=`url('${item.photoBack}')`;back.innerHTML='';}
-  else{back.style.backgroundImage='';back.innerHTML='<i class="ti ti-camera-off" style="font-size:18px;color:var(--border);"></i>';}
-  document.getElementById('closet-detail-overlay').style.display='block';
+  document.getElementById('cd-name-input').value=item.name||'';
+  document.getElementById('cd-brand-input').value=item.brand||'';
+  document.getElementById('cd-color-input').value=(item.colors&&item.colors[0])||item.color||'';
+  document.getElementById('cd-size-input').value=item.size||'';
+  document.getElementById('cd-price-input').value=item.price||'';
+  document.querySelectorAll('.cd-cat-btn').forEach(b=>{
+    b.classList.toggle('on', b.textContent.trim().toLowerCase()===(item.category||'').toLowerCase());
+  });
+  if(item.photoFront) displayPhoto('cd-front',item.photoFront);
+  else{const f=document.getElementById('cd-front');if(f){f.style.backgroundImage='';f.innerHTML='<i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i>';}}
+  if(item.photoBack) displayPhoto('cd-back',item.photoBack);
+  else{const b=document.getElementById('cd-back');if(b){b.style.backgroundImage='';b.innerHTML='<i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i>';}}
+  const ov=document.getElementById('closet-detail-overlay');
+  ov.style.display='block';
+  ov.scrollTop=0;
+  const ch=document.getElementById('compact-header');if(ch)ch.style.display='none';
+  const ttb=document.getElementById('time-tabs-bar');if(ttb)ttb.style.display='none';
 }
 
 function closeClosetDetail(){
   document.getElementById('closet-detail-overlay').style.display='none';
   closetDetailItemId=null;
+  const ch=document.getElementById('compact-header');if(ch)ch.style.removeProperty('display');
+  const ttb=document.getElementById('time-tabs-bar');if(ttb)ttb.style.display='flex';
+}
+
+function cdSetCategory(val,btn){
+  document.querySelectorAll('.cd-cat-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+async function saveClosetDetail(){
+  if(!closetDetailItemId)return;
+  const item=closetItems.find(i=>i.id===closetDetailItemId);
+  if(!item)return;
+  item.name=document.getElementById('cd-name-input').value.trim()||item.name;
+  item.brand=document.getElementById('cd-brand-input').value.trim();
+  const colorVal=document.getElementById('cd-color-input').value.trim();
+  item.color=colorVal;
+  item.colors=colorVal?[colorVal]:[];
+  item.size=document.getElementById('cd-size-input').value.trim();
+  const priceVal=document.getElementById('cd-price-input').value;
+  item.price=priceVal?parseFloat(priceVal):null;
+  const activeCat=document.querySelector('.cd-cat-btn.on');
+  if(activeCat)item.category=activeCat.textContent.trim().toLowerCase();
+  const pf=getSlotPhotoUrl('cd-front');if(pf)item.photoFront=pf;
+  const pb=getSlotPhotoUrl('cd-back');if(pb)item.photoBack=pb;
+  const tx=db.transaction('closet','readwrite');
+  tx.objectStore('closet').put(item);
+  await new Promise(r=>tx.oncomplete=r);
+  syncToBlob('closet');
+  renderClosetGrid();
+  closeClosetDetail();
 }
 
 async function deleteClosetItem(){
