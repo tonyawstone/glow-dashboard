@@ -4380,6 +4380,28 @@ textarea:focus,input:focus{border-color:var(--accent);}
 <!-- overlays at end of body -->
 
 <!-- Past Boxes overlay -->
+<!-- Try-on photo lightbox -->
+<div id="dl-tryon-lightbox" onclick="closeTryOnLightbox()" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;flex-direction:column;">
+  <img id="dl-tryon-lightbox-img" src="" style="max-width:94%;max-height:78vh;object-fit:contain;border-radius:8px;">
+  <div style="display:flex;gap:12px;margin-top:16px;" onclick="event.stopPropagation()">
+    <button onclick="changeTryOnPhoto()" style="padding:8px 20px;border-radius:20px;border:0.5px solid rgba(255,255,255,0.35);background:transparent;color:#fff;font-size:13px;cursor:pointer;font-family:var(--sans);">Change photo</button>
+    <button onclick="closeTryOnLightbox()" style="padding:8px 20px;border-radius:20px;border:none;background:rgba(255,255,255,0.15);color:#fff;font-size:13px;cursor:pointer;font-family:var(--sans);">Close</button>
+  </div>
+</div>
+
+<!-- Try-on save confirmation (shown at Finish) -->
+<div id="dl-tryon-confirm-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(61,46,30,0.6);align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:420px;max-height:80vh;overflow-y:auto;box-sizing:border-box;">
+    <div style="font-family:var(--serif);font-size:20px;color:var(--text);margin-bottom:4px;">Save looks to your Closet?</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5;">Check the looks you want in your Looks gallery. Unchecked ones stay in Past Boxes.</div>
+    <div id="dl-tryon-confirm-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="confirmSaveTryOnLooks()" style="flex:2;padding:12px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save to Looks ✓</button>
+      <button onclick="skipTryOnSave()" style="flex:1;padding:12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);">Skip</button>
+    </div>
+  </div>
+</div>
+
 <div id="dl-history-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:600;overflow-y:auto;">
   <div style="min-height:100%;padding:16px;box-sizing:border-box;padding-top:max(60px,env(safe-area-inset-top) + 20px);padding-bottom:40px;max-width:420px;margin:0 auto;">
     <div style="background:#fff;border-radius:16px;padding:16px;">
@@ -5330,7 +5352,7 @@ function addDailyLookTryOn(existingTryOn=null){
   const div=document.createElement('div');
   div.id='dl-tryon-'+id;
   div.style.cssText='position:relative;';
-  div.innerHTML=`<div class="photo-slot" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('dl-tryon-photo-${id}')" id="dl-tryon-photo-${id}"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><button onclick="removeDailyLookTryOn(${id})" style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(196,115,90,0.85);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>`;
+  div.innerHTML=`<div class="photo-slot" style="width:100%;aspect-ratio:3/4;" onclick="tryOnSlotClick(${id})" id="dl-tryon-photo-${id}"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><button onclick="removeDailyLookTryOn(${id})" style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(196,115,90,0.85);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>`;
   list.appendChild(div);
   if(tryOn.photo){const s=document.getElementById(`dl-tryon-photo-${id}`);if(s){s.style.backgroundImage=`url('${tryOn.photo}')`;s.style.backgroundSize='cover';s.style.backgroundPosition='center';s.innerHTML='';}}
 }
@@ -5387,7 +5409,6 @@ async function saveDailyLookBox(){
       }
     }
     syncOutfitsToBlob();
-    syncTryOnsToLooks(_editingBoxRecord||{ts:Date.now(),date,tryOns:tryOnsWithPhotos}).catch(()=>{});
     toast('dl-toast');
   }catch(e){console.error('saveDailyLookBox error',e);showToast('Could not save — please try again');}
 }
@@ -5510,6 +5531,75 @@ function updateDlFinishBtn(){
 
 async function finishDailyLookBox(){
   await saveDailyLookBox();
+  const box=_editingBoxRecord;
+  const hasTryOns=(box?.tryOns||[]).some(t=>t.photo&&!t.photo.startsWith('data:'));
+  if(hasTryOns) showTryOnSaveConfirm(box);
+  else resetDailyLookBox();
+}
+
+let _tryOnLightboxId=null;
+
+function tryOnSlotClick(id){
+  const slot=document.getElementById(`dl-tryon-photo-${id}`);
+  if(!slot) return;
+  const img=slot.querySelector('img');
+  const bg=slot.style.backgroundImage;
+  const src=img?.src||(bg&&bg!=='none'?bg.replace(/^url\(['"]?/,'').replace(/['"]?\)$/,''):'');
+  if(src&&!src.endsWith(window.location.href)&&src!==''){
+    _tryOnLightboxId=id;
+    openTryOnLightbox(src);
+  } else {
+    pickPhoto(`dl-tryon-photo-${id}`);
+  }
+}
+
+function openTryOnLightbox(src){
+  const lb=document.getElementById('dl-tryon-lightbox');
+  const img=document.getElementById('dl-tryon-lightbox-img');
+  if(!lb||!img) return;
+  img.src=src;
+  lb.style.display='flex';
+}
+
+function closeTryOnLightbox(){
+  const lb=document.getElementById('dl-tryon-lightbox');
+  if(lb) lb.style.display='none';
+  _tryOnLightboxId=null;
+}
+
+function changeTryOnPhoto(){
+  const id=_tryOnLightboxId;
+  closeTryOnLightbox();
+  if(id!==null) pickPhoto(`dl-tryon-photo-${id}`);
+}
+
+function showTryOnSaveConfirm(box){
+  const tryOns=(box.tryOns||[]).filter(t=>t.photo&&!t.photo.startsWith('data:'));
+  if(!tryOns.length){resetDailyLookBox();return;}
+  const overlay=document.getElementById('dl-tryon-confirm-overlay');
+  const grid=document.getElementById('dl-tryon-confirm-grid');
+  if(!overlay||!grid) return;
+  grid.innerHTML=tryOns.map(t=>`<label style="position:relative;cursor:pointer;display:block;"><img src="${t.photo}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:0.5px solid var(--border);display:block;"><input type="checkbox" data-tryon-id="${t.id}" checked style="position:absolute;top:6px;left:6px;width:18px;height:18px;accent-color:var(--accent);cursor:pointer;"></label>`).join('');
+  overlay.style.display='flex';
+  window._confirmBox=box;
+}
+
+async function confirmSaveTryOnLooks(){
+  const overlay=document.getElementById('dl-tryon-confirm-overlay');
+  const checked=[...overlay.querySelectorAll('input[type=checkbox]:checked')].map(cb=>parseInt(cb.dataset.tryonId));
+  const box=window._confirmBox;
+  if(box&&checked.length){
+    const filtered={...box,tryOns:(box.tryOns||[]).filter(t=>checked.includes(t.id))};
+    await syncTryOnsToLooks(filtered);
+  }
+  overlay.style.display='none';
+  window._confirmBox=null;
+  resetDailyLookBox();
+}
+
+function skipTryOnSave(){
+  document.getElementById('dl-tryon-confirm-overlay').style.display='none';
+  window._confirmBox=null;
   resetDailyLookBox();
 }
 
