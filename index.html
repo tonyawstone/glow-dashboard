@@ -5466,11 +5466,7 @@ async function loadBoxForEditing(boxId){
     if(box.stylistPhoto){stylistSlot.style.backgroundImage=`url('${box.stylistPhoto}')`;stylistSlot.style.backgroundSize='cover';stylistSlot.style.backgroundPosition='center';stylistSlot.innerHTML='';}
     else{stylistSlot.style.backgroundImage='';stylistSlot.innerHTML='<i class="ti ti-camera" style="font-size:16px;color:var(--border);position:relative;z-index:1;"></i>';}
   }
-  // Restore items
-  for(const item of (box.items||[])) addDailyLookItem(item);
-  // Restore try-ons
-  for(const t of (box.tryOns||[])) addDailyLookTryOn(t);
-  // Set editing state
+  // Set editing state BEFORE restoring items so autoSaveDailyLookBox updates instead of creating duplicates
   _editingBoxRecord=box;
   const banner=document.getElementById('dl-editing-banner');
   const label=document.getElementById('dl-editing-label');
@@ -5478,6 +5474,10 @@ async function loadBoxForEditing(boxId){
   if(banner) banner.style.display='flex';
   if(label) label.textContent='Editing box from '+fmtOutfitDate(box.date);
   if(saveBtn) saveBtn.textContent='Update box';
+  // Restore items
+  for(const item of (box.items||[])) addDailyLookItem(item);
+  // Restore try-ons
+  for(const t of (box.tryOns||[])) addDailyLookTryOn(t);
 }
 
 function resetDailyLookBox(){
