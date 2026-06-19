@@ -11567,6 +11567,7 @@ async function ocrStylistNote(dataUrl){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         images:[{media_type:mimeType,data:base64}],
+        mode:'myair',
         prompt:'This is a screenshot of a stylist note or styling card. Extract ALL the text from it exactly as written — every word, recommendation, bullet point, and note. Return only the extracted text, preserving line breaks and structure as closely as possible.'
       })
     });
