@@ -1095,8 +1095,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div id="dl-tryons-list" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px;"></div>
         <button onclick="addDailyLookTryOn()" style="width:100%;padding:8px;border-radius:10px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">+ Add try-on photo</button>
       </div>
-      <div style="text-align:center;">
+      <div style="text-align:center;display:flex;gap:10px;justify-content:center;align-items:center;">
         <button id="dl-save-btn" onclick="saveDailyLookBox()" style="padding:9px 28px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save box</button>
+        <button id="dl-finish-btn" onclick="finishDailyLookBox()" style="display:none;padding:9px 28px;border-radius:20px;background:#27500A;border:none;color:#fff;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Finish box ✓</button>
       </div>
       <div class="toast-msg" id="dl-toast">Saved!</div>
     </div>
@@ -5220,6 +5221,7 @@ function saveItemCard(id){
   formDiv.style.display='none';
   updateDailyLookCartTotal();
   autoSaveDailyLookBox().catch(()=>{});
+  updateDlFinishBtn();
 }
 
 function editItemCard(id){
@@ -5275,6 +5277,7 @@ function removeDailyLookItem(id){
   if(el) el.remove();
   updateDailyLookCartTotal();
   if(!dlItems.length){const ts=document.getElementById('dl-tryons-section');if(ts)ts.style.display='none';}
+  updateDlFinishBtn();
 }
 
 function dlUpdateItem(id,field,value){
@@ -5491,8 +5494,21 @@ function resetDailyLookBox(){
   if(stylistSlot){stylistSlot.style.backgroundImage='';stylistSlot.innerHTML='<i class="ti ti-camera" style="font-size:16px;color:var(--border);position:relative;z-index:1;"></i>';}
   const banner=document.getElementById('dl-editing-banner');if(banner)banner.style.display='none';
   const saveBtn=document.getElementById('dl-save-btn');if(saveBtn)saveBtn.textContent='Save box';
+  const finishBtn=document.getElementById('dl-finish-btn');if(finishBtn)finishBtn.style.display='none';
   const ts=document.getElementById('dl-tryons-section');if(ts)ts.style.display='none';
   updateDailyLookCartTotal();
+}
+
+function updateDlFinishBtn(){
+  const btn=document.getElementById('dl-finish-btn');
+  if(!btn)return;
+  const allDecided=dlItems.length>0&&dlItems.every(i=>i.keepReturn==='Keeping'||i.keepReturn==='Returned');
+  btn.style.display=allDecided?'inline-block':'none';
+}
+
+async function finishDailyLookBox(){
+  await saveDailyLookBox();
+  resetDailyLookBox();
 }
 // ──────────────────────────────────────────────────────────────────────────
 
