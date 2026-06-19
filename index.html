@@ -11565,12 +11565,12 @@ async function ocrStylistNote(dataUrl){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        mode:'hair_compare',
-        images:[{media_type:'image/jpeg',data:base64}],
+        imageBase64:base64,
+        mimeType:'image/jpeg',
         prompt:'This is a screenshot of a stylist note or styling card. Extract ALL the text from it exactly as written — every word, recommendation, bullet point, and note. Return only the extracted text, preserving line breaks and structure as closely as possible.'
       })
     });
-    if(!res.ok) throw new Error('Status '+res.status);
+    if(!res.ok){const errText=await res.text().catch(()=>'');console.error('OCR HTTP error',res.status,errText);throw new Error('Status '+res.status);}
     const d=await res.json();
     console.log('Stylist OCR raw response:',JSON.stringify(d).slice(0,300));
     const text=d.result||d.content?.find(b=>b.type==='text')?.text||'';
