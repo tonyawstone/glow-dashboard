@@ -5197,14 +5197,16 @@ function addDailyLookItem(existingItem=null){
   const div=document.createElement('div');
   div.id='dl-item-'+id;
   div.style.cssText='margin-bottom:10px;border-radius:10px;border:0.5px solid var(--border);overflow:hidden;';
-  div.innerHTML=`<div id="dl-item-form-${id}" style="padding:12px;background:var(--cream);"><div style="display:flex;gap:8px;margin-bottom:8px;"><div style="flex:1;text-align:center;"><div class="photo-slot" style="width:100%;aspect-ratio:2/3;" onclick="pickPhoto('dl-photo-${id}-front')" id="dl-photo-${id}-front"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div></div><div style="flex:1;text-align:center;"><div class="photo-slot" style="width:100%;aspect-ratio:2/3;" onclick="pickPhoto('dl-photo-${id}-back')" id="dl-photo-${id}-back"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div></div></div><input type="text" placeholder="Item name..." oninput="dlUpdateItem(${id},'desc',this.value)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;"><div style="display:flex;gap:6px;margin-bottom:6px;"><input type="text" placeholder="Color" oninput="dlUpdateItem(${id},'color',this.value)" id="dl-color-${id}" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"><input type="text" placeholder="Size" oninput="dlUpdateItem(${id},'size',this.value)" id="dl-size-${id}" style="width:80px;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"></div><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:13px;color:var(--muted);">$</span><input type="number" placeholder="0.00" step="0.01" min="0" oninput="dlUpdateItem(${id},'price',this.value)" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"></div><div style="display:flex;gap:6px;margin-bottom:10px;"><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Keeping',this)" style="flex:1;text-align:center;">Keeping</button><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Returned',this)" style="flex:1;text-align:center;">Returned</button></div><div style="display:flex;gap:8px;"><button onclick="saveItemCard(${id})" style="flex:1;padding:9px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;">Save item</button><button onclick="removeDailyLookItem(${id})" style="padding:9px 14px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Remove</button></div></div><div id="dl-item-summary-${id}" style="display:none;padding:10px 12px;background:#fff;"></div>`;
+  div.innerHTML=`<div id="dl-item-form-${id}" style="padding:12px;background:var(--cream);"><div style="display:flex;gap:8px;margin-bottom:8px;"><div style="flex:1;text-align:center;"><div class="photo-slot" style="width:100%;aspect-ratio:2/3;" onclick="pickPhoto('dl-photo-${id}-front')" id="dl-photo-${id}-front"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div></div><div style="flex:1;text-align:center;"><div class="photo-slot" style="width:100%;aspect-ratio:2/3;" onclick="pickPhoto('dl-photo-${id}-back')" id="dl-photo-${id}-back"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div></div></div><input type="text" placeholder="Item name..." oninput="dlUpdateItem(${id},'desc',this.value)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;"><input type="text" placeholder="Store / Brand" oninput="dlUpdateItem(${id},'brand',this.value)" id="dl-brand-${id}" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;"><div style="display:flex;gap:6px;margin-bottom:6px;"><input type="text" placeholder="Color" oninput="dlUpdateItem(${id},'color',this.value)" id="dl-color-${id}" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"><input type="text" placeholder="Size" oninput="dlUpdateItem(${id},'size',this.value)" id="dl-size-${id}" style="width:80px;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"></div><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:13px;color:var(--muted);">$</span><input type="number" placeholder="0.00" step="0.01" min="0" oninput="dlUpdateItem(${id},'price',this.value)" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);"></div><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;" id="dl-cat-row-${id}"><button class="tag dl-cat-btn" onclick="dlSetCategory(${id},'Top',this)" style="font-size:11px;padding:4px 10px;">Top</button><button class="tag dl-cat-btn" onclick="dlSetCategory(${id},'Bottom',this)" style="font-size:11px;padding:4px 10px;">Bottom</button><button class="tag dl-cat-btn" onclick="dlSetCategory(${id},'Dress',this)" style="font-size:11px;padding:4px 10px;">Dress</button><button class="tag dl-cat-btn" onclick="dlSetCategory(${id},'Shoes',this)" style="font-size:11px;padding:4px 10px;">Shoes</button><button class="tag dl-cat-btn" onclick="dlSetCategory(${id},'Bag',this)" style="font-size:11px;padding:4px 10px;">Bag</button><button class="tag dl-cat-btn" onclick="dlSetCategory(${id},'Accessory',this)" style="font-size:11px;padding:4px 10px;">Accessory</button></div><div style="display:flex;gap:6px;margin-bottom:10px;"><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Keeping',this)" style="flex:1;text-align:center;">Keeping</button><button class="tag dl-kr-btn" onclick="dlSetKeepReturn(${id},'Returned',this)" style="flex:1;text-align:center;">Returned</button></div><div style="display:flex;gap:8px;"><button onclick="saveItemCard(${id})" style="flex:1;padding:9px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;">Save item</button><button onclick="removeDailyLookItem(${id})" style="padding:9px 14px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Remove</button></div></div><div id="dl-item-summary-${id}" style="display:none;padding:10px 12px;background:#fff;"></div>`;
   container.appendChild(div);
   // Restore saved data if loading from history
   if(item.desc){const inp=div.querySelector('input[type="text"]');if(inp)inp.value=item.desc;}
   if(item.color){const inp=document.getElementById(`dl-color-${id}`);if(inp)inp.value=item.color;}
   if(item.size){const inp=document.getElementById(`dl-size-${id}`);if(inp)inp.value=item.size;}
   if(item.price){const inp=div.querySelector('input[type="number"]');if(inp)inp.value=item.price;}
+  if(item.brand){const inp=document.getElementById(`dl-brand-${id}`);if(inp)inp.value=item.brand;}
   if(item.keepReturn){div.querySelectorAll('.dl-kr-btn').forEach(b=>{if(b.textContent.trim()===item.keepReturn)b.classList.add('on');});}
+  if(item.category){div.querySelectorAll('.dl-cat-btn').forEach(b=>{if(b.textContent.trim()===item.category)b.classList.add('on');});}
   if(item.photoFront)displayPhoto(`dl-photo-${id}-front`,item.photoFront);
   if(item.photoBack)displayPhoto(`dl-photo-${id}-back`,item.photoBack);
   if(existingItem) saveItemCard(id);
@@ -5229,6 +5231,10 @@ function saveItemCard(id){
   item.size=sizeInp?sizeInp.value.trim():'';
   item.price=priceInp?priceInp.value:'';
   item.keepReturn=activeKr?activeKr.textContent.trim():'';
+  const brandInp=document.getElementById(`dl-brand-${id}`);
+  const activeCat=formDiv.querySelector('.dl-cat-btn.on');
+  item.brand=brandInp?brandInp.value.trim():'';
+  item.category=activeCat?activeCat.textContent.trim():'';
   const pf=getSlotPhotoUrl(`dl-photo-${id}-front`);if(pf)item.photoFront=pf;
   const pb=getSlotPhotoUrl(`dl-photo-${id}-back`);if(pb)item.photoBack=pb;
   // Render summary
@@ -5237,7 +5243,7 @@ function saveItemCard(id){
   const photoHtml=item.photoFront
     ?`<div style="width:40px;height:54px;border-radius:6px;background-image:url('${item.photoFront}');background-size:cover;background-position:center;flex-shrink:0;"></div>`
     :'<div style="width:40px;height:54px;border-radius:6px;background:var(--warm);border:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;">👗</div>';
-  const meta=[item.color,item.size].filter(Boolean).join(' · ');
+  const meta=[item.category,item.brand,item.color,item.size].filter(Boolean).join(' · ');
   const priceStr=item.price?`$${parseFloat(item.price).toFixed(2)}`:'';
   summaryDiv.innerHTML=`<div style="display:flex;gap:10px;align-items:center;">${photoHtml}<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;">${item.desc||'Unnamed item'}</div>${meta?`<div style="font-size:11px;color:var(--muted);margin-bottom:2px;">${meta}</div>`:''}<div style="display:flex;gap:6px;align-items:center;">${priceStr?`<span style="font-size:12px;color:var(--text);">${priceStr}</span>`:''}${item.keepReturn?`<span style="font-size:10px;padding:2px 7px;border-radius:8px;background:${krBg};color:${krColor};">${item.keepReturn}</span>`:''}</div></div><div style="display:flex;gap:6px;flex-shrink:0;align-items:center;"><button onclick="editItemCard(${id})" style="padding:5px 12px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Edit</button><button onclick="removeDailyLookItem(${id})" style="width:26px;height:26px;border-radius:50%;background:rgba(196,115,90,0.12);border:none;color:var(--rose);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button></div></div>`;
   summaryDiv.style.display='block';
@@ -5319,6 +5325,18 @@ function dlSetKeepReturn(id,val,btn){
     btn.classList.add('on');
   }
   updateDailyLookCartTotal();
+}
+
+function dlSetCategory(id,val,btn){
+  const item=dlItems.find(i=>i.id===id);
+  if(!item) return;
+  const row=document.getElementById(`dl-cat-row-${id}`);
+  if(item.category===val){item.category='';btn.classList.remove('on');}
+  else{
+    item.category=val;
+    if(row) row.querySelectorAll('.dl-cat-btn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+  }
 }
 
 function updateDailyLookCartTotal(){
@@ -5415,7 +5433,7 @@ async function saveDailyLookBox(){
 
 async function autoAddToCloset(item){
   if(!item.desc&&!item.photoFront) return;
-  const entry={name:item.desc||'DailyLook item',photoFront:item.photoFront||null,photoBack:item.photoBack||null,category:'other',colors:[],price:item.price?parseFloat(item.price):null,source:'DailyLook'};
+  const entry={name:item.desc||'DailyLook item',brand:item.brand||'',photoFront:item.photoFront||null,photoBack:item.photoBack||null,category:item.category?.toLowerCase()||'other',colors:item.color?[item.color]:[],price:item.price?parseFloat(item.price):null,source:'DailyLook'};
   await dbAdd('closet',entry);
   syncToBlob('closet');
   // Reload closet cache
