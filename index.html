@@ -1438,6 +1438,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="overflow-x:auto;white-space:nowrap;padding-bottom:10px;margin-bottom:10px;">
         <div style="display:inline-flex;gap:6px;">
           <button class="tag on" onclick="filterClosetLooks('all',this)" style="white-space:nowrap;">All</button>
+          <button class="tag" onclick="filterClosetLooks('dailylook',this)" style="white-space:nowrap;">DailyLook</button>
           <button class="tag" onclick="filterClosetLooks('Work',this)" style="white-space:nowrap;">Work</button>
           <button class="tag" onclick="filterClosetLooks('Weekend',this)" style="white-space:nowrap;">Weekend</button>
           <button class="tag" onclick="filterClosetLooks('Casual',this)" style="white-space:nowrap;">Casual</button>
@@ -4953,7 +4954,7 @@ function openLookDetail(idx){
   document.getElementById('ld-meta').textContent=[fmtOutfitDate(e.date),keepLabel,stars].filter(Boolean).join(' · ');
   const allTags=[...(e.occ||[]),...(e.vibe||[]),...(e.colors||[]),...(Array.isArray(e.season)?e.season:(e.season?[e.season]:[]))].filter(Boolean);
   document.getElementById('ld-tags').innerHTML=allTags.length?`<div class="outfit-tags">${allTags.map(t=>`<span class="outfit-tag">${t}</span>`).join('')}</div>`:'';
-  document.getElementById('ld-notes').innerHTML=e.notes?`<div style="font-size:12px;color:var(--muted);font-style:italic;line-height:1.5;">"${e.notes}"</div>`:'';
+  document.getElementById('ld-notes').innerHTML=e.notes?`<div style="font-size:12px;color:var(--muted);font-style:italic;line-height:1.5;">"${e.notes}"</div>`:''+(e.source==='dailylook'?`<div style="font-size:11px;color:var(--accent);margin-top:4px;">From DailyLook box · ${fmtOutfitDate(e.date)}</div>`:'');
   renderLookDetailPieces(e);
   document.getElementById('ld-view-mode').style.display='block';
   document.getElementById('ld-edit-mode').style.display='none';
@@ -5386,6 +5387,7 @@ async function saveDailyLookBox(){
       }
     }
     syncOutfitsToBlob();
+    syncTryOnsToLooks(_editingBoxRecord||{ts:Date.now(),date,tryOns:tryOnsWithPhotos}).catch(()=>{});
     toast('dl-toast');
   }catch(e){console.error('saveDailyLookBox error',e);showToast('Could not save — please try again');}
 }
@@ -5509,6 +5511,30 @@ function updateDlFinishBtn(){
 async function finishDailyLookBox(){
   await saveDailyLookBox();
   resetDailyLookBox();
+}
+
+async function syncTryOnsToLooks(box){
+  const tryOns=(box.tryOns||[]).filter(t=>t.photo&&!t.photo.startsWith('data:'));
+  if(!tryOns.length) return;
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const [yr,mo,dy]=(box.date||logicalDayStr()).split('-');
+  const label=`DailyLook · ${months[parseInt(mo)-1]} ${parseInt(dy)}`;
+  const all=await dbAll('outfits');
+  const existing=all.filter(e=>e.dailylookBoxTs===box.ts);
+  for(const t of tryOns){
+    const match=existing.find(e=>e.tryOnId===t.id);
+    if(match){
+      if(match.photo!==t.photo){
+        match.photo=t.photo;
+        const tx=db.transaction('outfits','readwrite');
+        tx.objectStore('outfits').put(match);
+        await new Promise(r=>tx.oncomplete=r);
+      }
+    } else {
+      await dbAdd('outfits',{src:'My outfit',photo:t.photo,desc:label,date:box.date||logicalDayStr(),ts:Date.now(),source:'dailylook',dailylookBoxTs:box.ts,tryOnId:t.id,pieceIds:[],occ:[],vibe:[],stars:0,wearAgain:false});
+    }
+  }
+  _closetOutfits=[];
 }
 // ──────────────────────────────────────────────────────────────────────────
 
@@ -7442,7 +7468,7 @@ async function renderCloset(filter){
   if(!grid) return;
   if(!_closetOutfits.length) _closetOutfits=await dbAll('outfits');
   const myOutfits=_closetOutfits.filter(e=>e.src==='My outfit'||(!e.src&&e.photo));
-  const filtered=_closetFilter==='all'?myOutfits:myOutfits.filter(e=>
+  const filtered=_closetFilter==='all'?myOutfits:_closetFilter==='dailylook'?myOutfits.filter(e=>e.source==='dailylook'):myOutfits.filter(e=>
     (e.occ||[]).includes(_closetFilter)||(e.vibe||[]).includes(_closetFilter));
   const sorted=[...filtered].sort((a,b)=>b.date>a.date?1:-1);
   if(!sorted.length){
@@ -7455,7 +7481,8 @@ async function renderCloset(filter){
     if(_pickerDay){
       return `<div onclick="pickOutfitForDayIdx(${i})" style="cursor:pointer;"><div style="width:100%;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);overflow:hidden;position:relative;">${photoHtml}<div style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;"><div style="background:rgba(0,0,0,0.45);color:#fff;font-size:10px;padding:3px 10px;border-radius:8px;">Tap to pick</div></div></div><div style="font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.desc||''}</div></div>`;
     }
-    return `<div style="position:relative;"><div onclick="openLookDetail(${i})" style="cursor:pointer;"><div style="width:100%;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);overflow:hidden;position:relative;">${photoHtml}${e.wearAgain?'<div style="position:absolute;bottom:4px;left:4px;background:rgba(160,120,80,0.85);color:#fff;font-size:9px;padding:2px 5px;border-radius:6px;">↩</div>':''}${e.stars?`<div style="position:absolute;top:4px;left:4px;font-size:10px;color:#D4A96A;text-shadow:0 0 3px rgba(0,0,0,0.4);">${'★'.repeat(e.stars)}</div>`:''}</div><div style="font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.desc||''}</div></div><button onclick="quickDeleteLook(${i})" style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(196,115,90,0.85);border:none;color:#fff;font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button></div>`;
+    const dlBadge=e.source==='dailylook'?'<div style="position:absolute;bottom:4px;right:4px;background:rgba(61,46,30,0.75);color:#fff;font-size:8px;padding:2px 5px;border-radius:6px;letter-spacing:0.3px;">DL</div>':'';
+    return `<div style="position:relative;"><div onclick="openLookDetail(${i})" style="cursor:pointer;"><div style="width:100%;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);overflow:hidden;position:relative;">${photoHtml}${e.wearAgain?'<div style="position:absolute;bottom:4px;left:4px;background:rgba(160,120,80,0.85);color:#fff;font-size:9px;padding:2px 5px;border-radius:6px;">↩</div>':''}${e.stars?`<div style="position:absolute;top:4px;left:4px;font-size:10px;color:#D4A96A;text-shadow:0 0 3px rgba(0,0,0,0.4);">${'★'.repeat(e.stars)}</div>`:''}${dlBadge}</div><div style="font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.desc||''}</div></div><button onclick="quickDeleteLook(${i})" style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(196,115,90,0.85);border:none;color:#fff;font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button></div>`;
   }).join('');
 }
 
