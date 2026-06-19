@@ -1454,7 +1454,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Look Detail Popup -->
     <div id="look-detail-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:600;overflow-y:auto;">
-      <div style="min-height:100%;padding:16px;box-sizing:border-box;display:flex;align-items:flex-start;justify-content:center;padding-top:40px;padding-bottom:40px;">
+      <div style="min-height:100%;padding:16px;box-sizing:border-box;display:flex;align-items:flex-start;justify-content:center;padding-top:20px;padding-bottom:80px;">
         <div style="background:#fff;border-radius:16px;width:100%;max-width:420px;overflow:hidden;">
           <div style="background:var(--warm);position:relative;">
             <img id="ld-photo" src="" style="width:100%;display:block;max-height:55vh;object-fit:contain;">
@@ -4981,12 +4981,18 @@ function openLookDetail(idx){
   document.getElementById('ld-view-mode').style.display='block';
   document.getElementById('ld-edit-mode').style.display='none';
   document.getElementById('ld-piece-picker').style.display='none';
-  document.getElementById('look-detail-overlay').style.display='block';
+  const ldOverlay=document.getElementById('look-detail-overlay');
+  ldOverlay.style.display='block';
+  ldOverlay.scrollTop=0;
+  const ch=document.getElementById('compact-header');if(ch)ch.style.display='none';
+  const ttb=document.getElementById('time-tabs-bar');if(ttb)ttb.style.display='none';
 }
 
 function closeLookDetail(){
   document.getElementById('look-detail-overlay').style.display='none';
   _lookDetailIdx=null;
+  const ch=document.getElementById('compact-header');if(ch)ch.style.removeProperty('display');
+  const ttb=document.getElementById('time-tabs-bar');if(ttb)ttb.style.display='flex';
 }
 
 function renderLookDetailPieces(e){
