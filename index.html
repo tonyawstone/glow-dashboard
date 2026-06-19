@@ -11561,19 +11561,19 @@ async function ocrStylistNote(dataUrl){
   noteEl.disabled=true;
   try{
     const base64=dataUrl.split(',')[1];
+    const mimeType=dataUrl.split(';')[0].split(':')[1]||'image/jpeg';
     const res=await fetch(`${BACKEND}/api/skin-analysis`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        imageBase64:base64,
-        mimeType:'image/jpeg',
+        images:[{media_type:mimeType,data:base64}],
         prompt:'This is a screenshot of a stylist note or styling card. Extract ALL the text from it exactly as written — every word, recommendation, bullet point, and note. Return only the extracted text, preserving line breaks and structure as closely as possible.'
       })
     });
     if(!res.ok){const errText=await res.text().catch(()=>'');console.error('OCR HTTP error',res.status,errText);throw new Error('Status '+res.status);}
     const d=await res.json();
     console.log('Stylist OCR raw response:',JSON.stringify(d).slice(0,300));
-    const text=d.result||d.content?.find(b=>b.type==='text')?.text||'';
+    const text=d.result||d.content?.[0]?.text||d.content?.find(b=>b.type==='text')?.text||'';
     if(text.trim()){
       noteEl.value=text.trim();
       showToast('Notes extracted from screenshot ✓');
@@ -11649,7 +11649,6 @@ function displayPhoto(slotId,data){
   const label=slot.querySelector('.photo-slot-label')?.textContent||'';
   slot.innerHTML=`<img src="${data}" alt="photo"><button class="rm" onclick="removePhoto('${slotId}',event)">✕</button>`;
   if(label){const lbl=document.createElement('div');lbl.className='photo-slot-label';lbl.textContent=label;slot.appendChild(lbl);}
-  if(slotId==='dl-stylist-photo'&&data.startsWith('data:')) ocrStylistNote(data);
 }
 
 async function removePhoto(slotId,event){
