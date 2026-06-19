@@ -5716,6 +5716,7 @@ async function confirmSaveTryOnLooks(){
   overlay.style.display='none';
   window._confirmBox=null;
   resetDailyLookBox();
+  renderLookbook().catch(()=>{});
 }
 
 function skipTryOnSave(){
@@ -7498,11 +7499,13 @@ async function renderLookbook(){
   const grid=document.getElementById('lookbook-grid');
   const card=document.getElementById('lookbook-card');
 
-  // Deduplicate by ts, falling back to date+src+desc for entries without ts
+  // Deduplicate: DL looks by dailylookBoxTs+tryOnId, others by ts then stable fallback
   const dedup = (arr) => {
     const seen = new Set();
     return arr.filter(e => {
-      const key = e.ts ? String(e.ts) : ((e.date||'') + '_' + (e.src||'') + '_' + (e.desc||'').slice(0,20));
+      const key = (e.source==='dailylook'&&e.tryOnId!=null)
+        ? 'dl-'+e.dailylookBoxTs+'-'+e.tryOnId
+        : (e.ts ? String(e.ts) : ((e.date||'') + '_' + (e.src||'') + '_' + (e.desc||'').slice(0,20)));
       if(seen.has(key)) return false;
       seen.add(key);
       return true;
