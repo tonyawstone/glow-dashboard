@@ -11649,7 +11649,7 @@ function displayPhoto(slotId,data){
   const label=slot.querySelector('.photo-slot-label')?.textContent||'';
   slot.innerHTML=`<img src="${data}" alt="photo"><button class="rm" onclick="removePhoto('${slotId}',event)">✕</button>`;
   if(label){const lbl=document.createElement('div');lbl.className='photo-slot-label';lbl.textContent=label;slot.appendChild(lbl);}
-  if(slotId==='dl-stylist-photo') ocrStylistNote(data);
+  if(slotId==='dl-stylist-photo'&&data.startsWith('data:')) ocrStylistNote(data);
 }
 
 async function removePhoto(slotId,event){
