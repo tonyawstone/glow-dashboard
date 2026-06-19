@@ -5635,6 +5635,7 @@ async function syncTryOnsToLooks(box){
   const label=`DailyLook · ${months[parseInt(mo)-1]} ${parseInt(dy)}`;
   const all=await dbAll('outfits');
   const existing=all.filter(e=>e.dailylookBoxTs===box.ts);
+  let tsSeed=Date.now();
   for(const t of tryOns){
     const match=existing.find(e=>e.tryOnId===t.id);
     if(match){
@@ -5645,7 +5646,7 @@ async function syncTryOnsToLooks(box){
         await new Promise(r=>tx.oncomplete=r);
       }
     } else {
-      await dbAdd('outfits',{src:'My outfit',photo:t.photo,desc:label,date:box.date||logicalDayStr(),ts:Date.now(),source:'dailylook',dailylookBoxTs:box.ts,tryOnId:t.id,pieceIds:[],occ:[],vibe:[],stars:0,wearAgain:false});
+      await dbAdd('outfits',{src:'My outfit',photo:t.photo,desc:label,date:box.date||logicalDayStr(),ts:tsSeed++,source:'dailylook',dailylookBoxTs:box.ts,tryOnId:t.id,pieceIds:[],occ:[],vibe:[],stars:0,wearAgain:false});
     }
   }
   _closetOutfits=[];
@@ -5891,7 +5892,7 @@ async function syncToBlob(store) {
     // Merge: blob entries + local entries, dedup by id or date+type key
     const merged = [...blobData];
     for(const entry of local){
-      const outfitKey = e => e.ts ? String(e.ts) : e.date+(e.src||'')+(e.desc||'').slice(0,20);
+      const outfitKey = e => (e.source==='dailylook'&&e.tryOnId!=null) ? 'dl-'+e.dailylookBoxTs+'-'+e.tryOnId : (e.ts ? String(e.ts) : e.date+(e.src||'')+(e.desc||'').slice(0,20));
       const key = store==='outfits' ? outfitKey(entry) : (entry.id || ((entry.type||'')+(entry.date||'')+(entry.sys||'')+(entry.mood||'')+(entry.isoDate||'')));
       const exists = merged.some(e=>{
         const ek = store==='outfits' ? outfitKey(e) : (e.id || ((e.type||'')+(e.date||'')+(e.sys||'')+(e.mood||'')+(e.isoDate||'')));
@@ -5932,7 +5933,7 @@ async function loadFromBlob(store) {
       // Prevents re-adding the same entry when the Blob copy lacks a ts.
       const localByTs = {};
       const localByStable = {};
-      const outfitStableKey = e => (e.date||'') + (e.src||'') + (e.desc||'').slice(0, 20);
+      const outfitStableKey = e => (e.source==='dailylook'&&e.tryOnId!=null) ? 'dl-'+e.dailylookBoxTs+'-'+e.tryOnId : (e.date||'') + (e.src||'') + (e.desc||'').slice(0, 20);
       local.forEach(e => {
         if (e.ts) localByTs[String(e.ts)] = e;
         const sk = outfitStableKey(e);
