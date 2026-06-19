@@ -4861,7 +4861,7 @@ function getSlotPhotoUrl(slotId){
   const el=document.getElementById(slotId);
   if(!el)return null;
   const img=el.querySelector('img');
-  if(img&&img.src&&img.src.startsWith('data:'))return img.src;
+  if(img&&img.src&&(img.src.startsWith('data:')||img.src.startsWith('http')))return img.src;
   const bg=el.style.backgroundImage;
   if(!bg||bg==='none'||bg==='')return null;
   return bg.replace(/^url\(['"]?/,'').replace(/['"]?\)$/,'');
@@ -5164,7 +5164,8 @@ function initDailyLookBox(){
 }
 
 function addDailyLookItem(existingItem=null){
-  const id=dlItemIdCounter++;
+  const id=existingItem?.id!=null?existingItem.id:dlItemIdCounter++;
+  if(existingItem?.id!=null&&existingItem.id>=dlItemIdCounter)dlItemIdCounter=existingItem.id+1;
   const item=existingItem?{...existingItem,id}:{id,desc:'',color:'',size:'',price:'',keepReturn:''};
   dlItems.push(item);
   const container=document.getElementById('dl-items-list');
@@ -5180,8 +5181,8 @@ function addDailyLookItem(existingItem=null){
   if(item.size){const inp=document.getElementById(`dl-size-${id}`);if(inp)inp.value=item.size;}
   if(item.price){const inp=div.querySelector('input[type="number"]');if(inp)inp.value=item.price;}
   if(item.keepReturn){div.querySelectorAll('.dl-kr-btn').forEach(b=>{if(b.textContent.trim()===item.keepReturn)b.classList.add('on');});}
-  if(item.photoFront){const s=document.getElementById(`dl-photo-${id}-front`);if(s){s.style.backgroundImage=`url('${item.photoFront}')`;s.style.backgroundSize='cover';s.style.backgroundPosition='center';s.innerHTML='';}}
-  if(item.photoBack){const s=document.getElementById(`dl-photo-${id}-back`);if(s){s.style.backgroundImage=`url('${item.photoBack}')`;s.style.backgroundSize='cover';s.style.backgroundPosition='center';s.innerHTML='';}}
+  if(item.photoFront)displayPhoto(`dl-photo-${id}-front`,item.photoFront);
+  if(item.photoBack)displayPhoto(`dl-photo-${id}-back`,item.photoBack);
   if(existingItem) saveItemCard(id);
   updateDailyLookCartTotal();
   const ts=document.getElementById('dl-tryons-section');if(ts)ts.style.display='block';
@@ -5229,6 +5230,22 @@ function editItemCard(id){
   formDiv.style.display='block';
 }
 
+async function syncOutfitsToBlob(){
+  const all=await dbAll('outfits');
+  const stripped=all.map(box=>{
+    if(box.type!=='dailylook-box')return box;
+    const proxyUrl=(slotId)=>`${BACKEND}/api/upload-photo?slotId=${slotId}`;
+    return{...box,
+      stylistPhoto:box.stylistPhoto&&!box.stylistPhoto.startsWith('data:')?box.stylistPhoto:box.stylistPhoto?proxyUrl('dl-stylist-photo'):null,
+      items:(box.items||[]).map(i=>({...i,
+        photoFront:i.photoFront&&!i.photoFront.startsWith('data:')?i.photoFront:i.photoFront?proxyUrl(`dl-photo-${i.id}-front`):null,
+        photoBack:i.photoBack&&!i.photoBack.startsWith('data:')?i.photoBack:i.photoBack?proxyUrl(`dl-photo-${i.id}-back`):null,
+      })),
+    };
+  });
+  try{await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'outfits',data:stripped})});}catch(e){console.warn('syncOutfitsToBlob failed:',e);}
+}
+
 async function autoSaveDailyLookBox(){
   if(!dlItems.length) return;
   const date=document.getElementById('dl-date')?.value||logicalDayStr();
@@ -5249,7 +5266,7 @@ async function autoSaveDailyLookBox(){
     const saved=all.find(e=>e.ts===newTs&&e.type==='dailylook-box');
     if(saved) _editingBoxRecord=saved;
   }
-  syncToBlob('outfits');
+  syncOutfitsToBlob();
 }
 
 function removeDailyLookItem(id){
@@ -5365,7 +5382,7 @@ async function saveDailyLookBox(){
         if(saveBtn)saveBtn.textContent='Update box';
       }
     }
-    syncToBlob('outfits');
+    syncOutfitsToBlob();
     toast('dl-toast');
   }catch(e){console.error('saveDailyLookBox error',e);showToast('Could not save — please try again');}
 }
@@ -5428,8 +5445,7 @@ async function deleteDailyLookBox(boxId,event){
   event.stopPropagation();
   if(!confirm('Delete this box? This cannot be undone.')) return;
   await dbDelete('outfits',boxId);
-  const remaining=await dbAll('outfits');
-  try{await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'outfits',data:remaining})});}catch(e){}
+  await syncOutfitsToBlob();
   openDailyLookHistory();
 }
 
@@ -11599,8 +11615,13 @@ async function uploadPhotoToBlob(slotId,dataUrl){
     });
     if(!res.ok) throw new Error(await res.text());
     const {url}=await res.json();
-    // Store the Blob URL in IndexedDB so future loads use it
     await dbPutPhoto(slotId+'-bloburl',url);
+    // Update DOM slot so getSlotPhotoUrl returns proxy URL (not base64)
+    const slot=document.getElementById(slotId);
+    if(slot){const img=slot.querySelector('img');if(img)img.src=url;}
+    // Update dlItems so next sync captures proxy URL
+    const m=slotId.match(/^dl-photo-(\d+)-(front|back)$/);
+    if(m){const it=dlItems.find(i=>i.id===parseInt(m[1]));if(it)it[m[2]==='front'?'photoFront':'photoBack']=url;}
     console.log(`✅ Photo uploaded to Blob: ${slotId}`);
   }catch(err){
     console.warn('Blob upload failed (photo still saved locally):',err.message);
