@@ -10599,8 +10599,8 @@ function editSleepCheckin(){
 async function restoreSleepCheckinState(){
   try{
     // Sleep entries are dated with logicalDayStr() at save time.
-    // Valid dates: yesterday (most common) and logical today (covers early-morning logs before 3 AM reset).
-    const validDates = new Set([yesterdayStr(), logicalDayStr()]);
+    // logicalDayStr() already returns yesterday before 3 AM, so one date covers both cases.
+    const validDates = new Set([logicalDayStr()]);
     const stored = localStorage.getItem('glowSleepCheckinState');
     if(stored){
       const s = JSON.parse(stored);
