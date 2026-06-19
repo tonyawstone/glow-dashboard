@@ -5789,10 +5789,17 @@ async function loadFromBlob(store) {
           const {id, ...entryWithoutId} = entry;
           await dbAdd(store, entryWithoutId);
           added++;
-        } else if (entry.photo && entry.photo.startsWith('https://') && (!existing.photo || existing.photo.startsWith('data:'))) {
-          existing.photo = entry.photo;
-          await dbUpdate('outfits', existing);
-          updated++;
+        } else {
+          let needsUpdate = false;
+          if (entry.type === 'dailylook-box' && (entry.items||[]).length > (existing.items||[]).length) {
+            Object.assign(existing, {items:entry.items||[],tryOns:entry.tryOns||[],stylistNote:entry.stylistNote||existing.stylistNote,stylistPhoto:entry.stylistPhoto||existing.stylistPhoto,date:entry.date||existing.date});
+            needsUpdate = true;
+          }
+          if (entry.photo && entry.photo.startsWith('https://') && (!existing.photo || existing.photo.startsWith('data:'))) {
+            existing.photo = entry.photo;
+            needsUpdate = true;
+          }
+          if (needsUpdate) { await dbUpdate('outfits', existing); updated++; }
         }
       }
     } else {
