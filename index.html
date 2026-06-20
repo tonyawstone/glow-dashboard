@@ -6691,13 +6691,11 @@ async function buildDailyProgress(){
   autoChecks['dp-reflection'] = refs.some(e=>e.type==='daily'&&(e.date===logical||e.date===today)&&e.answer?.length>0) || _journaledToday || _wellspokenToday;
   autoChecks['dp-mood'] = minds.some(e=>e.date===logical||e.date===today);
 
-  // Sleep check-in (last night = yesterday or logical day before 3 AM, or day-before-yesterday before 3 AM)
-  const _d2=new Date();_d2.setDate(_d2.getDate()-2);
-  const dayBeforeYesterday=`${_d2.getFullYear()}-${String(_d2.getMonth()+1).padStart(2,'0')}-${String(_d2.getDate()).padStart(2,'0')}`;
+  // Sleep check-in (last night = yesterday or logical day before 3 AM)
   const sleepBlobData = Array.isArray(sleepBlob?.data) ? sleepBlob.data : [];
   autoChecks['dp-sleep-checkin'] =
-    sleeps.some(e=>e.date===yesterday||e.date===logical||e.date===dayBeforeYesterday) ||
-    sleepBlobData.some(e=>e.date===yesterday||e.date===logical||e.date===dayBeforeYesterday);
+    sleeps.some(e=>e.date===yesterday||e.date===logical) ||
+    sleepBlobData.some(e=>e.date===yesterday||e.date===logical);
 
   // myAir + CPAP (last night only)
   autoChecks['dp-myair'] = !!myairEntry;
