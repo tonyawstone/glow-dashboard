@@ -10315,7 +10315,7 @@ async function saveSleep(){
   const csvHrs = document.getElementById('csv-sleephrs')?.textContent||'';
 
   let hrs = csvHrs.replace('h','').trim() || '—';
-  if(bed && wake && bed!=='—' && wake!=='—'){
+  if(hrs === '—' && bed && wake && bed!=='—' && wake!=='—'){
     const parseT = t => { const m=t.match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m)return null; let h=parseInt(m[1]); if(m[3].toUpperCase()==='PM'&&h!==12)h+=12; if(m[3].toUpperCase()==='AM'&&h===12)h=0; return h*60+parseInt(m[2]); };
     const bm=parseT(bed),wm=parseT(wake);
     if(bm!==null&&wm!==null){ let diff=wm-bm; if(diff<0)diff+=1440; hrs=(diff/60).toFixed(1); }
