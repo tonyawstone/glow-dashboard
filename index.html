@@ -1435,20 +1435,20 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <!-- Pieces section -->
     <div id="closet-pieces-section">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <div style="display:flex;justify-content:flex-start;margin-bottom:8px;">
         <span id="closet-count" style="font-size:11px;color:var(--muted);"></span>
       </div>
-      <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
-        <button class="tag on" data-cat-filter onclick="filterClosetPieces('all',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">All</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('top',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Tops</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('bottom',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Bottoms</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('dress',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Dresses</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('shoes',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Shoes</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('bag',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Bags</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('accessory',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Accessories</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('other',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Other</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="tag on" data-cat-filter onclick="filterClosetPieces('all',this)" style="font-size:12px;padding:5px 12px;">All</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('top',this)" style="font-size:12px;padding:5px 12px;">Tops</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('bottom',this)" style="font-size:12px;padding:5px 12px;">Bottoms</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('dress',this)" style="font-size:12px;padding:5px 12px;">Dresses</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('shoes',this)" style="font-size:12px;padding:5px 12px;">Shoes</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('bag',this)" style="font-size:12px;padding:5px 12px;">Bags</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('accessory',this)" style="font-size:12px;padding:5px 12px;">Accessories</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('other',this)" style="font-size:12px;padding:5px 12px;">Other</button>
       </div>
-      <div id="closet-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;"></div>
+      <div id="closet-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;align-items:start;"></div>
       <div id="closet-empty" style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">No pieces yet — add your first below</div>
       <div id="closet-add-panel" style="display:none;border-top:0.5px solid var(--border);padding-top:14px;margin-top:4px;">
         <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:10px;">New piece</div>
@@ -5198,17 +5198,21 @@ function renderClosetGrid(){
     const cell=document.createElement('div');
     cell.style.cssText='cursor:pointer;';
     cell.onclick=()=>openPieceView(item.id);
-    const photoDiv=document.createElement('div');
-    photoDiv.style.cssText='width:100%;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:4px;background-size:cover;background-position:center;';
-    if(item.photoFront)photoDiv.style.backgroundImage=`url('${item.photoFront}')`;
-    else photoDiv.innerHTML='<i class="ti ti-hanger" style="font-size:20px;color:var(--border);"></i>';
+    // Outer div sets the 3:4 ratio reliably via padding-bottom (cross-browser)
+    const photoWrap=document.createElement('div');
+    photoWrap.style.cssText='position:relative;width:100%;padding-bottom:133.33%;border-radius:10px;overflow:hidden;margin-bottom:4px;background:var(--warm);border:0.5px solid var(--border);';
+    const photoInner=document.createElement('div');
+    photoInner.style.cssText='position:absolute;inset:0;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;';
+    if(item.photoFront)photoInner.style.backgroundImage=`url('${item.photoFront}')`;
+    else photoInner.innerHTML='<i class="ti ti-hanger" style="font-size:24px;color:var(--border);"></i>';
+    photoWrap.appendChild(photoInner);
     const nameDiv=document.createElement('div');
     nameDiv.style.cssText='font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
     nameDiv.textContent=item.name||'—';
     const catDiv=document.createElement('div');
-    catDiv.style.cssText='font-size:10px;color:var(--muted);';
+    catDiv.style.cssText='font-size:10px;color:var(--muted);margin-bottom:2px;';
     catDiv.textContent=item.category?(item.category.charAt(0).toUpperCase()+item.category.slice(1)):'';
-    cell.appendChild(photoDiv);cell.appendChild(nameDiv);cell.appendChild(catDiv);
+    cell.appendChild(photoWrap);cell.appendChild(nameDiv);cell.appendChild(catDiv);
     grid.appendChild(cell);
   });
 }
