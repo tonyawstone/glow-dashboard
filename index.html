@@ -4112,7 +4112,168 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="reflection-log-weekly"><div class="log-empty">No reflections logged this week.</div></div>
     </div>
     <div class="card">
-      <div class="card-title">7 pillars · this week</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="card-title" style="margin:0;">7 pillars of self-care</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tap a pillar when you've nurtured it today</div>
+
+      <!-- Physical -->
+      <div class="pillar-row" onclick="togglePillar('p-physical')">
+        <div class="pillar-icon">💪</div>
+        <div style="flex:1;">
+          <div class="pillar-name">Physical <button onclick="event.stopPropagation();openPillarInfo('physical')" class="guide-btn" style="font-size:10px;width:18px;height:18px;min-width:18px;min-height:18px;">?</button></div>
+          <div class="pillar-example">Move · sleep · hydrate · meds</div>
+        </div>
+        <div class="tog" id="p-physical"><div class="tok"></div></div>
+      </div>
+      <div class="pillar-detail" id="pd-physical">
+        <div class="tags" id="pdt-physical">
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Walk / Move</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Slept 7-9 h</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Stayed hydrated</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Ate nourishing meals</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Meds on time</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">CPAP compliance</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Zepbound on schedule</button>
+        </div>
+        <textarea class="pillar-note" id="pdn-physical" placeholder="Optional note…" rows="2" oninput="savePillarsToday()"></textarea>
+      </div>
+
+      <!-- Emotional -->
+      <div class="pillar-row" onclick="togglePillar('p-emotional')">
+        <div class="pillar-icon">💛</div>
+        <div style="flex:1;">
+          <div class="pillar-name">Emotional <button onclick="event.stopPropagation();openPillarInfo('emotional')" class="guide-btn" style="font-size:10px;width:18px;height:18px;min-width:18px;min-height:18px;">?</button></div>
+          <div class="pillar-example">Feel · process · set boundaries</div>
+        </div>
+        <div class="tog" id="p-emotional"><div class="tok"></div></div>
+      </div>
+      <div class="pillar-detail" id="pd-emotional">
+        <div class="tags" id="pdt-emotional">
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Named my feelings</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Set a boundary</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Said no</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Cried (it's healthy)</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Talked to someone</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Did something joyful</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Sat with discomfort</button>
+        </div>
+        <textarea class="pillar-note" id="pdn-emotional" placeholder="Optional note…" rows="2" oninput="savePillarsToday()"></textarea>
+      </div>
+
+      <!-- Mental -->
+      <div class="pillar-row" onclick="togglePillar('p-mental')">
+        <div class="pillar-icon">🧠</div>
+        <div style="flex:1;">
+          <div class="pillar-name">Mental <button onclick="event.stopPropagation();openPillarInfo('mental')" class="guide-btn" style="font-size:10px;width:18px;height:18px;min-width:18px;min-height:18px;">?</button></div>
+          <div class="pillar-example">Journal · reflect · learn · focus</div>
+        </div>
+        <div class="tog" id="p-mental"><div class="tok"></div></div>
+      </div>
+      <div class="pillar-detail" id="pd-mental">
+        <div class="tags" id="pdt-mental">
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Journaled in Day One</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Read something</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Reflected / meditated</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Learned something new</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Limited doom-scroll</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Used Wellspoken</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Set intention word</button>
+        </div>
+        <textarea class="pillar-note" id="pdn-mental" placeholder="Optional note…" rows="2" oninput="savePillarsToday()"></textarea>
+      </div>
+
+      <!-- Social -->
+      <div class="pillar-row" onclick="togglePillar('p-social')">
+        <div class="pillar-icon">🤝</div>
+        <div style="flex:1;">
+          <div class="pillar-name">Social <button onclick="event.stopPropagation();openPillarInfo('social')" class="guide-btn" style="font-size:10px;width:18px;height:18px;min-width:18px;min-height:18px;">?</button></div>
+          <div class="pillar-example">Connect · be present · reach out</div>
+        </div>
+        <div class="tog" id="p-social"><div class="tok"></div></div>
+      </div>
+      <div class="pillar-detail" id="pd-social">
+        <div class="tags" id="pdt-social">
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Real conversation</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Quality time</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Reached out to someone</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Shared a meal</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Said something kind</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Present (phone down)</button>
+        </div>
+        <textarea class="pillar-note" id="pdn-social" placeholder="Optional note…" rows="2" oninput="savePillarsToday()"></textarea>
+      </div>
+
+      <!-- Spiritual -->
+      <div class="pillar-row" onclick="togglePillar('p-spiritual')">
+        <div class="pillar-icon">🙏</div>
+        <div style="flex:1;">
+          <div class="pillar-name">Spiritual <button onclick="event.stopPropagation();openPillarInfo('spiritual')" class="guide-btn" style="font-size:10px;width:18px;height:18px;min-width:18px;min-height:18px;">?</button></div>
+          <div class="pillar-example">Prayer · gratitude · stillness</div>
+        </div>
+        <div class="tog" id="p-spiritual"><div class="tok"></div></div>
+      </div>
+      <div class="pillar-detail" id="pd-spiritual">
+        <div class="tags" id="pdt-spiritual">
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Prayer / quiet reflection</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Gratitude practice</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Deep breathing</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Read something meaningful</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">In nature intentionally</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Church / community</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Sat in stillness</button>
+        </div>
+        <textarea class="pillar-note" id="pdn-spiritual" placeholder="Optional note…" rows="2" oninput="savePillarsToday()"></textarea>
+      </div>
+
+      <!-- Environmental -->
+      <div class="pillar-row" onclick="togglePillar('p-environmental')">
+        <div class="pillar-icon">🏡</div>
+        <div style="flex:1;">
+          <div class="pillar-name">Environmental <button onclick="event.stopPropagation();openPillarInfo('environmental')" class="guide-btn" style="font-size:10px;width:18px;height:18px;min-width:18px;min-height:18px;">?</button></div>
+          <div class="pillar-example">Tidy · fresh air · calm space</div>
+        </div>
+        <div class="tog" id="p-environmental"><div class="tok"></div></div>
+      </div>
+      <div class="pillar-detail" id="pd-environmental">
+        <div class="tags" id="pdt-environmental">
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Tidied a space</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Fresh air / outside</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Decluttered something</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Made bedroom cozy</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Candle or music</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Organized wardrobe</button>
+        </div>
+        <textarea class="pillar-note" id="pdn-environmental" placeholder="Optional note…" rows="2" oninput="savePillarsToday()"></textarea>
+      </div>
+
+      <!-- Financial -->
+      <div class="pillar-row" onclick="togglePillar('p-financial')">
+        <div class="pillar-icon">💚</div>
+        <div style="flex:1;">
+          <div class="pillar-name">Financial <button onclick="event.stopPropagation();openPillarInfo('financial')" class="guide-btn" style="font-size:10px;width:18px;height:18px;min-width:18px;min-height:18px;">?</button></div>
+          <div class="pillar-example">Accounts · bills · save · celebrate</div>
+        </div>
+        <div class="tog" id="p-financial"><div class="tok"></div></div>
+      </div>
+      <div class="pillar-detail" id="pd-financial">
+        <div class="tags" id="pdt-financial">
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Checked accounts</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Paid a bill</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Tracked a purchase</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Reviewed subscriptions</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Saved something</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Money date with myself</button>
+          <button class="tag sm" onclick="this.classList.toggle('on');savePillarsToday()">Celebrated a win</button>
+        </div>
+        <textarea class="pillar-note" id="pdn-financial" placeholder="Optional note…" rows="2" oninput="savePillarsToday()"></textarea>
+      </div>
+
+      <div id="pillars-status" style="margin-top:12px;font-size:12px;color:var(--muted);text-align:center;padding:6px 0;">Tap pillars above when you've nurtured them today</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:8px;">This week's coverage</div>
       <div id="pillars-weekly"><div class="log-empty">Log daily to see your weekly pillar coverage.</div></div>
     </div>
     <div class="card">
