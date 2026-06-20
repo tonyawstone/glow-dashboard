@@ -1420,35 +1420,42 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
   </div>
   <div class="view-content" id="vc-style-closet">
-    <!-- Picking mode banner — shown when opened from weekly planner -->
-    <div id="closet-pick-banner" style="display:none;background:var(--accent);color:#fff;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="font-size:11px;opacity:0.85;">Picking for</div>
-        <div id="closet-pick-label" style="font-size:13px;font-weight:600;"></div>
-      </div>
-      <button onclick="cancelClosetPick()" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 10px;font-size:12px;color:#fff;cursor:pointer;">✕ Cancel</button>
+    <!-- Custom closet header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 14px;">
+      <button onclick="toggleClosetView()" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--text);display:flex;align-items:center;gap:2px;"><i class="ti ti-chevron-left" style="font-size:20px;"></i></button>
+      <div style="font-family:var(--serif);font-size:20px;font-weight:400;color:var(--text);">My Closet</div>
+      <button onclick="toggleClosetSearch()" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--text);display:flex;align-items:center;"><i class="ti ti-search" style="font-size:20px;"></i></button>
     </div>
-    <!-- Sub-tabs: Pieces | Looks -->
-    <div style="display:flex;justify-content:center;gap:8px;margin-bottom:16px;">
-      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="padding:8px 28px;border-radius:20px;border:none;background:var(--accent);color:#F5EFE6;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;">Pieces</button>
-      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="padding:8px 28px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;">Looks</button>
+    <!-- Stats row -->
+    <div id="closet-stats" style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:14px;letter-spacing:0.01em;"></div>
+    <!-- Search bar (hidden by default) -->
+    <div id="closet-search-bar" style="display:none;margin-bottom:12px;">
+      <input type="text" id="closet-search-input" placeholder="Search my closet..." oninput="filterClosetBySearch(this.value)" style="width:100%;padding:9px 14px;border-radius:20px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;background:var(--warm);">
+    </div>
+    <!-- Hidden pick banner (functionality preserved, UI lives in weekly planner) -->
+    <div id="closet-pick-banner" style="display:none;">
+      <div id="closet-pick-label"></div>
+    </div>
+    <!-- Sub-tabs: Items | Looks — segmented control style -->
+    <div style="display:flex;background:var(--warm);border-radius:22px;padding:3px;margin-bottom:16px;">
+      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="flex:1;padding:8px 0;border-radius:18px;border:none;background:#fff;color:var(--text);font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.08);">Items</button>
+      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="flex:1;padding:8px 0;border-radius:18px;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;">Looks</button>
     </div>
     <!-- Pieces section -->
     <div id="closet-pieces-section">
-      <div style="display:flex;justify-content:flex-start;margin-bottom:8px;">
-        <span id="closet-count" style="font-size:11px;color:var(--muted);"></span>
+      <div style="overflow-x:auto;white-space:nowrap;margin-bottom:12px;padding-bottom:2px;-webkit-overflow-scrolling:touch;">
+        <div style="display:inline-flex;gap:6px;">
+          <button class="tag on" data-cat-filter onclick="filterClosetPieces('all',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">All</button>
+          <button class="tag" data-cat-filter onclick="filterClosetPieces('top',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Tops</button>
+          <button class="tag" data-cat-filter onclick="filterClosetPieces('bottom',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Bottoms</button>
+          <button class="tag" data-cat-filter onclick="filterClosetPieces('dress',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Dresses</button>
+          <button class="tag" data-cat-filter onclick="filterClosetPieces('shoes',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Shoes</button>
+          <button class="tag" data-cat-filter onclick="filterClosetPieces('bag',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Bags</button>
+          <button class="tag" data-cat-filter onclick="filterClosetPieces('accessory',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Accessories</button>
+          <button class="tag" data-cat-filter onclick="filterClosetPieces('other',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Other</button>
+        </div>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-        <button class="tag on" data-cat-filter onclick="filterClosetPieces('all',this)" style="font-size:12px;padding:5px 12px;">All</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('top',this)" style="font-size:12px;padding:5px 12px;">Tops</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('bottom',this)" style="font-size:12px;padding:5px 12px;">Bottoms</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('dress',this)" style="font-size:12px;padding:5px 12px;">Dresses</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('shoes',this)" style="font-size:12px;padding:5px 12px;">Shoes</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('bag',this)" style="font-size:12px;padding:5px 12px;">Bags</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('accessory',this)" style="font-size:12px;padding:5px 12px;">Accessories</button>
-        <button class="tag" data-cat-filter onclick="filterClosetPieces('other',this)" style="font-size:12px;padding:5px 12px;">Other</button>
-      </div>
-      <div id="closet-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px;align-items:start;"></div>
+      <div id="closet-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px;align-items:start;"></div>
       <div id="closet-empty" style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">No pieces yet — add your first below</div>
       <div id="closet-add-panel" style="display:none;border-top:0.5px solid var(--border);padding-top:14px;margin-top:4px;">
         <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:10px;">New piece</div>
@@ -4869,7 +4876,7 @@ async function tab(id){
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitMobilitySummary(); buildZepSideEffectsSummary(); loadBodyGoals(); buildZepboundStatus(); loadInjectionSiteHistory(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld)_sld.value=logicalDayStr(); }
-  else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');document.getElementById('compact-header').style.display='';document.getElementById('bottom-nav').style.display='';} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
+  else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');document.getElementById('compact-header').style.display='';document.getElementById('bottom-nav').style.display='';document.getElementById('time-tabs-bar').style.display='';document.getElementById('style-inspo-bar').style.display='';} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') {
     buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary(); const _slpd=document.getElementById('sleep-log-date');if(_slpd&&!_slpd.value)_slpd.value=logicalDayStr();
     // Default myAir date to yesterday — CPAP data is always for last night
@@ -4909,7 +4916,7 @@ function setView(v,btn){
   // Mark matching buttons in both the time-tabs-bar and any legacy vtabs
   document.querySelectorAll('.vtab').forEach(b=>{ if(b.dataset.view===v) b.classList.add('on'); });
   applyView();
-  if(curTab==='style'){ if(closetViewOpen){document.getElementById('compact-header').style.display='';document.getElementById('bottom-nav').style.display='';}closetViewOpen=false; renderLookbook(); if(v==='weekly') loadWeekPlan(); if(v==='monthly'){ renderStyleCalendar(); buildStylePurchaseHistory('style-purchase-history-monthly',false); } if(v==='yearly') buildStyleYearlyView(); }
+  if(curTab==='style'){ if(closetViewOpen){document.getElementById('compact-header').style.display='';document.getElementById('bottom-nav').style.display='';document.getElementById('time-tabs-bar').style.display='';document.getElementById('style-inspo-bar').style.display='';}closetViewOpen=false; renderLookbook(); if(v==='weekly') loadWeekPlan(); if(v==='monthly'){ renderStyleCalendar(); buildStylePurchaseHistory('style-purchase-history-monthly',false); } if(v==='yearly') buildStyleYearlyView(); }
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
@@ -5154,8 +5161,13 @@ async function loadCloset(){
     await Promise.all(dupIds.map(id=>dbDelete('closet',id)));
     closetItems=closetItems.filter(item=>!dupIds.includes(item.id));
   }
+  // Reset search state each time closet loads
+  _closetSearchQuery='';
+  const _si=document.getElementById('closet-search-input');if(_si)_si.value='';
+  const _sb=document.getElementById('closet-search-bar');if(_sb)_sb.style.display='none';
   // Render immediately with what we have (base64 photos display locally while upload runs)
   renderClosetGrid();
+  updateClosetStats();
   // Upload any remaining base64 photos to CDN so they sync cross-device
   let photosMigrated=false;
   for(const item of closetItems){
@@ -5180,48 +5192,91 @@ async function loadCloset(){
       photosMigrated=true;
     }
   }
-  if(photosMigrated) renderClosetGrid();
+  if(photosMigrated){renderClosetGrid();updateClosetStats();}
   if(closetItems.length||dupIds.length||photosMigrated) syncToBlob('closet').catch(()=>{});
 }
 
+var _closetSearchQuery='';
 function renderClosetGrid(){
   const grid=document.getElementById('closet-grid');
   const empty=document.getElementById('closet-empty');
-  const countEl=document.getElementById('closet-count');
   if(!grid)return;
-  const filtered=closetCatFilter==='all'?closetItems:closetItems.filter(i=>i.category===closetCatFilter);
-  if(countEl)countEl.textContent=closetItems.length+(closetItems.length===1?' piece':' pieces');
+  let filtered=closetCatFilter==='all'?closetItems:closetItems.filter(i=>i.category===closetCatFilter);
+  if(_closetSearchQuery){const q=_closetSearchQuery.toLowerCase();filtered=filtered.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.category||'').toLowerCase().includes(q));}
   grid.innerHTML='';
   if(!filtered.length){if(empty)empty.style.display='block';return;}
   if(empty)empty.style.display='none';
+  const CAT_LABEL={top:'Top',bottom:'Bottom',dress:'Dress',shoes:'Shoes',bag:'Bag',accessory:'Accessory',other:'Other'};
   filtered.forEach(item=>{
     const cell=document.createElement('div');
     cell.style.cssText='cursor:pointer;min-width:0;';
     cell.onclick=()=>openPieceView(item.id);
     const photoWrap=document.createElement('div');
     photoWrap.className='closet-photo-wrap';
-    photoWrap.style.cssText='position:relative;width:100%;aspect-ratio:3/4;border-radius:10px;overflow:hidden;margin-bottom:4px;background:var(--warm);border:0.5px solid var(--border);';
+    photoWrap.style.cssText='position:relative;width:100%;aspect-ratio:3/4;border-radius:12px;overflow:hidden;margin-bottom:6px;background:var(--warm);border:0.5px solid var(--border);';
     const photoInner=document.createElement('div');
-    photoInner.style.cssText='position:absolute;inset:0;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;';
+    photoInner.style.cssText='position:absolute;inset:0;background-size:cover;background-position:center top;display:flex;align-items:center;justify-content:center;';
     if(item.photoFront)photoInner.style.backgroundImage=`url('${item.photoFront}')`;
-    else photoInner.innerHTML='<i class="ti ti-hanger" style="font-size:24px;color:var(--border);"></i>';
-    photoWrap.appendChild(photoInner);
+    else photoInner.innerHTML='<i class="ti ti-hanger" style="font-size:28px;color:var(--border);"></i>';
+    // Heart button
+    const heart=document.createElement('button');
+    heart.style.cssText='position:absolute;top:8px;right:8px;z-index:2;background:rgba(255,255,255,0.88);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;line-height:1;padding:0;';
+    heart.innerHTML=item.favorite?'♥':'♡';
+    heart.style.color=item.favorite?'#b85c5c':'var(--muted)';
+    heart.onclick=(e)=>{e.stopPropagation();togglePieceFavorite(item.id);};
+    photoWrap.appendChild(photoInner);photoWrap.appendChild(heart);
     const nameDiv=document.createElement('div');
-    nameDiv.style.cssText='font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+    nameDiv.style.cssText='font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;margin-bottom:3px;';
     nameDiv.textContent=item.name||'—';
-    const catDiv=document.createElement('div');
-    catDiv.style.cssText='font-size:10px;color:var(--muted);margin-bottom:2px;';
-    catDiv.textContent=item.category?(item.category.charAt(0).toUpperCase()+item.category.slice(1)):'';
-    cell.appendChild(photoWrap);cell.appendChild(nameDiv);cell.appendChild(catDiv);
+    const bottomRow=document.createElement('div');
+    bottomRow.style.cssText='display:flex;align-items:center;gap:5px;margin-bottom:4px;';
+    if(item.category){
+      const tag=document.createElement('span');
+      tag.style.cssText='font-size:10px;color:var(--accent);background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;';
+      tag.textContent=CAT_LABEL[item.category]||item.category;
+      bottomRow.appendChild(tag);
+    }
+    cell.appendChild(photoWrap);cell.appendChild(nameDiv);cell.appendChild(bottomRow);
     grid.appendChild(cell);
   });
-  // Override with explicit pixel height after layout so every photo is identical regardless of column width drift
   requestAnimationFrame(()=>{
     const wraps=grid.querySelectorAll('.closet-photo-wrap');
     if(!wraps.length)return;
     const h=Math.round(wraps[0].offsetWidth*4/3);
     wraps.forEach(w=>w.style.height=h+'px');
   });
+}
+function updateClosetStats(){
+  const el=document.getElementById('closet-stats');
+  if(!el)return;
+  const favCount=closetItems.filter(i=>i.favorite).length;
+  const parts=[`${closetItems.length} ${closetItems.length===1?'piece':'pieces'}`];
+  if(favCount>0)parts.push(`${favCount} favorite${favCount===1?'':'s'}`);
+  el.textContent=parts.join(' · ');
+}
+async function togglePieceFavorite(id){
+  const item=closetItems.find(i=>i.id===id);
+  if(!item)return;
+  item.favorite=!item.favorite;
+  const tx=db.transaction('closet','readwrite');
+  tx.objectStore('closet').put({...item});
+  await new Promise(r=>tx.oncomplete=r);
+  renderClosetGrid();
+  updateClosetStats();
+  syncToBlob('closet').catch(()=>{});
+}
+function toggleClosetSearch(){
+  const bar=document.getElementById('closet-search-bar');
+  const inp=document.getElementById('closet-search-input');
+  if(!bar)return;
+  const open=bar.style.display==='none'||!bar.style.display;
+  bar.style.display=open?'block':'none';
+  if(open&&inp){inp.value='';_closetSearchQuery='';inp.focus();renderClosetGrid();}
+  else{_closetSearchQuery='';renderClosetGrid();}
+}
+function filterClosetBySearch(q){
+  _closetSearchQuery=q.trim();
+  renderClosetGrid();
 }
 
 function filterClosetPieces(cat,btn){
@@ -5241,14 +5296,14 @@ function switchClosetTab(tab){
   if(tab==='pieces'){
     if(pSec)pSec.style.display='block';
     if(lSec)lSec.style.display='none';
-    if(pBtn){pBtn.style.background='var(--accent)';pBtn.style.color='#F5EFE6';pBtn.style.border='none';pBtn.style.fontWeight='500';}
-    if(lBtn){lBtn.style.background='transparent';lBtn.style.color='var(--muted)';lBtn.style.border='0.5px solid var(--border)';lBtn.style.fontWeight='400';}
+    if(pBtn){pBtn.style.background='#fff';pBtn.style.color='var(--text)';pBtn.style.fontWeight='500';pBtn.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)';}
+    if(lBtn){lBtn.style.background='transparent';lBtn.style.color='var(--muted)';lBtn.style.fontWeight='400';lBtn.style.boxShadow='none';}
     renderClosetGrid();
   }else{
     if(pSec)pSec.style.display='none';
     if(lSec)lSec.style.display='block';
-    if(lBtn){lBtn.style.background='var(--accent)';lBtn.style.color='#F5EFE6';lBtn.style.border='none';lBtn.style.fontWeight='500';}
-    if(pBtn){pBtn.style.background='transparent';pBtn.style.color='var(--muted)';pBtn.style.border='0.5px solid var(--border)';pBtn.style.fontWeight='400';}
+    if(lBtn){lBtn.style.background='#fff';lBtn.style.color='var(--text)';lBtn.style.fontWeight='500';lBtn.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)';}
+    if(pBtn){pBtn.style.background='transparent';pBtn.style.color='var(--muted)';pBtn.style.fontWeight='400';pBtn.style.boxShadow='none';}
     renderCloset('all');
   }
 }
@@ -8160,6 +8215,8 @@ function toggleClosetView(){
     if(inspoBtn) inspoBtn.textContent='✨ Inspo Board';
     document.getElementById('compact-header').style.display='';
     document.getElementById('bottom-nav').style.display='';
+    document.getElementById('time-tabs-bar').style.display='';
+    document.getElementById('style-inspo-bar').style.display='';
   } else {
     inspoViewOpen=false; shoppingViewOpen=false;
     closetViewOpen=true;
@@ -8170,6 +8227,8 @@ function toggleClosetView(){
     if(inspoBtn) inspoBtn.textContent='✨ Inspo Board';
     document.getElementById('compact-header').style.display='none';
     document.getElementById('bottom-nav').style.display='none';
+    document.getElementById('time-tabs-bar').style.display='none';
+    document.getElementById('style-inspo-bar').style.display='none';
     loadCloset();switchClosetTab(_pickerDay?'looks':'pieces');
   }
 }
