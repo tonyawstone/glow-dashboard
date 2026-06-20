@@ -4697,7 +4697,7 @@ async function tab(id){
     try { restoreWashDates(); } catch(e){}
     try { buildProductTags(); } catch(e){}
   }
-  if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); loadSkinRoutineState(); loadMuselyHistoryFromBlob().then(()=>{ renderSkincareLog(); showSkinPMSavedView(); loadPMLastNight(); }); loadAvatarGameFromBlob(); }
+  if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); loadSkinRoutineState(); loadMuselyHistoryFromBlob().then(()=>{ renderSkincareLog(); showSkinPMSavedView(); loadPMLastNight(); }); loadAvatarGameFromBlob(); const _skd=document.getElementById('skin-log-date');if(_skd&&!_skd.value)_skd.value=logicalDayStr(); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
     const today = logicalDayStr();
     ['skin-log-date','water-log-date','wellness-log-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=today; });
@@ -10637,9 +10637,12 @@ async function restoreSkinCheckinState(){
       const res = await fetch(`${BACKEND}/api/sync?pillar=skins&t=${Date.now()}`);
       if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
         const found = data.filter(e=>e.type==='checkin').find(e=>e.date===today);
-        if(found) showSkinCheckinSaved(found);
+        if(found){ showSkinCheckinSaved(found); return; }
       }
     }catch(e){}
+    // No check-in found for today — reset date input to today so saves go to the right date
+    const dateEl=document.getElementById('skin-log-date');
+    if(dateEl) dateEl.value=today;
   }catch(e){}
 }
 
@@ -10665,7 +10668,6 @@ function editSkinAM(){
 }
 
 function showSkinPMSavedView(){
-function showSkinPMSavedView(){
   const saved = document.getElementById('skin-pm-saved');
   if(!saved) return;
   const history = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
@@ -10687,7 +10689,6 @@ function showSkinPMSavedView(){
     <div style="font-size:12px;color:var(--text);">${parts.join(' · ')}</div>
     <div style="font-size:11px;color:var(--muted);margin-top:4px;">Tonight → use: ${nextTreatment}</div>
   </div>`;
-}
 }
 
 function editSkinPM(){
