@@ -1141,6 +1141,30 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
+    <!-- Piece View Popup -->
+    <div id="cpv-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:9500;overflow-y:auto;">
+      <div style="min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:20px;padding-bottom:80px;box-sizing:border-box;">
+      <div style="background:#fff;border-radius:16px;padding:20px;width:100%;max-width:420px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div id="cpv-title" style="font-family:var(--serif);font-size:18px;color:var(--text);">Piece</div>
+          <button onclick="closePieceView()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;line-height:1;margin-left:12px;">×</button>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;">
+          <div id="cpv-photo" style="width:90px;min-width:90px;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;overflow:hidden;"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+            <div id="cpv-name" style="font-size:15px;font-weight:500;color:var(--text);"></div>
+            <div id="cpv-meta" style="font-size:12px;color:var(--muted);line-height:1.6;"></div>
+            <button onclick="openClosetDetailFromView()" style="margin-top:8px;padding:6px 14px;border-radius:10px;background:transparent;border:0.5px solid var(--accent);color:var(--accent);font-size:12px;font-family:var(--sans);cursor:pointer;align-self:flex-start;">Edit</button>
+          </div>
+        </div>
+        <div style="border-top:0.5px solid var(--border);padding-top:14px;">
+          <div id="cpv-looks-title" style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:500;"></div>
+          <div id="cpv-looks-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+        </div>
+      </div>
+      </div>
+    </div>
+
     <!-- 2. Your Looks -->
     
     <div class="card" id="lookbook-card" style="display:none;">
@@ -4928,7 +4952,7 @@ function renderClosetGrid(){
   filtered.forEach(item=>{
     const cell=document.createElement('div');
     cell.style.cssText='cursor:pointer;';
-    cell.onclick=()=>openClosetDetail(item.id);
+    cell.onclick=()=>openPieceView(item.id);
     const photoDiv=document.createElement('div');
     photoDiv.style.cssText='width:100%;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:4px;background-size:cover;background-position:center;';
     if(item.photoFront)photoDiv.style.backgroundImage=`url('${item.photoFront}')`;
@@ -5238,6 +5262,77 @@ async function deleteClosetItem(){
   syncToBlob('closet');
   closeClosetDetail();
   loadCloset();
+}
+
+var _cpvItemId=null;
+
+async function openPieceView(id){
+  const item=closetItems.find(i=>i.id===id);
+  if(!item)return;
+  _cpvItemId=id;
+  const photoEl=document.getElementById('cpv-photo');
+  if(item.photoFront){
+    photoEl.style.backgroundImage=`url('${item.photoFront}')`;
+    photoEl.innerHTML='';
+  }else{
+    photoEl.style.backgroundImage='';
+    photoEl.innerHTML='<i class="ti ti-hanger" style="font-size:24px;color:var(--border);"></i>';
+  }
+  document.getElementById('cpv-title').textContent=item.name||'Piece';
+  document.getElementById('cpv-name').textContent=item.name||'—';
+  const metaParts=[
+    item.brand||null,
+    item.category?(item.category.charAt(0).toUpperCase()+item.category.slice(1)):null,
+    item.color||null,
+    item.size?('Size '+item.size):null,
+    item.price!=null&&item.price!==''?('$'+parseFloat(item.price).toFixed(2)):null
+  ].filter(Boolean);
+  document.getElementById('cpv-meta').textContent=metaParts.length?metaParts.join(' · '):'No details yet';
+  if(!_closetOutfits.length)_closetOutfits=await dbAll('outfits');
+  const myOutfits=_closetOutfits.filter(e=>e.src==='My outfit'||(!e.src&&e.photo));
+  const wornIn=myOutfits.filter(o=>(o.pieceIds||[]).includes(id));
+  const looksTitle=document.getElementById('cpv-looks-title');
+  const looksGrid=document.getElementById('cpv-looks-grid');
+  if(!wornIn.length){
+    looksTitle.textContent='Not tagged in any looks yet';
+    looksGrid.innerHTML='';
+  }else{
+    looksTitle.textContent=`Worn in ${wornIn.length} look${wornIn.length===1?'':'s'}`;
+    looksGrid.innerHTML=wornIn.map(o=>{
+      const ph=o.photo?`<img src="${o.photo}" style="width:100%;height:100%;object-fit:cover;">`:'<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:20px;">👗</div>';
+      return `<div onclick="openLookFromPieceView(${o.ts})" style="cursor:pointer;"><div style="width:100%;aspect-ratio:3/4;border-radius:8px;background:var(--warm);border:0.5px solid var(--border);overflow:hidden;">${ph}</div><div style="font-size:9px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.desc||o.date||''}</div></div>`;
+    }).join('');
+  }
+  const ov=document.getElementById('cpv-overlay');
+  ov.style.display='block';ov.scrollTop=0;
+  const ch=document.getElementById('compact-header');if(ch)ch.style.display='none';
+  const ttb=document.getElementById('time-tabs-bar');if(ttb)ttb.style.display='none';
+}
+
+function closePieceView(){
+  document.getElementById('cpv-overlay').style.display='none';
+  _cpvItemId=null;
+  const ch=document.getElementById('compact-header');if(ch)ch.style.removeProperty('display');
+  const ttb=document.getElementById('time-tabs-bar');if(ttb)ttb.style.display='flex';
+}
+
+function openClosetDetailFromView(){
+  if(!_cpvItemId)return;
+  const id=_cpvItemId;
+  document.getElementById('cpv-overlay').style.display='none';
+  _cpvItemId=null;
+  openClosetDetail(id);
+}
+
+async function openLookFromPieceView(ts){
+  document.getElementById('cpv-overlay').style.display='none';
+  _cpvItemId=null;
+  if(!_closetOutfits.length)_closetOutfits=await dbAll('outfits');
+  const myOutfits=_closetOutfits.filter(e=>e.src==='My outfit'||(!e.src&&e.photo));
+  const sorted=[...myOutfits].sort((a,b)=>b.date>a.date?1:-1);
+  window._closetMap=sorted;
+  const idx=sorted.findIndex(e=>e.ts===ts);
+  if(idx>=0)openLookDetail(idx);
 }
 
 let dlItems=[],dlItemIdCounter=0,dlTryOns=[],dlTryOnCounter=0,_editingBoxRecord=null;
