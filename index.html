@@ -6535,8 +6535,11 @@ async function loadFromBlob(store) {
       const entryKey = (e) => e.ts ? String(e.ts) : ((e.type||'') + (e.date||'') + (e.sys||'') + (e.mood||'') + (e.isoDate||''));
       const localMap = {};
       local.forEach(e => { localMap[entryKey(e)] = e; });
+      const _deletedClosetTs = store==='closet' ? new Set(JSON.parse(localStorage.getItem('glowDeletedClosetTs')||'[]').map(String)) : null;
       for (const entry of data) {
         const key = entryKey(entry);
+        // Never re-add a closet entry the user explicitly deleted on this device
+        if (_deletedClosetTs && entry.ts && _deletedClosetTs.has(String(entry.ts))) continue;
         if (!key || !localMap[key]) {
           const {id, ...entryWithoutId} = entry;
           await dbAdd(store, entryWithoutId);
