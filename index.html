@@ -5131,10 +5131,28 @@ function getSlotPhotoUrl(slotId){
 }
 
 async function loadCloset(){
+  // Pull from blob first so cross-device pieces appear
+  await loadFromBlob('closet');
   closetItems=await dbAll('closet');
+  // Dedup DailyLook-sourced pieces by name+category — keep oldest ts, delete newer dupes
+  const seenDL=new Map();
+  const dupIds=[];
+  for(const item of closetItems){
+    if(item.source==='DailyLook'&&item.name){
+      const k=(item.name||'').toLowerCase().trim()+'|'+(item.category||'');
+      if(seenDL.has(k)){
+        const prev=seenDL.get(k);
+        if((item.ts||0)<(prev.ts||0)){dupIds.push(prev.id);seenDL.set(k,item);}
+        else{dupIds.push(item.id);}
+      } else {seenDL.set(k,item);}
+    }
+  }
+  if(dupIds.length){
+    await Promise.all(dupIds.map(id=>dbDelete('closet',id)));
+    closetItems=closetItems.filter(item=>!dupIds.includes(item.id));
+  }
   renderClosetGrid();
-  // Push any locally-stored pieces to blob (catches items that failed to sync previously)
-  if(closetItems.length) syncToBlob('closet').catch(()=>{});
+  if(closetItems.length||dupIds.length) syncToBlob('closet').catch(()=>{});
 }
 
 function renderClosetGrid(){
@@ -5824,11 +5842,17 @@ async function saveDailyLookBox(){
     ...t,
     photo:getSlotPhotoUrl(`dl-tryon-photo-${t.id}`)||t.photo||null,
   }));
-  // Auto-add newly kept items to closet
+  // Auto-add kept items to closet; remove returned items that were previously added
   for(const item of itemsWithPhotos){
     if(item.keepReturn==='Keeping'){
       const closetTs = await autoAddToCloset(item);
       if(closetTs){ item.closetAdded=true; item.closetItemTs=closetTs; }
+    } else if(item.keepReturn==='Returned' && item.closetItemTs){
+      const current=await dbAll('closet');
+      const entry=current.find(c=>c.ts===item.closetItemTs);
+      if(entry) await dbDelete('closet',entry.id);
+      item.closetAdded=false; item.closetItemTs=null;
+      syncToBlob('closet').catch(()=>{});
     }
   }
   try{
@@ -6478,7 +6502,7 @@ async function deduplicateOutfits() {
 }
 
 async function syncAllFromBlob() {
-  const stores = ['checkins','bps','sleeps','skins','hairs','minds','outfits','exercises','labs','wardrobeplans','boxsummaries','reflections','water','myair','intentions','bodies','wellness_checkins'];
+  const stores = ['checkins','bps','sleeps','skins','hairs','minds','outfits','exercises','labs','wardrobeplans','boxsummaries','reflections','water','myair','intentions','bodies','wellness_checkins','closet'];
   await Promise.all(stores.map(s => loadFromBlob(s)));
   await loadLogs();
   console.log('✅ All data synced from Blob');
@@ -6489,6 +6513,7 @@ async function syncAllFromBlob() {
   await updateBPBanners();
   renderLookbook();
   loadWeekIntention();
+  await loadCloset();
 }
 
 // ── SAVE HANDLERS ─────────────────────────────────────────────────────
