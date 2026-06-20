@@ -2985,6 +2985,17 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="chart-wrap" style="height:180px;" id="wrap-resp-week-chart"></div>
     </div>
 
+    <div class="card">
+      <div class="card-title">🩺 BP vs Sleep quality · last 7 days</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">High BP days often coincide with poor sleep — look for the pattern.</div>
+      <div class="chart-wrap" style="height:220px;" id="wrap-bp-sleep-chart"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-size:11px;color:var(--muted);">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#C4735A;margin-right:3px;"></span>Systolic</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6B9E78;margin-right:3px;"></span>Diastolic</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#9B7EB8;margin-right:3px;"></span>Sleep quality (right axis)</span>
+      </div>
+    </div>
+
   </div>
 
   <!-- ── MONTHLY ── -->
@@ -4879,7 +4890,7 @@ function setView(v,btn){
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
-  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildHRRespWeekCharts();}}
+  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildHRRespWeekCharts();buildBPSleepWeekChart();}}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); if(v==='monthly') setTimeout(()=>switchSkinMetricChart(activeSkinMetric, document.querySelector('#skin-metric-tabs .chart-tab.on')||document.querySelector('#skin-metric-tabs .chart-tab')),100); }
   if(curTab==='hair'&&v!=='daily'){ buildHairCharts(); if(v==='weekly'){ loadHairAnalysesLog(); loadHairMilestones(); } }
   if(curTab==='body'&&v!=='daily'){ buildBodyCompChartsForView(v); if(v==='weekly'){ buildWeeklyExercise(); buildGaitWeekCharts(); } if(v==='monthly') buildZepMonthlyTracker(); if(v==='yearly') buildBodyYearlySummary(); }
@@ -6679,11 +6690,13 @@ async function buildDailyProgress(){
   autoChecks['dp-reflection'] = refs.some(e=>e.type==='daily'&&(e.date===logical||e.date===today)&&e.answer?.length>0) || _journaledToday || _wellspokenToday;
   autoChecks['dp-mood'] = minds.some(e=>e.date===logical||e.date===today);
 
-  // Sleep check-in (last night = yesterday or logical day before 3 AM)
+  // Sleep check-in (last night = yesterday or logical day before 3 AM, or day-before-yesterday before 3 AM)
+  const _d2=new Date();_d2.setDate(_d2.getDate()-2);
+  const dayBeforeYesterday=`${_d2.getFullYear()}-${String(_d2.getMonth()+1).padStart(2,'0')}-${String(_d2.getDate()).padStart(2,'0')}`;
   const sleepBlobData = Array.isArray(sleepBlob?.data) ? sleepBlob.data : [];
   autoChecks['dp-sleep-checkin'] =
-    sleeps.some(e=>e.date===yesterday||e.date===logical) ||
-    sleepBlobData.some(e=>e.date===yesterday||e.date===logical);
+    sleeps.some(e=>e.date===yesterday||e.date===logical||e.date===dayBeforeYesterday) ||
+    sleepBlobData.some(e=>e.date===yesterday||e.date===logical||e.date===dayBeforeYesterday);
 
   // myAir + CPAP (last night only)
   autoChecks['dp-myair'] = !!myairEntry;
@@ -15618,6 +15631,53 @@ async function buildGaitWeekCharts(){
     'Double Support %', '#5B8DD9', 25);
 }
 
+async function buildBPSleepWeekChart(){
+  const wrap = document.getElementById('wrap-bp-sleep-chart');
+  if(!wrap) return;
+  const canvasId = 'bp-sleep-week-chart';
+  if(!wrap.querySelector('canvas')){const c=document.createElement('canvas');c.id=canvasId;wrap.appendChild(c);}
+  if(chartInstances[canvasId]){chartInstances[canvasId].destroy();delete chartInstances[canvasId];}
+
+  const [bps, sleeps] = await Promise.all([dbAll('bps').catch(()=>[]), dbAll('sleeps').catch(()=>[])]);
+  const qualityScore = {'Distressed':1,'Rough':1,'Poor':2,'Groggy':2,'OK':3,'Sleepy':3,'Good':4,'Rested':4,'Great':5,'Refreshed':5};
+
+  const now = new Date();
+  const days = [];
+  for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d);}
+  const labels = days.map(d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+
+  const sysData=[], diaData=[], sleepData=[];
+  days.forEach(d=>{
+    const iso = d.toISOString().slice(0,10);
+    const bpEntries = bps.filter(b=>b.date===iso&&b.sys&&b.dia);
+    if(bpEntries.length){
+      const avgSys = Math.round(bpEntries.reduce((s,b)=>s+parseInt(b.sys),0)/bpEntries.length);
+      const avgDia = Math.round(bpEntries.reduce((s,b)=>s+parseInt(b.dia),0)/bpEntries.length);
+      sysData.push(avgSys); diaData.push(avgDia);
+    } else { sysData.push(null); diaData.push(null); }
+    const slp = sleeps.find(s=>s.date===iso);
+    sleepData.push(slp?.quality ? (qualityScore[slp.quality]||null) : null);
+  });
+
+  chartInstances[canvasId] = new Chart(wrap.querySelector('canvas').getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Systolic',data:sysData,borderColor:'#C4735A',backgroundColor:'rgba(196,115,90,0.08)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#C4735A',tension:0.3,spanGaps:true,yAxisID:'y'},
+      {label:'Diastolic',data:diaData,borderColor:'#6B9E78',backgroundColor:'rgba(107,158,120,0.08)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#6B9E78',tension:0.3,spanGaps:true,yAxisID:'y'},
+      {label:'Sleep quality',data:sleepData,borderColor:'#9B7EB8',backgroundColor:'rgba(155,126,184,0.08)',borderWidth:2,pointRadius:5,pointBackgroundColor:'#9B7EB8',tension:0.3,spanGaps:true,yAxisID:'y2',borderDash:[4,3]},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{if(c.dataset.yAxisID==='y2'){const lbls=['','Poor','Groggy','OK','Rested','Refreshed'];return 'Sleep: '+(lbls[c.parsed.y]||c.parsed.y);}return c.dataset.label+': '+c.parsed.y;}}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10},color:'#8C7B6B'}},
+        y:{position:'left',grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#8C7B6B'},title:{display:true,text:'BP (mmHg)',font:{size:9},color:'#8C7B6B'}},
+        y2:{position:'right',min:0,max:5,grid:{display:false},ticks:{font:{size:10},color:'#9B7EB8',stepSize:1,callback:v=>['','Poor','Groggy','OK','Rested','Refreshed'][v]||''},title:{display:true,text:'Sleep',font:{size:9},color:'#9B7EB8'}}
+      }
+    }
+  });
+}
+
 async function buildBodyWaterWeekChart(){
   const wrap = document.getElementById('wrap-bodywater-week-chart');
   if(!wrap) return;
@@ -16935,17 +16995,19 @@ async function getMostRecentMyAirEntry(){
 // Keep old name as alias for DP checks that need last-night specifically
 async function getMyAirEntryForLastNight(){
   const yesterday = yesterdayStr();
-  const logical = logicalDayStr(); // before 3 AM CST = yesterday, after = today
-  const validDates = new Set([yesterday, logical]);
+  const logical = logicalDayStr(); // before 3 AM = yesterday, after = today
+  const _d=new Date();_d.setDate(_d.getDate()-2);
+  const dayBefore=`${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
+  const validDates = new Set([yesterday, logical, dayBefore]);
   try{
     const local = await dbAll('myair').catch(()=>[]);
-    const entry = local.find(e=>validDates.has((e.isoDate||'').slice(0,10)));
+    const entry = [...local].filter(e=>validDates.has((e.isoDate||'').slice(0,10))).sort((a,b)=>(b.isoDate||'').localeCompare(a.isoDate||''))[0];
     if(entry) return entry;
   }catch(e){}
   try{
     const res = await fetch(`${BACKEND}/api/sync?pillar=myair&t=${Date.now()}`);
     if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
-      return data.find(e=>validDates.has((e.isoDate||'').slice(0,10)))||null;
+      return [...data].filter(e=>validDates.has((e.isoDate||'').slice(0,10))).sort((a,b)=>(b.isoDate||'').localeCompare(a.isoDate||''))[0]||null;
     }
   }catch(e){}
   return null;
