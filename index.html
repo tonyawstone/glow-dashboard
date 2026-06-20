@@ -1429,9 +1429,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <button onclick="cancelClosetPick()" style="background:rgba(255,255,255,0.25);border:none;border-radius:8px;padding:5px 10px;font-size:12px;color:#fff;cursor:pointer;">✕ Cancel</button>
     </div>
     <!-- Sub-tabs: Pieces | Looks -->
-    <div style="display:flex;border-bottom:0.5px solid var(--border);margin-bottom:16px;">
-      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="flex:1;padding:10px 0;background:none;border:none;border-bottom:2px solid var(--accent);font-size:13px;font-weight:500;color:var(--accent);font-family:var(--sans);cursor:pointer;">Pieces</button>
-      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="flex:1;padding:10px 0;background:none;border:none;border-bottom:2px solid transparent;font-size:13px;font-weight:400;color:var(--muted);font-family:var(--sans);cursor:pointer;">Looks</button>
+    <div style="display:flex;justify-content:center;gap:8px;margin-bottom:16px;">
+      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="padding:8px 28px;border-radius:20px;border:none;background:var(--accent);color:#F5EFE6;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;">Pieces</button>
+      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="padding:8px 28px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;">Looks</button>
     </div>
     <!-- Pieces section -->
     <div id="closet-pieces-section">
@@ -4869,7 +4869,7 @@ async function tab(id){
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitMobilitySummary(); buildZepSideEffectsSummary(); loadBodyGoals(); buildZepboundStatus(); loadInjectionSiteHistory(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld)_sld.value=logicalDayStr(); }
-  else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
+  else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');document.getElementById('compact-header').style.display='';document.getElementById('bottom-nav').style.display='';} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') {
     buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary(); const _slpd=document.getElementById('sleep-log-date');if(_slpd&&!_slpd.value)_slpd.value=logicalDayStr();
     // Default myAir date to yesterday — CPAP data is always for last night
@@ -4909,7 +4909,7 @@ function setView(v,btn){
   // Mark matching buttons in both the time-tabs-bar and any legacy vtabs
   document.querySelectorAll('.vtab').forEach(b=>{ if(b.dataset.view===v) b.classList.add('on'); });
   applyView();
-  if(curTab==='style'){ closetViewOpen=false; renderLookbook(); if(v==='weekly') loadWeekPlan(); if(v==='monthly'){ renderStyleCalendar(); buildStylePurchaseHistory('style-purchase-history-monthly',false); } if(v==='yearly') buildStyleYearlyView(); }
+  if(curTab==='style'){ if(closetViewOpen){document.getElementById('compact-header').style.display='';document.getElementById('bottom-nav').style.display='';}closetViewOpen=false; renderLookbook(); if(v==='weekly') loadWeekPlan(); if(v==='monthly'){ renderStyleCalendar(); buildStylePurchaseHistory('style-purchase-history-monthly',false); } if(v==='yearly') buildStyleYearlyView(); }
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
@@ -5241,14 +5241,14 @@ function switchClosetTab(tab){
   if(tab==='pieces'){
     if(pSec)pSec.style.display='block';
     if(lSec)lSec.style.display='none';
-    if(pBtn){pBtn.style.borderBottomColor='var(--accent)';pBtn.style.color='var(--accent)';pBtn.style.fontWeight='500';}
-    if(lBtn){lBtn.style.borderBottomColor='transparent';lBtn.style.color='var(--muted)';lBtn.style.fontWeight='400';}
+    if(pBtn){pBtn.style.background='var(--accent)';pBtn.style.color='#F5EFE6';pBtn.style.border='none';pBtn.style.fontWeight='500';}
+    if(lBtn){lBtn.style.background='transparent';lBtn.style.color='var(--muted)';lBtn.style.border='0.5px solid var(--border)';lBtn.style.fontWeight='400';}
     renderClosetGrid();
   }else{
     if(pSec)pSec.style.display='none';
     if(lSec)lSec.style.display='block';
-    if(lBtn){lBtn.style.borderBottomColor='var(--accent)';lBtn.style.color='var(--accent)';lBtn.style.fontWeight='500';}
-    if(pBtn){pBtn.style.borderBottomColor='transparent';pBtn.style.color='var(--muted)';pBtn.style.fontWeight='400';}
+    if(lBtn){lBtn.style.background='var(--accent)';lBtn.style.color='#F5EFE6';lBtn.style.border='none';lBtn.style.fontWeight='500';}
+    if(pBtn){pBtn.style.background='transparent';pBtn.style.color='var(--muted)';pBtn.style.border='0.5px solid var(--border)';pBtn.style.fontWeight='400';}
     renderCloset('all');
   }
 }
@@ -8158,6 +8158,8 @@ function toggleClosetView(){
     btn.textContent='👗 My Closet';
     if(shopBtn) shopBtn.style.display='';
     if(inspoBtn) inspoBtn.textContent='✨ Inspo Board';
+    document.getElementById('compact-header').style.display='';
+    document.getElementById('bottom-nav').style.display='';
   } else {
     inspoViewOpen=false; shoppingViewOpen=false;
     closetViewOpen=true;
@@ -8166,6 +8168,8 @@ function toggleClosetView(){
     btn.textContent='← Back';
     if(shopBtn) shopBtn.style.display='none';
     if(inspoBtn) inspoBtn.textContent='✨ Inspo Board';
+    document.getElementById('compact-header').style.display='none';
+    document.getElementById('bottom-nav').style.display='none';
     loadCloset();switchClosetTab(_pickerDay?'looks':'pieces');
   }
 }
