@@ -6287,7 +6287,7 @@ async function syncToBlob(store) {
     // Merge: local wins for updates; blob fills in entries not present locally.
     // This ensures mutations (pieceIds, tags, etc.) always propagate to blob.
     const outfitKey = e => (e.source==='dailylook'&&e.tryOnId!=null) ? 'dl-'+e.dailylookBoxTs+'-'+e.tryOnId : (e.ts ? String(e.ts) : e.date+(e.src||'')+(e.desc||'').slice(0,20));
-    const entryKey = (e,s) => s==='outfits' ? outfitKey(e) : (e.id || ((e.type||'')+(e.date||'')+(e.sys||'')+(e.mood||'')+(e.isoDate||'')));
+    const entryKey = (e,s) => s==='outfits' ? outfitKey(e) : (e.ts ? String(e.ts) : (e.id ? String(e.id) : ((e.type||'')+(e.date||'')+(e.sys||'')+(e.mood||'')+(e.isoDate||''))));
     // Build blob lookup
     const blobMap = {};
     blobData.forEach(e=>{ blobMap[entryKey(e,store)]=e; });
@@ -6326,6 +6326,13 @@ async function syncToBlob(store) {
         if(e.photo && e.photo.startsWith('data:')){ return {...e, photo:''}; }
         return e;
       });
+    }
+    if(store === 'closet'){
+      payload = merged.map(e=>({
+        ...e,
+        photoFront: e.photoFront?.startsWith('data:') ? null : (e.photoFront||null),
+        photoBack:  e.photoBack?.startsWith('data:')  ? null : (e.photoBack||null),
+      }));
     }
     await fetch(`${BACKEND}/api/sync`, {
       method: 'POST',
@@ -6382,12 +6389,12 @@ async function loadFromBlob(store) {
         }
       }
     } else {
-      const entryKey = (e) => (e.type||'') + (e.date||'') + (e.sys||'') + (e.mood||'') + (e.isoDate||'');
+      const entryKey = (e) => e.ts ? String(e.ts) : ((e.type||'') + (e.date||'') + (e.sys||'') + (e.mood||'') + (e.isoDate||''));
       const localMap = {};
       local.forEach(e => { localMap[entryKey(e)] = e; });
       for (const entry of data) {
         const key = entryKey(entry);
-        if (!localMap[key]) {
+        if (!key || !localMap[key]) {
           const {id, ...entryWithoutId} = entry;
           await dbAdd(store, entryWithoutId);
           added++;
