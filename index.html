@@ -5568,6 +5568,12 @@ function closePieceView(){
 
 async function deletePiece(id){
   if(!id) return;
+  const item = closetItems.find(i=>i.id===id);
+  if(item?.ts){
+    const tomb = JSON.parse(localStorage.getItem('glowDeletedClosetTs')||'[]');
+    tomb.push(item.ts);
+    localStorage.setItem('glowDeletedClosetTs', JSON.stringify(tomb.slice(-100)));
+  }
   await dbDelete('closet', id);
   closetItems = closetItems.filter(i=>i.id!==id);
   syncToBlob('closet').catch(()=>{});
@@ -6428,7 +6434,12 @@ async function syncToBlob(store) {
       delete blobMap[k];
     }
     // Add blob-only entries (added from another device, not yet in local IDB)
-    for(const blobOnly of Object.values(blobMap)) merged.push(blobOnly);
+    // Skip closet entries the user explicitly deleted (tracked via tombstone in localStorage)
+    const _deletedClosetTs = store==='closet' ? new Set(JSON.parse(localStorage.getItem('glowDeletedClosetTs')||'[]').map(String)) : null;
+    for(const blobOnly of Object.values(blobMap)){
+      if(_deletedClosetTs && blobOnly.ts && _deletedClosetTs.has(String(blobOnly.ts))) continue;
+      merged.push(blobOnly);
+    }
     // Strip base64 photos — top-level photo field, and nested photos inside dailylook-box records
     let payload = merged;
     if(['outfits','skins','hairs'].includes(store)){
