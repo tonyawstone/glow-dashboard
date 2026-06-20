@@ -1264,7 +1264,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
           <div id="cpv-name" style="font-size:15px;font-weight:500;color:var(--text);"></div>
           <div id="cpv-meta" style="font-size:12px;color:var(--muted);line-height:1.6;"></div>
-          <button onclick="openClosetDetailFromView()" style="margin-top:8px;padding:6px 14px;border-radius:10px;background:transparent;border:0.5px solid var(--accent);color:var(--accent);font-size:12px;font-family:var(--sans);cursor:pointer;align-self:flex-start;">Edit</button>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button onclick="openClosetDetailFromView()" style="padding:6px 14px;border-radius:10px;background:transparent;border:0.5px solid var(--accent);color:var(--accent);font-size:12px;font-family:var(--sans);cursor:pointer;">Edit</button>
+            <button onclick="deletePiece(_cpvItemId)" style="padding:6px 14px;border-radius:10px;background:transparent;border:0.5px solid var(--rose);color:var(--rose);font-size:12px;font-family:var(--sans);cursor:pointer;">Delete</button>
+          </div>
         </div>
       </div>
       <div style="border-top:0.5px solid var(--border);padding-top:14px;">
@@ -5535,6 +5538,16 @@ function closePieceView(){
   _cpvItemId=null;
   const ch=document.getElementById('compact-header');if(ch)ch.style.removeProperty('display');
   const ttb=document.getElementById('time-tabs-bar');if(ttb)ttb.style.display='flex';
+}
+
+async function deletePiece(id){
+  if(!id) return;
+  await dbDelete('closet', id);
+  closetItems = closetItems.filter(i=>i.id!==id);
+  syncToBlob('closet').catch(()=>{});
+  closePieceView();
+  renderClosetGrid();
+  showToast('Piece removed from MyCloset');
 }
 
 function openClosetDetailFromView(){
