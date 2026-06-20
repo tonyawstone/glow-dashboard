@@ -6811,7 +6811,7 @@ async function buildDailyProgress(){
     if(allDone) pillarsDone++;
     const pct = items.length > 0 ? Math.round((itemsDone / items.length) * 100) : 0;
     const barColor = allDone ? '#6B9E78' : pct > 0 ? 'var(--accent)' : 'var(--border)';
-    return `<div onclick="tab('${meta.tab}')" style="
+    return `<div onclick="openCheckinHubToPillar('${PILLAR_NAMES[pillar]}')" style="
       flex:1;min-width:0;padding:8px 6px;border-radius:12px;
       background:${allDone ? 'rgba(107,158,120,0.1)' : 'var(--warm)'};
       border:0.5px solid ${allDone ? 'rgba(107,158,120,0.3)' : 'var(--border)'};
@@ -9319,6 +9319,14 @@ function closeCheckinHub(){
   document.getElementById('bnav-home').classList.add('on');
 }
 
+function openCheckinHubToPillar(name){
+  openCheckinHub();
+  setTimeout(()=>{
+    const el = document.getElementById('ci-section-'+name.toLowerCase());
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 450);
+}
+
 async function renderCheckinHub(){
   const today = nowStr();
   const yesterday = yesterdayStr();
@@ -9404,7 +9412,7 @@ async function renderCheckinHub(){
   const sectionsEl = document.getElementById('ci-sections');
   if(!sectionsEl) return;
   sectionsEl.innerHTML = PILLARS.map(p=>`
-    <div class="ci-section">
+    <div class="ci-section" id="ci-section-${p.name.toLowerCase()}">
       <div class="ci-section-header" onclick="${p.formHtml?`toggleHubForm('${p.name.toLowerCase()}')`:`checkinGoTo('${p.tab}','${p.scrollId}','${p.toggleFn}')`}" style="cursor:pointer;">
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="width:34px;height:34px;border-radius:50%;background:${p.done?'rgba(107,158,120,0.12)':'rgba(0,0,0,0.04)'};border:0.5px solid ${p.done?'rgba(107,158,120,0.3)':'var(--border)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
