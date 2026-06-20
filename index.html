@@ -16607,11 +16607,13 @@ function buildCPAPEquipmentStatus(){
   const el = document.getElementById('cpap-equipment-status');
   if(!el) return;
   const equipment = JSON.parse(localStorage.getItem('glowCPAPEquipment')||'{}');
+  const customDetails = JSON.parse(localStorage.getItem('glowCPAPItemDetails')||'{}');
   const now = new Date();
 
   let overdueCount = 0, dueSoonCount = 0;
 
   const rows = CPAP_ITEMS.map(item => {
+    const d = {...item, ...(customDetails[item.key]||{})};
     const lastReplaced = equipment[item.key] ? new Date(equipment[item.key]) : null;
     const daysSince = lastReplaced ? Math.floor((now - lastReplaced)/(1000*60*60*24)) : null;
     const daysUntilDue = lastReplaced ? item.days - daysSince : null;
@@ -16625,40 +16627,122 @@ function buildCPAPEquipmentStatus(){
     else { dueLabel=`${daysUntilDue}d left`; dueClass='cpap-due-ok'; }
 
     const lastStr = lastReplaced ? safeDate(lastReplaced.toISOString().slice(0,10)).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Never';
-
     const todayBtn = item.key === 'filter_disposable'
       ? `<button class="cpap-save-btn" style="white-space:nowrap;" onclick="replaceCPAPItem('${item.key}')">Today</button>`
       : '';
+    const esc = s => (s||'').replace(/"/g,'&quot;');
 
     return `<div class="cpap-replace-item">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
-        <div style="font-size:13px;font-weight:600;color:var(--text);">${item.label}</div>
-        <div class="cpap-item-due ${dueClass}" style="margin-left:8px;white-space:nowrap;">${dueLabel}</div>
+      <div id="cpap-ri-view-${item.key}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);">${d.label}</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="cpap-item-due ${dueClass}" style="white-space:nowrap;">${dueLabel}</div>
+            <button onclick="toggleCPAPItemEdit('${item.key}')" title="Edit details" style="background:none;border:none;cursor:pointer;padding:0 2px;color:var(--muted);font-size:13px;line-height:1;">✏️</button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:1px;">${d.desc} · ${d.size}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${d.store} · ${d.cost} · every ${item.interval}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:11px;color:var(--muted);white-space:nowrap;">Last: ${lastStr}</span>
+          <input type="date" id="cpap-date-${item.key}" class="cpap-date-input" style="flex:1;min-width:100px;">
+          <button class="cpap-save-btn" onclick="replaceCPAPItemDate('${item.key}')">Save</button>
+          ${todayBtn}
+        </div>
       </div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:1px;">${item.desc} · ${item.size}</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${item.store} · ${item.cost} · every ${item.interval}</div>
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-        <span style="font-size:11px;color:var(--muted);white-space:nowrap;">Last: ${lastStr}</span>
-        <input type="date" id="cpap-date-${item.key}" class="cpap-date-input" style="flex:1;min-width:100px;">
-        <button class="cpap-save-btn" onclick="replaceCPAPItemDate('${item.key}')">Save</button>
-        ${todayBtn}
+      <div id="cpap-ri-edit-${item.key}" style="display:none;padding-top:4px;">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Edit details</div>
+        <div style="display:grid;gap:6px;margin-bottom:8px;">
+          <input id="cpap-edit-desc-${item.key}" class="cpap-date-input" style="width:100%;box-sizing:border-box;" placeholder="Description" value="${esc(d.desc)}">
+          <div style="display:flex;gap:6px;">
+            <input id="cpap-edit-size-${item.key}" class="cpap-date-input" style="flex:1;" placeholder="Size / spec" value="${esc(d.size)}">
+            <input id="cpap-edit-cost-${item.key}" class="cpap-date-input" style="flex:1;" placeholder="Cost" value="${esc(d.cost)}">
+          </div>
+          <input id="cpap-edit-store-${item.key}" class="cpap-date-input" style="width:100%;box-sizing:border-box;" placeholder="Where to buy" value="${esc(d.store)}">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="cpap-save-btn" onclick="saveCPAPItemDetails('${item.key}')">Save</button>
+          <button class="cpap-save-btn" style="color:var(--muted);border-color:var(--border);" onclick="toggleCPAPItemEdit('${item.key}')">Cancel</button>
+        </div>
       </div>
     </div>`;
   });
 
-  // Update header badge
+  // Bundle section
+  const bundleSection = `<div style="margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:9px 12px;background:var(--warm);border-radius:10px;" onclick="toggleCPAPBundle()">
+      <div style="font-size:12px;font-weight:600;color:var(--text);">Log bundle replacement</div>
+      <div id="cpap-bundle-chevron" style="font-size:14px;color:var(--muted);transition:transform 0.2s;">›</div>
+    </div>
+    <div id="cpap-bundle-body" style="display:none;padding:10px 12px 12px;border:0.5px solid var(--border);border-top:none;border-radius:0 0 10px 10px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Select which items you replaced together, then pick the date.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-bottom:10px;">
+        ${CPAP_ITEMS.map(i=>`<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" id="cpap-bundle-cb-${i.key}" style="margin:0;accent-color:var(--accent);"> ${i.label}</label>`).join('')}
+      </div>
+      <input type="date" id="cpap-bundle-date" class="cpap-date-input" style="width:100%;box-sizing:border-box;margin-bottom:8px;">
+      <button id="cpap-bundle-save-btn" class="cpap-save-btn" style="width:100%;" onclick="saveCPAPBundle()">Save selected</button>
+    </div>
+  </div>`;
+
+  // Header badge
   const badge = document.getElementById('cpap-replace-header-badge');
   if(badge){
-    if(overdueCount > 0){
+    if(overdueCount > 0)
       badge.innerHTML = `<span style="padding:2px 8px;border-radius:10px;background:#FEE2E2;color:#7F1D1D;font-weight:600;">⚠️ ${overdueCount} overdue</span>`;
-    } else if(dueSoonCount > 0){
+    else if(dueSoonCount > 0)
       badge.innerHTML = `<span style="padding:2px 8px;border-radius:10px;background:#FEF3C7;color:#92400E;">Due soon</span>`;
-    } else {
+    else
       badge.innerHTML = `<span style="padding:2px 8px;border-radius:10px;background:#EAF3DE;color:#27500A;">All OK</span>`;
-    }
   }
 
-  el.innerHTML = rows.join('');
+  el.innerHTML = bundleSection + rows.join('');
+}
+
+function toggleCPAPItemEdit(key){
+  const view = document.getElementById(`cpap-ri-view-${key}`);
+  const edit = document.getElementById(`cpap-ri-edit-${key}`);
+  if(!view||!edit) return;
+  const showing = edit.style.display !== 'none';
+  view.style.display = showing ? 'block' : 'none';
+  edit.style.display = showing ? 'none' : 'block';
+}
+
+function saveCPAPItemDetails(key){
+  const saved = JSON.parse(localStorage.getItem('glowCPAPItemDetails')||'{}');
+  saved[key] = {
+    desc: document.getElementById(`cpap-edit-desc-${key}`)?.value||'',
+    size: document.getElementById(`cpap-edit-size-${key}`)?.value||'',
+    store: document.getElementById(`cpap-edit-store-${key}`)?.value||'',
+    cost: document.getElementById(`cpap-edit-cost-${key}`)?.value||'',
+  };
+  localStorage.setItem('glowCPAPItemDetails', JSON.stringify(saved));
+  buildCPAPEquipmentStatus();
+}
+
+function toggleCPAPBundle(){
+  const body = document.getElementById('cpap-bundle-body');
+  const chevron = document.getElementById('cpap-bundle-chevron');
+  if(!body) return;
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
+}
+
+async function saveCPAPBundle(){
+  const dateEl = document.getElementById('cpap-bundle-date');
+  if(!dateEl?.value){ alert('Please select a date first.'); return; }
+  const equipment = JSON.parse(localStorage.getItem('glowCPAPEquipment')||'{}');
+  let count = 0;
+  CPAP_ITEMS.forEach(item => {
+    const cb = document.getElementById(`cpap-bundle-cb-${item.key}`);
+    if(cb?.checked){ equipment[item.key] = safeDate(dateEl.value).toISOString(); count++; }
+  });
+  if(!count){ alert('Select at least one item.'); return; }
+  localStorage.setItem('glowCPAPEquipment', JSON.stringify(equipment));
+  fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'cpap_equipment',data:equipment})}).catch(()=>{});
+  const btn = document.getElementById('cpap-bundle-save-btn');
+  if(btn){ btn.textContent='✓ Saved!'; btn.style.color='#27500A'; btn.style.borderColor='#27500A'; }
+  setTimeout(()=>buildCPAPEquipmentStatus(), 1500);
 }
 
 
