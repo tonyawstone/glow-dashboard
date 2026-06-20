@@ -6012,12 +6012,23 @@ async function syncToBlob(store) {
     }
     // Add blob-only entries (added from another device, not yet in local IDB)
     for(const blobOnly of Object.values(blobMap)) merged.push(blobOnly);
-    // For outfits/skins/hairs — strip base64 photos only, keep Blob URLs
+    // Strip base64 photos — top-level photo field, and nested photos inside dailylook-box records
     let payload = merged;
     if(['outfits','skins','hairs'].includes(store)){
       payload = merged.map(e=>{
+        if(e.type==='dailylook-box'){
+          return {...e,
+            photo: e.photo?.startsWith('data:')?'':e.photo||'',
+            stylistPhoto: e.stylistPhoto?.startsWith('data:')?null:e.stylistPhoto||null,
+            items: (e.items||[]).map(i=>({...i,
+              photoFront: i.photoFront?.startsWith('data:')?null:i.photoFront||null,
+              photoBack: i.photoBack?.startsWith('data:')?null:i.photoBack||null,
+            })),
+            tryOns: (e.tryOns||[]).map(t=>({...t, photo:t.photo?.startsWith('data:')?null:t.photo||null})),
+          };
+        }
         if(e.photo && e.photo.startsWith('data:')){ return {...e, photo:''}; }
-        return e; // keep Blob URLs (https://...) intact
+        return e;
       });
     }
     await fetch(`${BACKEND}/api/sync`, {
