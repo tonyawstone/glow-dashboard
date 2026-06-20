@@ -4687,7 +4687,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 </div>
 
 
-<input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handlePhoto(event)">
+<input type="file" id="photo-input" accept="image/*" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;" onchange="handlePhoto(event)">
 
 <script>
 // ── SAFE NAV HELPERS (defined first so score card can use them) ────────
@@ -4754,7 +4754,7 @@ async function boot(){
   loadReflectionPrompt();
   loadPillarsToday();
   loadWeekIntention();
-  dbDelPhoto('outfit-new'); dbDelPhoto('outfit-new-bloburl');
+  await dbDelPhoto('outfit-new'); await dbDelPhoto('outfit-new-bloburl');
   await loadAllPhotos();
   await loadLogs();
   renderLookbook();
