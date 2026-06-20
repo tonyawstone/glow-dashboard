@@ -2678,12 +2678,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <div id="wellness-symptom-panel" style="display:none;">
           <div class="tags" id="wellness-symptom-tags" style="margin-bottom:12px;">
-            <button class="tag" onclick="tog(this);saveWellnessDraft()">Normal</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Steady</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Headache</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Fatigue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Dizzy</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Nausea</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Pain</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Bloating</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Constipation</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Brain fog</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Injection site soreness</button>
+            <button class="tag" onclick="tog(this);saveWellnessDraft()">Normal</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Steady</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Headache</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Fatigue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Dizzy</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Nausea</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Pain</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Aches</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Bloating</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Constipation</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Brain fog</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Injection site soreness</button>
           </div>
         </div>
         <div id="wellness-concerns-panel" style="display:none;">
           <div class="tags" id="wellness-concerns-tags" style="margin-bottom:12px;">
-            <button class="tag" onclick="tog(this);saveWellnessDraft()">BP concern</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Medication issue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Hydration concern</button>
+            <button class="tag" onclick="tog(this);saveWellnessDraft()">None</button><button class="tag" onclick="tog(this);saveWellnessDraft()">BP concern</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Medication issue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Hydration concern</button>
           </div>
         </div>
         <textarea id="wellness-note" rows="2" placeholder="Any symptoms, BP, medication, or hydration notes today?" oninput="saveWellnessDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
@@ -6413,7 +6413,7 @@ async function deduplicateOutfits() {
 }
 
 async function syncAllFromBlob() {
-  const stores = ['checkins','bps','sleeps','skins','hairs','minds','outfits','exercises','labs','wardrobeplans','boxsummaries','reflections','water','myair','intentions','bodies'];
+  const stores = ['checkins','bps','sleeps','skins','hairs','minds','outfits','exercises','labs','wardrobeplans','boxsummaries','reflections','water','myair','intentions','bodies','wellness_checkins'];
   await Promise.all(stores.map(s => loadFromBlob(s)));
   await loadLogs();
   console.log('✅ All data synced from Blob');
@@ -11486,7 +11486,7 @@ async function openWellnessLog(){
         if(res.ok){ const d=await res.json(); entries=Array.isArray(d.data)?d.data:[]; }
       }catch(e){}
     }
-    entries = entries.sort((a,b)=>b.date.localeCompare(a.date));
+    entries = entries.filter(e=>e.date).sort((a,b)=>b.date.localeCompare(a.date));
     if(!entries.length){ el.innerHTML='<div class="log-empty">No wellness check-ins yet.</div>'; return; }
     const chips = arr=>(arr||[]).filter(Boolean).map(v=>`<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;">${v}</span>`).join('');
     el.innerHTML = entries.map(e=>`
@@ -11495,7 +11495,7 @@ async function openWellnessLog(){
         ${e.wellnessFace?`<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;">${e.wellnessFace}</div>`:''}
         ${(e.energy||e.appetite)?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${[e.energy?'Energy: '+e.energy:'',e.appetite?'Appetite: '+e.appetite:''].filter(Boolean).join(' · ')}</div>`:''}
         ${(e.symptoms||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">${chips(e.symptoms)}</div>`:''}
-        ${(e.feelings||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">${chips(e.feelings)}</div>`:''}
+        ${(e.concerns||e.feelings||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">${chips(e.concerns||e.feelings||[])}</div>`:''}
         ${e.note?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">${e.note}</div>`:''}
       </div>`).join('');
   }catch(err){ el.innerHTML='<div class="log-empty">Could not load entries.</div>'; }
