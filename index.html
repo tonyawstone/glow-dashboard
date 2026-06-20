@@ -3487,9 +3487,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Wash Day card -->
     <div class="card" id="wash-day-card">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
-        <i class="ti ti-droplet" style="font-size:13px;color:var(--accent);"></i>
-        <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Wash Day</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-droplet" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Wash Day</div>
+        </div>
+        <input type="date" id="wash-day-entry-date" style="font-size:11px;color:var(--accent);border:none;background:transparent;cursor:pointer;font-family:var(--sans);">
       </div>
       <div style="display:flex;gap:10px;margin-bottom:14px;">
         <div style="flex:1;background:var(--warm);border-radius:10px;padding:10px 12px;border:0.5px solid var(--border);">
@@ -11312,18 +11315,22 @@ function saveWashDates(){
 function restoreWashDates(){
   try{
     const d = JSON.parse(localStorage.getItem('glowWashDates')||'null');
-    if(!d) return;
-    if(d.last && document.getElementById('last-wash-date')) document.getElementById('last-wash-date').value = d.last;
-    if(d.next && document.getElementById('next-wash-date')) document.getElementById('next-wash-date').value = d.next;
+    if(d){
+      if(d.last && document.getElementById('last-wash-date')) document.getElementById('last-wash-date').value = d.last;
+      if(d.next && document.getElementById('next-wash-date')) document.getElementById('next-wash-date').value = d.next;
+    }
   }catch(e){}
+  const entryEl = document.getElementById('wash-day-entry-date');
+  if(entryEl && !entryEl.value) entryEl.value = logicalDayStr();
 }
 
 async function saveWashDay(){
   const care = gT('hcare-tags');
   const lastWash = document.getElementById('last-wash-date')?.value||'';
   const nextWash = document.getElementById('next-wash-date')?.value||'';
-  if(!care.length && !lastWash){ showToast('Add at least one entry first'); return; }
-  const entry = {type:'wash-day', care, lastWash, nextWash, date: logicalDayStr()};
+  if(!care.length && !lastWash && !nextWash){ showToast('Add at least one entry first'); return; }
+  const entryDate = document.getElementById('wash-day-entry-date')?.value || logicalDayStr();
+  const entry = {type:'wash-day', care, lastWash, nextWash, date: entryDate};
   try{
     await dbAdd('hairs', entry);
     syncToBlob('hairs');
