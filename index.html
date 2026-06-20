@@ -5427,6 +5427,7 @@ async function syncOutfitsToBlob(){
         photoFront:i.photoFront&&!i.photoFront.startsWith('data:')?i.photoFront:i.photoFront?proxyUrl(`dl-photo-${i.id}-front`):null,
         photoBack:i.photoBack&&!i.photoBack.startsWith('data:')?i.photoBack:i.photoBack?proxyUrl(`dl-photo-${i.id}-back`):null,
       })),
+      tryOns:(box.tryOns||[]).map(t=>({...t,photo:t.photo&&!t.photo.startsWith('data:')?t.photo:null})),
     };
   });
   try{await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'outfits',data:stripped})});}catch(e){console.warn('syncOutfitsToBlob failed:',e);}
@@ -6203,8 +6204,16 @@ async function deduplicateOutfits() {
   const all = await dbAll('outfits');
   const seen = new Map(); // stableKey → best entry
   for (const e of all) {
-    const sk = (e.date||'') + (e.src||'') + (e.desc||'').slice(0, 20);
-    const key = e.ts ? String(e.ts) : sk;
+    let sk;
+    if (e.source === 'dailylook' && e.tryOnId != null) {
+      // Each DL look is unique per tryOn slot — never collapse these
+      sk = 'dl-' + e.dailylookBoxTs + '-' + e.tryOnId;
+    } else if (e.type === 'dailylook-box') {
+      // Each box is unique by its own ts
+      sk = 'dlbox-' + (e.ts || e.date);
+    } else {
+      sk = (e.date||'') + (e.src||'') + (e.desc||'').slice(0, 20);
+    }
     const prev = seen.get(sk);
     if (!prev) { seen.set(sk, e); continue; }
     // Keep whichever has a photo, or the higher ts
