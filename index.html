@@ -5116,6 +5116,8 @@ function getSlotPhotoUrl(slotId){
 async function loadCloset(){
   closetItems=await dbAll('closet');
   renderClosetGrid();
+  // Push any locally-stored pieces to blob (catches items that failed to sync previously)
+  if(closetItems.length) syncToBlob('closet').catch(()=>{});
 }
 
 function renderClosetGrid(){
