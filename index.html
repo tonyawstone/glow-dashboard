@@ -4765,6 +4765,7 @@ async function boot(){
   await deduplicateOutfits();
   loadCheckinState();
   loadCoachingInsights();
+  restoreCoachCache();
   loadSavedScore();
   loadTodayWater();
   loadTodaySleepFromCSV();
@@ -4891,6 +4892,7 @@ function applyView(){
   const t=document.getElementById('vc-'+curTab+'-'+curView);
   if(t)t.classList.add('on');
   else{const d=document.getElementById('vc-'+curTab+'-daily');if(d)d.classList.add('on');}
+  restoreCoachCache();
 }
 
 // ── UI HELPERS ────────────────────────────────────────────────────────
@@ -19455,6 +19457,12 @@ async function callCoach(pillar, userMessage, outputId, logData) {
     const data = await res.json();
     const response = data.response || 'No response generated.';
     if (el) el.textContent = response;
+    // Cache for 24-hour persistence across page reloads
+    try {
+      const cache = JSON.parse(localStorage.getItem('glowCoachCache') || '{}');
+      cache[outputId] = { text: response, savedAt: Date.now() };
+      localStorage.setItem('glowCoachCache', JSON.stringify(cache));
+    } catch(e) {}
     const dateStr = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
     // Save to coaching blob
     fetch(`${BACKEND}/api/sync`, {
@@ -19477,6 +19485,27 @@ async function callCoach(pillar, userMessage, outputId, logData) {
     }).catch(()=>{});
   } catch (err) {
     if (el) el.textContent = 'Coach unavailable right now — try again shortly.';
+  }
+}
+
+function restoreCoachCache() {
+  const TTL = 24 * 60 * 60 * 1000;
+  let cache = {};
+  try { cache = JSON.parse(localStorage.getItem('glowCoachCache') || '{}'); } catch(e) {}
+  const now = Date.now();
+  const expired = [];
+  Object.entries(cache).forEach(([id, entry]) => {
+    if (!entry?.text || !entry.savedAt) { expired.push(id); return; }
+    if (now - entry.savedAt > TTL) { expired.push(id); return; }
+    const el = document.getElementById(id);
+    if (el && (!el.textContent.trim() || el.style.display === 'none')) {
+      el.textContent = entry.text;
+      el.style.display = 'block';
+    }
+  });
+  if (expired.length) {
+    expired.forEach(id => delete cache[id]);
+    try { localStorage.setItem('glowCoachCache', JSON.stringify(cache)); } catch(e) {}
   }
 }
 
