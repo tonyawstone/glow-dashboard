@@ -16590,7 +16590,7 @@ async function replaceCPAPItem(key){
 }
 
 async function loadCPAPEquipment(){
-  // Try Blob first, fall back to localStorage
+  initCPAPBundleDefaults();
   try {
     const res = await fetch(`${BACKEND}/api/sync?pillar=cpap_equipment`);
     if(res.ok){
@@ -16675,12 +16675,17 @@ function buildCPAPEquipmentStatus(){
       <div id="cpap-bundle-chevron" style="font-size:14px;color:var(--muted);transition:transform 0.2s;">›</div>
     </div>
     <div id="cpap-bundle-body" style="display:none;padding:10px 12px 12px;border:0.5px solid var(--border);border-top:none;border-radius:0 0 10px 10px;">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Select which items you replaced together, then pick the date.</div>
+      <div id="cpap-bundle-presets"></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Check items replaced together:</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-bottom:10px;">
         ${CPAP_ITEMS.map(i=>`<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" id="cpap-bundle-cb-${i.key}" style="margin:0;accent-color:var(--accent);"> ${i.label}</label>`).join('')}
       </div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <input id="cpap-bundle-name" class="cpap-date-input" style="flex:1;" placeholder="Save selection as bundle…">
+        <button class="cpap-save-btn" onclick="saveCPAPBundlePreset()">Save</button>
+      </div>
       <input type="date" id="cpap-bundle-date" class="cpap-date-input" style="width:100%;box-sizing:border-box;margin-bottom:8px;">
-      <button id="cpap-bundle-save-btn" class="cpap-save-btn" style="width:100%;" onclick="saveCPAPBundle()">Save selected</button>
+      <button id="cpap-bundle-save-btn" class="cpap-save-btn" style="width:100%;" onclick="saveCPAPBundle()">Log replacement</button>
     </div>
   </div>`;
 
@@ -16696,6 +16701,7 @@ function buildCPAPEquipmentStatus(){
   }
 
   el.innerHTML = bundleSection + rows.join('');
+  renderCPAPBundlePresets();
 }
 
 function toggleCPAPItemEdit(key){
@@ -16726,6 +16732,57 @@ function toggleCPAPBundle(){
   const open = body.style.display === 'none';
   body.style.display = open ? 'block' : 'none';
   if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
+}
+
+function initCPAPBundleDefaults(){
+  if(localStorage.getItem('glowCPAPBundles') !== null) return;
+  localStorage.setItem('glowCPAPBundles', JSON.stringify([
+    { name:'Frame kit', items:['mask_cushion','mask_frame'] }
+  ]));
+}
+
+function renderCPAPBundlePresets(){
+  const el = document.getElementById('cpap-bundle-presets');
+  if(!el) return;
+  const bundles = JSON.parse(localStorage.getItem('glowCPAPBundles')||'[]');
+  if(!bundles.length){ el.innerHTML=''; return; }
+  el.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+    ${bundles.map((b,i)=>`
+      <div style="display:flex;align-items:center;gap:2px;">
+        <button onclick="loadCPAPBundlePreset(${i})" style="padding:4px 10px;border-radius:20px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">${b.name}</button>
+        <button onclick="deleteCPAPBundlePreset(${i})" title="Remove preset" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;line-height:1;padding:0 2px;">×</button>
+      </div>`).join('')}
+  </div>`;
+}
+
+function loadCPAPBundlePreset(idx){
+  const bundles = JSON.parse(localStorage.getItem('glowCPAPBundles')||'[]');
+  const bundle = bundles[idx];
+  if(!bundle) return;
+  CPAP_ITEMS.forEach(item => {
+    const cb = document.getElementById(`cpap-bundle-cb-${item.key}`);
+    if(cb) cb.checked = bundle.items.includes(item.key);
+  });
+}
+
+function saveCPAPBundlePreset(){
+  const nameEl = document.getElementById('cpap-bundle-name');
+  const name = nameEl?.value.trim();
+  if(!name){ nameEl?.focus(); return; }
+  const checkedItems = CPAP_ITEMS.filter(i=>document.getElementById(`cpap-bundle-cb-${i.key}`)?.checked).map(i=>i.key);
+  if(!checkedItems.length){ alert('Check at least one item to save as a bundle.'); return; }
+  const bundles = JSON.parse(localStorage.getItem('glowCPAPBundles')||'[]');
+  bundles.push({ name, items: checkedItems });
+  localStorage.setItem('glowCPAPBundles', JSON.stringify(bundles));
+  if(nameEl) nameEl.value='';
+  renderCPAPBundlePresets();
+}
+
+function deleteCPAPBundlePreset(idx){
+  const bundles = JSON.parse(localStorage.getItem('glowCPAPBundles')||'[]');
+  bundles.splice(idx,1);
+  localStorage.setItem('glowCPAPBundles', JSON.stringify(bundles));
+  renderCPAPBundlePresets();
 }
 
 async function saveCPAPBundle(){
