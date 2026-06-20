@@ -1085,7 +1085,24 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:8px;">Items in this box</div>
       <div id="dl-items-list"></div>
       <button onclick="addDailyLookItem()" style="width:100%;padding:10px;border-radius:10px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--sans);margin-bottom:14px;">+ Add item</button>
-      <div id="dl-cart-total" style="display:none;background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;"></div>
+      <div id="dl-cart-total" style="display:none;background:var(--warm);border:0.5px solid var(--border);border-radius:10px 10px 0 0;padding:12px;"></div>
+      <div id="dl-credits-section" style="display:none;background:var(--warm);border:0.5px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:10px 12px 12px;margin-bottom:14px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Credits applied</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;">
+          <span style="font-size:12px;color:var(--text);">Stylist fee credit</span>
+          <div style="display:flex;align-items:center;gap:3px;">
+            <span style="font-size:12px;color:var(--muted);">-$</span>
+            <input type="number" id="dl-stylist-credit" min="0" step="0.01" placeholder="0.00" oninput="updateDailyLookCartTotal()" style="width:70px;padding:4px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:12px;color:var(--text);font-family:var(--sans);text-align:right;background:#fff;">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span style="font-size:12px;color:var(--text);">Promo / other credits</span>
+          <div style="display:flex;align-items:center;gap:3px;">
+            <span style="font-size:12px;color:var(--muted);">-$</span>
+            <input type="number" id="dl-promo-credit" min="0" step="0.01" placeholder="0.00" oninput="updateDailyLookCartTotal()" style="width:70px;padding:4px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:12px;color:var(--text);font-family:var(--sans);text-align:right;background:#fff;">
+          </div>
+        </div>
+      </div>
       <!-- Try-on looks section -->
       <div id="dl-tryons-section" style="display:none;border-top:0.5px solid var(--border);padding-top:12px;margin-bottom:14px;">
         <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:8px;">Try-on looks</div>
@@ -5687,8 +5704,10 @@ function updateDailyLookCartTotal(){
   const undecided=dlItems.filter(i=>!i.keepReturn);
   const totalEl=document.getElementById('dl-cart-total');
   if(!totalEl) return;
-  if(!dlItems.length){totalEl.style.display='none';return;}
+  const creditsEl=document.getElementById('dl-credits-section');
+  if(!dlItems.length){totalEl.style.display='none';if(creditsEl)creditsEl.style.display='none';return;}
   totalEl.style.display='block';
+  if(creditsEl)creditsEl.style.display='block';
 
   // Discount: 3-4 keeping → 50% off 1 cheapest; 5+ → 50% off 2 cheapest
   const keepingPriced=keeping.map(i=>({...i,p:parseFloat(i.price)||0}));
@@ -5733,8 +5752,16 @@ function updateDailyLookCartTotal(){
     // Tax
     html+=`<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px;"><span>MS Tax (7%)</span><span>+$${taxAmt.toFixed(2)}</span></div>`;
 
+    // Credits & amount paid
+    const stylistCredit=parseFloat(document.getElementById('dl-stylist-credit')?.value)||0;
+    const promoCredit=parseFloat(document.getElementById('dl-promo-credit')?.value)||0;
+    const totalCredits=stylistCredit+promoCredit;
+    const amountPaid=Math.max(0,total-totalCredits);
     // Total
-    html+=`<div style="display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--border);padding-top:8px;"><span style="font-size:13px;font-weight:500;color:var(--text);">Total</span><span style="font-family:var(--serif);font-size:22px;color:var(--text);">$${total.toFixed(2)}</span></div>`;
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--border);padding-top:8px;${totalCredits>0?'margin-bottom:6px;':''}"><span style="font-size:13px;font-weight:500;color:var(--text);">Total</span><span style="font-family:var(--serif);font-size:22px;color:var(--text);">$${total.toFixed(2)}</span></div>`;
+    if(totalCredits>0){
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--border);padding-top:8px;"><span style="font-size:13px;font-weight:600;color:#27500A;">Amount paid</span><span style="font-family:var(--serif);font-size:22px;color:#27500A;">$${amountPaid.toFixed(2)}</span></div>`;
+    }
   }
 
   // Status summary
@@ -5805,15 +5832,17 @@ async function saveDailyLookBox(){
     }
   }
   try{
+    const stylistCredit=parseFloat(document.getElementById('dl-stylist-credit')?.value)||0;
+    const promoCredit=parseFloat(document.getElementById('dl-promo-credit')?.value)||0;
     if(_editingBoxRecord){
-      const updatedRecord={..._editingBoxRecord,date,stylistNote,stylistPhoto,items:itemsWithPhotos,tryOns:tryOnsWithPhotos};
+      const updatedRecord={..._editingBoxRecord,date,stylistNote,stylistPhoto,items:itemsWithPhotos,tryOns:tryOnsWithPhotos,stylistCredit,promoCredit};
       const tx=db.transaction('outfits','readwrite');
       tx.objectStore('outfits').put(updatedRecord);
       await new Promise(r=>tx.oncomplete=r);
       _editingBoxRecord=updatedRecord;
     } else {
       const newTs=Date.now();
-      await dbAdd('outfits',{type:'dailylook-box',date,stylistNote,stylistPhoto,items:itemsWithPhotos,tryOns:tryOnsWithPhotos,ts:newTs});
+      await dbAdd('outfits',{type:'dailylook-box',date,stylistNote,stylistPhoto,items:itemsWithPhotos,tryOns:tryOnsWithPhotos,stylistCredit,promoCredit,ts:newTs});
       // Switch to edit mode so future saves update this box instead of creating new ones
       const all=await dbAll('outfits');
       const saved=all.find(e=>e.ts===newTs&&e.type==='dailylook-box');
@@ -5925,6 +5954,11 @@ async function loadBoxForEditing(boxId){
   if(banner) banner.style.display='flex';
   if(label) label.textContent='Editing box from '+fmtOutfitDate(box.date);
   if(saveBtn) saveBtn.textContent='Update box';
+  // Restore credits
+  const stylistCreditEl=document.getElementById('dl-stylist-credit');
+  if(stylistCreditEl) stylistCreditEl.value=box.stylistCredit||'';
+  const promoCreditEl=document.getElementById('dl-promo-credit');
+  if(promoCreditEl) promoCreditEl.value=box.promoCredit||'';
   // Restore items
   for(const item of (box.items||[])) addDailyLookItem(item);
   // Restore try-ons
@@ -5944,6 +5978,8 @@ function resetDailyLookBox(){
   const saveBtn=document.getElementById('dl-save-btn');if(saveBtn)saveBtn.textContent='Save box';
   const finishBtn=document.getElementById('dl-finish-btn');if(finishBtn)finishBtn.style.display='none';
   const ts=document.getElementById('dl-tryons-section');if(ts)ts.style.display='none';
+  const stylistCreditEl=document.getElementById('dl-stylist-credit');if(stylistCreditEl)stylistCreditEl.value='';
+  const promoCreditEl=document.getElementById('dl-promo-credit');if(promoCreditEl)promoCreditEl.value='';
   updateDailyLookCartTotal();
 }
 
