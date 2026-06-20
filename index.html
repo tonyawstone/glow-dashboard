@@ -1448,7 +1448,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="tag" data-cat-filter onclick="filterClosetPieces('accessory',this)" style="font-size:12px;padding:5px 12px;">Accessories</button>
         <button class="tag" data-cat-filter onclick="filterClosetPieces('other',this)" style="font-size:12px;padding:5px 12px;">Other</button>
       </div>
-      <div id="closet-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;align-items:start;"></div>
+      <div id="closet-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px;align-items:start;"></div>
       <div id="closet-empty" style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">No pieces yet — add your first below</div>
       <div id="closet-add-panel" style="display:none;border-top:0.5px solid var(--border);padding-top:14px;margin-top:4px;">
         <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:10px;">New piece</div>
@@ -5196,11 +5196,11 @@ function renderClosetGrid(){
   if(empty)empty.style.display='none';
   filtered.forEach(item=>{
     const cell=document.createElement('div');
-    cell.style.cssText='cursor:pointer;';
+    cell.style.cssText='cursor:pointer;min-width:0;';
     cell.onclick=()=>openPieceView(item.id);
-    // Outer div sets the 3:4 ratio reliably via padding-bottom (cross-browser)
     const photoWrap=document.createElement('div');
-    photoWrap.style.cssText='position:relative;width:100%;padding-bottom:133.33%;border-radius:10px;overflow:hidden;margin-bottom:4px;background:var(--warm);border:0.5px solid var(--border);';
+    photoWrap.className='closet-photo-wrap';
+    photoWrap.style.cssText='position:relative;width:100%;aspect-ratio:3/4;border-radius:10px;overflow:hidden;margin-bottom:4px;background:var(--warm);border:0.5px solid var(--border);';
     const photoInner=document.createElement('div');
     photoInner.style.cssText='position:absolute;inset:0;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;';
     if(item.photoFront)photoInner.style.backgroundImage=`url('${item.photoFront}')`;
@@ -5214,6 +5214,13 @@ function renderClosetGrid(){
     catDiv.textContent=item.category?(item.category.charAt(0).toUpperCase()+item.category.slice(1)):'';
     cell.appendChild(photoWrap);cell.appendChild(nameDiv);cell.appendChild(catDiv);
     grid.appendChild(cell);
+  });
+  // Override with explicit pixel height after layout so every photo is identical regardless of column width drift
+  requestAnimationFrame(()=>{
+    const wraps=grid.querySelectorAll('.closet-photo-wrap');
+    if(!wraps.length)return;
+    const h=Math.round(wraps[0].offsetWidth*4/3);
+    wraps.forEach(w=>w.style.height=h+'px');
   });
 }
 
