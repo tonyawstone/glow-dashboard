@@ -1098,73 +1098,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
 
 
-    <!-- Closet item detail overlay -->
-    <div id="closet-detail-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:9500;overflow-y:auto;">
-      <div style="min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:20px;padding-bottom:80px;box-sizing:border-box;">
-      <div style="background:#fff;border-radius:16px;padding:20px;width:100%;max-width:420px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-          <div style="font-family:var(--serif);font-size:18px;color:var(--text);">Edit item</div>
-          <button onclick="closeClosetDetail()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;line-height:1;margin-left:12px;">×</button>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:14px;">
-          <div style="flex:1;text-align:center;">
-            <div class="photo-slot" id="cd-front" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cd-front')"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div>
-          </div>
-          <div style="flex:1;text-align:center;">
-            <div class="photo-slot" id="cd-back" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cd-back')"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div>
-          </div>
-        </div>
-        <input id="cd-name-input" type="text" placeholder="Item name..." style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;">
-        <input id="cd-brand-input" type="text" placeholder="Store / Brand" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:8px;">
-        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;" id="cd-cat-row">
-          <button class="tag cd-cat-btn" onclick="cdSetCategory('top',this)">Top</button>
-          <button class="tag cd-cat-btn" onclick="cdSetCategory('bottom',this)">Bottom</button>
-          <button class="tag cd-cat-btn" onclick="cdSetCategory('dress',this)">Dress</button>
-          <button class="tag cd-cat-btn" onclick="cdSetCategory('shoes',this)">Shoes</button>
-          <button class="tag cd-cat-btn" onclick="cdSetCategory('bag',this)">Bag</button>
-          <button class="tag cd-cat-btn" onclick="cdSetCategory('accessory',this)">Accessory</button>
-          <button class="tag cd-cat-btn" onclick="cdSetCategory('other',this)">Other</button>
-        </div>
-        <div style="display:flex;gap:6px;margin-bottom:6px;">
-          <input id="cd-color-input" type="text" placeholder="Color" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
-          <input id="cd-size-input" type="text" placeholder="Size" style="width:80px;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
-          <span style="font-size:13px;color:var(--muted);">$</span>
-          <input id="cd-price-input" type="number" placeholder="0.00" step="0.01" min="0" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
-        </div>
-        <button onclick="saveClosetDetail()" style="width:100%;padding:10px;border-radius:12px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;margin-bottom:8px;">Save</button>
-        <button onclick="deleteClosetItem()" style="width:100%;padding:10px;border-radius:12px;border:0.5px solid var(--rose);background:transparent;color:var(--rose);font-size:13px;font-family:var(--sans);cursor:pointer;">Remove from closet</button>
-      </div>
-      </div>
-    </div>
-
-    <!-- Piece View Popup -->
-    <div id="cpv-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:9500;overflow-y:auto;">
-      <div style="min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:20px;padding-bottom:80px;box-sizing:border-box;">
-      <div style="background:#fff;border-radius:16px;padding:20px;width:100%;max-width:420px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-          <div id="cpv-title" style="font-family:var(--serif);font-size:18px;color:var(--text);">Piece</div>
-          <button onclick="closePieceView()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;line-height:1;margin-left:12px;">×</button>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;">
-          <div id="cpv-photo" style="width:90px;min-width:90px;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;overflow:hidden;"></div>
-          <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
-            <div id="cpv-name" style="font-size:15px;font-weight:500;color:var(--text);"></div>
-            <div id="cpv-meta" style="font-size:12px;color:var(--muted);line-height:1.6;"></div>
-            <button onclick="openClosetDetailFromView()" style="margin-top:8px;padding:6px 14px;border-radius:10px;background:transparent;border:0.5px solid var(--accent);color:var(--accent);font-size:12px;font-family:var(--sans);cursor:pointer;align-self:flex-start;">Edit</button>
-          </div>
-        </div>
-        <div style="border-top:0.5px solid var(--border);padding-top:14px;">
-          <div id="cpv-looks-title" style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:500;"></div>
-          <div id="cpv-looks-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
-        </div>
-      </div>
-      </div>
-    </div>
-
     <!-- 2. Your Looks -->
     
     <div class="card" id="lookbook-card" style="display:none;">
@@ -1254,6 +1187,74 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="style-coach-output-full" class="coach-response" style="display:none;margin-top:10px;"></div>
     </div>
   </div>
+
+  <!-- Closet item detail overlay — moved outside view-content so it's never hidden by a parent display:none -->
+  <div id="closet-detail-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:9500;overflow-y:auto;">
+    <div style="min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:20px;padding-bottom:80px;box-sizing:border-box;">
+    <div style="background:#fff;border-radius:16px;padding:20px;width:100%;max-width:420px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-family:var(--serif);font-size:18px;color:var(--text);">Edit item</div>
+        <button onclick="closeClosetDetail()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;line-height:1;margin-left:12px;">×</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <div style="flex:1;text-align:center;">
+          <div class="photo-slot" id="cd-front" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cd-front')"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div>
+        </div>
+        <div style="flex:1;text-align:center;">
+          <div class="photo-slot" id="cd-back" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cd-back')"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div>
+        </div>
+      </div>
+      <input id="cd-name-input" type="text" placeholder="Item name..." style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;">
+      <input id="cd-brand-input" type="text" placeholder="Store / Brand" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:8px;">
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;" id="cd-cat-row">
+        <button class="tag cd-cat-btn" onclick="cdSetCategory('top',this)">Top</button>
+        <button class="tag cd-cat-btn" onclick="cdSetCategory('bottom',this)">Bottom</button>
+        <button class="tag cd-cat-btn" onclick="cdSetCategory('dress',this)">Dress</button>
+        <button class="tag cd-cat-btn" onclick="cdSetCategory('shoes',this)">Shoes</button>
+        <button class="tag cd-cat-btn" onclick="cdSetCategory('bag',this)">Bag</button>
+        <button class="tag cd-cat-btn" onclick="cdSetCategory('accessory',this)">Accessory</button>
+        <button class="tag cd-cat-btn" onclick="cdSetCategory('other',this)">Other</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <input id="cd-color-input" type="text" placeholder="Color" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
+        <input id="cd-size-input" type="text" placeholder="Size" style="width:80px;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+        <span style="font-size:13px;color:var(--muted);">$</span>
+        <input id="cd-price-input" type="number" placeholder="0.00" step="0.01" min="0" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
+      </div>
+      <button onclick="saveClosetDetail()" style="width:100%;padding:10px;border-radius:12px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;margin-bottom:8px;">Save</button>
+      <button onclick="deleteClosetItem()" style="width:100%;padding:10px;border-radius:12px;border:0.5px solid var(--rose);background:transparent;color:var(--rose);font-size:13px;font-family:var(--sans);cursor:pointer;">Remove from closet</button>
+    </div>
+    </div>
+  </div>
+
+  <!-- Piece View Popup — moved outside view-content so it's never hidden by a parent display:none -->
+  <div id="cpv-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:9500;overflow-y:auto;">
+    <div style="min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:20px;padding-bottom:80px;box-sizing:border-box;">
+    <div style="background:#fff;border-radius:16px;padding:20px;width:100%;max-width:420px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div id="cpv-title" style="font-family:var(--serif);font-size:18px;color:var(--text);">Piece</div>
+        <button onclick="closePieceView()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;line-height:1;margin-left:12px;">×</button>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;">
+        <div id="cpv-photo" style="width:90px;min-width:90px;aspect-ratio:3/4;border-radius:10px;background:var(--warm);border:0.5px solid var(--border);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;overflow:hidden;"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+          <div id="cpv-name" style="font-size:15px;font-weight:500;color:var(--text);"></div>
+          <div id="cpv-meta" style="font-size:12px;color:var(--muted);line-height:1.6;"></div>
+          <button onclick="openClosetDetailFromView()" style="margin-top:8px;padding:6px 14px;border-radius:10px;background:transparent;border:0.5px solid var(--accent);color:var(--accent);font-size:12px;font-family:var(--sans);cursor:pointer;align-self:flex-start;">Edit</button>
+        </div>
+      </div>
+      <div style="border-top:0.5px solid var(--border);padding-top:14px;">
+        <div id="cpv-looks-title" style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:500;"></div>
+        <div id="cpv-looks-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+      </div>
+    </div>
+    </div>
+  </div>
+
   <div class="view-content" id="vc-style-weekly">
     <div class="section-label">This week's looks</div>
 
@@ -5161,6 +5162,8 @@ async function togglePieceTag(pieceId){
 
 function closePiecePicker(){
   document.getElementById('ld-piece-picker').style.display='none';
+  const ov=document.getElementById('look-detail-overlay');if(ov)ov.scrollTop=0;
+  renderLookbook().catch(()=>{});
 }
 
 function toggleClosetAdd(){
