@@ -17005,9 +17005,13 @@ async function getMostRecentMyAirEntry(){
 async function getMyAirEntryForLastNight(){
   const yesterday = yesterdayStr();
   const logical = logicalDayStr(); // before 3 AM = yesterday, after = today
-  const _d=new Date();_d.setDate(_d.getDate()-2);
-  const dayBefore=`${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
-  const validDates = new Set([yesterday, logical, dayBefore]);
+  const validDates = new Set([yesterday, logical]);
+  // Before 3 AM only: also check one day earlier so data logged during the previous afternoon
+  // (which gets isoDate = yesterdayStr() at that time = 2 days ago now) isn't lost at midnight
+  if(logical === yesterday){
+    const _d=new Date();_d.setDate(_d.getDate()-2);
+    validDates.add(`${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`);
+  }
   try{
     const local = await dbAll('myair').catch(()=>[]);
     const entry = [...local].filter(e=>validDates.has((e.isoDate||'').slice(0,10))).sort((a,b)=>(b.isoDate||'').localeCompare(a.isoDate||''))[0];
