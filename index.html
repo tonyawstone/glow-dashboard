@@ -1416,14 +1416,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <span id="closet-count" style="font-size:11px;color:var(--muted);"></span>
       </div>
       <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
-        <button class="tag on" data-cat-filter onclick="filterCloset('all',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">All</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('top',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Tops</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('bottom',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Bottoms</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('dress',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Dresses</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('shoes',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Shoes</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('bag',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Bags</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('accessory',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Accessories</button>
-        <button class="tag" data-cat-filter onclick="filterCloset('other',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Other</button>
+        <button class="tag on" data-cat-filter onclick="filterClosetPieces('all',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">All</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('top',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Tops</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('bottom',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Bottoms</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('dress',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Dresses</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('shoes',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Shoes</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('bag',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Bags</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('accessory',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Accessories</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('other',this)" style="white-space:nowrap;font-size:12px;padding:5px 12px;flex-shrink:0;">Other</button>
       </div>
       <div id="closet-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;"></div>
       <div id="closet-empty" style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">No pieces yet — add your first below</div>
@@ -5131,12 +5131,14 @@ function renderClosetGrid(){
   });
 }
 
-function filterCloset(cat,btn){
+function filterClosetPieces(cat,btn){
   closetCatFilter=cat;
   document.querySelectorAll('[data-cat-filter]').forEach(b=>b.classList.remove('on'));
   if(btn)btn.classList.add('on');
   renderClosetGrid();
 }
+
+function filterCloset(cat,btn){ filterClosetPieces(cat,btn); }
 
 function switchClosetTab(tab){
   const pSec=document.getElementById('closet-pieces-section');
@@ -5148,6 +5150,7 @@ function switchClosetTab(tab){
     if(lSec)lSec.style.display='none';
     if(pBtn){pBtn.style.borderBottomColor='var(--accent)';pBtn.style.color='var(--accent)';pBtn.style.fontWeight='500';}
     if(lBtn){lBtn.style.borderBottomColor='transparent';lBtn.style.color='var(--muted)';lBtn.style.fontWeight='400';}
+    renderClosetGrid();
   }else{
     if(pSec)pSec.style.display='none';
     if(lSec)lSec.style.display='block';
