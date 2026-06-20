@@ -12164,8 +12164,18 @@ async function updateForecast(){await buildRecentChart();if(activeChart==='miles
 
 // ── PHOTO HANDLING ────────────────────────────────────────────────────
 let curPhotoTarget=null;
-function pickPhoto(slotId){curPhotoTarget=slotId;document.getElementById('photo-input').click();}
-function triggerOutfitPhoto(idx){curPhotoTarget='outfit-grid-'+idx;document.getElementById('photo-input').click();}
+function pickPhoto(slotId){
+  curPhotoTarget=slotId;
+  // Remove any previous dynamic input (iOS Safari requires a fresh input each time)
+  const prev=document.getElementById('_dyn_photo');if(prev)prev.remove();
+  const inp=document.createElement('input');
+  inp.type='file';inp.id='_dyn_photo';inp.accept='image/*';
+  inp.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;z-index:-1;';
+  inp.addEventListener('change',handlePhoto,{once:true});
+  document.body.appendChild(inp);
+  inp.click();
+}
+function triggerOutfitPhoto(idx){pickPhoto('outfit-grid-'+idx);}
 
 async function handlePhoto(event){
   const file=event.target.files[0];if(!file)return;
