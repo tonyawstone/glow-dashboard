@@ -5799,9 +5799,9 @@ async function saveDailyLookBox(){
   }));
   // Auto-add newly kept items to closet
   for(const item of itemsWithPhotos){
-    if(item.keepReturn==='Keeping'&&!item.closetAdded){
-      await autoAddToCloset(item);
-      item.closetAdded=true;
+    if(item.keepReturn==='Keeping'){
+      const closetTs = await autoAddToCloset(item);
+      if(closetTs){ item.closetAdded=true; item.closetItemTs=closetTs; }
     }
   }
   try{
@@ -5833,12 +5833,18 @@ async function saveDailyLookBox(){
 }
 
 async function autoAddToCloset(item){
-  if(!item.desc&&!item.photoFront) return;
-  const entry={name:item.desc||'DailyLook item',brand:item.brand||'',photoFront:item.photoFront||null,photoBack:item.photoBack||null,category:item.category?.toLowerCase()||'other',colors:item.color?[item.color]:[],price:item.price?parseFloat(item.price):null,source:'DailyLook'};
+  if(!item.desc&&!item.photoFront) return null;
+  // If this item was previously added, verify it still exists in closet by its stored ts
+  if(item.closetItemTs){
+    const current = await dbAll('closet');
+    if(current.some(c=>c.ts===item.closetItemTs)) return item.closetItemTs; // already present, skip
+  }
+  const ts = Date.now();
+  const entry={ts,name:item.desc||'DailyLook item',brand:item.brand||'',photoFront:item.photoFront||null,photoBack:item.photoBack||null,category:item.category?.toLowerCase()||'other',colors:item.color?[item.color]:[],price:item.price?parseFloat(item.price):null,source:'DailyLook'};
   await dbAdd('closet',entry);
-  syncToBlob('closet');
-  // Reload closet cache
+  syncToBlob('closet').catch(()=>{});
   closetItems=await dbAll('closet');
+  return ts;
 }
 
 async function openDailyLookHistory(){
