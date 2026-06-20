@@ -927,6 +927,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">How are you showing up today?</div>
         </div>
         <div id="style-checkin-header-right" style="display:flex;align-items:center;gap:8px;">
+          <button onclick="openStyleCheckinHistory()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past check-ins →</button>
         </div>
       </div>
       <div id="style-checkin-saved" style="display:none;"></div>
@@ -4832,7 +4833,7 @@ async function tab(id){
   document.querySelectorAll('.vtab')[0].classList.add('on');
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitMobilitySummary(); buildZepSideEffectsSummary(); loadBodyGoals(); buildZepboundStatus(); loadInjectionSiteHistory(); }
-  if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld&&!_sld.value)_sld.value=logicalDayStr(); }
+  if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld)_sld.value=logicalDayStr(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') {
     buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary(); const _slpd=document.getElementById('sleep-log-date');if(_slpd&&!_slpd.value)_slpd.value=logicalDayStr();
@@ -11678,20 +11679,29 @@ function restoreStyleCheckinDraft(){
   if(d.note && document.getElementById('style-checkin-note')) document.getElementById('style-checkin-note').value = d.note;
 }
 
+function styleCheckinIsCurrentDay(entry){
+  // True if the entry belongs to the current 3 AM logical day
+  const today = logicalDayStr();
+  if(entry.date===today) return true;
+  // Fallback: savedAt within 27 hours covers any 3 AM window edge case
+  if(entry.savedAt && (Date.now()-entry.savedAt) < 27*60*60*1000) return true;
+  return false;
+}
+
 async function restoreStyleCheckinState(){
   try{
     const today = logicalDayStr();
     const cached = JSON.parse(localStorage.getItem('glowStyleCheckinState')||'null');
-    if(cached && cached.date===today){
+    if(cached && styleCheckinIsCurrentDay(cached)){
       showStyleCheckinSaved(cached); return;
     }
     let entry = null;
-    try{ const all = await dbAll('outfits'); entry = all.filter(e=>e.type==='style-checkin'&&(e.date===today||e.date===logicalDayStr())).pop(); }catch(e){}
+    try{ const all = await dbAll('outfits'); entry = all.filter(e=>e.type==='style-checkin'&&e.date===today).pop(); }catch(e){}
     if(!entry){
       try{
         const res = await fetch(`${BACKEND}/api/sync?pillar=outfits&t=${Date.now()}`);
         if(res.ok){ const d=await res.json(); const data=Array.isArray(d.data)?d.data:[];
-          entry = data.filter(e=>e.type==='style-checkin'&&(e.date===today||e.date===logicalDayStr())).pop();
+          entry = data.filter(e=>e.type==='style-checkin'&&e.date===today).pop();
         }
       }catch(e){}
     }
@@ -11725,6 +11735,28 @@ async function saveStyleCheckin(){
     buildDailyProgress();
     showStyleCheckinSaved(entry);
   }catch(err){ showToast('Could not save — please try again'); }
+}
+
+async function openStyleCheckinHistory(){
+  let entries=[];
+  try{ const all=await dbAll('outfits'); entries=all.filter(e=>e.type==='style-checkin').sort((a,b)=>(b.date||'').localeCompare(a.date||'')); }catch(e){}
+  let ov=document.getElementById('style-checkin-history-overlay');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='style-checkin-history-overlay';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;display:flex;align-items:flex-end;';
+    ov.innerHTML='<div id="style-checkin-history-sheet" style="width:100%;max-height:80vh;background:var(--bg);border-radius:18px 18px 0 0;padding:20px 16px 32px;overflow-y:auto;box-sizing:border-box;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;"><div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Style Check-in History</div><button onclick="document.getElementById(\'style-checkin-history-overlay\').remove()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;">×</button></div><div id="style-checkin-history-list"></div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',e=>{ if(e.target===ov) ov.remove(); });
+  }
+  const list=document.getElementById('style-checkin-history-list');
+  if(!entries.length){ list.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:24px 0;">No past check-ins yet.</div>'; return; }
+  const chip=v=>`<span style="background:rgba(160,120,80,0.1);color:var(--accent);border:0.5px solid rgba(160,120,80,0.25);border-radius:20px;padding:3px 10px;font-size:11px;margin:2px 2px 0 0;display:inline-block;">${v}</span>`;
+  list.innerHTML=entries.map(e=>{
+    const dateLabel=e.date?new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}):'—';
+    const tags=[e.styleFace,e.outfitFeel,...(e.styleVibe||[]),...(e.working||[])].filter(Boolean);
+    return `<div style="padding:12px 0;border-bottom:0.5px solid var(--border);"><div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${dateLabel}</div><div style="display:flex;flex-wrap:wrap;gap:2px;">${tags.map(chip).join('')}</div>${e.note?`<div style="font-family:var(--serif);font-size:12px;color:var(--muted);font-style:italic;margin-top:6px;">${e.note}</div>`:''}</div>`;
+  }).join('');
 }
 
 async function saveMind(){
