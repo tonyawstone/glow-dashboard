@@ -2597,6 +2597,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div class="chart-wrap" style="height:220px;"><canvas id="body-comp-chart-monthly"></canvas></div>
     </div>
     <div class="card"><div class="card-title">Monthly steps</div><div class="chart-wrap" id="wrap-steps-month-chart"></div></div>
+    <div class="card">
+      <div class="card-title">💉 Zepbound · monthly log</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Once weekly · every Saturday · tracking dose & schedule compliance</div>
+      <div id="zep-monthly-tracker"><div class="log-empty">Loading Zepbound history...</div></div>
+    </div>
   </div>
 
   <div class="view-content" id="vc-body-yearly">
@@ -2998,12 +3003,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <span class="bp-legend-dot" style="background:#6B9E78"></span> Diastolic
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">💉 Zepbound · monthly log</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Once weekly · every Saturday · tracking dose & schedule compliance</div>
-      <div id="zep-monthly-tracker"><div class="log-empty">Loading Zepbound history...</div></div>
-    </div>
-
     <div class="card">
       <div class="card-title">Lab trends · Oct 2025 → Feb 2026</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tracking improvement since starting Zepbound. Next labs expected Aug–Nov 2026.</div>
@@ -4878,10 +4877,10 @@ function setView(v,btn){
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
-  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildHRRespWeekCharts();}if(v==='monthly')buildZepMonthlyTracker();}
+  if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildHRRespWeekCharts();}}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); if(v==='monthly') setTimeout(()=>switchSkinMetricChart(activeSkinMetric, document.querySelector('#skin-metric-tabs .chart-tab.on')||document.querySelector('#skin-metric-tabs .chart-tab')),100); }
   if(curTab==='hair'&&v!=='daily'){ buildHairCharts(); if(v==='weekly'){ loadHairAnalysesLog(); loadHairMilestones(); } }
-  if(curTab==='body'&&v!=='daily'){ buildBodyCompChartsForView(v); if(v==='weekly'){ buildWeeklyExercise(); buildGaitWeekCharts(); } if(v==='yearly') buildBodyYearlySummary(); }
+  if(curTab==='body'&&v!=='daily'){ buildBodyCompChartsForView(v); if(v==='weekly'){ buildWeeklyExercise(); buildGaitWeekCharts(); } if(v==='monthly') buildZepMonthlyTracker(); if(v==='yearly') buildBodyYearlySummary(); }
   if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); buildSleepMyAirCombinedChart(); buildSleepStagesWeeklyChart(); }
   if(curTab==='sleep'&&v==='monthly') { buildMyAirCharts(); buildSleepMonthlyCalendar(); }
   if(curTab==='mind'){ loadIntentionHistory(); loadReflectionHistory(); if(v==='weekly'){ loadPillarsToday(); renderPillarsWeekly(); } }
