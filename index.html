@@ -6604,6 +6604,7 @@ var DP_ITEMS = [
   ['🧠 Mind',    'dp-reflection','Reflection prompt answered','Journal · DayOne · prompt',           null, 'mind'],
   ['🧠 Mind',    'dp-mood',      'Mood logged',              'Vibe · energy · gratitude · wins',   null, 'mind'],
   ['😴 Sleep',   'dp-sleep-checkin', 'Sleep check-in logged',    'Quality · energy · notes',           null, 'sleep'],
+  ['😴 Sleep',   'dp-apple-sleep',   'Apple / Withings data',    'Hours · stages from CSV upload',     null, 'sleep'],
   ['😴 Sleep',   'dp-cpap',          'CPAP used last night',     'Usage hours logged',                 null, 'sleep'],
   ['😴 Sleep',   'dp-myair',         'myAir data saved',         'AHI · seal · on/off events',         null, 'sleep'],
   ['🌿 Wellness','dp-bp',        'BP logged',                'Blood pressure reading',             null, 'health'],
@@ -6668,7 +6669,7 @@ async function buildDailyProgress(){
   // Fetch all data sources in parallel for speed
   const [
     checkins, refs, minds, sleeps, bps,
-    sleepBlob, myairEntry, bpBlob, medsBlob, skinRoutineBlob, csvBPData
+    sleepBlob, myairEntry, bpBlob, medsBlob, skinRoutineBlob, csvBPData, csvRows
   ] = await Promise.all([
     dbAll('checkins').catch(()=>[]),
     dbAll('reflections').catch(()=>[]),
@@ -6681,6 +6682,7 @@ async function buildDailyProgress(){
     fetch(`${BACKEND}/api/sync?pillar=meds_log&t=${Date.now()}`).then(r=>r.ok?r.json():null).catch(()=>null),
     fetch(`${BACKEND}/api/sync?pillar=skin_routine&t=${Date.now()}`).then(r=>r.ok?r.json():null).catch(()=>null),
     getCSVBPData().catch(()=>[]),
+    getCSVRows().catch(()=>[]),
   ]);
 
   // Mind — use logical day (3 AM reset)
@@ -6690,11 +6692,15 @@ async function buildDailyProgress(){
   autoChecks['dp-reflection'] = refs.some(e=>e.type==='daily'&&(e.date===logical||e.date===today)&&e.answer?.length>0) || _journaledToday || _wellspokenToday;
   autoChecks['dp-mood'] = minds.some(e=>e.date===logical||e.date===today);
 
-  // Sleep check-in (last night = yesterday or logical day before 3 AM)
+  // Sleep check-in — manual log only (quality/energy/notes entered by user)
   const sleepBlobData = Array.isArray(sleepBlob?.data) ? sleepBlob.data : [];
   autoChecks['dp-sleep-checkin'] =
-    sleeps.some(e=>e.date===yesterday||e.date===logical) ||
-    sleepBlobData.some(e=>e.date===yesterday||e.date===logical);
+    sleeps.some(e=>(e.date===yesterday||e.date===logical) && (e.quality||e.note)) ||
+    sleepBlobData.some(e=>(e.date===yesterday||e.date===logical) && (e.quality||e.note));
+
+  // Apple / Withings sleep data — auto from CSV upload
+  const csvSleepRow = csvRows.find(r=>(r.date===yesterday||r.date===today||r.date===logical) && parseFloat(r.sleep_hrs)>0);
+  autoChecks['dp-apple-sleep'] = !!csvSleepRow;
 
   // myAir + CPAP (last night only)
   autoChecks['dp-myair'] = !!myairEntry;
@@ -6775,7 +6781,7 @@ async function buildDailyProgress(){
   // Build HTML — 7 collapsible pillar rows
   const PILLAR_META = {
     '🧠 Mind':     { icon: 'ti-brain',              tab: 'mind',   keys: ['dp-activation','dp-reflection','dp-mood'] },
-    '😴 Sleep':    { icon: 'ti-moon',               tab: 'sleep',  keys: ['dp-sleep-checkin','dp-cpap','dp-myair'] },
+    '😴 Sleep':    { icon: 'ti-moon',               tab: 'sleep',  keys: ['dp-sleep-checkin','dp-apple-sleep','dp-cpap','dp-myair'] },
     '🌿 Wellness': { icon: 'ti-leaf', tab: 'health', keys: ['dp-bp','dp-meds-am','dp-meds-pm','dp-bodywater','dp-water'] },
     '✨ Skin':     { icon: 'ti-sparkles',           tab: 'skin',   keys: ['dp-skin-checkin','dp-skin-am','dp-skin-pm','dp-musely-game'] },
     '❤️ Body':    { icon: 'ti-barbell',       tab: 'body',   keys: ['dp-body','dp-exercise'] },
@@ -7002,7 +7008,7 @@ function updateTodayRing(score){
 function updatePillarRings(checks){
   const pillarItems = {
     mind:    ['dp-activation','dp-reflection','dp-mood'],
-    sleep:   ['dp-sleep-checkin','dp-cpap','dp-myair'],
+    sleep:   ['dp-sleep-checkin','dp-apple-sleep','dp-cpap','dp-myair'],
     health:  ['dp-bp','dp-meds-am','dp-meds-pm','dp-bodywater','dp-water'],
     skin:    ['dp-skin-checkin','dp-skin-am','dp-skin-pm','dp-musely-game'],
     body:    ['dp-body','dp-exercise'],
