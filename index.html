@@ -4722,7 +4722,7 @@ function setView(v,btn){
   if(curTab==='body'&&v!=='daily'){ buildBodyCompChartsForView(v); if(v==='weekly'){ buildWeeklyExercise(); buildGaitWeekCharts(); } if(v==='yearly') buildBodyYearlySummary(); }
   if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); buildSleepMyAirCombinedChart(); buildSleepStagesWeeklyChart(); }
   if(curTab==='sleep'&&v==='monthly') { buildMyAirCharts(); buildSleepMonthlyCalendar(); }
-  if(curTab==='mind'){ loadIntentionHistory(); loadReflectionHistory(); if(v==='weekly') loadPillarsToday(); }
+  if(curTab==='mind'){ loadIntentionHistory(); loadReflectionHistory(); if(v==='weekly'){ loadPillarsToday(); renderPillarsWeekly(); } }
 }
 function applyView(){
   const c=document.getElementById('s-'+curTab);if(!c)return;
@@ -15976,6 +15976,69 @@ function savePillarsToday(){
     state['note_'+key]=document.getElementById('pdn-'+key)?.value||'';
   });
   localStorage.setItem('glowPillarsToday',JSON.stringify(state));
+  // Persist to day-by-day history for the weekly card
+  try{
+    const hist=JSON.parse(localStorage.getItem('glowPillarsHistory')||'{}');
+    const dayData={}; PILLAR_KEYS.forEach(key=>{ dayData[key]=state['p-'+key]; });
+    hist[state.date]=dayData;
+    const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-90);
+    const cutoffStr=nowStr(cutoff);
+    Object.keys(hist).forEach(d=>{ if(d<cutoffStr) delete hist[d]; });
+    localStorage.setItem('glowPillarsHistory',JSON.stringify(hist));
+  }catch(e){}
+  if(curView==='weekly'&&curTab==='mind') renderPillarsWeekly();
+}
+
+function renderPillarsWeekly(){
+  const el=document.getElementById('pillars-weekly'); if(!el)return;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const weekStart=new Date(today); weekStart.setDate(today.getDate()-today.getDay());
+  const days=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(weekStart); d.setDate(weekStart.getDate()+i);
+    days.push({date:nowStr(d),label:['Su','M','Tu','W','Th','F','Sa'][i],future:d>today});
+  }
+  let hist={};
+  try{ hist=JSON.parse(localStorage.getItem('glowPillarsHistory')||'{}'); }catch(e){}
+  // Fold in today's current state in case it hasn't been saved to history yet
+  try{
+    const ts=JSON.parse(localStorage.getItem('glowPillarsToday')||'{}');
+    if(ts.date===logicalDayStr()){ hist[ts.date]=hist[ts.date]||{}; PILLAR_KEYS.forEach(k=>{ hist[ts.date][k]=ts['p-'+k]; }); }
+  }catch(e){}
+  const loggedDays=days.filter(d=>!d.future);
+  const totalDone=loggedDays.reduce((sum,day)=>{ const d=hist[day.date]||{}; return sum+PILLAR_KEYS.filter(k=>d[k]).length; },0);
+  const totalPossible=loggedDays.length*7;
+  if(totalDone===0){ el.innerHTML='<div class="log-empty">Log daily to see your weekly pillar coverage.</div>'; return; }
+  const pct=Math.round(totalDone/totalPossible*100);
+  const pctColor=pct>=70?'#27500A':pct>=40?'var(--accent)':'var(--muted)';
+  const dayHeaders=days.map(d=>`<div style="text-align:center;font-size:9px;color:${d.future?'var(--border)':'var(--muted)'};font-weight:500;">${d.label}</div>`).join('');
+  const rows=PILLAR_KEYS.map(key=>{
+    const info=PILLAR_INFO[key];
+    const dots=days.map(day=>{
+      if(day.future) return`<div style="width:20px;height:20px;border-radius:50%;background:var(--warm);border:0.5px dashed var(--border);margin:0 auto;"></div>`;
+      const done=hist[day.date]&&hist[day.date][key];
+      return`<div style="width:20px;height:20px;border-radius:50%;background:${done?'var(--accent)':'rgba(0,0,0,0.07)'};margin:0 auto;display:flex;align-items:center;justify-content:center;">${done?`<i class="ti ti-check" style="font-size:9px;color:#fff;"></i>`:''}</div>`;
+    }).join('');
+    const daysDone=loggedDays.filter(d=>hist[d.date]&&hist[d.date][key]).length;
+    return`<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid var(--border);">
+      <div style="font-size:14px;width:20px;text-align:center;">${info.icon}</div>
+      <div style="flex:1;min-width:0;font-size:11px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${info.title.split(' ')[0]}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,20px);gap:2px;">${dots}</div>
+      <div style="font-size:10px;color:${daysDone===loggedDays.length?'#27500A':'var(--muted)'};min-width:24px;text-align:right;font-weight:${daysDone===loggedDays.length?'600':'400'};">${daysDone}/${loggedDays.length}</div>
+    </div>`;
+  }).join('');
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:11px;color:var(--muted);">${totalDone} of ${totalPossible} possible check-ins</div>
+      <div style="font-size:14px;font-weight:700;color:${pctColor};">${pct}%</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;padding-bottom:4px;border-bottom:0.5px solid var(--border);margin-bottom:2px;">
+      <div style="width:20px;"></div><div style="flex:1;min-width:0;"></div>
+      <div style="display:grid;grid-template-columns:repeat(7,20px);gap:2px;">${dayHeaders}</div>
+      <div style="min-width:24px;"></div>
+    </div>
+    ${rows}
+  `;
 }
 
 function loadPillarsToday(){
