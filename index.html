@@ -4754,6 +4754,7 @@ async function boot(){
   loadReflectionPrompt();
   loadPillarsToday();
   loadWeekIntention();
+  dbDelPhoto('outfit-new'); dbDelPhoto('outfit-new-bloburl');
   await loadAllPhotos();
   await loadLogs();
   renderLookbook();
