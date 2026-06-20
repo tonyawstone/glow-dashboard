@@ -783,9 +783,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
           </div>
           <div id="dp-overall" style="font-family:var(--serif);font-size:13px;color:var(--accent);white-space:nowrap;font-weight:400;"></div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Complete your daily check-ins</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Complete your daily activities</div>
         <div id="daily-progress-list"></div>
-        <button onclick="openDPOverlay()" style="background:none;border:none;font-size:13px;color:var(--accent);cursor:pointer;padding:6px 0 0;font-family:var(--serif);display:flex;align-items:center;gap:4px;margin-top:4px;width:100%;justify-content:center;">View full checklist <span style="font-size:14px;">→</span></button>
+        <button onclick="openDPOverlay()" style="background:none;border:none;font-size:13px;color:var(--accent);cursor:pointer;padding:6px 0 0;font-family:var(--serif);display:flex;align-items:center;gap:4px;margin-top:4px;width:100%;justify-content:center;">View full activity list <span style="font-size:14px;">→</span></button>
       </div>
     </div>
 
@@ -6811,7 +6811,7 @@ async function buildDailyProgress(){
     if(allDone) pillarsDone++;
     const pct = items.length > 0 ? Math.round((itemsDone / items.length) * 100) : 0;
     const barColor = allDone ? '#6B9E78' : pct > 0 ? 'var(--accent)' : 'var(--border)';
-    return `<div onclick="openCheckinHubToPillar('${PILLAR_NAMES[pillar]}')" style="
+    return `<div onclick="openDPOverlayToPillar('${PILLAR_NAMES[pillar]}')" style="
       flex:1;min-width:0;padding:8px 6px;border-radius:12px;
       background:${allDone ? 'rgba(107,158,120,0.1)' : 'var(--warm)'};
       border:0.5px solid ${allDone ? 'rgba(107,158,120,0.3)' : 'var(--border)'};
@@ -6945,8 +6945,9 @@ function openDPOverlay(){
       ? `<div style="width:34px;height:34px;border-radius:50%;background:#6B9E78;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ${meta.icon}" style="font-size:15px;color:#fff;"></i></div>`
       : `<div style="width:34px;height:34px;border-radius:50%;background:var(--warm);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ${meta.icon}" style="font-size:15px;color:var(--muted);"></i></div>`;
 
+    const dpName = PILLAR_NAMES[pillar].toLowerCase();
     html += `
-      <div style="background:#fff;border:0.5px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;">
+      <div id="dp-activity-${dpName}" style="background:#fff;border:0.5px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;">
         <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.dpo-chevron').style.transform=this.nextElementSibling.style.display==='block'?'rotate(180deg)':''">
           ${iconCircle}
           <div style="flex:1;">
@@ -6955,7 +6956,7 @@ function openDPOverlay(){
           </div>
           <i class="ti ti-chevron-down dpo-chevron" style="font-size:14px;color:var(--muted);transition:transform 0.2s;${isOpen?'transform:rotate(180deg)':''}"></i>
         </div>
-        <div style="display:${isOpen?'block':'none'};">
+        <div id="dp-activity-body-${dpName}" style="display:${isOpen?'block':'none'};">
           ${items.map(it => {
             const done = checks[it.id]||false;
             return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:0.5px solid var(--border);cursor:pointer;" onclick="closeOverlay('dp-detail-overlay');tab('${it.deepLink}')">
@@ -9325,6 +9326,21 @@ function openCheckinHubToPillar(name){
     const el = document.getElementById('ci-section-'+name.toLowerCase());
     if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
   }, 450);
+}
+
+function openDPOverlayToPillar(name){
+  openDPOverlay();
+  setTimeout(()=>{
+    const n = name.toLowerCase();
+    const body = document.getElementById('dp-activity-body-'+n);
+    if(body && body.style.display==='none'){
+      body.style.display='block';
+      const chev = body.previousElementSibling?.querySelector('.dpo-chevron');
+      if(chev) chev.style.transform='rotate(180deg)';
+    }
+    const el = document.getElementById('dp-activity-'+n);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 350);
 }
 
 async function renderCheckinHub(){
@@ -20339,7 +20355,7 @@ async function weeklyMindInsight(){
   <div style="padding:16px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeOverlay('dp-detail-overlay')" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
-      <div class="overlay-title" style="font-family:var(--serif);font-size:22px;font-weight:300;">Daily Check-Ins</div>
+      <div class="overlay-title" style="font-family:var(--serif);font-size:22px;font-weight:300;">Daily Activity List</div>
     </div>
     <div id="dp-detail-content"><div class="log-empty">Loading...</div></div>
   </div>
