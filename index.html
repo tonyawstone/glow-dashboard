@@ -456,6 +456,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .sec.on{display:block;}
 .view-content{display:none;}
 .view-content.on{display:block;}
+#vc-style-closet.on{position:fixed;inset:0;z-index:500;background:var(--cream);overflow-y:auto;padding:max(14px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));box-sizing:border-box;display:block;}
 
 /* AFFIRMATION */
 .affirmation-card{background:linear-gradient(135deg,var(--warm),#E8DDD0);border-radius:16px;padding:14px 16px;border:0.5px solid var(--border);margin-bottom:14px;position:relative;overflow:hidden;min-height:100px;display:flex;flex-direction:column;justify-content:center;}
@@ -1421,13 +1422,14 @@ textarea:focus,input:focus{border-color:var(--accent);}
   </div>
   <div class="view-content" id="vc-style-closet">
     <!-- Custom closet header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 14px;">
-      <button onclick="toggleClosetView()" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--text);display:flex;align-items:center;gap:2px;"><i class="ti ti-chevron-left" style="font-size:20px;"></i></button>
-      <div style="font-family:var(--serif);font-size:20px;font-weight:400;color:var(--text);">My Closet</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 10px;">
+      <button onclick="toggleClosetView()" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--text);display:flex;align-items:center;"><i class="ti ti-chevron-left" style="font-size:20px;"></i></button>
+      <div style="text-align:center;">
+        <div style="font-family:var(--serif);font-size:20px;font-weight:400;color:var(--text);line-height:1.2;">My Closet</div>
+        <div id="closet-stats" style="font-size:11px;color:var(--muted);margin-top:1px;"></div>
+      </div>
       <button onclick="toggleClosetSearch()" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--text);display:flex;align-items:center;"><i class="ti ti-search" style="font-size:20px;"></i></button>
     </div>
-    <!-- Stats row -->
-    <div id="closet-stats" style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:14px;letter-spacing:0.01em;"></div>
     <!-- Search bar (hidden by default) -->
     <div id="closet-search-bar" style="display:none;margin-bottom:12px;">
       <input type="text" id="closet-search-input" placeholder="Search my closet..." oninput="filterClosetBySearch(this.value)" style="width:100%;padding:9px 14px;border-radius:20px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;background:var(--warm);">
@@ -1437,7 +1439,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="closet-pick-label"></div>
     </div>
     <!-- Sub-tabs: Items | Looks — segmented control style -->
-    <div style="display:flex;background:var(--warm);border-radius:22px;padding:3px;margin-bottom:16px;">
+    <div style="display:flex;background:var(--warm);border-radius:22px;padding:3px;margin-bottom:16px;border:0.5px solid var(--border);">
       <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="flex:1;padding:8px 0;border-radius:18px;border:none;background:#fff;color:var(--text);font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.08);">Items</button>
       <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="flex:1;padding:8px 0;border-radius:18px;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;">Looks</button>
     </div>
@@ -4876,7 +4878,7 @@ async function tab(id){
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitMobilitySummary(); buildZepSideEffectsSummary(); loadBodyGoals(); buildZepboundStatus(); loadInjectionSiteHistory(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld)_sld.value=logicalDayStr(); }
-  else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');document.getElementById('compact-header').style.display='';document.getElementById('bottom-nav').style.display='';document.getElementById('time-tabs-bar').style.display='';document.getElementById('style-inspo-bar').style.display='';} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
+  else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') {
     buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary(); const _slpd=document.getElementById('sleep-log-date');if(_slpd&&!_slpd.value)_slpd.value=logicalDayStr();
     // Default myAir date to yesterday — CPAP data is always for last night
@@ -4916,7 +4918,7 @@ function setView(v,btn){
   // Mark matching buttons in both the time-tabs-bar and any legacy vtabs
   document.querySelectorAll('.vtab').forEach(b=>{ if(b.dataset.view===v) b.classList.add('on'); });
   applyView();
-  if(curTab==='style'){ if(closetViewOpen){document.getElementById('compact-header').style.display='';document.getElementById('bottom-nav').style.display='';document.getElementById('time-tabs-bar').style.display='';document.getElementById('style-inspo-bar').style.display='';}closetViewOpen=false; renderLookbook(); if(v==='weekly') loadWeekPlan(); if(v==='monthly'){ renderStyleCalendar(); buildStylePurchaseHistory('style-purchase-history-monthly',false); } if(v==='yearly') buildStyleYearlyView(); }
+  if(curTab==='style'){ if(closetViewOpen){document.getElementById('vc-style-closet').classList.remove('on');}closetViewOpen=false; renderLookbook(); if(v==='weekly') loadWeekPlan(); if(v==='monthly'){ renderStyleCalendar(); buildStylePurchaseHistory('style-purchase-history-monthly',false); } if(v==='yearly') buildStyleYearlyView(); }
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
@@ -5220,23 +5222,25 @@ function renderClosetGrid(){
     else photoInner.innerHTML='<i class="ti ti-hanger" style="font-size:28px;color:var(--border);"></i>';
     // Heart button
     const heart=document.createElement('button');
-    heart.style.cssText='position:absolute;top:8px;right:8px;z-index:2;background:rgba(255,255,255,0.88);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;line-height:1;padding:0;';
+    heart.style.cssText='position:absolute;top:7px;right:7px;z-index:2;background:rgba(255,255,255,0.88);border:none;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;line-height:1;padding:0;';
     heart.innerHTML=item.favorite?'♥':'♡';
     heart.style.color=item.favorite?'#b85c5c':'var(--muted)';
     heart.onclick=(e)=>{e.stopPropagation();togglePieceFavorite(item.id);};
-    photoWrap.appendChild(photoInner);photoWrap.appendChild(heart);
-    const nameDiv=document.createElement('div');
-    nameDiv.style.cssText='font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;margin-bottom:3px;';
-    nameDiv.textContent=item.name||'—';
-    const bottomRow=document.createElement('div');
-    bottomRow.style.cssText='display:flex;align-items:center;gap:5px;margin-bottom:4px;';
+    // Label overlay inside card
+    const labelBar=document.createElement('div');
+    labelBar.style.cssText='position:absolute;bottom:0;left:0;right:0;padding:18px 7px 7px;background:linear-gradient(transparent,rgba(40,28,16,0.55));border-radius:0 0 12px 12px;';
+    const nameLbl=document.createElement('div');
+    nameLbl.style.cssText='font-size:11px;color:#fff;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;';
+    nameLbl.textContent=item.name||'—';
+    labelBar.appendChild(nameLbl);
     if(item.category){
-      const tag=document.createElement('span');
-      tag.style.cssText='font-size:10px;color:var(--accent);background:var(--warm);border:0.5px solid var(--border);border-radius:10px;padding:2px 8px;';
-      tag.textContent=CAT_LABEL[item.category]||item.category;
-      bottomRow.appendChild(tag);
+      const catLbl=document.createElement('div');
+      catLbl.style.cssText='font-size:9px;color:rgba(255,255,255,0.75);margin-top:1px;';
+      catLbl.textContent=CAT_LABEL[item.category]||item.category;
+      labelBar.appendChild(catLbl);
     }
-    cell.appendChild(photoWrap);cell.appendChild(nameDiv);cell.appendChild(bottomRow);
+    photoWrap.appendChild(photoInner);photoWrap.appendChild(heart);photoWrap.appendChild(labelBar);
+    cell.appendChild(photoWrap);
     grid.appendChild(cell);
   });
   requestAnimationFrame(()=>{
@@ -8213,22 +8217,13 @@ function toggleClosetView(){
     btn.textContent='👗 My Closet';
     if(shopBtn) shopBtn.style.display='';
     if(inspoBtn) inspoBtn.textContent='✨ Inspo Board';
-    document.getElementById('compact-header').style.display='';
-    document.getElementById('bottom-nav').style.display='';
-    document.getElementById('time-tabs-bar').style.display='';
-    document.getElementById('style-inspo-bar').style.display='';
   } else {
     inspoViewOpen=false; shoppingViewOpen=false;
     closetViewOpen=true;
-    document.querySelectorAll('#s-style .view-content').forEach(el=>el.classList.remove('on'));
     document.getElementById('vc-style-closet').classList.add('on');
     btn.textContent='← Back';
     if(shopBtn) shopBtn.style.display='none';
     if(inspoBtn) inspoBtn.textContent='✨ Inspo Board';
-    document.getElementById('compact-header').style.display='none';
-    document.getElementById('bottom-nav').style.display='none';
-    document.getElementById('time-tabs-bar').style.display='none';
-    document.getElementById('style-inspo-bar').style.display='none';
     loadCloset();switchClosetTab(_pickerDay?'looks':'pieces');
   }
 }
