@@ -5743,6 +5743,21 @@ function addDailyLookTryOn(existingTryOn=null){
   div.innerHTML=`<div class="photo-slot" style="width:100%;aspect-ratio:3/4;" onclick="tryOnSlotClick(${id})" id="dl-tryon-photo-${id}"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div><button onclick="removeDailyLookTryOn(${id})" style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(196,115,90,0.85);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>`;
   list.appendChild(div);
   if(tryOn.photo){const s=document.getElementById(`dl-tryon-photo-${id}`);if(s){s.style.backgroundImage=`url('${tryOn.photo}')`;s.style.backgroundSize='cover';s.style.backgroundPosition='center';s.innerHTML='';}}
+  else{
+    // Photo may still be in the photos IDB store (e.g. if blob sync overwrote tryOns with null photos)
+    const slotKey=`dl-tryon-photo-${id}`;
+    dbGetPhoto(slotKey+'-bloburl').then(burl=>{
+      const url=burl||(null);
+      if(url){applyTryOnPhoto(id,url,url);}
+      else dbGetPhoto(slotKey).then(b64=>{if(b64)applyTryOnPhoto(id,b64,null);});
+    });
+  }
+}
+
+function applyTryOnPhoto(id,displayUrl,storeUrl){
+  const s=document.getElementById(`dl-tryon-photo-${id}`);
+  if(s){s.style.backgroundImage=`url('${displayUrl}')`;s.style.backgroundSize='cover';s.style.backgroundPosition='center';s.innerHTML='';}
+  const t=dlTryOns.find(t=>t.id===id);if(t)t.photo=storeUrl||displayUrl;
 }
 
 function removeDailyLookTryOn(id){
@@ -6339,7 +6354,10 @@ async function loadFromBlob(store) {
         } else {
           let needsUpdate = false;
           if (entry.type === 'dailylook-box' && (entry.items||[]).length > (existing.items||[]).length) {
-            Object.assign(existing, {items:entry.items||[],tryOns:entry.tryOns||[],stylistNote:entry.stylistNote||existing.stylistNote,stylistPhoto:entry.stylistPhoto||existing.stylistPhoto,date:entry.date||existing.date});
+            // Blob tryOns may have null photos (base64 was stripped before upload) — merge to keep local photos
+            const localTryOns = existing.tryOns || [];
+            const mergedTryOns = (entry.tryOns||[]).map((t,i)=>({...t,photo:t.photo||localTryOns[i]?.photo||null}));
+            Object.assign(existing, {items:entry.items||[],tryOns:mergedTryOns,stylistNote:entry.stylistNote||existing.stylistNote,stylistPhoto:entry.stylistPhoto||existing.stylistPhoto,date:entry.date||existing.date});
             needsUpdate = true;
           }
           if (entry.photo && entry.photo.startsWith('https://') && (!existing.photo || existing.photo.startsWith('data:'))) {
@@ -12217,6 +12235,9 @@ async function uploadPhotoToBlob(slotId,dataUrl){
     // Update dlItems so next sync captures proxy URL
     const m=slotId.match(/^dl-photo-(\d+)-(front|back)$/);
     if(m){const it=dlItems.find(i=>i.id===parseInt(m[1]));if(it)it[m[2]==='front'?'photoFront':'photoBack']=url;}
+    // Update dlTryOns so next save captures CDN URL instead of base64
+    const m2=slotId.match(/^dl-tryon-photo-(\d+)$/);
+    if(m2){const t=dlTryOns.find(t=>t.id===parseInt(m2[1]));if(t)t.photo=url;}
     console.log(`✅ Photo uploaded to Blob: ${slotId}`);
   }catch(err){
     console.warn('Blob upload failed (photo still saved locally):',err.message);
