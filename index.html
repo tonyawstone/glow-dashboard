@@ -12183,9 +12183,11 @@ async function handlePhoto(event){
     const compressed=await compressImage(file,curPhotoTarget==='hero'?220:800,0.75);
     displayPhoto(curPhotoTarget,compressed);
     // Don't persist quick-log slot to IndexedDB — saveQuickLog handles it
+    // Don't pre-upload outfit-new to blob — saveOutfit uploads to a unique outfit_${ts} slot;
+    // pre-uploading here would set img.src to a cached proxy URL that briefly shows the old photo
     if(curPhotoTarget!=='ql-photo'){
       await dbPutPhoto(curPhotoTarget,compressed);
-      uploadPhotoToBlob(curPhotoTarget,compressed);
+      if(curPhotoTarget!=='outfit-new') uploadPhotoToBlob(curPhotoTarget,compressed);
     }
     if(curPhotoTarget==='dl-stylist-photo') ocrStylistNote(compressed);
   }catch(err){alert('Could not save photo: '+err.message);}
