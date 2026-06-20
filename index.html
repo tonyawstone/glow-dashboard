@@ -4848,7 +4848,7 @@ async function tab(id){
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld)_sld.value=logicalDayStr(); }
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') {
-    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary(); const _slpd=document.getElementById('sleep-log-date');if(_slpd&&!_slpd.value)_slpd.value=yesterdayStr();
+    buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary(); const _slpd=document.getElementById('sleep-log-date');if(_slpd&&!_slpd.value)_slpd.value=logicalDayStr();
     // Default myAir date to yesterday — CPAP data is always for last night
     const myairDate = document.getElementById('myair-date');
     const myairLabel = document.getElementById('myair-date-label');
@@ -6693,13 +6693,14 @@ async function buildDailyProgress(){
   autoChecks['dp-mood'] = minds.some(e=>e.date===logical||e.date===today);
 
   // Sleep check-in — manual log only (quality/energy/notes entered by user)
+  // Apple Health convention: entry date = wake date (today/logical), not the night-before
   const sleepBlobData = Array.isArray(sleepBlob?.data) ? sleepBlob.data : [];
   autoChecks['dp-sleep-checkin'] =
-    sleeps.some(e=>(e.date===yesterday||e.date===logical) && (e.quality||e.note)) ||
-    sleepBlobData.some(e=>(e.date===yesterday||e.date===logical) && (e.quality||e.note));
+    sleeps.some(e=>(e.date===today||e.date===logical) && (e.quality||e.note)) ||
+    sleepBlobData.some(e=>(e.date===today||e.date===logical) && (e.quality||e.note));
 
-  // Apple / Withings sleep data — auto from CSV upload
-  const csvSleepRow = csvRows.find(r=>(r.date===yesterday||r.date===today||r.date===logical) && parseFloat(r.sleep_hrs)>0);
+  // Apple / Withings sleep data — auto from CSV upload (also wake-date convention)
+  const csvSleepRow = csvRows.find(r=>(r.date===today||r.date===logical) && parseFloat(r.sleep_hrs)>0);
   autoChecks['dp-apple-sleep'] = !!csvSleepRow;
 
   // myAir + CPAP (last night only)
@@ -7124,7 +7125,7 @@ async function openPastSleepLog(){
       const chips = [e.hrs+'h', e.quality, ...(e.energy||[])].filter(Boolean);
       html += '<div style="padding:12px 0;border-bottom:0.5px solid var(--border);">'
         +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">'
-        +(e.date ? (()=>{ const d=safeDate(e.date); return d&&!isNaN(d)?'Night of '+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}):e.date; })() : 'Unknown')
+        +(e.date ? (()=>{ const d=safeDate(e.date); if(!d||isNaN(d))return e.date; const prev=new Date(d);prev.setDate(prev.getDate()-1); return 'Night of '+prev.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); })() : 'Unknown')
         +(e.bed?' · '+e.bed+'→'+e.wake:'')+'</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">'
         +chips.map(c=>'<span style="background:var(--warm);border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;">'+c+'</span>').join('')
@@ -17791,7 +17792,8 @@ async function loadMyAirLastLogged(){
         // Always use isoDate for consistent formatting
         const iso = (e.isoDate||'').slice(0,10);
         const d = iso ? safeDate(iso) : null;
-        const dateLabel = d && !isNaN(d) ? 'Night of '+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) : e.date||'Unknown date';
+        const _prev=new Date(d);_prev.setDate(_prev.getDate()-1);
+        const dateLabel = d && !isNaN(d) ? 'Night of '+_prev.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) : e.date||'Unknown date';
         const scoreColor = e.score>=90?'#27500A':e.score>=70?'#92400E':'#7F1D1D';
         const realIdx = data.length - 1 - i;
         return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);">
