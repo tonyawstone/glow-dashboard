@@ -6686,6 +6686,7 @@ var DP_ITEMS = [
   ['😴 Sleep',   'dp-apple-sleep',   'Apple / Withings data',    'Hours · stages from CSV upload',     null, 'sleep'],
   ['😴 Sleep',   'dp-cpap',          'CPAP used last night',     'Usage hours logged',                 null, 'sleep'],
   ['😴 Sleep',   'dp-myair',         'myAir data saved',         'AHI · seal · on/off events',         null, 'sleep'],
+  ['🌿 Wellness','dp-wellness-checkin','Wellness check-in logged','How you feel today',           null, 'health'],
   ['🌿 Wellness','dp-bp',        'BP logged',                'Blood pressure reading',             null, 'health'],
   ['🌿 Wellness','dp-meds-am',   'AM meds taken',            'Irbesartan · Metoprolol · Amlodipine · Osteo Biflex', null, 'health'],
   ['🌿 Wellness','dp-meds-pm',   'PM meds taken',            'Rosuvastatin',                       null, 'health'],
@@ -6786,6 +6787,9 @@ async function buildDailyProgress(){
   autoChecks['dp-myair'] = !!myairEntry;
   autoChecks['dp-cpap'] = !!(myairEntry?.cpapUsed);
 
+  // Wellness check-in — logical day
+  try { const wellnessCheckins = await dbAll('wellness_checkins'); autoChecks['dp-wellness-checkin'] = wellnessCheckins.some(e=>e.date===logical||e.date===today); } catch(e){}
+
   // BP — stays checked until 3 AM reset
   autoChecks['dp-bp'] =
     (Array.isArray(csvBPData) && csvBPData.some(e=>e.date===logical||e.date===today)) ||
@@ -6862,7 +6866,7 @@ async function buildDailyProgress(){
   const PILLAR_META = {
     '🧠 Mind':     { icon: 'ti-brain',              tab: 'mind',   keys: ['dp-activation','dp-reflection','dp-mood'] },
     '😴 Sleep':    { icon: 'ti-moon',               tab: 'sleep',  keys: ['dp-sleep-checkin','dp-apple-sleep','dp-cpap','dp-myair'] },
-    '🌿 Wellness': { icon: 'ti-leaf', tab: 'health', keys: ['dp-bp','dp-meds-am','dp-meds-pm','dp-bodywater','dp-water'] },
+    '🌿 Wellness': { icon: 'ti-leaf', tab: 'health', keys: ['dp-wellness-checkin','dp-bp','dp-meds-am','dp-meds-pm','dp-bodywater','dp-water'] },
     '✨ Skin':     { icon: 'ti-sparkles',           tab: 'skin',   keys: ['dp-skin-checkin','dp-skin-am','dp-skin-pm','dp-musely-game'] },
     '❤️ Body':    { icon: 'ti-barbell',       tab: 'body',   keys: ['dp-body','dp-exercise'] },
     '👗 Style':    { icon: 'ti-hanger',             tab: 'style',  keys: ['dp-outfit'] },
@@ -6958,7 +6962,7 @@ function openDPOverlay(){
   const PILLAR_META = {
     '🧠 Mind':     { icon: 'ti-brain',     tab: 'mind',   keys: ['dp-activation','dp-reflection','dp-mood'] },
     '😴 Sleep':    { icon: 'ti-moon',      tab: 'sleep',  keys: ['dp-sleep-checkin','dp-cpap','dp-myair'] },
-    '🌿 Wellness': { icon: 'ti-leaf',      tab: 'health', keys: ['dp-bp','dp-meds-am','dp-meds-pm','dp-bodywater','dp-water'] },
+    '🌿 Wellness': { icon: 'ti-leaf',      tab: 'health', keys: ['dp-wellness-checkin','dp-bp','dp-meds-am','dp-meds-pm','dp-bodywater','dp-water'] },
     '✨ Skin':     { icon: 'ti-sparkles',  tab: 'skin',   keys: ['dp-skin-checkin','dp-skin-am','dp-skin-pm','dp-musely-game'] },
     '❤️ Body':    { icon: 'ti-barbell',    tab: 'body',   keys: ['dp-body','dp-exercise'] },
     '👗 Style':    { icon: 'ti-hanger',    tab: 'style',  keys: ['dp-outfit'] },
