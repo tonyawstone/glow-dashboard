@@ -7807,7 +7807,7 @@ async function renderLookbook(){
     });
   };
 
-  const worn=dedup((outfits||[]).filter(e=>e.src==='My outfit'||(!e.src&&e.keep!=='Inspo only')));
+  const worn=dedup((outfits||[]).filter(e=>e.type!=='dailylook-box'&&(e.src==='My outfit'||(!e.src&&e.keep!=='Inspo only'))));
   const inspo=dedup((outfits||[]).filter(e=>e.src==='Inspo'||e.src==='DailyLook'||(e.src!=='My outfit'&&e.keep==='Inspo only')));
 
   // Your Looks — worn only
@@ -7998,11 +7998,7 @@ async function renderCloset(filter){
   }).join('');
 }
 
-function filterCloset(f,btn){
-  document.querySelectorAll('#vc-style-closet .tag').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  renderCloset(f);
-}
+// filterCloset for pieces is defined earlier (sets closetCatFilter + renderClosetGrid)
 
 // ── CLOSET PICKER (for weekly planner) ────────────────────────────────
 var _pickerDay=null, _pickerFilter='all';
