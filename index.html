@@ -7699,7 +7699,7 @@ async function saveOutfit(){
   const kr=document.getElementById('keep-return-section');if(kr)kr.style.display='none';
   const df=document.getElementById('outfit-date');if(df)df.closest('div').style.display='';
   setStars('outfit-stars',0);
-  if(photoSlot){photoSlot.innerHTML='<i class="ti ti-camera" aria-hidden="true"></i>';}
+  if(photoSlot){photoSlot.innerHTML='<i class="ti ti-camera" aria-hidden="true"></i>';dbDelPhoto('outfit-new');dbDelPhoto('outfit-new-bloburl');}
   await renderLookbook();
   await updateOutfitNudge();
   buildDailyProgress();
