@@ -187,7 +187,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
 .cpap-item-due{font-size:11px;font-weight:600;padding:2px 7px;border-radius:8px;}
 .cpap-due-ok{background:#EAF3DE;color:#27500A;}
 .cpap-due-soon{background:#FEF3C7;color:#92400E;}
-.cpap-due-overdue{background:#FEE2E2;color:#7F1D1D;}border-radius:20px;border:1.5px solid var(--border);background:var(--warm);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);}
+.cpap-due-overdue{background:#FEE2E2;color:#7F1D1D;}
+.cpap-replace-item{padding:12px 0;border-bottom:0.5px solid var(--border);}
+.cpap-replace-item:last-child{border-bottom:none;}border-radius:20px;border:1.5px solid var(--border);background:var(--warm);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);}
 .zep-exp-opt{width:100%;padding:11px 14px;border-radius:10px;border:0.5px solid var(--border);background:#fff;font-size:13px;color:var(--text);cursor:pointer;font-family:var(--sans);text-align:left;transition:background 0.15s;}
 .zep-exp-opt.selected{background:#EAF3DE;border-color:#6B9E78;color:#27500A;font-weight:500;}
 .zep-dose-btn{padding:5px 10px;border-radius:20px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);opacity:0.4;transition:opacity 0.15s,background 0.15s;}
@@ -1971,25 +1973,22 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <button class="btn-primary" style="margin-bottom:4px;" onclick="saveCPAPCleaning()">Log cleaning done</button>
         <div class="toast-msg" id="cpap-clean-toast">Cleaning logged!</div>
-        <!-- Replacement tracker -->
-        <div style="margin-top:18px;padding-top:14px;border-top:0.5px solid var(--border);">
-          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">Replacement schedule</div>
-          <div id="cpap-equipment-status">
-            <div class="log-empty">Loading equipment status...</div>
-          </div>
-          <div style="margin-top:12px;">
-            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Enter replacement date:</div>
-            <div class="cpap-date-row"><span>Mask cushion</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_cushion" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_cushion')">Save</button></div></div>
-            <div class="cpap-date-row"><span>Mask frame</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-mask_frame" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('mask_frame')">Save</button></div></div>
-            <div class="cpap-date-row"><span>Headgear</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-headgear" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('headgear')">Save</button></div></div>
-            <div class="cpap-date-row"><span>Tubing</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-tubing" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('tubing')">Save</button></div></div>
-            <div class="cpap-date-row"><span>Water chamber</span><div style="display:flex;gap:6px;"><input type="date" id="cpap-date-water_chamber" class="cpap-date-input"><button class="cpap-save-btn" onclick="replaceCPAPItemDate('water_chamber')">Save</button></div></div>
-            <div style="margin-top:10px;">
-              <button class="cpap-replace-btn" style="width:100%;" onclick="replaceCPAPItem('filter_disposable')">&#x2713; Replaced disposable filter today</button>
-            </div>
-            <div class="toast-msg" id="cpap-replace-toast">Saved!</div>
-          </div>
+      </div>
+    </div>
+
+    <!-- CPAP Replacement Schedule — separate collapsible card -->
+    <div class="card" id="cpap-replace-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleCPAPReplaceCard()">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-refresh-alert" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">CPAP Replacement</div>
+          <div id="cpap-replace-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;margin-left:2px;">›</div>
         </div>
+        <div id="cpap-replace-header-badge" style="font-size:11px;"></div>
+      </div>
+      <div id="cpap-replace-body" style="display:none;margin-top:14px;">
+        <div id="cpap-equipment-status"><div class="log-empty">Loading...</div></div>
+        <div class="toast-msg" id="cpap-replace-toast">Saved!</div>
       </div>
     </div>
 
@@ -16558,12 +16557,12 @@ async function loadReflectionHistory(){
 }
 
 const CPAP_ITEMS = [
-  { key:'mask_cushion',     label:'Mask cushion (F30i)',  days:30,  interval:'4–6 weeks' },
-  { key:'mask_frame',       label:'Mask frame',           days:90,  interval:'3 months' },
-  { key:'headgear',         label:'Headgear',             days:180, interval:'6 months' },
-  { key:'tubing',           label:'Tubing',               days:90,  interval:'3 months' },
-  { key:'water_chamber',    label:'Water chamber',        days:180, interval:'6 months' },
-  { key:'filter_disposable',label:'Disposable filter',   days:14,  interval:'2 weeks'  },
+  { key:'mask_cushion',     label:'Mask cushion',      days:30,  interval:'4–6 weeks', desc:'AirTouch F30i InfinitySeal™ memory foam cushion', size:'Medium',    store:'ResMed / Amazon', cost:'~$28' },
+  { key:'mask_frame',       label:'Mask frame',        days:90,  interval:'3 months',  desc:'AirTouch F30i frame kit',                          size:'Standard',  store:'ResMed / Amazon', cost:'~$55' },
+  { key:'headgear',         label:'Headgear',          days:180, interval:'6 months',  desc:'AirFit/AirTouch F30i headgear',                    size:'Standard',  store:'ResMed / Amazon', cost:'~$23' },
+  { key:'tubing',           label:'Tubing',            days:90,  interval:'3 months',  desc:'ClimateLine Air 11 heated tube',                   size:'15mm · 6ft', store:'ResMed',          cost:'~$28' },
+  { key:'water_chamber',    label:'Water chamber',     days:180, interval:'6 months',  desc:'HumidAir 11 cleanable water chamber',              size:'Standard',  store:'ResMed',          cost:'~$35' },
+  { key:'filter_disposable',label:'Disposable filter', days:14,  interval:'2 weeks',   desc:'Ultra-fine disposable filters',                    size:'Standard',  store:'Amazon / ResMed', cost:'~$12/2-pk' },
 ];
 
 async function replaceCPAPItemDate(key){
@@ -16610,41 +16609,56 @@ function buildCPAPEquipmentStatus(){
   const equipment = JSON.parse(localStorage.getItem('glowCPAPEquipment')||'{}');
   const now = new Date();
 
+  let overdueCount = 0, dueSoonCount = 0;
+
   const rows = CPAP_ITEMS.map(item => {
     const lastReplaced = equipment[item.key] ? new Date(equipment[item.key]) : null;
     const daysSince = lastReplaced ? Math.floor((now - lastReplaced)/(1000*60*60*24)) : null;
     const daysUntilDue = lastReplaced ? item.days - daysSince : null;
     const overdue = daysUntilDue !== null && daysUntilDue <= 0;
     const dueSoon = daysUntilDue !== null && daysUntilDue <= 7 && daysUntilDue > 0;
-    const ok = daysUntilDue !== null && daysUntilDue > 7;
 
     let dueLabel, dueClass;
-    if(!lastReplaced){ dueLabel='Never set'; dueClass='cpap-due-soon'; }
-    else if(overdue){ dueLabel=`${Math.abs(daysUntilDue)}d overdue`; dueClass='cpap-due-overdue'; }
-    else if(dueSoon){ dueLabel=`Due in ${daysUntilDue}d`; dueClass='cpap-due-soon'; }
+    if(!lastReplaced){ dueLabel='Never set'; dueClass='cpap-due-soon'; dueSoonCount++; }
+    else if(overdue){ dueLabel=`${Math.abs(daysUntilDue)}d overdue`; dueClass='cpap-due-overdue'; overdueCount++; }
+    else if(dueSoon){ dueLabel=`Due in ${daysUntilDue}d`; dueClass='cpap-due-soon'; dueSoonCount++; }
     else { dueLabel=`${daysUntilDue}d left`; dueClass='cpap-due-ok'; }
 
-    const lastStr = lastReplaced ? safeDate(lastReplaced.toISOString().slice(0,10)).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+    const lastStr = lastReplaced ? safeDate(lastReplaced.toISOString().slice(0,10)).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Never';
 
-    return `<div class="cpap-item">
-      <div>
-        <div class="cpap-item-name">${item.label}</div>
-        <div style="font-size:10px;color:var(--muted);">Replace every ${item.interval} · Last: ${lastStr}</div>
+    const todayBtn = item.key === 'filter_disposable'
+      ? `<button class="cpap-save-btn" style="white-space:nowrap;" onclick="replaceCPAPItem('${item.key}')">Today</button>`
+      : '';
+
+    return `<div class="cpap-replace-item">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);">${item.label}</div>
+        <div class="cpap-item-due ${dueClass}" style="margin-left:8px;white-space:nowrap;">${dueLabel}</div>
       </div>
-      <div class="cpap-item-due ${dueClass}">${dueLabel}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:1px;">${item.desc} · ${item.size}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${item.store} · ${item.cost} · every ${item.interval}</div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--muted);white-space:nowrap;">Last: ${lastStr}</span>
+        <input type="date" id="cpap-date-${item.key}" class="cpap-date-input" style="flex:1;min-width:100px;">
+        <button class="cpap-save-btn" onclick="replaceCPAPItemDate('${item.key}')">Save</button>
+        ${todayBtn}
+      </div>
     </div>`;
   });
 
-  const overdueCount = CPAP_ITEMS.filter(item => {
-    const last = equipment[item.key] ? new Date(equipment[item.key]) : null;
-    if(!last) return true;
-    return Math.floor((now-last)/(1000*60*60*24)) >= item.days;
-  }).length;
+  // Update header badge
+  const badge = document.getElementById('cpap-replace-header-badge');
+  if(badge){
+    if(overdueCount > 0){
+      badge.innerHTML = `<span style="padding:2px 8px;border-radius:10px;background:#FEE2E2;color:#7F1D1D;font-weight:600;">⚠️ ${overdueCount} overdue</span>`;
+    } else if(dueSoonCount > 0){
+      badge.innerHTML = `<span style="padding:2px 8px;border-radius:10px;background:#FEF3C7;color:#92400E;">Due soon</span>`;
+    } else {
+      badge.innerHTML = `<span style="padding:2px 8px;border-radius:10px;background:#EAF3DE;color:#27500A;">All OK</span>`;
+    }
+  }
 
-  el.innerHTML = `
-    ${overdueCount > 0 ? `<div style="padding:8px 12px;background:#FEE2E2;border-radius:10px;font-size:12px;color:#7F1D1D;margin-bottom:10px;font-weight:600;">⚠️ ${overdueCount} item${overdueCount>1?'s':''} due for replacement</div>` : '<div style="padding:8px 12px;background:#EAF3DE;border-radius:10px;font-size:12px;color:#27500A;margin-bottom:10px;">✅ All items up to date</div>'}
-    ${rows.join('')}
-  `;
+  el.innerHTML = rows.join('');
 }
 
 
@@ -16729,6 +16743,15 @@ function loadCPAPCleanState(){
 function toggleCPAPCareCard(){
   const body = document.getElementById('cpap-care-body');
   const chevron = document.getElementById('cpap-care-chevron');
+  if(!body) return;
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if(chevron) chevron.style.transform = open ? 'rotate(90deg)' : '';
+}
+
+function toggleCPAPReplaceCard(){
+  const body = document.getElementById('cpap-replace-body');
+  const chevron = document.getElementById('cpap-replace-chevron');
   if(!body) return;
   const open = body.style.display === 'none';
   body.style.display = open ? 'block' : 'none';
