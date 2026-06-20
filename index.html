@@ -5154,8 +5154,34 @@ async function loadCloset(){
     await Promise.all(dupIds.map(id=>dbDelete('closet',id)));
     closetItems=closetItems.filter(item=>!dupIds.includes(item.id));
   }
+  // Render immediately with what we have (base64 photos display locally while upload runs)
   renderClosetGrid();
-  if(closetItems.length||dupIds.length) syncToBlob('closet').catch(()=>{});
+  // Upload any remaining base64 photos to CDN so they sync cross-device
+  let photosMigrated=false;
+  for(const item of closetItems){
+    let pf=item.photoFront, pb=item.photoBack, changed=false;
+    if(pf?.startsWith('data:')){
+      try{
+        const r=await fetch(`${BACKEND}/api/upload-photo`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slotId:`closet-${item.ts||item.id}-front`,dataUrl:pf})});
+        if(r.ok){const d=await r.json();pf=d.url;changed=true;}
+      }catch(e){}
+    }
+    if(pb?.startsWith('data:')){
+      try{
+        const r=await fetch(`${BACKEND}/api/upload-photo`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slotId:`closet-${item.ts||item.id}-back`,dataUrl:pb})});
+        if(r.ok){const d=await r.json();pb=d.url;changed=true;}
+      }catch(e){}
+    }
+    if(changed){
+      const tx=db.transaction('closet','readwrite');
+      tx.objectStore('closet').put({...item,photoFront:pf,photoBack:pb});
+      await new Promise(r=>tx.oncomplete=r);
+      item.photoFront=pf; item.photoBack=pb;
+      photosMigrated=true;
+    }
+  }
+  if(photosMigrated) renderClosetGrid();
+  if(closetItems.length||dupIds.length||photosMigrated) syncToBlob('closet').catch(()=>{});
 }
 
 function renderClosetGrid(){
@@ -5906,7 +5932,21 @@ async function autoAddToCloset(item){
     if(current.some(c=>c.ts===item.closetItemTs)) return item.closetItemTs; // already present, skip
   }
   const ts = Date.now();
-  const entry={ts,name:item.desc||'DailyLook item',brand:item.brand||'',photoFront:item.photoFront||null,photoBack:item.photoBack||null,category:item.category?.toLowerCase()||'other',colors:item.color?[item.color]:[],price:item.price?parseFloat(item.price):null,source:'DailyLook'};
+  // Upload base64 photos to CDN so they sync cross-device (same pattern as outfit photos)
+  let photoFront=item.photoFront||null, photoBack=item.photoBack||null;
+  if(photoFront?.startsWith('data:')){
+    try{
+      const r=await fetch(`${BACKEND}/api/upload-photo`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slotId:`closet-${ts}-front`,dataUrl:photoFront})});
+      if(r.ok){const d=await r.json();photoFront=d.url;}
+    }catch(e){}
+  }
+  if(photoBack?.startsWith('data:')){
+    try{
+      const r=await fetch(`${BACKEND}/api/upload-photo`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slotId:`closet-${ts}-back`,dataUrl:photoBack})});
+      if(r.ok){const d=await r.json();photoBack=d.url;}
+    }catch(e){}
+  }
+  const entry={ts,name:item.desc||'DailyLook item',brand:item.brand||'',photoFront,photoBack,category:item.category?.toLowerCase()||'other',colors:item.color?[item.color]:[],price:item.price?parseFloat(item.price):null,source:'DailyLook'};
   await dbAdd('closet',entry);
   syncToBlob('closet').catch(()=>{});
   closetItems=await dbAll('closet');
