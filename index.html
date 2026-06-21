@@ -4935,7 +4935,7 @@ async function tab(id){
     try { restoreWashDates(); } catch(e){}
     try { buildProductTags(); } catch(e){}
   }
-  if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); loadSkinRoutineState(); loadMuselyHistoryFromBlob().then(()=>{ renderSkincareLog(); showSkinPMSavedView(); loadPMLastNight(); }); loadAvatarGameFromBlob(); const _skd=document.getElementById('skin-log-date');if(_skd&&!_skd.value)_skd.value=logicalDayStr(); }
+  if(id==='skin'){ loadLatestSkinScan(); restoreSkinDraft(); loadSkinRoutineState(); Promise.all([loadMuselyHistoryFromBlob(), loadSkinAMHistoryFromBlob()]).then(()=>{ renderSkincareLog(); showSkinPMSavedView(); loadPMLastNight(); }); loadAvatarGameFromBlob(); const _skd=document.getElementById('skin-log-date');if(_skd&&!_skd.value)_skd.value=logicalDayStr(); }
   if(id==='health'){ buildBPChart(); buildAppleHealthMetrics(); buildHydrationStatus(); loadTodayWater(); checkLastUpload(); buildHealthInsights(); buildZepboundStatus(); loadMedsChecklist(); loadZepSideHistory(); loadInjectionSiteHistory(); updateBPBanners();
     const today = logicalDayStr();
     ['skin-log-date','water-log-date','wellness-log-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=today; });
@@ -7652,6 +7652,7 @@ function addSkincareLog(){
     if(h.find(e=>e.date===date)){ showToast('AM entry already exists for that date'); return; }
     h.push({date, steps:['Cleanser','Super Serum','Vit C','SPF']});
     localStorage.setItem('glowSkinAMHistory', JSON.stringify(h));
+    saveSkinAMHistoryToBlob(h);
   } else if(type==='pm-aa'||type==='pm-spot'){
     const treatment = type==='pm-aa' ? 'Musely Anti-Aging Cream' : 'Musely Spot Treatment';
     const h = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
@@ -10822,6 +10823,7 @@ function updateSkinProgress(){
     if(todayIdx>=0) amHistory[todayIdx]=entry; else amHistory.push(entry);
     if(amHistory.length>30) amHistory.shift();
     localStorage.setItem('glowSkinAMHistory', JSON.stringify(amHistory));
+    saveSkinAMHistoryToBlob(amHistory);
     showSkinAMSavedView();
   }
   // PM: auto-save and show saved view when Musely + Olay both checked (mirrors AM)
@@ -12353,6 +12355,28 @@ function saveMuselyHistoryToBlob(history){
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({pillar:'musely_log', data: history})
   }).catch(e=>console.warn('musely_log sync error:',e));
+}
+
+function saveSkinAMHistoryToBlob(history){
+  fetch(`${BACKEND}/api/sync`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pillar:'skin_am_log', data: history})
+  }).catch(e=>console.warn('skin_am_log sync error:',e));
+}
+
+async function loadSkinAMHistoryFromBlob(){
+  try{
+    const res = await fetch(`${BACKEND}/api/sync?pillar=skin_am_log&t=${Date.now()}`);
+    if(!res.ok) return;
+    const {data} = await res.json();
+    if(!Array.isArray(data)||!data.length) return;
+    const local = JSON.parse(localStorage.getItem('glowSkinAMHistory')||'[]');
+    const merged = [...data];
+    local.forEach(le=>{ if(!merged.find(b=>b.date===le.date)) merged.push(le); });
+    merged.sort((a,b)=>a.date.localeCompare(b.date));
+    localStorage.setItem('glowSkinAMHistory', JSON.stringify(merged));
+  }catch(e){}
 }
 
 function saveAvatarGameToBlob(history){
@@ -14539,19 +14563,21 @@ async function buildSkinCharts(){
     if(weeklySkinEl){
       const muselyHistory = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
       const amHistory = JSON.parse(localStorage.getItem('glowSkinAMHistory')||'[]');
-      // Build last-7-days date set for accurate filtering
+      // Build Sun–Sat week date set
       const _today = logicalDayStr();
-      const _last7Dates = new Set();
+      const _todayD = new Date(_today+'T12:00:00');
+      const _dow = _todayD.getDay(); // 0=Sun
+      const _weekDates = new Set();
       for(let i=0;i<7;i++){
-        const d=new Date(_today+'T12:00:00');
-        d.setDate(d.getDate()-i);
-        _last7Dates.add(d.toISOString().split('T')[0]);
+        const d=new Date(_todayD);
+        d.setDate(_todayD.getDate()-_dow+i);
+        _weekDates.add(d.toISOString().split('T')[0]);
       }
-      const amDone = amHistory.filter(e=>_last7Dates.has(e.date)).length;
-      const recentMusely = muselyHistory.filter(e=>_last7Dates.has(e.date));
+      const amDone = amHistory.filter(e=>_weekDates.has(e.date)).length;
+      const recentMusely = muselyHistory.filter(e=>_weekDates.has(e.date));
       const pmDone = recentMusely.length;
-      const aaCount = recentMusely.filter(m=>m.treatment==='Anti-Aging Cream').length;
-      const spotCount = recentMusely.filter(m=>m.treatment==='Spot Treatment').length;
+      const aaCount = recentMusely.filter(m=>m.treatment&&m.treatment.includes('Anti-Aging')).length;
+      const spotCount = recentMusely.filter(m=>m.treatment&&m.treatment.includes('Spot')).length;
       weeklySkinEl.innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
           <div style="padding:8px;border-radius:10px;background:var(--warm);text-align:center;">
@@ -20827,7 +20853,7 @@ async function weeklyMindInsight(){
 </div>
 
 <div id="skincare-log-overlay" class="fullscreen-overlay">
-  <div style="padding:16px;">
+  <div style="padding:16px;padding-bottom:80px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <button onclick="closeOverlay('skincare-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
       <div class="overlay-title" style="font-family:var(--serif);font-size:22px;font-weight:300;">Skincare Routine Log</div>
