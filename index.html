@@ -9372,7 +9372,7 @@ function openSleepScoreInfo(){
     </div>
     <div class="guide-section">
       <div class="guide-section-title">Data source</div>
-      <div class="guide-item">Calculated from Withings sleep mat data via Apple Health CSV export. Sleeptracker excluded. Sleep window: 8pm–10am only. For Withings' own score (which also factors in interruptions and regularity), tap "Open Withings" below.</div>
+      <div class="guide-item">Calculated from your primary sleep tracker via Apple Health CSV export. Sleep window: 8pm–11am only. To change which tracker is primary, run <strong>glowupload</strong> and select from the picker. For Withings' own score (which also factors in interruptions and regularity), tap "Open Withings" below.</div>
     </div>
     <div class="guide-section">
       <div class="guide-section-title">💡 Tips for you</div>
@@ -13553,7 +13553,8 @@ async function buildSleepAppleMetrics(){
       tibEl.textContent = `${tibH}h ${tibM}m`;
     }
     const d = safeDate(withTimes.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    if(dateLabelEl) dateLabelEl.textContent = `Withings · ${smartDate(withTimes.date)} · ${d}`;
+    const _sleepSrcLabel = (withTimes.sleep_source||'CSV').replace('®','').trim();
+    if(dateLabelEl) dateLabelEl.textContent = `${_sleepSrcLabel} · ${smartDate(withTimes.date)} · ${d}`;
   } else {
     if(hrsEl) hrsEl.textContent = parseFloat(latest.sleep_hrs).toFixed(1)+'h';
     if(dateLabelEl) dateLabelEl.textContent = 'Re-run Python script to add bedtime/wake times · last known shown';
