@@ -1284,7 +1284,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Other</button>
       </div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Color</div>
-      <div class="tags" id="cp-color-tags" style="margin-bottom:10px;">
+      <div class="tags" id="cp-color-tags" style="margin-bottom:8px;">
         <button class="tag" onclick="tog(this)">Black</button>
         <button class="tag" onclick="tog(this)">White</button>
         <button class="tag" onclick="tog(this)">Gray</button>
@@ -1297,6 +1297,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <button class="tag" onclick="tog(this)">Red</button>
         <button class="tag" onclick="tog(this)">Pattern</button>
       </div>
+      <input type="text" id="cp-color-custom" placeholder="Or type a color..." style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:10px;background:#fff;">
       <div style="display:flex;gap:8px;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:6px;flex:1;">
           <span style="font-size:13px;color:var(--muted);">$</span>
@@ -5507,7 +5508,7 @@ function toggleClosetAdd(){
   ov.style.display=opening?'block':'none';
   if(opening){ov.scrollTop=0;}
   else{
-    ['cp-name','cp-brand','cp-price','cp-date-purchased'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['cp-name','cp-brand','cp-price','cp-date-purchased','cp-color-custom'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});;
     const dlCb=document.getElementById('cp-is-dailylook');if(dlCb)dlCb.checked=false;
     ['cp-cat-tags','cp-color-tags'].forEach(id=>{const c=document.getElementById(id);if(c)c.querySelectorAll('.tag.on').forEach(b=>b.classList.remove('on'));});
     ['cp-front','cp-back'].forEach(sid=>{const el=document.getElementById(sid);if(el){el.style.backgroundImage='';el.innerHTML='<i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i>';}});
@@ -5520,8 +5521,9 @@ async function saveClosetItem(){
   const price=parseFloat(document.getElementById('cp-price')?.value)||null;
   const cats=getTags('cp-cat-tags');
   const colors=getTags('cp-color-tags');
+  const colorCustom=document.getElementById('cp-color-custom')?.value.trim()||'';
   const category=(cats[0]||'other').toLowerCase();
-  const color=colors.join(', ');
+  const color=[...colors,...(colorCustom?[colorCustom]:[])].join(', ');
   if(!name&&!cats.length){showToast('Add a name or category first');return;}
   const photoFront=getSlotPhotoUrl('cp-front');
   const photoBack=getSlotPhotoUrl('cp-back');
