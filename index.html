@@ -1439,9 +1439,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="closet-pick-label"></div>
     </div>
     <!-- Sub-tabs: Items | Looks -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="padding:11px;border-radius:12px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:14px;font-weight:500;font-family:var(--serif);cursor:pointer;">Items</button>
-      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="padding:11px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:14px;font-weight:400;font-family:var(--serif);cursor:pointer;">Looks</button>
+    <div style="display:flex;border-radius:12px;overflow:hidden;border:0.5px solid var(--accent);margin-bottom:16px;">
+      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="flex:1;padding:11px;border:none;border-right:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:14px;font-weight:500;font-family:var(--serif);cursor:pointer;">Items</button>
+      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="flex:1;padding:11px;border:none;background:transparent;color:var(--muted);font-size:14px;font-weight:400;font-family:var(--serif);cursor:pointer;">Looks</button>
     </div>
     <!-- Pieces section -->
     <div id="closet-pieces-section">
@@ -5211,11 +5211,11 @@ function renderClosetGrid(){
   const CAT_LABEL={top:'Top',bottom:'Bottom',dress:'Dress',shoes:'Shoes',bag:'Bag',accessory:'Accessory',other:'Other'};
   filtered.forEach(item=>{
     const cell=document.createElement('div');
-    cell.style.cssText='cursor:pointer;min-width:0;border-radius:12px;border:0.5px solid var(--border);overflow:hidden;background:var(--warm);';
+    cell.style.cssText='cursor:pointer;min-width:0;border-radius:12px;border:0.5px solid var(--border);overflow:hidden;background:#fff;';
     cell.onclick=()=>openPieceView(item.id);
     const photoWrap=document.createElement('div');
     photoWrap.className='closet-photo-wrap';
-    photoWrap.style.cssText='position:relative;width:100%;aspect-ratio:3/4;background:var(--warm);';
+    photoWrap.style.cssText='position:relative;width:100%;aspect-ratio:3/4;background:#fff;';
     const photoInner=document.createElement('div');
     photoInner.style.cssText='position:absolute;inset:0;background-size:cover;background-position:center top;display:flex;align-items:center;justify-content:center;';
     if(item.photoFront)photoInner.style.backgroundImage=`url('${item.photoFront}')`;
@@ -5223,13 +5223,12 @@ function renderClosetGrid(){
     // Heart button
     const heart=document.createElement('button');
     heart.style.cssText='position:absolute;top:7px;right:7px;z-index:2;background:rgba(255,255,255,0.88);border:none;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;line-height:1;padding:0;';
-    heart.innerHTML=item.favorite?'♥':'♡';
-    heart.style.color=item.favorite?'#b85c5c':'var(--muted)';
+    heart.innerHTML=item.favorite?'<i class="ti ti-heart-filled" style="font-size:14px;color:#b85c5c;line-height:1;"></i>':'<i class="ti ti-heart" style="font-size:14px;color:var(--muted);line-height:1;"></i>';
     heart.onclick=(e)=>{e.stopPropagation();togglePieceFavorite(item.id);};
     photoWrap.appendChild(photoInner);photoWrap.appendChild(heart);
     // Label below image, separated by border line
     const labelBar=document.createElement('div');
-    labelBar.style.cssText='border-top:0.5px solid var(--border);padding:6px 8px;background:var(--warm);';
+    labelBar.style.cssText='border-top:0.5px solid var(--border);padding:6px 8px;background:#fff;';
     const nameLbl=document.createElement('div');
     nameLbl.style.cssText='font-size:12px;color:var(--text);font-weight:400;font-family:var(--serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;';
     nameLbl.textContent=item.name||'—';
@@ -5300,14 +5299,14 @@ function switchClosetTab(tab){
   if(tab==='pieces'){
     if(pSec)pSec.style.display='block';
     if(lSec)lSec.style.display='none';
-    if(pBtn){pBtn.style.background='var(--warm)';pBtn.style.color='var(--accent)';pBtn.style.borderColor='var(--accent)';pBtn.style.fontWeight='500';}
-    if(lBtn){lBtn.style.background='transparent';lBtn.style.color='var(--muted)';lBtn.style.borderColor='var(--border)';lBtn.style.fontWeight='400';}
+    if(pBtn){pBtn.style.background='var(--warm)';pBtn.style.color='var(--accent)';pBtn.style.borderRight='0.5px solid var(--accent)';pBtn.style.fontWeight='500';}
+    if(lBtn){lBtn.style.background='transparent';lBtn.style.color='var(--muted)';lBtn.style.fontWeight='400';}
     renderClosetGrid();
   }else{
     if(pSec)pSec.style.display='none';
     if(lSec)lSec.style.display='block';
-    if(lBtn){lBtn.style.background='var(--warm)';lBtn.style.color='var(--accent)';lBtn.style.borderColor='var(--accent)';lBtn.style.fontWeight='500';}
-    if(pBtn){pBtn.style.background='transparent';pBtn.style.color='var(--muted)';pBtn.style.borderColor='var(--border)';pBtn.style.fontWeight='400';}
+    if(lBtn){lBtn.style.background='var(--warm)';lBtn.style.color='var(--accent)';lBtn.style.fontWeight='500';}
+    if(pBtn){pBtn.style.background='transparent';pBtn.style.color='var(--muted)';pBtn.style.borderRight='0.5px solid var(--border)';pBtn.style.fontWeight='400';}
     renderCloset('all');
   }
 }
