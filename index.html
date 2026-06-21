@@ -6872,7 +6872,8 @@ var DP_ITEMS = [
   ['✨ Skin',    'dp-musely-game','Musely avatar played',    'Evening skin game',                  null, 'skin'],
   ['❤️ Body',   'dp-body',      'Body check-in logged',     'Non-scale wins · measurements',      null, 'body'],
   ['❤️ Body',   'dp-exercise',  'Exercise logged',          'Workout · Pilates · treadmill',      null, 'body'],
-  ['👗 Style',   'dp-outfit',    'Outfit logged',            'My outfit · Inspo · DailyLook',      null, 'style'],
+  ['👗 Style',   'dp-outfit',        'Outfit logged',            'My outfit · Inspo · DailyLook',      null, 'style'],
+  ['👗 Style',   'dp-style-checkin', 'Style check-in done',      'How you feel in today\'s look',       null, 'style'],
   ['💇 Hair',   'dp-hair',      'Hair check-in done',       'Products · style · condition',       null, 'hair'],
 ];
 
@@ -7031,7 +7032,7 @@ async function buildDailyProgress(){
   } catch(e){}
 
   // Outfit — logical day
-  try { const outfits = await dbAll('outfits'); autoChecks['dp-outfit'] = outfits.some(e=>(e.date===logical||e.date===today)&&e.type!=='Inspo'); } catch(e){}
+  try { const outfits = await dbAll('outfits'); autoChecks['dp-outfit'] = outfits.some(e=>(e.date===logical||e.date===today)&&e.type!=='Inspo'); autoChecks['dp-style-checkin'] = outfits.some(e=>(e.date===logical||e.date===today)&&e.type==='style-checkin'); } catch(e){}
 
   // Hair — logical day
   try { const hairs = await dbAll('hairs'); autoChecks['dp-hair'] = hairs.some(e=>e.date===logical||e.date===today); } catch(e){}
@@ -7043,7 +7044,7 @@ async function buildDailyProgress(){
     '🌿 Wellness': { icon: 'ti-leaf', tab: 'health', keys: ['dp-wellness-checkin','dp-bp','dp-meds-am','dp-meds-pm','dp-bodywater','dp-water'] },
     '✨ Skin':     { icon: 'ti-sparkles',           tab: 'skin',   keys: ['dp-skin-checkin','dp-skin-am','dp-skin-pm','dp-musely-game'] },
     '❤️ Body':    { icon: 'ti-barbell',       tab: 'body',   keys: ['dp-body','dp-exercise'] },
-    '👗 Style':    { icon: 'ti-shopping-bag',         tab: 'style',  keys: ['dp-outfit'] },
+    '👗 Style':    { icon: 'ti-shopping-bag',         tab: 'style',  keys: ['dp-outfit','dp-style-checkin'] },
     '💇 Hair':    { icon: 'ti-scissors',            tab: 'hair',   keys: ['dp-hair'] },
   };
   const PILLAR_NAMES = {
@@ -7271,7 +7272,7 @@ function updatePillarRings(checks){
     health:  ['dp-bp','dp-meds-am','dp-meds-pm','dp-bodywater','dp-water'],
     skin:    ['dp-skin-checkin','dp-skin-am','dp-skin-pm','dp-musely-game'],
     body:    ['dp-body','dp-exercise'],
-    style:   ['dp-outfit'],
+    style:   ['dp-outfit','dp-style-checkin'],
     hair:    ['dp-hair'],
   };
 
