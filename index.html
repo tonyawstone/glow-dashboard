@@ -905,8 +905,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
   <!-- Style action bar -->
   <div id="style-inspo-bar" style="display:none;padding:0 16px 10px;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <button id="style-inspo-btn" class="btn-secondary" style="font-size:13px;" onclick="toggleInspoView()">✨ Inspo Board</button>
-      <button id="style-closet-btn" class="btn-secondary" style="font-size:13px;" onclick="toggleClosetView()">👗 My Closet</button>
+      <button id="style-inspo-btn" class="btn-secondary" style="font-size:13px;font-family:var(--serif);background:#E3DACC;" onclick="toggleInspoView()"><i class="ti ti-sparkles" style="font-size:14px;margin-right:5px;vertical-align:-2px;"></i>Inspo Board</button>
+      <button id="style-closet-btn" class="btn-secondary" style="font-size:13px;font-family:var(--serif);background:#E3DACC;" onclick="toggleClosetView()"><i class="ti ti-hanger" style="font-size:14px;margin-right:5px;vertical-align:-2px;"></i>My Closet</button>
     </div>
   </div>
 
@@ -8211,9 +8211,9 @@ function toggleInspoView(){
     inspoViewOpen=false;
     document.getElementById('vc-style-inspo').classList.remove('on');
     applyView();
-    btn.textContent='✨ Inspo Board';
+    btn.innerHTML='<i class="ti ti-sparkles" style="font-size:14px;margin-right:5px;vertical-align:-2px;"></i>Inspo Board';
     if(shopBtn) shopBtn.style.display='';
-    if(closetBtn) closetBtn.textContent='👗 My Closet';
+    if(closetBtn) closetBtn.innerHTML='<i class="ti ti-hanger" style="font-size:14px;margin-right:5px;vertical-align:-2px;"></i>My Closet';
   } else {
     shoppingViewOpen=false; closetViewOpen=false;
     inspoViewOpen=true;
@@ -8221,7 +8221,7 @@ function toggleInspoView(){
     document.getElementById('vc-style-inspo').classList.add('on');
     btn.textContent='← Back';
     if(shopBtn) shopBtn.style.display='none';
-    if(closetBtn) closetBtn.textContent='👗 My Closet';
+    if(closetBtn) closetBtn.innerHTML='<i class="ti ti-hanger" style="font-size:14px;margin-right:5px;vertical-align:-2px;"></i>My Closet';
     renderLookbook();
   }
 }
@@ -8235,9 +8235,9 @@ function toggleClosetView(){
     closetViewOpen=false;
     document.getElementById('vc-style-closet').classList.remove('on');
     applyView();
-    btn.textContent='👗 My Closet';
+    btn.innerHTML='<i class="ti ti-hanger" style="font-size:14px;margin-right:5px;vertical-align:-2px;"></i>My Closet';
     if(shopBtn) shopBtn.style.display='';
-    if(inspoBtn) inspoBtn.textContent='✨ Inspo Board';
+    if(inspoBtn) inspoBtn.innerHTML='<i class="ti ti-sparkles" style="font-size:14px;margin-right:5px;vertical-align:-2px;"></i>Inspo Board';
     document.getElementById('compact-header').style.removeProperty('display');
     document.getElementById('bottom-nav').style.removeProperty('display');
     document.getElementById('time-tabs-bar').style.removeProperty('display');
@@ -8247,7 +8247,7 @@ function toggleClosetView(){
     document.getElementById('vc-style-closet').classList.add('on');
     btn.textContent='← Back';
     if(shopBtn) shopBtn.style.display='none';
-    if(inspoBtn) inspoBtn.textContent='✨ Inspo Board';
+    if(inspoBtn) inspoBtn.innerHTML='<i class="ti ti-sparkles" style="font-size:14px;margin-right:5px;vertical-align:-2px;"></i>Inspo Board';
     document.getElementById('compact-header').style.display='none';
     document.getElementById('bottom-nav').style.display='none';
     document.getElementById('time-tabs-bar').style.display='none';
@@ -8268,7 +8268,7 @@ function toggleShoppingView(){
     document.querySelectorAll('#s-style .view-content').forEach(el=>el.classList.remove('on'));
     document.getElementById('vc-style-shopping').classList.add('on');
     btn.textContent='← Back';
-    document.getElementById('style-inspo-btn').textContent='✨ Inspo Board';
+    document.getElementById('style-inspo-btn').innerHTML='<i class="ti ti-sparkles" style="font-size:14px;margin-right:5px;vertical-align:-2px;"></i>Inspo Board';
     renderShoppingList();
   }
 }
@@ -8774,7 +8774,7 @@ function goToShoppingList(){
   shoppingViewOpen=true;
   document.querySelectorAll('#s-style .view-content').forEach(el=>el.classList.remove('on'));
   document.getElementById('vc-style-shopping').classList.add('on');
-  document.getElementById('style-inspo-btn').textContent='✨ Inspo Board';
+  document.getElementById('style-inspo-btn').innerHTML='<i class="ti ti-sparkles" style="font-size:14px;margin-right:5px;vertical-align:-2px;"></i>Inspo Board';
   document.getElementById('style-shopping-btn').style.display='';
   renderShoppingList();
 }
