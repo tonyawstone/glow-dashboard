@@ -18054,9 +18054,9 @@ function calcSealScore(lmin){
   if(isNaN(l)) return null;
   if(l <= 16) return 20;
   if(l >= 55) return 0;
-  // Each 2 L/min above 16 = -1 point from 20
-  // 17-18=19, 19-20=18, ... 53-54=1, 55+=0
-  return Math.max(0, 20 - Math.ceil((l - 16) / 2));
+  // Bands: ≤16=20, 17-18=19, 19-20=18, 21-22=17, ... each 2 L/min = -1 pt
+  // floor keeps decimals in the lower band (e.g. 20.4 stays in 19-20 = 18 pts)
+  return Math.max(0, 19 - Math.floor((l - 17) / 2));
 }
 
 function calcOnOffScore(events){
