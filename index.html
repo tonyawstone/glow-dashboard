@@ -1253,6 +1253,63 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
   </div>
 
+  <!-- Add Piece Overlay -->
+  <div id="closet-add-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:9500;overflow-y:auto;">
+    <div style="min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:20px;padding-bottom:80px;box-sizing:border-box;">
+    <div style="background:#fff;border-radius:16px;padding:20px;width:100%;max-width:420px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-family:var(--serif);font-size:18px;color:var(--text);">New piece</div>
+        <button onclick="toggleClosetAdd()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;line-height:1;margin-left:12px;">×</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <div style="flex:1;text-align:center;">
+          <div class="photo-slot" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cp-front')" id="cp-front"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div>
+        </div>
+        <div style="flex:1;text-align:center;">
+          <div class="photo-slot" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cp-back')" id="cp-back"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div>
+        </div>
+      </div>
+      <input type="text" id="cp-name" placeholder="Item name..." style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:8px;background:#fff;">
+      <input type="text" id="cp-brand" placeholder="Brand (optional)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:10px;background:#fff;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Category</div>
+      <div class="tags" id="cp-cat-tags" style="margin-bottom:10px;">
+        <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Top</button>
+        <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Bottom</button>
+        <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Dress</button>
+        <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Shoes</button>
+        <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Bag</button>
+        <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Accessory</button>
+        <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Other</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Color</div>
+      <div class="tags" id="cp-color-tags" style="margin-bottom:10px;">
+        <button class="tag" onclick="tog(this)">Black</button>
+        <button class="tag" onclick="tog(this)">White</button>
+        <button class="tag" onclick="tog(this)">Gray</button>
+        <button class="tag" onclick="tog(this)">Navy</button>
+        <button class="tag" onclick="tog(this)">Blue</button>
+        <button class="tag" onclick="tog(this)">Green</button>
+        <button class="tag" onclick="tog(this)">Brown</button>
+        <button class="tag" onclick="tog(this)">Beige</button>
+        <button class="tag" onclick="tog(this)">Pink</button>
+        <button class="tag" onclick="tog(this)">Red</button>
+        <button class="tag" onclick="tog(this)">Pattern</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+        <span style="font-size:13px;color:var(--muted);">$</span>
+        <input type="number" id="cp-price" placeholder="Price paid (opt)" step="0.01" min="0" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);background:#fff;">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="toggleClosetAdd()" style="flex:1;padding:9px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-family:var(--sans);cursor:pointer;">Cancel</button>
+        <button onclick="saveClosetItem()" style="flex:2;padding:9px 20px;border-radius:12px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save piece</button>
+      </div>
+      <div class="toast-msg" id="cp-toast">Saved!</div>
+    </div>
+    </div>
+  </div>
+
   <!-- Piece View Popup — moved outside view-content so it's never hidden by a parent display:none -->
   <div id="cpv-overlay" style="display:none;position:fixed;inset:0;background:rgba(61,46,30,0.5);z-index:9500;overflow-y:auto;">
     <div style="min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:20px;padding-bottom:80px;box-sizing:border-box;">
@@ -1459,55 +1516,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div id="closet-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px;align-items:start;"></div>
       <div id="closet-empty" style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">No pieces yet — add your first below</div>
-      <div id="closet-add-panel" style="display:none;border-top:0.5px solid var(--border);padding-top:14px;margin-top:4px;">
-        <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:10px;">New piece</div>
-        <div style="display:flex;gap:8px;margin-bottom:12px;">
-          <div style="flex:1;text-align:center;">
-            <div class="photo-slot" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cp-front')" id="cp-front"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div>
-          </div>
-          <div style="flex:1;text-align:center;">
-            <div class="photo-slot" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cp-back')" id="cp-back"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div>
-          </div>
-        </div>
-        <input type="text" id="cp-name" placeholder="Item name..." style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:8px;background:#fff;">
-        <input type="text" id="cp-brand" placeholder="Brand (optional)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:10px;background:#fff;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Category</div>
-        <div class="tags" id="cp-cat-tags" style="margin-bottom:10px;">
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Top</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Bottom</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Dress</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Shoes</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Bag</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Accessory</button>
-          <button class="tag" onclick="togSingle(this,'cp-cat-tags')">Other</button>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Color</div>
-        <div class="tags" id="cp-color-tags" style="margin-bottom:10px;">
-          <button class="tag" onclick="tog(this)">Black</button>
-          <button class="tag" onclick="tog(this)">White</button>
-          <button class="tag" onclick="tog(this)">Gray</button>
-          <button class="tag" onclick="tog(this)">Navy</button>
-          <button class="tag" onclick="tog(this)">Blue</button>
-          <button class="tag" onclick="tog(this)">Green</button>
-          <button class="tag" onclick="tog(this)">Brown</button>
-          <button class="tag" onclick="tog(this)">Beige</button>
-          <button class="tag" onclick="tog(this)">Pink</button>
-          <button class="tag" onclick="tog(this)">Red</button>
-          <button class="tag" onclick="tog(this)">Pattern</button>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
-          <span style="font-size:13px;color:var(--muted);">$</span>
-          <input type="number" id="cp-price" placeholder="Price paid (opt)" step="0.01" min="0" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);background:#fff;">
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="toggleClosetAdd()" style="flex:1;padding:9px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-family:var(--sans);cursor:pointer;">Cancel</button>
-          <button onclick="saveClosetItem()" style="flex:2;padding:9px 20px;border-radius:20px;background:var(--accent);border:none;color:#F5EFE6;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);">Save piece</button>
-        </div>
-        <div class="toast-msg" id="cp-toast">Saved!</div>
-      </div>
-      <button id="closet-add-btn" onclick="toggleClosetAdd()" style="width:100%;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--serif);margin-top:4px;">+ Add piece</button>
+      <button onclick="toggleClosetAdd()" style="width:100%;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--serif);margin-top:4px;">+ Add piece</button>
     </div>
     <!-- Looks section -->
     <div id="closet-looks-section" style="display:none;">
@@ -5483,13 +5492,12 @@ function closePiecePicker(){
 }
 
 function toggleClosetAdd(){
-  const panel=document.getElementById('closet-add-panel');
-  const addBtn=document.getElementById('closet-add-btn');
-  if(!panel)return;
-  const opening=panel.style.display==='none';
-  panel.style.display=opening?'block':'none';
-  if(addBtn)addBtn.style.display=opening?'none':'block';
-  if(!opening){
+  const ov=document.getElementById('closet-add-overlay');
+  if(!ov)return;
+  const opening=ov.style.display==='none';
+  ov.style.display=opening?'block':'none';
+  if(opening){ov.scrollTop=0;}
+  else{
     ['cp-name','cp-brand','cp-price'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     ['cp-cat-tags','cp-color-tags'].forEach(id=>{const c=document.getElementById(id);if(c)c.querySelectorAll('.tag.on').forEach(b=>b.classList.remove('on'));});
     ['cp-front','cp-back'].forEach(sid=>{const el=document.getElementById(sid);if(el){el.style.backgroundImage='';el.innerHTML='<i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i>';}});
@@ -12473,7 +12481,7 @@ async function handlePhoto(event){
     // pre-uploading here would set img.src to a cached proxy URL that briefly shows the old photo
     if(curPhotoTarget!=='ql-photo'){
       await dbPutPhoto(curPhotoTarget,compressed);
-      if(curPhotoTarget!=='outfit-new') uploadPhotoToBlob(curPhotoTarget,compressed);
+      if(curPhotoTarget!=='outfit-new'&&curPhotoTarget!=='cp-front'&&curPhotoTarget!=='cp-back') uploadPhotoToBlob(curPhotoTarget,compressed);
     }
     if(curPhotoTarget==='dl-stylist-photo') ocrStylistNote(compressed);
   }catch(err){alert('Could not save photo: '+err.message);}
