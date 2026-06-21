@@ -134,6 +134,7 @@ html,body{height:100%;background:var(--cream);color:var(--text);font-family:var(
 .tags{display:flex;flex-wrap:wrap;gap:7px;margin:7px 0;}
 .tag{font-size:14px;padding:8px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);}
 .tag.on{background:var(--warm);color:var(--accent);border-color:var(--accent);}
+#vc-style-closet .tag.on{background:#7D5C4A;color:#fff;border-color:#7D5C4A;}
 .fl{font-size:14px;color:var(--muted);margin:13px 0 6px;}
 
 /* INPUTS */
@@ -1440,8 +1441,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <!-- Sub-tabs: Items | Looks -->
     <div style="display:flex;width:fit-content;margin:0 auto 16px;background:var(--warm);border-radius:12px;padding:3px;">
-      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="padding:9px 20px;border-radius:9px;border:none;background:#fff;color:var(--accent);font-size:14px;font-weight:500;font-family:var(--serif);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.08);">Items</button>
-      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="padding:9px 20px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-size:14px;font-weight:400;font-family:var(--serif);cursor:pointer;">Looks</button>
+      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="padding:6px 18px;border-radius:9px;border:none;background:#fff;color:var(--accent);font-size:13px;font-weight:500;font-family:var(--serif);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.08);">Items</button>
+      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="padding:6px 18px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:400;font-family:var(--serif);cursor:pointer;">Looks</button>
     </div>
     <!-- Pieces section -->
     <div id="closet-pieces-section">
