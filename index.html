@@ -1438,10 +1438,10 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div id="closet-pick-banner" style="display:none;">
       <div id="closet-pick-label"></div>
     </div>
-    <!-- Sub-tabs: Items | Looks — segmented control style -->
-    <div style="display:flex;background:var(--warm);border-radius:22px;padding:3px;margin:0 auto 16px;border:0.5px solid var(--border);width:fit-content;">
-      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="padding:7px 28px;border-radius:18px;border:none;background:#fff;color:var(--text);font-size:14px;font-weight:500;font-family:var(--serif);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.08);">Items</button>
-      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="padding:7px 28px;border-radius:18px;border:none;background:transparent;color:var(--muted);font-size:14px;font-weight:400;font-family:var(--serif);cursor:pointer;">Looks</button>
+    <!-- Sub-tabs: Items | Looks -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="padding:11px;border-radius:12px;border:0.5px solid var(--accent);background:var(--warm);color:var(--accent);font-size:14px;font-weight:500;font-family:var(--serif);cursor:pointer;">Items</button>
+      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="padding:11px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:14px;font-weight:400;font-family:var(--serif);cursor:pointer;">Looks</button>
     </div>
     <!-- Pieces section -->
     <div id="closet-pieces-section">
@@ -5300,14 +5300,14 @@ function switchClosetTab(tab){
   if(tab==='pieces'){
     if(pSec)pSec.style.display='block';
     if(lSec)lSec.style.display='none';
-    if(pBtn){pBtn.style.background='#fff';pBtn.style.color='var(--text)';pBtn.style.fontWeight='500';pBtn.style.fontFamily='var(--serif)';pBtn.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)';}
-    if(lBtn){lBtn.style.background='transparent';lBtn.style.color='var(--muted)';lBtn.style.fontWeight='400';lBtn.style.fontFamily='var(--serif)';lBtn.style.boxShadow='none';}
+    if(pBtn){pBtn.style.background='var(--warm)';pBtn.style.color='var(--accent)';pBtn.style.borderColor='var(--accent)';pBtn.style.fontWeight='500';}
+    if(lBtn){lBtn.style.background='transparent';lBtn.style.color='var(--muted)';lBtn.style.borderColor='var(--border)';lBtn.style.fontWeight='400';}
     renderClosetGrid();
   }else{
     if(pSec)pSec.style.display='none';
     if(lSec)lSec.style.display='block';
-    if(lBtn){lBtn.style.background='#fff';lBtn.style.color='var(--text)';lBtn.style.fontWeight='500';lBtn.style.fontFamily='var(--serif)';lBtn.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)';}
-    if(pBtn){pBtn.style.background='transparent';pBtn.style.color='var(--muted)';pBtn.style.fontWeight='400';pBtn.style.fontFamily='var(--serif)';pBtn.style.boxShadow='none';}
+    if(lBtn){lBtn.style.background='var(--warm)';lBtn.style.color='var(--accent)';lBtn.style.borderColor='var(--accent)';lBtn.style.fontWeight='500';}
+    if(pBtn){pBtn.style.background='transparent';pBtn.style.color='var(--muted)';pBtn.style.borderColor='var(--border)';pBtn.style.fontWeight='400';}
     renderCloset('all');
   }
 }
