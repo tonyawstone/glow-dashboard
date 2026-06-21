@@ -13601,9 +13601,9 @@ async function buildSleepAppleMetrics(){
     if(hrsEl) hrsEl.textContent = _sd.hrs.toFixed(1)+'h';
     // Calculate time in bed from bedtime → waketime
     const tibEl = document.getElementById('csv-timeinbed');
-    if(tibEl && withTimes.bedtime && withTimes.waketime){
-      const [bh,bm] = withTimes.bedtime.split(':').map(Number);
-      const [wh,wm] = withTimes.waketime.split(':').map(Number);
+    if(tibEl && _sd.bedtime && _sd.waketime){
+      const [bh,bm] = _sd.bedtime.split(':').map(Number);
+      const [wh,wm] = _sd.waketime.split(':').map(Number);
       const bedMins = bh*60+bm;
       const wakeMins = wh >= bh ? wh*60+wm : wh*60+wm+1440; // handle midnight crossover
       const tibMins = Math.max(0, wakeMins - bedMins);
@@ -13621,7 +13621,8 @@ async function buildSleepAppleMetrics(){
 
   // Update the big sleep number display inside the card
   const sleepDisplayEl = document.getElementById('sleep-display');
-  const latestHrs = parseFloat(latest.sleep_hrs).toFixed(1);
+  const _sdLatest = getActiveSleepData(latest);
+  const latestHrs = _sdLatest.hrs.toFixed(1);
   if(sleepDisplayEl) sleepDisplayEl.textContent = latestHrs + 'h';
 
   // Show stale warning if data isn't from today or yesterday
