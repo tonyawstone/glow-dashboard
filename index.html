@@ -3222,64 +3222,65 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
     </div>
 
-    <!-- Skincare Routine — unified card with AM, PM, Avatar subsections -->
-    <div class="card">
+    <!-- AM Skincare Routine -->
+    <div class="card" id="skin-am-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
         <div style="display:flex;align-items:center;gap:6px;">
-          <i class="ti ti-sparkles" style="font-size:13px;color:var(--accent);"></i>
-          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Skincare Routine</div>
+          <i class="ti ti-sun" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">AM Skincare Routine</div>
         </div>
         <button onclick="openSkincareLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past logs →</button>
       </div>
-
-      <!-- AM subcard -->
-      <div style="border:0.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinAM()">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div style="font-size:13px;font-weight:600;color:var(--text);">☀️ Morning routine</div>
-            <div id="skin-am-chevron" style="font-size:16px;color:var(--muted);transition:transform 0.2s;">›</div>
-          </div>
-          <div id="skin-am-progress" style="font-size:12px;color:var(--muted);"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinAM()">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);">☀️ Morning routine</div>
+          <div id="skin-am-chevron" style="font-size:16px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
-        <div id="skin-am-saved" style="display:none;margin-top:8px;"></div>
-        <div id="skin-am-body" style="display:none;margin-top:10px;">
-          <div class="med-row" id="r-cleanser" onclick="toggleSkinStep('r-cleanser')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Facial Cleanser</div><div class="med-note">Advanced Deep Clean</div></div></div>
-          <div class="med-row" id="r-serum" onclick="toggleSkinStep('r-serum')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Serum</div></div></div>
-          <div class="med-row" id="r-vitc" onclick="toggleSkinStep('r-vitc')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Vitamin C Moisturizer</div></div></div>
-          <div class="med-row" id="r-spf" onclick="toggleSkinStep('r-spf')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Cream with SPF</div><div class="med-note">Daily sunscreen</div></div></div>
-          <div class="med-row" id="r-eye" onclick="toggleSkinStep('r-eye')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Grace &amp; Stella Under Eye Mask</div><div class="med-note">As needed</div></div></div>
+        <div id="skin-am-progress" style="font-size:12px;color:var(--muted);"></div>
+      </div>
+      <div id="skin-am-saved" style="display:none;margin-top:8px;"></div>
+      <div id="skin-am-body" style="display:none;margin-top:10px;">
+        <div class="med-row" id="r-cleanser" onclick="toggleSkinStep('r-cleanser')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Facial Cleanser</div><div class="med-note">Advanced Deep Clean</div></div></div>
+        <div class="med-row" id="r-serum" onclick="toggleSkinStep('r-serum')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Serum</div></div></div>
+        <div class="med-row" id="r-vitc" onclick="toggleSkinStep('r-vitc')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Vitamin C Moisturizer</div></div></div>
+        <div class="med-row" id="r-spf" onclick="toggleSkinStep('r-spf')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Olay Super Cream with SPF</div><div class="med-note">Daily sunscreen</div></div></div>
+        <div class="med-row" id="r-eye" onclick="toggleSkinStep('r-eye')"><div class="med-check">&#x2713;</div><div class="med-info"><div class="med-name">Grace &amp; Stella Under Eye Mask</div><div class="med-note">As needed</div></div></div>
+      </div>
+    </div>
+
+    <!-- PM Skincare Routine -->
+    <div class="card" id="skin-pm-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-moon" style="font-size:13px;color:var(--accent);"></i>
+          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">PM Skincare Routine</div>
         </div>
       </div>
-
-      <!-- PM subcard -->
-      <div style="border:0.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinPM()">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div style="font-size:13px;font-weight:600;color:var(--text);">🌙 Evening routine</div>
-            <div id="skin-pm-chevron" style="font-size:16px;color:var(--muted);transition:transform 0.2s;">›</div>
-          </div>
-          <div id="skin-pm-progress" style="font-size:12px;color:var(--muted);"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleSkinPM()">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);">🌙 Evening routine</div>
+          <div id="skin-pm-chevron" style="font-size:16px;color:var(--muted);transition:transform 0.2s;">›</div>
         </div>
-        <div id="skin-pm-saved" style="display:none;margin-top:8px;"></div>
-        <div id="skin-pm-body" style="display:none;margin-top:10px;">
-          <div id="skin-pm-last-night" style="margin-bottom:10px;"></div>
-          <div class="med-row" id="r-musely-aa" onclick="selectMuselyCheck('aa')" style="margin-bottom:5px;">
-            <div class="med-check">&#x2713;</div>
-            <div class="med-info"><div class="med-name">Musely Anti-Aging Cream</div><div class="med-note">Alternate nightly with Spot Treatment</div></div>
-          </div>
-          <div class="med-row" id="r-musely-spot" onclick="selectMuselyCheck('spot')" style="margin-bottom:8px;">
-            <div class="med-check">&#x2713;</div>
-            <div class="med-info"><div class="med-name">Musely Spot Treatment</div><div class="med-note">Alternate nightly with Anti-Aging Cream</div></div>
-          </div>
-          <div class="med-row" id="r-regen" onclick="toggleSkinStep('r-regen')">
-            <div class="med-check">&#x2713;</div>
-            <div class="med-info"><div class="med-name">Olay Regenerist Ultra Rich Cream</div><div class="med-note">After Musely · every night</div></div>
-          </div>
+        <div id="skin-pm-progress" style="font-size:12px;color:var(--muted);"></div>
+      </div>
+      <div id="skin-pm-saved" style="display:none;margin-top:8px;"></div>
+      <div id="skin-pm-body" style="display:none;margin-top:10px;">
+        <div id="skin-pm-last-night" style="margin-bottom:10px;"></div>
+        <div class="med-row" id="r-musely-aa" onclick="selectMuselyCheck('aa')" style="margin-bottom:5px;">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Musely Anti-Aging Cream</div><div class="med-note">Alternate nightly with Spot Treatment</div></div>
+        </div>
+        <div class="med-row" id="r-musely-spot" onclick="selectMuselyCheck('spot')" style="margin-bottom:8px;">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Musely Spot Treatment</div><div class="med-note">Alternate nightly with Anti-Aging Cream</div></div>
+        </div>
+        <div class="med-row" id="r-regen" onclick="toggleSkinStep('r-regen')">
+          <div class="med-check">&#x2713;</div>
+          <div class="med-info"><div class="med-name">Olay Regenerist Ultra Rich Cream</div><div class="med-note">After Musely · every night</div></div>
         </div>
       </div>
-
-      <!-- Musely game subcard -->
-      <div style="border:0.5px solid var(--border);border-radius:12px;padding:12px;">
+      <!-- Musely game -->
+      <div style="border-top:0.5px solid var(--border);margin-top:12px;padding-top:12px;">
         <div id="skin-game-saved" style="display:none;margin-bottom:8px;"></div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="med-row" id="r-musely-game" onclick="toggleSkinStep('r-musely-game')" style="flex:1;margin:0;">
@@ -4456,7 +4457,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="display:flex;flex-direction:column;gap:8px;">
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--text);">💊 Meds &amp; supplements</span><span style="color:var(--muted);">Resets at 3 AM</span></div>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--text);">💧 Water intake</span><span style="color:var(--muted);">Resets at 3 AM</span></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--text);">✨ Skincare routine</span><span style="color:var(--muted);">Resets at 3 AM</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--text);">☀️ AM Skincare Routine</span><span style="color:var(--muted);">Resets at 3 AM</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--text);">🌙 PM Skincare Routine</span><span style="color:var(--muted);">Resets at 3 AM</span></div>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--text);">😴 Sleep &amp; CPAP</span><span style="color:var(--muted);">Resets at 3 AM</span></div>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--text);">🏋️ Exercise check-in</span><span style="color:var(--muted);">Resets at 3 AM</span></div>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="color:var(--text);">👗 Outfit nudge</span><span style="color:var(--muted);">Resets at 3 AM</span></div>
