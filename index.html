@@ -6981,11 +6981,13 @@ async function buildDailyProgress(){
   // Wellness check-in — logical day
   try { const wellnessCheckins = await dbAll('wellness_checkins'); autoChecks['dp-wellness-checkin'] = wellnessCheckins.some(e=>e.date===logical||e.date===today); } catch(e){}
 
-  // BP — stays checked until 3 AM reset
-  autoChecks['dp-bp'] =
-    (Array.isArray(csvBPData) && csvBPData.some(e=>e.date===logical||e.date===today)) ||
-    bps.some(e=>e.date===logical||e.date===today) ||
-    (Array.isArray(bpBlob?.data) && bpBlob.data.some(e=>e.date===logical||e.date===today));
+  // BP — persists once logged; done if any valid reading exists across all sources
+  const _allBPSrc = [
+    ...(Array.isArray(csvBPData) ? csvBPData : []),
+    ...bps,
+    ...(Array.isArray(bpBlob?.data) ? bpBlob.data : [])
+  ];
+  autoChecks['dp-bp'] = _allBPSrc.some(e=>e.sys&&e.dia);
 
   // Meds AM + PM (DOM + Blob + localStorage) — logical day
   const AM_MEDS = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo'];
