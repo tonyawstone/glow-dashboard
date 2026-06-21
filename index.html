@@ -1429,11 +1429,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="font-family:var(--serif);font-size:20px;font-weight:400;color:var(--text);line-height:1.2;">My Closet</div>
         <div id="closet-stats" style="font-size:11px;color:var(--muted);margin-top:1px;"></div>
       </div>
-      <button onclick="toggleClosetSearch()" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--text);display:flex;align-items:center;"><i class="ti ti-search" style="font-size:20px;"></i></button>
-    </div>
-    <!-- Search bar (hidden by default) -->
-    <div id="closet-search-bar" style="display:none;margin-bottom:12px;">
-      <input type="text" id="closet-search-input" placeholder="Search my closet..." oninput="filterClosetBySearch(this.value)" style="width:100%;padding:9px 14px;border-radius:20px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;background:var(--warm);">
+      <div style="width:28px;"></div>
     </div>
     <!-- Hidden pick banner (functionality preserved, UI lives in weekly planner) -->
     <div id="closet-pick-banner" style="display:none;">
@@ -1457,6 +1453,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
           <button class="tag" data-cat-filter onclick="filterClosetPieces('accessory',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Accessories</button>
           <button class="tag" data-cat-filter onclick="filterClosetPieces('other',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Other</button>
         </div>
+      </div>
+      <!-- Permanent search bar -->
+      <div style="position:relative;margin-bottom:12px;">
+        <i class="ti ti-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted);pointer-events:none;"></i>
+        <input type="text" id="closet-search-input" placeholder="Search my closet..." oninput="filterClosetBySearch(this.value)" style="width:100%;padding:9px 14px 9px 34px;border-radius:12px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--serif);box-sizing:border-box;background:transparent;outline:none;">
       </div>
       <div id="closet-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px;align-items:start;"></div>
       <div id="closet-empty" style="font-size:13px;color:var(--muted);text-align:center;padding:24px 0;">No pieces yet — add your first below</div>
