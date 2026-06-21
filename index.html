@@ -1790,17 +1790,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
     <!-- Sleep Snapshot (hours + score side by side) -->
     <div class="card" id="sleep-snapshot-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <i class="ti ti-moon-stars" style="font-size:13px;color:var(--accent);"></i>
-          <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Sleep Snapshot</div>
-        </div>
-        <div style="display:flex;gap:4px;" id="sleep-tracker-selector">
-          <button id="slp-pref-auto" onclick="setSleepPref('auto')" style="font-size:10px;padding:3px 7px;border-radius:10px;border:0.5px solid var(--border);cursor:pointer;background:var(--accent);color:#fff;font-family:var(--sans);">Auto</button>
-          <button id="slp-pref-w" onclick="setSleepPref('w')" style="font-size:10px;padding:3px 7px;border-radius:10px;border:0.5px solid var(--border);cursor:pointer;background:transparent;color:var(--muted);font-family:var(--sans);">Withings</button>
-          <button id="slp-pref-aw" onclick="setSleepPref('aw')" style="font-size:10px;padding:3px 7px;border-radius:10px;border:0.5px solid var(--border);cursor:pointer;background:transparent;color:var(--muted);font-family:var(--sans);">Watch</button>
-          <button id="slp-pref-st" onclick="setSleepPref('st')" style="font-size:10px;padding:3px 7px;border-radius:10px;border:0.5px solid var(--border);cursor:pointer;background:transparent;color:var(--muted);font-family:var(--sans);">Sleeptracker</button>
-        </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <i class="ti ti-moon-stars" style="font-size:13px;color:var(--accent);"></i>
+        <div style="font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);">Sleep Snapshot</div>
+      </div>
+      <div id="sleep-tracker-pills" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
       <!-- Row: data box LEFT (cream, half-width), score circle RIGHT (tan box) -->
       <div style="display:flex;gap:10px;align-items:stretch;">
         <!-- Left: hours + times — cream box, centered -->
@@ -4917,11 +4911,6 @@ async function tab(id){
   else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');document.getElementById('compact-header').style.removeProperty('display');document.getElementById('bottom-nav').style.removeProperty('display');document.getElementById('time-tabs-bar').style.removeProperty('display');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') {
     buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary(); const _slpd=document.getElementById('sleep-log-date');if(_slpd&&!_slpd.value)_slpd.value=logicalDayStr();
-    const _curPref = getSleepPref();
-    ['auto','w','aw','st'].forEach(p => {
-      const btn = document.getElementById(`slp-pref-${p}`);
-      if(btn){ btn.style.background = p===_curPref?'var(--accent)':'transparent'; btn.style.color=p===_curPref?'#fff':'var(--muted)'; }
-    });
     // Default myAir date to yesterday — CPAP data is always for last night
     const myairDate = document.getElementById('myair-date');
     const myairLabel = document.getElementById('myair-date-label');
@@ -6949,16 +6938,34 @@ function setSleepPref(pref){
     if(rows.length) buildSleepAppleMetrics(rows);
   });
   buildDailyProgress();
-  ['auto','w','aw','st'].forEach(p => {
-    const btn = document.getElementById(`slp-pref-${p}`);
-    if(btn) btn.style.background = p===pref ? 'var(--accent)' : 'transparent';
-    if(btn) btn.style.color = p===pref ? '#fff' : 'var(--muted)';
-  });
+}
+
+function renderSleepTrackerPills(row){
+  const container = document.getElementById('sleep-tracker-pills');
+  if(!container) return;
+  const pref = getSleepPref();
+  const trackers = [
+    {key:'w',  label:'Withings'},
+    {key:'aw', label:'Apple Watch'},
+    {key:'st', label:'Sleeptracker'},
+  ].filter(t => parseFloat(row[`sleep_hrs_${t.key}`]) > 0);
+  if(trackers.length <= 1){ container.innerHTML=''; return; }
+  const active = trackers.find(t=>t.key===pref) ? pref : trackers[0].key;
+  container.innerHTML = trackers.map(t=>`
+    <button onclick="setSleepPref('${t.key}')" style="font-size:10px;padding:3px 9px;border-radius:10px;border:0.5px solid var(--border);cursor:pointer;font-family:var(--sans);background:${t.key===active?'var(--accent)':'transparent'};color:${t.key===active?'#fff':'var(--muted)'};">${t.label}</button>
+  `).join('');
 }
 
 function getActiveSleepData(row){
   const pref = getSleepPref();
-  const suffix = (pref !== 'auto' && row[`sleep_hrs_${pref}`]) ? `_${pref}` : '';
+  let suffix = '';
+  if(pref !== 'auto' && parseFloat(row[`sleep_hrs_${pref}`]) > 0){
+    suffix = `_${pref}`;
+  } else {
+    for(const tk of ['w','aw','st']){
+      if(parseFloat(row[`sleep_hrs_${tk}`]) > 0){ suffix = `_${tk}`; break; }
+    }
+  }
   return {
     hrs:     parseFloat(row[`sleep_hrs${suffix}`])||0,
     deep:    parseFloat(row[`sleep_deep${suffix}`])||0,
@@ -6966,7 +6973,7 @@ function getActiveSleepData(row){
     core:    parseFloat(row[`sleep_core${suffix}`])||0,
     bedtime: row[`bedtime${suffix}`]||'',
     waketime:row[`waketime${suffix}`]||'',
-    source:  row[`sleep_src${suffix}`]||row[`sleep_source${suffix}`]||'',
+    source:  row[`sleep_src${suffix}`]||row[`sleep_source${suffix}`]||row.sleep_source||'',
     suffix,
   };
 }
@@ -13575,6 +13582,7 @@ async function buildSleepAppleMetrics(){
   const latest = withSleep.find(r=>r.date===todayStr)
               || withSleep.find(r=>r.date===yesterdayStr)
               || withSleep[withSleep.length-1];
+  renderSleepTrackerPills(latest);
   const recent7 = withSleep.slice(0,7);
   const avgSleep = recent7.reduce((a,r)=>a+parseFloat(r.sleep_hrs),0)/recent7.length;
   const fmt = d => safeDate(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
