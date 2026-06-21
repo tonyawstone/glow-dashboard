@@ -13043,11 +13043,11 @@ function buildSleepStagesDisplay(row){
   if(!total && !parseFloat(row.sleep_hrs)) return '';
   if(!total) return '<div style="font-size:11px;color:var(--muted);margin-top:8px;">Re-run Python script to see sleep stages</div>';
 
-  // Awake = time in bed - time asleep
+  // Awake = time in bed - time asleep (use active tracker's bedtime/waketime)
   let awake = 0;
-  if(row.bedtime && row.waketime){
-    const [bh,bm] = row.bedtime.split(':').map(Number);
-    const [wh,wm] = row.waketime.split(':').map(Number);
+  if(_sd.bedtime && _sd.waketime){
+    const [bh,bm] = _sd.bedtime.split(':').map(Number);
+    const [wh,wm] = _sd.waketime.split(':').map(Number);
     const bedMins = bh*60+bm;
     const wakeMins = (wh < bh) ? wh*60+wm+1440 : wh*60+wm;
     const tibHrs = Math.max(0, (wakeMins - bedMins)) / 60;
@@ -18165,8 +18165,7 @@ async function loadMyAirLastLogged(){
         // Always use isoDate for consistent formatting
         const iso = (e.isoDate||'').slice(0,10);
         const d = iso ? safeDate(iso) : null;
-        const _prev=new Date(d);_prev.setDate(_prev.getDate()-1);
-        const dateLabel = d && !isNaN(d) ? 'Night of '+_prev.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) : e.date||'Unknown date';
+        const dateLabel = d && !isNaN(d) ? 'Night of '+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) : e.date||'Unknown date';
         const scoreColor = e.score>=90?'#27500A':e.score>=70?'#92400E':'#7F1D1D';
         const realIdx = data.length - 1 - i;
         return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);">
