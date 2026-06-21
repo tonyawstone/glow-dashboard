@@ -2688,7 +2688,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
   <!-- ── DAILY ── -->
   <div class="view-content on" id="vc-health-daily">
-    <div class="section-label">Wellness · Today <button class="guide-btn" onclick="openGuide('health')">?</button></div>
+    <div class="section-label">Wellness <button class="guide-btn" onclick="openGuide('health')">?</button></div>
 
     <!-- Wellness Check-in card -->
     <div class="card" id="wellness-checkin-card">
@@ -2736,12 +2736,12 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <div id="wellness-symptom-panel" style="display:none;">
           <div class="tags" id="wellness-symptom-tags" style="margin-bottom:12px;">
-            <button class="tag" onclick="tog(this);saveWellnessDraft()">Normal</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Headache</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Fatigue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Sluggish</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Dizzy</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Nausea</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Pain</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Achy</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Muscle cramps</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Stomach pain</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Bloating</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Constipation</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Brain fog</button>
+            <button class="tag" onclick="tog(this);saveWellnessDraft()">No symptoms</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Headache</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Fatigue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Sluggish</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Dizzy</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Nausea</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Pain</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Achy</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Muscle cramps</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Stomach pain</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Bloating</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Constipation</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Brain fog</button>
           </div>
         </div>
         <div id="wellness-concerns-panel" style="display:none;">
           <div class="tags" id="wellness-concerns-tags" style="margin-bottom:12px;">
-            <button class="tag" onclick="tog(this);saveWellnessDraft()">None</button><button class="tag" onclick="tog(this);saveWellnessDraft()">BP concern</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Medication issue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Hydration concern</button>
+            <button class="tag" onclick="tog(this);saveWellnessDraft()">No health concerns</button><button class="tag" onclick="tog(this);saveWellnessDraft()">BP concern</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Medication issue</button><button class="tag" onclick="tog(this);saveWellnessDraft()">Hydration concern</button>
           </div>
         </div>
         <textarea id="wellness-note" rows="2" placeholder="Any symptoms, BP, medication, or hydration notes today?" oninput="saveWellnessDraft()" style="width:100%;padding:8px 10px;font-size:13px;border:0.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--text);font-family:var(--sans);resize:none;box-sizing:border-box;margin-bottom:14px;"></textarea>
