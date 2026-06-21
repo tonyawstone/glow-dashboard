@@ -1442,17 +1442,15 @@ textarea:focus,input:focus{border-color:var(--accent);}
     </div>
     <!-- Pieces section -->
     <div id="closet-pieces-section">
-      <div style="overflow-x:auto;white-space:nowrap;margin-bottom:12px;padding-bottom:2px;-webkit-overflow-scrolling:touch;">
-        <div style="display:inline-flex;gap:6px;">
-          <button class="tag on" data-cat-filter onclick="filterClosetPieces('all',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">All</button>
-          <button class="tag" data-cat-filter onclick="filterClosetPieces('top',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Tops</button>
-          <button class="tag" data-cat-filter onclick="filterClosetPieces('bottom',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Bottoms</button>
-          <button class="tag" data-cat-filter onclick="filterClosetPieces('dress',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Dresses</button>
-          <button class="tag" data-cat-filter onclick="filterClosetPieces('shoes',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Shoes</button>
-          <button class="tag" data-cat-filter onclick="filterClosetPieces('bag',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Bags</button>
-          <button class="tag" data-cat-filter onclick="filterClosetPieces('accessory',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Accessories</button>
-          <button class="tag" data-cat-filter onclick="filterClosetPieces('other',this)" style="font-size:12px;padding:5px 14px;white-space:nowrap;">Other</button>
-        </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+        <button class="tag on" data-cat-filter onclick="filterClosetPieces('all',this)" style="font-size:12px;padding:5px 14px;">All</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('top',this)" style="font-size:12px;padding:5px 14px;">Tops</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('bottom',this)" style="font-size:12px;padding:5px 14px;">Bottoms</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('dress',this)" style="font-size:12px;padding:5px 14px;">Dresses</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('shoes',this)" style="font-size:12px;padding:5px 14px;">Shoes</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('bag',this)" style="font-size:12px;padding:5px 14px;">Bags</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('accessory',this)" style="font-size:12px;padding:5px 14px;">Accessories</button>
+        <button class="tag" data-cat-filter onclick="filterClosetPieces('other',this)" style="font-size:12px;padding:5px 14px;">Other</button>
       </div>
       <!-- Permanent search bar -->
       <div style="position:relative;margin-bottom:12px;">
@@ -1465,11 +1463,11 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:10px;">New piece</div>
         <div style="display:flex;gap:8px;margin-bottom:12px;">
           <div style="flex:1;text-align:center;">
-            <div class="photo-slot" style="width:100%;height:110px;" onclick="pickPhoto('cp-front')" id="cp-front"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
+            <div class="photo-slot" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cp-front')" id="cp-front"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
             <div style="font-size:10px;color:var(--muted);margin-top:3px;">Front</div>
           </div>
           <div style="flex:1;text-align:center;">
-            <div class="photo-slot" style="width:100%;height:110px;" onclick="pickPhoto('cp-back')" id="cp-back"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
+            <div class="photo-slot" style="width:100%;aspect-ratio:3/4;" onclick="pickPhoto('cp-back')" id="cp-back"><i class="ti ti-camera" style="font-size:18px;color:var(--border);position:relative;z-index:1;"></i></div>
             <div style="font-size:10px;color:var(--muted);margin-top:3px;">Back (opt)</div>
           </div>
         </div>
@@ -1509,7 +1507,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <div class="toast-msg" id="cp-toast">Saved!</div>
       </div>
-      <button id="closet-add-btn" onclick="toggleClosetAdd()" style="width:100%;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);margin-top:4px;">+ Add piece</button>
+      <button id="closet-add-btn" onclick="toggleClosetAdd()" style="width:100%;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:var(--warm);color:var(--accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--serif);margin-top:4px;">+ Add piece</button>
     </div>
     <!-- Looks section -->
     <div id="closet-looks-section" style="display:none;">
