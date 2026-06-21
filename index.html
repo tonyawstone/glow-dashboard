@@ -4057,7 +4057,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <div class="card-title" style="margin:0;">💭 Today's reflection prompt</div>
-        <button onclick="toggleReflectionLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
+        <button onclick="openReflectionLog()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:0;font-family:var(--sans);">Past →</button>
       </div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">A few gentle thoughts for today</div>
       <div id="reflection-prompt" style="font-family:var(--serif);font-size:17px;font-style:italic;color:var(--text);line-height:1.65;text-align:center;padding:0 4px 14px;"></div>
@@ -4108,7 +4108,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
           </a>
         </div>
       </div>
-      <div id="reflection-log-daily" style="display:none;margin-top:12px;border-top:0.5px solid var(--border);padding-top:10px;"><div class="log-empty">No reflections yet.</div></div>
     </div>
 
     <!-- Daily Affirmation -->
@@ -7789,10 +7788,24 @@ function closeMoodLogOverlay(){
   
 }
 
-function toggleReflectionLog(){
-  const el = document.getElementById('reflection-log-daily');
+async function openReflectionLog(){
+  openOverlay('reflection-log-overlay');
+  const el = document.getElementById('reflection-log-overlay-content');
   if(!el) return;
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  el.innerHTML = '<div class="log-empty">Loading...</div>';
+  try {
+    const all = await dbAll('reflections');
+    const seen = new Map();
+    all.filter(e=>e.type==='daily').sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>seen.set(e.date,e));
+    const entries = [...seen.values()].sort((a,b)=>b.date.localeCompare(a.date));
+    if(!entries.length){ el.innerHTML='<div class="log-empty">No reflections yet.</div>'; return; }
+    el.innerHTML = entries.map(e=>`
+      <div style="padding:12px 0;border-bottom:0.5px solid var(--border);">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${fmtOutfitDate(e.date)}</div>
+        ${e.prompt?`<div style="font-size:12px;color:var(--accent);font-style:italic;margin-bottom:4px;">"${e.prompt}"</div>`:''}
+        <div style="font-size:13px;color:var(--text);line-height:1.5;white-space:pre-wrap;">${e.answer}</div>
+      </div>`).join('');
+  } catch(err){ el.innerHTML='<div class="log-empty">Could not load reflections.</div>'; }
 }
 
 function toggleActivation(){
@@ -20771,6 +20784,16 @@ async function weeklyMindInsight(){
       <div class="overlay-title" style="font-family:var(--serif);font-size:22px;font-weight:300;">Mind History</div>
     </div>
     <div id="mind-log-overlay-content"><div class="log-empty">Loading...</div></div>
+  </div>
+</div>
+
+<div id="reflection-log-overlay" class="fullscreen-overlay">
+  <div style="padding:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeOverlay('reflection-log-overlay');" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;">←</button>
+      <div class="overlay-title" style="font-family:var(--serif);font-size:22px;font-weight:300;">Past Reflections</div>
+    </div>
+    <div id="reflection-log-overlay-content"><div class="log-empty">Loading...</div></div>
   </div>
 </div>
 
