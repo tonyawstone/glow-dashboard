@@ -14538,11 +14538,18 @@ async function buildSkinCharts(){
     const weeklySkinEl = document.getElementById('weekly-skin');
     if(weeklySkinEl){
       const muselyHistory = JSON.parse(localStorage.getItem('glowMuselyHistory')||'[]');
-      const checkins = await dbAll('checkins');
-      const last7 = checkins.slice(-7);
-      const amDone = last7.filter(c=>c.skinAM).length;
-      const pmDone = last7.filter(c=>c.skinPM).length;
-      const recentMusely = muselyHistory.slice(-7);
+      const amHistory = JSON.parse(localStorage.getItem('glowSkinAMHistory')||'[]');
+      // Build last-7-days date set for accurate filtering
+      const _today = logicalDayStr();
+      const _last7Dates = new Set();
+      for(let i=0;i<7;i++){
+        const d=new Date(_today+'T12:00:00');
+        d.setDate(d.getDate()-i);
+        _last7Dates.add(d.toISOString().split('T')[0]);
+      }
+      const amDone = amHistory.filter(e=>_last7Dates.has(e.date)).length;
+      const recentMusely = muselyHistory.filter(e=>_last7Dates.has(e.date));
+      const pmDone = recentMusely.length;
       const aaCount = recentMusely.filter(m=>m.treatment==='Anti-Aging Cream').length;
       const spotCount = recentMusely.filter(m=>m.treatment==='Spot Treatment').length;
       weeklySkinEl.innerHTML = `
