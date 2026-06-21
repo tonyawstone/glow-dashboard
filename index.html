@@ -1229,7 +1229,8 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
       </div>
       <input id="cd-name-input" type="text" placeholder="Item name..." style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;">
-      <input id="cd-brand-input" type="text" placeholder="Store / Brand" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:8px;">
+      <input id="cd-brand-input" type="text" placeholder="Brand (optional)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:6px;">
+      <input id="cd-store-input" type="text" placeholder="Store (e.g. Target, Nordstrom)" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;margin-bottom:8px;">
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;" id="cd-cat-row">
         <button class="tag cd-cat-btn" onclick="cdSetCategory('top',this)">Top</button>
         <button class="tag cd-cat-btn" onclick="cdSetCategory('bottom',this)">Bottom</button>
@@ -1243,10 +1244,19 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <input id="cd-color-input" type="text" placeholder="Color" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
         <input id="cd-size-input" type="text" placeholder="Size" style="width:80px;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
       </div>
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
-        <span style="font-size:13px;color:var(--muted);">$</span>
-        <input id="cd-price-input" type="number" placeholder="0.00" step="0.01" min="0" style="flex:1;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;flex:1;">
+          <span style="font-size:13px;color:var(--muted);">$</span>
+          <input id="cd-price-input" type="number" placeholder="0.00" step="0.01" min="0" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);">
+        </div>
+        <div style="flex:1;">
+          <input type="date" id="cd-date-purchased" style="width:100%;padding:7px 10px;border-radius:8px;border:0.5px solid var(--border);font-size:13px;color:var(--text);font-family:var(--sans);box-sizing:border-box;">
+        </div>
       </div>
+      <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:var(--warm);cursor:pointer;margin-bottom:14px;">
+        <input type="checkbox" id="cd-is-dailylook" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+        <span style="font-size:13px;color:var(--text);font-family:var(--serif);">From DailyLook box</span>
+      </label>
       <button onclick="saveClosetDetail()" style="width:100%;padding:10px;border-radius:12px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;margin-bottom:8px;">Save</button>
       <button onclick="deleteClosetItem()" style="width:100%;padding:10px;border-radius:12px;border:0.5px solid var(--rose);background:transparent;color:var(--rose);font-size:13px;font-family:var(--sans);cursor:pointer;">Remove from closet</button>
     </div>
@@ -5544,9 +5554,12 @@ function openClosetDetail(id){
   closetDetailItemId=id;
   document.getElementById('cd-name-input').value=item.name||'';
   document.getElementById('cd-brand-input').value=item.brand||'';
+  document.getElementById('cd-store-input').value=item.store||'';
   document.getElementById('cd-color-input').value=(item.colors&&item.colors[0])||item.color||'';
   document.getElementById('cd-size-input').value=item.size||'';
   document.getElementById('cd-price-input').value=item.price||'';
+  document.getElementById('cd-date-purchased').value=item.datePurchased||'';
+  const dlCbD=document.getElementById('cd-is-dailylook');if(dlCbD)dlCbD.checked=item.source==='DailyLook';
   document.querySelectorAll('.cd-cat-btn').forEach(b=>{
     b.classList.toggle('on', b.textContent.trim().toLowerCase()===(item.category||'').toLowerCase());
   });
@@ -5579,12 +5592,15 @@ async function saveClosetDetail(){
   if(!item)return;
   item.name=document.getElementById('cd-name-input').value.trim()||item.name;
   item.brand=document.getElementById('cd-brand-input').value.trim();
+  item.store=document.getElementById('cd-store-input').value.trim();
   const colorVal=document.getElementById('cd-color-input').value.trim();
   item.color=colorVal;
   item.colors=colorVal?[colorVal]:[];
   item.size=document.getElementById('cd-size-input').value.trim();
   const priceVal=document.getElementById('cd-price-input').value;
   item.price=priceVal?parseFloat(priceVal):null;
+  item.datePurchased=document.getElementById('cd-date-purchased').value||null;
+  item.source=document.getElementById('cd-is-dailylook')?.checked?'DailyLook':(item.source==='DailyLook'?'manual':item.source||'manual');
   const activeCat=document.querySelector('.cd-cat-btn.on');
   if(activeCat)item.category=activeCat.textContent.trim().toLowerCase();
   const pf=getSlotPhotoUrl('cd-front');if(pf)item.photoFront=pf;
