@@ -13635,9 +13635,7 @@ async function buildSleepAppleMetrics(){
   const sleepStripEl = document.getElementById('s-sleep-h');
   const sleepSrcEl = document.getElementById('s-sleep-src');
   const sleepDateEl = document.getElementById('s-sleep-date');
-  if(sleepStripEl && sleepStripEl.textContent === '—'){
-    sleepStripEl.textContent = latestHrs + 'h';
-  }
+  if(sleepStripEl) sleepStripEl.textContent = latestHrs + 'h';
   if(sleepSrcEl) sleepSrcEl.textContent = staleLabel;
   if(sleepDateEl) sleepDateEl.textContent = smartDate(latest.date) || 'Last night';
 
@@ -17743,7 +17741,7 @@ async function loadTodaySleepFromCSV(){
                   || withSleep.find(r=>r.date===yesterdayStr)
                   || withSleep[withSleep.length-1];
       if(sleepEl){
-        const hrs = parseFloat(latest.sleep_hrs);
+        const hrs = getActiveSleepData(latest).hrs;
         const h = Math.floor(hrs);
         const m = Math.round((hrs - h) * 60);
         sleepEl.textContent = `${h}h ${m}m`;
