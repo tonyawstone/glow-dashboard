@@ -1439,9 +1439,9 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div id="closet-pick-label"></div>
     </div>
     <!-- Sub-tabs: Items | Looks — segmented control style -->
-    <div style="display:flex;background:var(--warm);border-radius:22px;padding:3px;margin-bottom:16px;border:0.5px solid var(--border);">
-      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="flex:1;padding:8px 0;border-radius:18px;border:none;background:#fff;color:var(--text);font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.08);">Items</button>
-      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="flex:1;padding:8px 0;border-radius:18px;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:400;font-family:var(--sans);cursor:pointer;">Looks</button>
+    <div style="display:flex;background:var(--warm);border-radius:22px;padding:3px;margin:0 auto 16px;border:0.5px solid var(--border);width:fit-content;">
+      <button id="closet-tab-pieces" onclick="switchClosetTab('pieces')" style="padding:7px 28px;border-radius:18px;border:none;background:#fff;color:var(--text);font-size:14px;font-weight:500;font-family:var(--serif);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.08);">Items</button>
+      <button id="closet-tab-looks" onclick="switchClosetTab('looks')" style="padding:7px 28px;border-radius:18px;border:none;background:transparent;color:var(--muted);font-size:14px;font-weight:400;font-family:var(--serif);cursor:pointer;">Looks</button>
     </div>
     <!-- Pieces section -->
     <div id="closet-pieces-section">
@@ -4878,7 +4878,7 @@ async function tab(id){
   applyView();
   if(id==='body') { buildBodyChart(); buildBodyCompositionMetrics(); restoreBodyDraft(); restoreBodyCheckinState(); restoreExerciseCheckinState(); buildGaitMobilitySummary(); buildZepSideEffectsSummary(); loadBodyGoals(); buildZepboundStatus(); loadInjectionSiteHistory(); }
   if(id==='style') { styleCalMonth=new Date(); styleCalMonth.setDate(1); renderLookbook(); document.getElementById('style-inspo-bar').style.display=''; updateShoppingBadgeOnLoad(); restoreStyleDraft(); restoreStyleCheckinState(); loadWardrobePlanLog(); loadTodayPlannedLook(); const _sld=document.getElementById('style-log-date');if(_sld)_sld.value=logicalDayStr(); }
-  else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
+  else { const bar=document.getElementById('style-inspo-bar'); if(bar) bar.style.display='none'; if(inspoViewOpen){inspoViewOpen=false;document.getElementById('vc-style-inspo').classList.remove('on');} if(shoppingViewOpen){shoppingViewOpen=false;document.getElementById('vc-style-shopping').classList.remove('on');} if(closetViewOpen){closetViewOpen=false;const cv=document.getElementById('vc-style-closet');if(cv)cv.classList.remove('on');document.getElementById('compact-header').style.removeProperty('display');document.getElementById('bottom-nav').style.removeProperty('display');document.getElementById('time-tabs-bar').style.removeProperty('display');} const _sb=document.getElementById('style-shopping-btn'); if(_sb) _sb.style.display=''; }
   if(id==='sleep') {
     buildSleepAppleMetrics(); loadCPAPEquipment(); loadMyAirLastLogged(); loadMyAirState(); loadCPAPCleanState(); loadSleepAidState(); restoreSleepDraft(); restoreSleepCheckinState(); updateMyAirCardSummary(); const _slpd=document.getElementById('sleep-log-date');if(_slpd&&!_slpd.value)_slpd.value=logicalDayStr();
     // Default myAir date to yesterday — CPAP data is always for last night
@@ -4918,7 +4918,7 @@ function setView(v,btn){
   // Mark matching buttons in both the time-tabs-bar and any legacy vtabs
   document.querySelectorAll('.vtab').forEach(b=>{ if(b.dataset.view===v) b.classList.add('on'); });
   applyView();
-  if(curTab==='style'){ if(closetViewOpen){document.getElementById('vc-style-closet').classList.remove('on');}closetViewOpen=false; renderLookbook(); if(v==='weekly') loadWeekPlan(); if(v==='monthly'){ renderStyleCalendar(); buildStylePurchaseHistory('style-purchase-history-monthly',false); } if(v==='yearly') buildStyleYearlyView(); }
+  if(curTab==='style'){ if(closetViewOpen){document.getElementById('vc-style-closet').classList.remove('on');document.getElementById('compact-header').style.removeProperty('display');document.getElementById('bottom-nav').style.removeProperty('display');document.getElementById('time-tabs-bar').style.removeProperty('display');}closetViewOpen=false; renderLookbook(); if(v==='weekly') loadWeekPlan(); if(v==='monthly'){ renderStyleCalendar(); buildStylePurchaseHistory('style-purchase-history-monthly',false); } if(v==='yearly') buildStyleYearlyView(); }
   if(curTab==='today' && v==='weekly') buildWeeklyTodayView();
   if(curTab==='today' && v==='monthly') buildMonthlyTodayView();
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
@@ -5229,14 +5229,14 @@ function renderClosetGrid(){
     photoWrap.appendChild(photoInner);photoWrap.appendChild(heart);
     // Label below image, separated by border line
     const labelBar=document.createElement('div');
-    labelBar.style.cssText='border-top:0.5px solid var(--border);padding:6px 8px;';
+    labelBar.style.cssText='border-top:0.5px solid var(--border);padding:6px 8px;background:var(--warm);';
     const nameLbl=document.createElement('div');
-    nameLbl.style.cssText='font-size:11px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;';
+    nameLbl.style.cssText='font-size:12px;color:var(--text);font-weight:400;font-family:var(--serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;';
     nameLbl.textContent=item.name||'—';
     labelBar.appendChild(nameLbl);
     if(item.category){
       const catLbl=document.createElement('div');
-      catLbl.style.cssText='font-size:10px;color:var(--muted);margin-top:1px;';
+      catLbl.style.cssText='font-size:10px;color:var(--muted);margin-top:1px;font-family:var(--sans);';
       catLbl.textContent=CAT_LABEL[item.category]||item.category;
       labelBar.appendChild(catLbl);
     }
@@ -5300,14 +5300,14 @@ function switchClosetTab(tab){
   if(tab==='pieces'){
     if(pSec)pSec.style.display='block';
     if(lSec)lSec.style.display='none';
-    if(pBtn){pBtn.style.background='#fff';pBtn.style.color='var(--text)';pBtn.style.fontWeight='500';pBtn.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)';}
-    if(lBtn){lBtn.style.background='transparent';lBtn.style.color='var(--muted)';lBtn.style.fontWeight='400';lBtn.style.boxShadow='none';}
+    if(pBtn){pBtn.style.background='#fff';pBtn.style.color='var(--text)';pBtn.style.fontWeight='500';pBtn.style.fontFamily='var(--serif)';pBtn.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)';}
+    if(lBtn){lBtn.style.background='transparent';lBtn.style.color='var(--muted)';lBtn.style.fontWeight='400';lBtn.style.fontFamily='var(--serif)';lBtn.style.boxShadow='none';}
     renderClosetGrid();
   }else{
     if(pSec)pSec.style.display='none';
     if(lSec)lSec.style.display='block';
-    if(lBtn){lBtn.style.background='#fff';lBtn.style.color='var(--text)';lBtn.style.fontWeight='500';lBtn.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)';}
-    if(pBtn){pBtn.style.background='transparent';pBtn.style.color='var(--muted)';pBtn.style.fontWeight='400';pBtn.style.boxShadow='none';}
+    if(lBtn){lBtn.style.background='#fff';lBtn.style.color='var(--text)';lBtn.style.fontWeight='500';lBtn.style.fontFamily='var(--serif)';lBtn.style.boxShadow='0 1px 3px rgba(0,0,0,0.08)';}
+    if(pBtn){pBtn.style.background='transparent';pBtn.style.color='var(--muted)';pBtn.style.fontWeight='400';pBtn.style.fontFamily='var(--serif)';pBtn.style.boxShadow='none';}
     renderCloset('all');
   }
 }
@@ -5352,8 +5352,8 @@ function openLookDetail(idx){
 function closeLookDetail(){
   document.getElementById('look-detail-overlay').style.display='none';
   _lookDetailIdx=null;
-  const ch=document.getElementById('compact-header');if(ch)ch.style.removeProperty('display');
-  const ttb=document.getElementById('time-tabs-bar');if(ttb)ttb.style.display='flex';
+  const ch=document.getElementById('compact-header');if(ch&&!closetViewOpen)ch.style.removeProperty('display');
+  const ttb=document.getElementById('time-tabs-bar');if(ttb&&!closetViewOpen)ttb.style.display='flex';
 }
 
 function renderLookDetailPieces(e){
@@ -5543,8 +5543,8 @@ function openClosetDetail(id){
 function closeClosetDetail(){
   document.getElementById('closet-detail-overlay').style.display='none';
   closetDetailItemId=null;
-  const ch=document.getElementById('compact-header');if(ch)ch.style.removeProperty('display');
-  const ttb=document.getElementById('time-tabs-bar');if(ttb)ttb.style.display='flex';
+  const ch=document.getElementById('compact-header');if(ch&&!closetViewOpen)ch.style.removeProperty('display');
+  const ttb=document.getElementById('time-tabs-bar');if(ttb&&!closetViewOpen)ttb.style.display='flex';
 }
 
 function cdSetCategory(val,btn){
@@ -5632,8 +5632,8 @@ async function openPieceView(id){
 function closePieceView(){
   document.getElementById('cpv-overlay').style.display='none';
   _cpvItemId=null;
-  const ch=document.getElementById('compact-header');if(ch)ch.style.removeProperty('display');
-  const ttb=document.getElementById('time-tabs-bar');if(ttb)ttb.style.display='flex';
+  const ch=document.getElementById('compact-header');if(ch&&!closetViewOpen)ch.style.removeProperty('display');
+  const ttb=document.getElementById('time-tabs-bar');if(ttb&&!closetViewOpen)ttb.style.display='flex';
 }
 
 async function deletePiece(id){
@@ -7331,9 +7331,9 @@ function closeOverlay(id){
   if(el) el.style.display = 'none';
   document.body.style.overflow = '';
   const ch = document.getElementById('compact-header');
-  if(ch){ ch.style.removeProperty('display'); }
+  if(ch&&!closetViewOpen){ ch.style.removeProperty('display'); }
   const ttb = document.getElementById('time-tabs-bar');
-  if(ttb) ttb.style.display = 'flex';
+  if(ttb&&!closetViewOpen) ttb.style.display = 'flex';
 }
 function closeCurrentOverlay(){
   if(document.body.dataset.currentOverlay){ closeOverlay(document.body.dataset.currentOverlay); }
@@ -8217,6 +8217,9 @@ function toggleClosetView(){
     btn.textContent='👗 My Closet';
     if(shopBtn) shopBtn.style.display='';
     if(inspoBtn) inspoBtn.textContent='✨ Inspo Board';
+    document.getElementById('compact-header').style.removeProperty('display');
+    document.getElementById('bottom-nav').style.removeProperty('display');
+    document.getElementById('time-tabs-bar').style.removeProperty('display');
   } else {
     inspoViewOpen=false; shoppingViewOpen=false;
     closetViewOpen=true;
@@ -8224,6 +8227,9 @@ function toggleClosetView(){
     btn.textContent='← Back';
     if(shopBtn) shopBtn.style.display='none';
     if(inspoBtn) inspoBtn.textContent='✨ Inspo Board';
+    document.getElementById('compact-header').style.display='none';
+    document.getElementById('bottom-nav').style.display='none';
+    document.getElementById('time-tabs-bar').style.display='none';
     loadCloset();switchClosetTab(_pickerDay?'looks':'pieces');
   }
 }
