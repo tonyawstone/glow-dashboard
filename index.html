@@ -6987,15 +6987,17 @@ async function buildDailyProgress(){
     bps.some(e=>e.date===logical||e.date===today) ||
     (Array.isArray(bpBlob?.data) && bpBlob.data.some(e=>e.date===logical||e.date===today));
 
-  // Meds AM + PM (DOM + Blob) — logical day
+  // Meds AM + PM (DOM + Blob + localStorage) — logical day
   const AM_MEDS = ['med-irbesartan','med-metoprolol','med-amlodipine','med-osteo'];
   const PM_MEDS = ['med-rosuvastatin'];
   const amDOM = AM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
   const pmDOM = PM_MEDS.every(id=>document.getElementById(id)?.classList.contains('done'));
   const medsBlobData = Array.isArray(medsBlob?.data) ? medsBlob.data : [];
   const medsEntry = medsBlobData.find(e=>e.date===logical||e.date===today);
-  autoChecks['dp-meds-am'] = amDOM || !!(medsEntry && AM_MEDS.every(id=>medsEntry[id]));
-  autoChecks['dp-meds-pm'] = pmDOM || !!(medsEntry && PM_MEDS.every(id=>medsEntry[id]));
+  let medsLocal = null;
+  try{ const _ms=JSON.parse(localStorage.getItem('glowMedsToday')||'null'); if(_ms&&(_ms.date===logical||_ms.date===today)) medsLocal=_ms; }catch(e){}
+  autoChecks['dp-meds-am'] = amDOM || !!(medsEntry && AM_MEDS.every(id=>medsEntry[id])) || !!(medsLocal && AM_MEDS.every(id=>medsLocal[id]));
+  autoChecks['dp-meds-pm'] = pmDOM || !!(medsEntry && PM_MEDS.every(id=>medsEntry[id])) || !!(medsLocal && PM_MEDS.every(id=>medsLocal[id]));
 
   // Water — 8+ glasses, logical day
   try {
