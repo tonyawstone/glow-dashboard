@@ -2186,7 +2186,7 @@ textarea:focus,input:focus{border-color:var(--accent);}
         </div>
         <div id="body-nsv-panel" style="display:none;">
           <div class="tags" id="nsv-tags" style="margin-bottom:12px;">
-            <button class="tag" onclick="tog(this);saveBodyDraft()">Clothes looser</button><button class="tag" onclick="tog(this);saveBodyDraft()">Compliment</button><button class="tag" onclick="tog(this);saveBodyDraft()">New low</button><button class="tag" onclick="tog(this);saveBodyDraft()">Less bloated</button><button class="tag" onclick="tog(this);saveBodyDraft()">More energy</button><button class="tag" onclick="tog(this);saveBodyDraft()">Feeling strong</button><button class="tag" onclick="tog(this);saveBodyDraft()">Waist smaller</button>
+            <button class="tag" onclick="tog(this);saveBodyDraft()">Clothes looser</button><button class="tag" onclick="tog(this);saveBodyDraft()">Compliment</button><button class="tag" onclick="tog(this);saveBodyDraft()">New low</button><button class="tag" onclick="tog(this);saveBodyDraft()">Less bloated</button><button class="tag" onclick="tog(this);saveBodyDraft()">More energy</button><button class="tag" onclick="tog(this);saveBodyDraft()">Feeling strong</button><button class="tag" onclick="tog(this);saveBodyDraft()">Waist smaller</button><button class="tag" onclick="tog(this);saveBodyDraft()">Body looks smaller</button><button class="tag" onclick="tog(this);saveBodyDraft()">Body looks good</button>
           </div>
         </div>
         <!-- Confidence — slider -->
@@ -2370,7 +2370,204 @@ textarea:focus,input:focus{border-color:var(--accent);}
           </div>
         </div>
       </div>
-    </div>
+
+    <!-- Evening Core Restore -->
+    <div class="card" id="evening-core-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleCoreRestore()">
+        <div>
+          <div class="card-title" style="margin:0;">🌙 Evening Core Restore</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">7 steps · ~10 min · core &amp; pelvic floor</div>
+          <span id="core-done-badge" style="display:none;font-size:11px;color:#6B9E78;margin-top:3px;">✅ Completed tonight</span>
+        </div>
+        <div id="core-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">&#x203A;</div>
+      </div>
+      <div id="core-body" style="display:none;margin-top:14px;">
+
+        <!-- Step 1: Diaphragmatic breath -->
+        <div class="dp-row" id="ecr-breath" style="margin-bottom:8px;">
+          <div class="dp-check">&#x2713;</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:var(--text);">🌬️ Diaphragmatic breath</div>
+            <div style="font-size:11px;color:var(--muted);">60 sec · belly rises not chest · activates deep core</div>
+          </div>
+          <button onclick="showCoreStep('ecr-breath-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
+        </div>
+        <div id="ecr-breath-widget" style="display:none;text-align:center;padding:12px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Inhale through nose · feel belly expand · slow full exhale</div>
+          <div id="ecr-breath-timer" style="font-size:36px;font-weight:700;color:#9B8EC4;">60</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds</div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button onclick="runActivationTimer('ecr-breath-timer',60,'ecr-breath','ecr-breath-widget')" style="padding:6px 16px;border-radius:20px;border:none;background:#9B8EC4;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
+            <button onclick="doneCoreStep('ecr-breath','ecr-breath-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Pelvic tilts -->
+        <div class="dp-row" id="ecr-tilts" style="margin-bottom:8px;">
+          <div class="dp-check">&#x2713;</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:var(--text);">🔄 Pelvic tilts</div>
+            <div style="font-size:11px;color:var(--muted);">30 sec · flatten low back to floor · hold 2 sec · release</div>
+          </div>
+          <button onclick="showCoreStep('ecr-tilts-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
+        </div>
+        <div id="ecr-tilts-widget" style="display:none;text-align:center;padding:12px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Knees bent · press low back into floor · hold 2 sec · release · repeat</div>
+          <div id="ecr-tilts-timer" style="font-size:36px;font-weight:700;color:var(--accent);">30</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds</div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button onclick="runActivationTimer('ecr-tilts-timer',30,'ecr-tilts','ecr-tilts-widget')" style="padding:6px 16px;border-radius:20px;border:none;background:var(--accent);color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
+            <button onclick="doneCoreStep('ecr-tilts','ecr-tilts-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Abdominal compressions -->
+        <div class="dp-row" id="ecr-compress" style="margin-bottom:8px;">
+          <div class="dp-check">&#x2713;</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:var(--text);">🤜🤛 Abdominal compressions</div>
+            <div style="font-size:11px;color:var(--muted);">10 reps · exhale · draw belly in · hold 6 sec · DR-targeted</div>
+          </div>
+          <button onclick="showCoreStep('ecr-compress-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
+        </div>
+        <div id="ecr-compress-widget" style="display:none;text-align:center;padding:12px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Exhale fully · pull belly button toward spine · hold · breathe in to release</div>
+          <div id="ecr-compress-phase" style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:4px;min-height:20px;">—</div>
+          <div id="ecr-compress-count" style="font-size:48px;font-weight:700;color:var(--accent);line-height:1.1;min-height:56px;"> </div>
+          <div id="ecr-compress-rep" style="font-size:13px;color:var(--muted);margin-top:4px;margin-bottom:10px;">0 / 10</div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button onclick="runCoreCompressions()" style="padding:6px 16px;border-radius:20px;border:none;background:var(--accent);color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
+            <button onclick="doneCoreStep('ecr-compress','ecr-compress-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Dead bug -->
+        <div class="dp-row" id="ecr-deadbug" style="margin-bottom:8px;">
+          <div class="dp-check">&#x2713;</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:var(--text);">🐛 Dead bug</div>
+            <div style="font-size:11px;color:var(--muted);">45 sec · on your back · alternate arm &amp; opposite leg · spine flat</div>
+          </div>
+          <button onclick="showCoreStep('ecr-deadbug-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
+        </div>
+        <div id="ecr-deadbug-widget" style="display:none;padding:10px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
+          <svg width="100%" viewBox="0 0 320 160" style="max-height:150px;">
+            <rect x="20" y="126" width="280" height="6" rx="3" fill="#C4A882" opacity="0.3"/>
+            <ellipse cx="168" cy="122" rx="72" ry="13" fill="#C4735A"/>
+            <circle cx="82" cy="114" r="17" fill="#D4956A"/>
+            <circle cx="76" cy="110" r="2.5" fill="#3D2E25" opacity="0.7"/>
+            <circle cx="87" cy="110" r="2.5" fill="#3D2E25" opacity="0.7"/>
+            <path d="M70 104 Q82 97 94 104 Q90 99 82 97 Q74 99 70 104Z" fill="#3D2E25"/>
+            <path d="M99 114 Q87 90 78 66" stroke="#D4956A" stroke-width="9" fill="none" stroke-linecap="round"/>
+            <circle cx="76" cy="61" r="9" fill="#D4956A" opacity="0.6"/>
+            <path d="M218 116 Q248 112 270 106" stroke="#D4956A" stroke-width="9" fill="none" stroke-linecap="round"/>
+            <ellipse cx="276" cy="105" rx="10" ry="6" fill="#D4956A" opacity="0.7"/>
+            <path d="M145 124 Q130 105 138 84" stroke="#8B7355" stroke-width="11" fill="none" stroke-linecap="round"/>
+            <path d="M138 84 Q148 67 160 58" stroke="#D4956A" stroke-width="9" fill="none" stroke-linecap="round"/>
+            <ellipse cx="163" cy="55" rx="11" ry="7" fill="#C4735A" opacity="0.7"/>
+            <path d="M196 124 Q232 120 256 118" stroke="#8B7355" stroke-width="11" fill="none" stroke-linecap="round"/>
+            <ellipse cx="263" cy="117" rx="10" ry="7" fill="#C4735A" opacity="0.7"/>
+            <text x="78" y="52" font-size="9" fill="#6B9E78" font-family="system-ui,sans-serif" text-anchor="middle">arm up</text>
+            <text x="270" y="98" font-size="9" fill="#6B9E78" font-family="system-ui,sans-serif" text-anchor="middle">arm out</text>
+            <text x="160" y="148" font-size="9" fill="#A07850" font-family="system-ui,sans-serif" text-anchor="middle">opposite leg extends · then switch · keep low back flat</text>
+          </svg>
+          <div style="text-align:center;margin-top:6px;">
+            <div id="ecr-deadbug-timer" style="font-size:36px;font-weight:700;color:#6B9E78;">45</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds</div>
+            <div style="display:flex;gap:8px;justify-content:center;">
+              <button onclick="runActivationTimer('ecr-deadbug-timer',45,'ecr-deadbug','ecr-deadbug-widget')" style="padding:6px 16px;border-radius:20px;border:none;background:#6B9E78;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
+              <button onclick="runActivationTimer('ecr-deadbug-timer',45,'ecr-deadbug','ecr-deadbug-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Repeat</button>
+              <button onclick="doneCoreStep('ecr-deadbug','ecr-deadbug-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5: Splinted mini-crunch -->
+        <div class="dp-row" id="ecr-minicrunch" style="margin-bottom:8px;">
+          <div class="dp-check">&#x2713;</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:var(--text);">🙌 Splinted mini-crunch</div>
+            <div style="font-size:11px;color:var(--muted);">12 reps · hands press abdomen in · tiny 2–3 inch shoulder lift</div>
+          </div>
+          <button onclick="showCoreStep('ecr-minicrunch-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
+        </div>
+        <div id="ecr-minicrunch-widget" style="display:none;padding:10px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
+          <svg width="100%" viewBox="0 0 320 150" style="max-height:130px;">
+            <rect x="20" y="118" width="280" height="6" rx="3" fill="#C4A882" opacity="0.3"/>
+            <ellipse cx="168" cy="115" rx="72" ry="13" fill="#C4735A"/>
+            <circle cx="84" cy="100" r="17" fill="#D4956A"/>
+            <circle cx="78" cy="96" r="2.5" fill="#3D2E25" opacity="0.7"/>
+            <circle cx="89" cy="96" r="2.5" fill="#3D2E25" opacity="0.7"/>
+            <path d="M80 105 Q84 108 90 105" stroke="#3D2E25" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M73 90 Q84 83 96 90 Q92 85 84 83 Q76 85 73 90Z" fill="#3D2E25"/>
+            <path d="M102 110 Q132 105 158 107" stroke="#D4956A" stroke-width="9" fill="none" stroke-linecap="round"/>
+            <path d="M232 110 Q205 105 175 107" stroke="#D4956A" stroke-width="9" fill="none" stroke-linecap="round"/>
+            <ellipse cx="166" cy="107" rx="14" ry="8" fill="#D4956A"/>
+            <path d="M148 118 Q138 102 146 86" stroke="#8B7355" stroke-width="11" fill="none" stroke-linecap="round"/>
+            <path d="M185 118 Q200 102 208 86" stroke="#8B7355" stroke-width="11" fill="none" stroke-linecap="round"/>
+            <ellipse cx="145" cy="83" rx="11" ry="7" fill="#C4735A" opacity="0.7"/>
+            <ellipse cx="209" cy="83" rx="11" ry="7" fill="#C4735A" opacity="0.7"/>
+            <path d="M118 102 L140 106" stroke="#6B9E78" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <path d="M218 102 L196 106" stroke="#6B9E78" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <text x="166" y="143" font-size="9" fill="#A07850" font-family="system-ui,sans-serif" text-anchor="middle">press abdomen inward · lift shoulders just 2–3 inches</text>
+          </svg>
+          <div style="text-align:center;margin-top:6px;">
+            <div id="ecr-crunch-count" style="font-size:56px;font-weight:700;color:var(--accent);line-height:1;">0</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">reps · target 12</div>
+            <button onclick="ecrCrunchTap()" style="width:80px;height:80px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:28px;cursor:pointer;margin-bottom:8px;">+</button>
+            <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+              <button onclick="document.getElementById('ecr-crunch-count').textContent='0'" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--sans);">Reset</button>
+              <button onclick="doneCoreStep('ecr-minicrunch','ecr-minicrunch-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 6: Kegel holds -->
+        <div class="dp-row" id="ecr-khold" style="margin-bottom:8px;">
+          <div class="dp-check">&#x2713;</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:var(--text);">🌺 Kegel holds</div>
+            <div style="font-size:11px;color:var(--muted);">10 reps · squeeze 5 sec · release 3 sec · pelvic floor strength</div>
+          </div>
+          <button onclick="showCoreStep('ecr-khold-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
+        </div>
+        <div id="ecr-khold-widget" style="display:none;text-align:center;padding:12px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
+          <div id="ecr-khold-phase" style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:4px;min-height:20px;">—</div>
+          <div id="ecr-khold-count" style="font-size:48px;font-weight:700;color:var(--accent);line-height:1.1;min-height:56px;"> </div>
+          <div id="ecr-khold-rep" style="font-size:13px;color:var(--muted);margin-top:4px;margin-bottom:10px;">0 / 10</div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button onclick="runKegelHolds()" style="padding:6px 16px;border-radius:20px;border:none;background:#C4735A;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
+            <button onclick="doneCoreStep('ecr-khold','ecr-khold-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
+          </div>
+        </div>
+
+        <!-- Step 7: Kegel pulses -->
+        <div class="dp-row" id="ecr-kpulse" style="margin-bottom:12px;">
+          <div class="dp-check">&#x2713;</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:var(--text);">⚡ Kegel pulses</div>
+            <div style="font-size:11px;color:var(--muted);">30 sec · quick squeeze-release · ~1 per second · fast-twitch activation</div>
+          </div>
+          <button onclick="showCoreStep('ecr-kpulse-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
+        </div>
+        <div id="ecr-kpulse-widget" style="display:none;text-align:center;padding:12px 0;margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Quick squeeze · quick release · keep a steady rhythm</div>
+          <div id="ecr-kpulse-timer" style="font-size:36px;font-weight:700;color:#C4735A;">30</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds</div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button onclick="runActivationTimer('ecr-kpulse-timer',30,'ecr-kpulse','ecr-kpulse-widget')" style="padding:6px 16px;border-radius:20px;border:none;background:#C4735A;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
+            <button onclick="doneCoreStep('ecr-kpulse','ecr-kpulse-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
+          </div>
+        </div>
+
+        <!-- Completion -->
+        <div id="core-complete-msg" style="display:none;text-align:center;padding:12px;background:rgba(107,158,120,0.1);border-radius:10px;font-size:13px;font-weight:500;color:#27500A;">
+          🌙 Core Restore complete! Your core and pelvic floor thank you.
+        </div>
+
+      </div>
+
+
     <!-- Body & Zepbound journey snapshot -->
     <div class="card" id="body-stats-card">
       <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;">
@@ -2568,201 +2765,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">Daily data from Withings via Apple Health · upload CSV weekly</div>
     </div>
 
-    <!-- Evening Core Restore -->
-    <div class="card" id="evening-core-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleCoreRestore()">
-        <div>
-          <div class="card-title" style="margin:0;">🌙 Evening Core Restore</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:3px;">7 steps · ~10 min · core &amp; pelvic floor</div>
-          <span id="core-done-badge" style="display:none;font-size:11px;color:#6B9E78;margin-top:3px;">✅ Completed tonight</span>
-        </div>
-        <div id="core-chevron" style="font-size:18px;color:var(--muted);transition:transform 0.2s;">&#x203A;</div>
-      </div>
-      <div id="core-body" style="display:none;margin-top:14px;">
-
-        <!-- Step 1: Diaphragmatic breath -->
-        <div class="dp-row" id="ecr-breath" style="margin-bottom:8px;">
-          <div class="dp-check">&#x2713;</div>
-          <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);">🌬️ Diaphragmatic breath</div>
-            <div style="font-size:11px;color:var(--muted);">60 sec · belly rises not chest · activates deep core</div>
-          </div>
-          <button onclick="showCoreStep('ecr-breath-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
-        </div>
-        <div id="ecr-breath-widget" style="display:none;text-align:center;padding:12px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Inhale through nose · feel belly expand · slow full exhale</div>
-          <div id="ecr-breath-timer" style="font-size:36px;font-weight:700;color:#9B8EC4;">60</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds</div>
-          <div style="display:flex;gap:8px;justify-content:center;">
-            <button onclick="runActivationTimer('ecr-breath-timer',60,'ecr-breath','ecr-breath-widget')" style="padding:6px 16px;border-radius:20px;border:none;background:#9B8EC4;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
-            <button onclick="doneCoreStep('ecr-breath','ecr-breath-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
-          </div>
-        </div>
-
-        <!-- Step 2: Pelvic tilts -->
-        <div class="dp-row" id="ecr-tilts" style="margin-bottom:8px;">
-          <div class="dp-check">&#x2713;</div>
-          <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);">🔄 Pelvic tilts</div>
-            <div style="font-size:11px;color:var(--muted);">30 sec · flatten low back to floor · hold 2 sec · release</div>
-          </div>
-          <button onclick="showCoreStep('ecr-tilts-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
-        </div>
-        <div id="ecr-tilts-widget" style="display:none;text-align:center;padding:12px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Knees bent · press low back into floor · hold 2 sec · release · repeat</div>
-          <div id="ecr-tilts-timer" style="font-size:36px;font-weight:700;color:var(--accent);">30</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds</div>
-          <div style="display:flex;gap:8px;justify-content:center;">
-            <button onclick="runActivationTimer('ecr-tilts-timer',30,'ecr-tilts','ecr-tilts-widget')" style="padding:6px 16px;border-radius:20px;border:none;background:var(--accent);color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
-            <button onclick="doneCoreStep('ecr-tilts','ecr-tilts-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
-          </div>
-        </div>
-
-        <!-- Step 3: Abdominal compressions -->
-        <div class="dp-row" id="ecr-compress" style="margin-bottom:8px;">
-          <div class="dp-check">&#x2713;</div>
-          <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);">🤜🤛 Abdominal compressions</div>
-            <div style="font-size:11px;color:var(--muted);">10 reps · exhale · draw belly in · hold 6 sec · DR-targeted</div>
-          </div>
-          <button onclick="showCoreStep('ecr-compress-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
-        </div>
-        <div id="ecr-compress-widget" style="display:none;text-align:center;padding:12px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Exhale fully · pull belly button toward spine · hold · breathe in to release</div>
-          <div id="ecr-compress-phase" style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:4px;min-height:20px;">—</div>
-          <div id="ecr-compress-count" style="font-size:48px;font-weight:700;color:var(--accent);line-height:1.1;min-height:56px;"> </div>
-          <div id="ecr-compress-rep" style="font-size:13px;color:var(--muted);margin-top:4px;margin-bottom:10px;">0 / 10</div>
-          <div style="display:flex;gap:8px;justify-content:center;">
-            <button onclick="runCoreCompressions()" style="padding:6px 16px;border-radius:20px;border:none;background:var(--accent);color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
-            <button onclick="doneCoreStep('ecr-compress','ecr-compress-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
-          </div>
-        </div>
-
-        <!-- Step 4: Dead bug -->
-        <div class="dp-row" id="ecr-deadbug" style="margin-bottom:8px;">
-          <div class="dp-check">&#x2713;</div>
-          <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);">🐛 Dead bug</div>
-            <div style="font-size:11px;color:var(--muted);">45 sec · on your back · alternate arm &amp; opposite leg · spine flat</div>
-          </div>
-          <button onclick="showCoreStep('ecr-deadbug-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
-        </div>
-        <div id="ecr-deadbug-widget" style="display:none;padding:10px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
-          <svg width="100%" viewBox="0 0 320 160" style="max-height:150px;">
-            <rect x="20" y="126" width="280" height="6" rx="3" fill="#C4A882" opacity="0.3"/>
-            <ellipse cx="168" cy="122" rx="72" ry="13" fill="#C4735A"/>
-            <circle cx="82" cy="114" r="17" fill="#D4956A"/>
-            <circle cx="76" cy="110" r="2.5" fill="#3D2E25" opacity="0.7"/>
-            <circle cx="87" cy="110" r="2.5" fill="#3D2E25" opacity="0.7"/>
-            <path d="M70 104 Q82 97 94 104 Q90 99 82 97 Q74 99 70 104Z" fill="#3D2E25"/>
-            <path d="M99 114 Q87 90 78 66" stroke="#D4956A" stroke-width="9" fill="none" stroke-linecap="round"/>
-            <circle cx="76" cy="61" r="9" fill="#D4956A" opacity="0.6"/>
-            <path d="M218 116 Q248 112 270 106" stroke="#D4956A" stroke-width="9" fill="none" stroke-linecap="round"/>
-            <ellipse cx="276" cy="105" rx="10" ry="6" fill="#D4956A" opacity="0.7"/>
-            <path d="M145 124 Q130 105 138 84" stroke="#8B7355" stroke-width="11" fill="none" stroke-linecap="round"/>
-            <path d="M138 84 Q148 67 160 58" stroke="#D4956A" stroke-width="9" fill="none" stroke-linecap="round"/>
-            <ellipse cx="163" cy="55" rx="11" ry="7" fill="#C4735A" opacity="0.7"/>
-            <path d="M196 124 Q232 120 256 118" stroke="#8B7355" stroke-width="11" fill="none" stroke-linecap="round"/>
-            <ellipse cx="263" cy="117" rx="10" ry="7" fill="#C4735A" opacity="0.7"/>
-            <text x="78" y="52" font-size="9" fill="#6B9E78" font-family="system-ui,sans-serif" text-anchor="middle">arm up</text>
-            <text x="270" y="98" font-size="9" fill="#6B9E78" font-family="system-ui,sans-serif" text-anchor="middle">arm out</text>
-            <text x="160" y="148" font-size="9" fill="#A07850" font-family="system-ui,sans-serif" text-anchor="middle">opposite leg extends · then switch · keep low back flat</text>
-          </svg>
-          <div style="text-align:center;margin-top:6px;">
-            <div id="ecr-deadbug-timer" style="font-size:36px;font-weight:700;color:#6B9E78;">45</div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds</div>
-            <div style="display:flex;gap:8px;justify-content:center;">
-              <button onclick="runActivationTimer('ecr-deadbug-timer',45,'ecr-deadbug','ecr-deadbug-widget')" style="padding:6px 16px;border-radius:20px;border:none;background:#6B9E78;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
-              <button onclick="runActivationTimer('ecr-deadbug-timer',45,'ecr-deadbug','ecr-deadbug-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Repeat</button>
-              <button onclick="doneCoreStep('ecr-deadbug','ecr-deadbug-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 5: Splinted mini-crunch -->
-        <div class="dp-row" id="ecr-minicrunch" style="margin-bottom:8px;">
-          <div class="dp-check">&#x2713;</div>
-          <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);">🙌 Splinted mini-crunch</div>
-            <div style="font-size:11px;color:var(--muted);">12 reps · hands press abdomen in · tiny 2–3 inch shoulder lift</div>
-          </div>
-          <button onclick="showCoreStep('ecr-minicrunch-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
-        </div>
-        <div id="ecr-minicrunch-widget" style="display:none;padding:10px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
-          <svg width="100%" viewBox="0 0 320 150" style="max-height:130px;">
-            <rect x="20" y="118" width="280" height="6" rx="3" fill="#C4A882" opacity="0.3"/>
-            <ellipse cx="168" cy="115" rx="72" ry="13" fill="#C4735A"/>
-            <circle cx="84" cy="100" r="17" fill="#D4956A"/>
-            <circle cx="78" cy="96" r="2.5" fill="#3D2E25" opacity="0.7"/>
-            <circle cx="89" cy="96" r="2.5" fill="#3D2E25" opacity="0.7"/>
-            <path d="M80 105 Q84 108 90 105" stroke="#3D2E25" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-            <path d="M73 90 Q84 83 96 90 Q92 85 84 83 Q76 85 73 90Z" fill="#3D2E25"/>
-            <path d="M102 110 Q132 105 158 107" stroke="#D4956A" stroke-width="9" fill="none" stroke-linecap="round"/>
-            <path d="M232 110 Q205 105 175 107" stroke="#D4956A" stroke-width="9" fill="none" stroke-linecap="round"/>
-            <ellipse cx="166" cy="107" rx="14" ry="8" fill="#D4956A"/>
-            <path d="M148 118 Q138 102 146 86" stroke="#8B7355" stroke-width="11" fill="none" stroke-linecap="round"/>
-            <path d="M185 118 Q200 102 208 86" stroke="#8B7355" stroke-width="11" fill="none" stroke-linecap="round"/>
-            <ellipse cx="145" cy="83" rx="11" ry="7" fill="#C4735A" opacity="0.7"/>
-            <ellipse cx="209" cy="83" rx="11" ry="7" fill="#C4735A" opacity="0.7"/>
-            <path d="M118 102 L140 106" stroke="#6B9E78" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-            <path d="M218 102 L196 106" stroke="#6B9E78" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-            <text x="166" y="143" font-size="9" fill="#A07850" font-family="system-ui,sans-serif" text-anchor="middle">press abdomen inward · lift shoulders just 2–3 inches</text>
-          </svg>
-          <div style="text-align:center;margin-top:6px;">
-            <div id="ecr-crunch-count" style="font-size:56px;font-weight:700;color:var(--accent);line-height:1;">0</div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">reps · target 12</div>
-            <button onclick="ecrCrunchTap()" style="width:80px;height:80px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:28px;cursor:pointer;margin-bottom:8px;">+</button>
-            <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
-              <button onclick="document.getElementById('ecr-crunch-count').textContent='0'" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--sans);">Reset</button>
-              <button onclick="doneCoreStep('ecr-minicrunch','ecr-minicrunch-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 6: Kegel holds -->
-        <div class="dp-row" id="ecr-khold" style="margin-bottom:8px;">
-          <div class="dp-check">&#x2713;</div>
-          <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);">🌺 Kegel holds</div>
-            <div style="font-size:11px;color:var(--muted);">10 reps · squeeze 5 sec · release 3 sec · pelvic floor strength</div>
-          </div>
-          <button onclick="showCoreStep('ecr-khold-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
-        </div>
-        <div id="ecr-khold-widget" style="display:none;text-align:center;padding:12px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
-          <div id="ecr-khold-phase" style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:4px;min-height:20px;">—</div>
-          <div id="ecr-khold-count" style="font-size:48px;font-weight:700;color:var(--accent);line-height:1.1;min-height:56px;"> </div>
-          <div id="ecr-khold-rep" style="font-size:13px;color:var(--muted);margin-top:4px;margin-bottom:10px;">0 / 10</div>
-          <div style="display:flex;gap:8px;justify-content:center;">
-            <button onclick="runKegelHolds()" style="padding:6px 16px;border-radius:20px;border:none;background:#C4735A;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
-            <button onclick="doneCoreStep('ecr-khold','ecr-khold-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
-          </div>
-        </div>
-
-        <!-- Step 7: Kegel pulses -->
-        <div class="dp-row" id="ecr-kpulse" style="margin-bottom:12px;">
-          <div class="dp-check">&#x2713;</div>
-          <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);">⚡ Kegel pulses</div>
-            <div style="font-size:11px;color:var(--muted);">30 sec · quick squeeze-release · ~1 per second · fast-twitch activation</div>
-          </div>
-          <button onclick="showCoreStep('ecr-kpulse-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
-        </div>
-        <div id="ecr-kpulse-widget" style="display:none;text-align:center;padding:12px 0;margin-bottom:8px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Quick squeeze · quick release · keep a steady rhythm</div>
-          <div id="ecr-kpulse-timer" style="font-size:36px;font-weight:700;color:#C4735A;">30</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds</div>
-          <div style="display:flex;gap:8px;justify-content:center;">
-            <button onclick="runActivationTimer('ecr-kpulse-timer',30,'ecr-kpulse','ecr-kpulse-widget')" style="padding:6px 16px;border-radius:20px;border:none;background:#C4735A;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
-            <button onclick="doneCoreStep('ecr-kpulse','ecr-kpulse-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
-          </div>
-        </div>
-
-        <!-- Completion -->
-        <div id="core-complete-msg" style="display:none;text-align:center;padding:12px;background:rgba(107,158,120,0.1);border-radius:10px;font-size:13px;font-weight:500;color:#27500A;">
-          🌙 Core Restore complete! Your core and pelvic floor thank you.
-        </div>
-
-      </div>
     </div>
 
     <div class="card">
