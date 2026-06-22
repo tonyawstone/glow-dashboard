@@ -2305,22 +2305,92 @@ textarea:focus,input:focus{border-color:var(--accent);}
       </div>
       <div id="core-body" style="display:none;margin-top:14px;">
 
-        <!-- Step 1: Diaphragmatic breath -->
+        <!-- Step 1: Diaphragmatic breathing -->
         <div class="dp-row" id="ecr-breath" style="margin-bottom:8px;">
           <div class="dp-check">&#x2713;</div>
           <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);">🌬️ Diaphragmatic breath</div>
+            <div style="font-size:13px;font-weight:500;color:var(--text);">🌬️ Diaphragmatic breathing</div>
             <div style="font-size:11px;color:var(--muted);">60 sec · belly rises not chest · activates deep core</div>
           </div>
           <button onclick="showCoreStep('ecr-breath-widget')" style="padding:5px 10px;border-radius:8px;border:0.5px solid var(--accent);background:transparent;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--sans);">Start</button>
         </div>
-        <div id="ecr-breath-widget" style="display:none;text-align:center;padding:12px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">Inhale through nose · feel belly expand · slow full exhale</div>
-          <div id="ecr-breath-timer" style="font-size:36px;font-weight:700;color:#9B8EC4;">60</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds</div>
-          <div style="display:flex;gap:8px;justify-content:center;">
-            <button onclick="runActivationTimer('ecr-breath-timer',60,'ecr-breath','ecr-breath-widget')" style="padding:6px 16px;border-radius:20px;border:none;background:#9B8EC4;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
-            <button onclick="doneCoreStep('ecr-breath','ecr-breath-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
+        <div id="ecr-breath-widget" style="display:none;padding:12px 0;border-bottom:0.5px solid var(--border);margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;text-align:center;">Inhale through nose · feel belly expand · slow full exhale</div>
+          <!-- Diaphragmatic breathing illustration -->
+          <svg width="100%" viewBox="0 0 320 180" style="max-height:170px;margin-bottom:8px;">
+            <!-- Floor line -->
+            <line x1="10" y1="170" x2="310" y2="170" stroke="#C4A882" stroke-width="1" opacity="0.3"/>
+            <!-- ── LEFT FIGURE: INHALE ── -->
+            <!-- torso -->
+            <ellipse cx="80" cy="120" rx="28" ry="38" fill="#2AA89A" opacity="0.85"/>
+            <!-- head -->
+            <circle cx="80" cy="68" r="18" fill="#D4956A"/>
+            <!-- hair -->
+            <path d="M64 60 Q68 44 80 42 Q92 44 96 60 Q92 48 80 46 Q68 48 64 60Z" fill="#6B4226"/>
+            <path d="M96 58 Q102 62 100 72 Q96 60 92 56Z" fill="#6B4226"/>
+            <!-- eye -->
+            <circle cx="87" cy="66" r="1.8" fill="#3D2E25"/>
+            <!-- nose -->
+            <path d="M85 70 Q87 73 84 74" stroke="#A07050" stroke-width="1" fill="none"/>
+            <!-- neck -->
+            <rect x="74" y="84" width="12" height="10" rx="4" fill="#D4956A"/>
+            <!-- arm -->
+            <path d="M52 108 Q40 120 44 136" stroke="#D4956A" stroke-width="10" fill="none" stroke-linecap="round"/>
+            <path d="M108 108 Q118 120 114 136" stroke="#D4956A" stroke-width="10" fill="none" stroke-linecap="round"/>
+            <!-- legs -->
+            <path d="M68 156 Q66 165 66 170" stroke="#E8A040" stroke-width="12" fill="none" stroke-linecap="round"/>
+            <path d="M92 156 Q94 165 94 170" stroke="#E8A040" stroke-width="12" fill="none" stroke-linecap="round"/>
+            <!-- belly expansion dashed oval -->
+            <ellipse cx="80" cy="128" rx="36" ry="30" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.7"/>
+            <!-- inhale arrows (belly expanding OUT) -->
+            <path d="M44 120 L30 120" stroke="#1A6EBF" stroke-width="2.5" marker-end="url(#arrowB)" stroke-linecap="round"/>
+            <path d="M44 132 L30 132" stroke="#1A6EBF" stroke-width="2.5" marker-end="url(#arrowB)" stroke-linecap="round"/>
+            <!-- nose inhale arrow -->
+            <path d="M97 67 L108 67" stroke="#1A6EBF" stroke-width="2" marker-end="url(#arrowB)" stroke-linecap="round"/>
+            <!-- labels -->
+            <text x="80" y="22" font-size="9" fill="#1A6EBF" font-family="system-ui,sans-serif" text-anchor="middle" font-weight="600">① Inhale slowly</text>
+            <text x="80" y="33" font-size="8" fill="#555" font-family="system-ui,sans-serif" text-anchor="middle">belly expands outward</text>
+
+            <!-- ── RIGHT FIGURE: EXHALE ── -->
+            <ellipse cx="230" cy="120" rx="26" ry="38" fill="#2AA89A" opacity="0.85"/>
+            <circle cx="230" cy="68" r="18" fill="#D4956A"/>
+            <path d="M214 60 Q218 44 230 42 Q242 44 246 60 Q242 48 230 46 Q218 48 214 60Z" fill="#6B4226"/>
+            <path d="M246 58 Q252 62 250 72 Q246 60 242 56Z" fill="#6B4226"/>
+            <circle cx="237" cy="66" r="1.8" fill="#3D2E25"/>
+            <path d="M235 70 Q237 73 234 74" stroke="#A07050" stroke-width="1" fill="none"/>
+            <rect x="224" y="84" width="12" height="10" rx="4" fill="#D4956A"/>
+            <path d="M202 108 Q190 120 194 136" stroke="#D4956A" stroke-width="10" fill="none" stroke-linecap="round"/>
+            <path d="M258 108 Q268 120 264 136" stroke="#D4956A" stroke-width="10" fill="none" stroke-linecap="round"/>
+            <path d="M218 156 Q216 165 216 170" stroke="#E8A040" stroke-width="12" fill="none" stroke-linecap="round"/>
+            <path d="M242 156 Q244 165 244 170" stroke="#E8A040" stroke-width="12" fill="none" stroke-linecap="round"/>
+            <!-- belly contracted dashed oval (smaller) -->
+            <ellipse cx="230" cy="128" rx="28" ry="24" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.7"/>
+            <!-- exhale arrow inward -->
+            <path d="M196 124 L208 124" stroke="#C4735A" stroke-width="2.5" marker-end="url(#arrowR)" stroke-linecap="round"/>
+            <!-- breath cloud out of mouth -->
+            <path d="M248 72 Q255 70 260 73 Q265 68 272 70 Q278 67 282 72 Q285 76 280 78 Q276 82 268 80 Q262 83 256 80 Q249 80 248 75Z" fill="#cde8f0" opacity="0.8"/>
+            <path d="M248 73 L243 71" stroke="#90C8D8" stroke-width="1.5" fill="none"/>
+            <!-- exhale label -->
+            <text x="230" y="22" font-size="9" fill="#C4735A" font-family="system-ui,sans-serif" text-anchor="middle" font-weight="600">④ Exhale slowly</text>
+            <text x="230" y="33" font-size="8" fill="#555" font-family="system-ui,sans-serif" text-anchor="middle">abdomen contracts in</text>
+
+            <!-- Arrow markers -->
+            <defs>
+              <marker id="arrowB" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 Z" fill="#1A6EBF"/>
+              </marker>
+              <marker id="arrowR" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 Z" fill="#C4735A"/>
+              </marker>
+            </defs>
+          </svg>
+          <div style="text-align:center;">
+            <div id="ecr-breath-timer" style="font-size:36px;font-weight:700;color:#9B8EC4;">60</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">seconds</div>
+            <div style="display:flex;gap:8px;justify-content:center;">
+              <button onclick="runActivationTimer('ecr-breath-timer',60,'ecr-breath','ecr-breath-widget')" style="padding:6px 16px;border-radius:20px;border:none;background:#9B8EC4;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);">Begin</button>
+              <button onclick="doneCoreStep('ecr-breath','ecr-breath-widget')" style="padding:6px 16px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--sans);">Done &#x2713;</button>
+            </div>
           </div>
         </div>
 
