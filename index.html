@@ -5438,10 +5438,27 @@ async function saveLookEdit(){
   const vibe=getTags('ld-edit-vibe');
   const wearAgain=document.getElementById('ld-edit-wear')?.classList.contains('on')||false;
   const stars=_lookEditStars;
-  const newPhoto=getSlotPhotoUrl('ld-edit-photo');
+  // Get photo: prefer data URL from <img> over backgroundImage to detect fresh picks
+  const slot=document.getElementById('ld-edit-photo');
+  let newPhoto=null;
+  if(slot){
+    const img=slot.querySelector('img');
+    if(img&&img.src&&img.src.startsWith('data:')) newPhoto=img.src;
+    else newPhoto=getSlotPhotoUrl('ld-edit-photo');
+  }
   const all=await dbAll('outfits');
   const entry=all.find(r=>r.ts===e.ts||(r.id&&r.id===e.id));
   if(!entry)return;
+  // Upload fresh pick to a unique per-look slot to avoid the shared proxy URL cache problem
+  if(newPhoto&&newPhoto.startsWith('data:')){
+    try{
+      const res=await fetch(`${BACKEND}/api/upload-photo`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({slotId:`look_${entry.id||entry.ts}`,dataUrl:newPhoto})
+      });
+      if(res.ok){const {url}=await res.json();newPhoto=url;}
+    }catch(_){}
+  }
   Object.assign(entry,{desc,notes,stars,occ,vibe,wearAgain});
   if(newPhoto)entry.photo=newPhoto;
   const tx=db.transaction('outfits','readwrite');
@@ -12608,7 +12625,7 @@ async function handlePhoto(event){
     // pre-uploading here would set img.src to a cached proxy URL that briefly shows the old photo
     if(curPhotoTarget!=='ql-photo'){
       await dbPutPhoto(curPhotoTarget,compressed);
-      if(curPhotoTarget!=='outfit-new'&&curPhotoTarget!=='cp-front'&&curPhotoTarget!=='cp-back') uploadPhotoToBlob(curPhotoTarget,compressed);
+      if(curPhotoTarget!=='outfit-new'&&curPhotoTarget!=='cp-front'&&curPhotoTarget!=='cp-back'&&curPhotoTarget!=='ld-edit-photo') uploadPhotoToBlob(curPhotoTarget,compressed);
     }
     if(curPhotoTarget==='dl-stylist-photo') ocrStylistNote(compressed);
   }catch(err){alert('Could not save photo: '+err.message);}
