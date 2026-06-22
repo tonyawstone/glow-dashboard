@@ -2292,84 +2292,6 @@ textarea:focus,input:focus{border-color:var(--accent);}
         <div class="toast-msg" id="bt">Saved!</div>
       </div>
     </div>
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="display:flex;align-items:center;gap:7px;">
-          <div style="width:24px;height:24px;border-radius:50%;background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-run" style="font-size:11px;color:#A07850;"></i></div>
-          <div>
-            <div class="card-title" style="margin:0;">Exercise check-in</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:1px;">Treadmill · Pilates · movement</div>
-          </div>
-        </div>
-        <button onclick="openExerciseLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
-      </div>
-      <!-- Saved state -->
-      <div id="exercise-checkin-saved" style="display:none;margin-bottom:10px;"></div>
-      <div id="exercise-checkin-body">
-        <!-- Steps + active energy from Apple Health CSV -->
-        <div id="exercise-stats-strip"><div class="log-empty" style="font-size:12px;">Upload CSV to see activity data.</div></div>
-        <!-- Quick accountability checkboxes — Treadmill + Pilates -->
-        <div style="background:var(--warm);border-radius:12px;padding:12px;margin-top:10px;margin-bottom:12px;">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Today's workout goals · 60 min total</div>
-          <!-- Treadmill -->
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div id="ex-treadmill-check" onclick="toggleExerciseBox('treadmill')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--accent);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;cursor:pointer;transition:background 0.15s;"></div>
-            <div style="flex:1;">
-              <div style="font-size:13px;font-weight:500;">Treadmill</div>
-              <div style="font-size:11px;color:var(--muted);">Goal: 40 min</div>
-            </div>
-            <input type="number" id="ex-treadmill-min" placeholder="min" min="0" max="180"
-              style="width:60px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;"
-              oninput="onExerciseMinInput('treadmill')">
-          </div>
-          <!-- Pilates -->
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <div id="ex-pilates-check" onclick="toggleExerciseBox('pilates')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--accent);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;cursor:pointer;transition:background 0.15s;"></div>
-            <div style="flex:1;">
-              <div style="font-size:13px;font-weight:500;">Pilates</div>
-              <div style="font-size:11px;color:var(--muted);">Goal: 20 min</div>
-            </div>
-            <input type="number" id="ex-pilates-min" placeholder="min" min="0" max="180"
-              style="width:60px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;"
-              oninput="onExerciseMinInput('pilates')">
-          </div>
-          <!-- Progress note -->
-          <div id="exercise-goal-note" style="font-size:12px;color:var(--muted);margin-bottom:8px;"></div>
-          <button class="btn-primary" onclick="saveExerciseCheckin()" style="width:100%;">Save workout ✓</button>
-          <div class="toast-msg" id="exc-toast">Workout saved! 💪</div>
-        </div>
-        <div id="exercise-today-status" style="margin:8px 0;"></div>
-        <div style="border-top:0.5px solid var(--border);padding-top:10px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleManualExercise()">
-            <div style="font-size:12px;font-weight:500;color:var(--text);">✏️ Log other movement</div>
-            <span id="manual-exercise-arrow" style="font-size:14px;color:var(--muted);">▾</span>
-          </div>
-          <div id="manual-exercise-body" style="display:none;margin-top:10px;">
-            <div style="display:flex;gap:6px;margin-bottom:8px;">
-              <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">AM</button>
-              <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">PM</button>
-            </div>
-            <div id="ex-time-tags" style="display:none;"></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Treadmill</div><input type="number" id="ex-walk" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Pilates</div><input type="number" id="ex-pilates" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Strength</div><input type="number" id="ex-strength" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Abs</div><input type="number" id="ex-abs" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Yoga</div><input type="number" id="ex-yoga" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Other</div><input type="number" id="ex-other" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
-            </div>
-            <div style="display:flex;gap:6px;margin:8px 0;">
-              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">Low</button>
-              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">Medium</button>
-              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">High</button>
-            </div>
-            <div id="ex-intensity" style="display:none;"></div>
-            <textarea id="ex-note" rows="1" placeholder="Notes: hip, energy, how it felt..." style="font-size:12px;"></textarea>
-            <button class="btn-primary" style="margin-top:8px;" onclick="saveExercise()">Log exercise</button>
-            <div class="toast-msg" id="ext">Saved!</div>
-          </div>
-        </div>
-      </div>
 
     <!-- Evening Core Restore -->
     <div class="card" id="evening-core-card">
@@ -2567,6 +2489,86 @@ textarea:focus,input:focus{border-color:var(--accent);}
 
       </div>
     </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:rgba(160,120,80,0.1);border:0.5px solid rgba(160,120,80,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-run" style="font-size:11px;color:#A07850;"></i></div>
+          <div>
+            <div class="card-title" style="margin:0;">Exercise check-in</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:1px;">Treadmill · Pilates · movement</div>
+          </div>
+        </div>
+        <button onclick="openExerciseLog()" style="padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--warm);font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--sans);">Past logs</button>
+      </div>
+      <!-- Saved state -->
+      <div id="exercise-checkin-saved" style="display:none;margin-bottom:10px;"></div>
+      <div id="exercise-checkin-body">
+        <!-- Steps + active energy from Apple Health CSV -->
+        <div id="exercise-stats-strip"><div class="log-empty" style="font-size:12px;">Upload CSV to see activity data.</div></div>
+        <!-- Quick accountability checkboxes — Treadmill + Pilates -->
+        <div style="background:var(--warm);border-radius:12px;padding:12px;margin-top:10px;margin-bottom:12px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Today's workout goals · 60 min total</div>
+          <!-- Treadmill -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div id="ex-treadmill-check" onclick="toggleExerciseBox('treadmill')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--accent);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;cursor:pointer;transition:background 0.15s;"></div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:500;">Treadmill</div>
+              <div style="font-size:11px;color:var(--muted);">Goal: 40 min</div>
+            </div>
+            <input type="number" id="ex-treadmill-min" placeholder="min" min="0" max="180"
+              style="width:60px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;"
+              oninput="onExerciseMinInput('treadmill')">
+          </div>
+          <!-- Pilates -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div id="ex-pilates-check" onclick="toggleExerciseBox('pilates')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--accent);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;cursor:pointer;transition:background 0.15s;"></div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:500;">Pilates</div>
+              <div style="font-size:11px;color:var(--muted);">Goal: 20 min</div>
+            </div>
+            <input type="number" id="ex-pilates-min" placeholder="min" min="0" max="180"
+              style="width:60px;padding:6px 8px;border-radius:8px;border:0.5px solid var(--border);font-size:14px;font-weight:600;text-align:center;"
+              oninput="onExerciseMinInput('pilates')">
+          </div>
+          <!-- Progress note -->
+          <div id="exercise-goal-note" style="font-size:12px;color:var(--muted);margin-bottom:8px;"></div>
+          <button class="btn-primary" onclick="saveExerciseCheckin()" style="width:100%;">Save workout ✓</button>
+          <div class="toast-msg" id="exc-toast">Workout saved! 💪</div>
+        </div>
+        <div id="exercise-today-status" style="margin:8px 0;"></div>
+        <div style="border-top:0.5px solid var(--border);padding-top:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleManualExercise()">
+            <div style="font-size:12px;font-weight:500;color:var(--text);">✏️ Log other movement</div>
+            <span id="manual-exercise-arrow" style="font-size:14px;color:var(--muted);">▾</span>
+          </div>
+          <div id="manual-exercise-body" style="display:none;margin-top:10px;">
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+              <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">AM</button>
+              <button class="tag" onclick="solo('ex-time-tags',this)" style="font-size:11px;padding:4px 10px;">PM</button>
+            </div>
+            <div id="ex-time-tags" style="display:none;"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Treadmill</div><input type="number" id="ex-walk" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Pilates</div><input type="number" id="ex-pilates" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Strength</div><input type="number" id="ex-strength" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Abs</div><input type="number" id="ex-abs" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Yoga</div><input type="number" id="ex-yoga" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+              <div class="toggle-row" style="padding:6px 8px;"><div class="tl" style="font-size:12px;">Other</div><input type="number" id="ex-other" placeholder="min" style="width:50px;padding:4px 6px;font-size:12px;"></div>
+            </div>
+            <div style="display:flex;gap:6px;margin:8px 0;">
+              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">Low</button>
+              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">Medium</button>
+              <button class="tag" onclick="solo('ex-intensity',this)" style="font-size:11px;padding:4px 10px;">High</button>
+            </div>
+            <div id="ex-intensity" style="display:none;"></div>
+            <textarea id="ex-note" rows="1" placeholder="Notes: hip, energy, how it felt..." style="font-size:12px;"></textarea>
+            <button class="btn-primary" style="margin-top:8px;" onclick="saveExercise()">Log exercise</button>
+            <div class="toast-msg" id="ext">Saved!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Body & Zepbound journey snapshot -->
     <div class="card" id="body-stats-card">
