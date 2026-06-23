@@ -7262,12 +7262,22 @@ async function buildDailyProgress(){
   autoChecks['dp-meds-am'] = amDOM || !!(medsEntry && AM_MEDS.every(id=>medsEntry[id])) || !!(medsLocal && AM_MEDS.every(id=>medsLocal[id]));
   autoChecks['dp-meds-pm'] = pmDOM || !!(medsEntry && PM_MEDS.every(id=>medsEntry[id])) || !!(medsLocal && PM_MEDS.every(id=>medsLocal[id]));
 
-  // Water — 8+ glasses, logical day
-  try {
-    const water = await dbAll('water');
-    const todayW = water.filter(w=>w.date===logical||w.date===today||w.date===new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})).pop();
-    autoChecks['dp-water'] = todayW && ((todayW.oz||0) >= 64 || (todayW.glasses||0) >= 8);
-  } catch(e){}
+  // Water — 64+ oz goal
+  // Check global first (always current), then localStorage, then IDB
+  autoChecks['dp-water'] = todayWaterOz >= 64;
+  if(!autoChecks['dp-water']){
+    try{
+      const ws = JSON.parse(localStorage.getItem('glowWaterToday')||'null');
+      if(ws && (ws.date===logical||ws.date===today) && (ws.oz||0)>=64) autoChecks['dp-water'] = true;
+    }catch(e){}
+  }
+  if(!autoChecks['dp-water']){
+    try{
+      const water = await dbAll('water');
+      const todayW = water.filter(w=>w.date===logical||w.date===today).pop();
+      if(todayW && ((todayW.oz||0)>=64||(todayW.glasses||0)>=8)) autoChecks['dp-water'] = true;
+    }catch(e){}
+  }
 
   // Skin check-in — logical day
   try { const skins = await dbAll('skins'); autoChecks['dp-skin-checkin'] = skins.some(e=>e.type==='checkin'&&(e.date===logical||e.date===today)); } catch(e){}
