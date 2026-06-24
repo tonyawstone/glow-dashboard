@@ -20594,6 +20594,32 @@ function buildLabChart(){
   });
 }
 
+// In-memory coach history cache — prevents race condition when saving multiple entries quickly
+let _coachHistoryCache = null;
+let _coachHistorySaving = false;
+const _coachHistoryQueue = [];
+
+async function flushCoachHistory(){
+  if(_coachHistorySaving || !_coachHistoryQueue.length) return;
+  _coachHistorySaving = true;
+  try {
+    if(!_coachHistoryCache){
+      const r = await fetch(`${BACKEND}/api/sync?pillar=coach_history`);
+      _coachHistoryCache = r.ok ? ((await r.json()).data||[]) : [];
+      if(!Array.isArray(_coachHistoryCache)) _coachHistoryCache = [];
+    }
+    while(_coachHistoryQueue.length){
+      const entry = _coachHistoryQueue.shift();
+      const isDupe = _coachHistoryCache.some(e=>e.prompt===entry.prompt&&e.date===entry.date&&e.pillar===entry.pillar);
+      if(!isDupe) _coachHistoryCache.push(entry);
+    }
+    await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'coach_history',data:_coachHistoryCache})});
+    setTimeout(applyCoachNudges, 800);
+  } catch(e){}
+  _coachHistorySaving = false;
+  if(_coachHistoryQueue.length) flushCoachHistory();
+}
+
 async function callCoach(pillar, userMessage, outputId, logData) {
   const el = document.getElementById(outputId);
   if (el) { el.style.display = 'block'; el.textContent = '✨ Getting your insight...'; }
@@ -20622,16 +20648,9 @@ async function callCoach(pillar, userMessage, outputId, logData) {
         data: { ...await getCoachingData(), [outputId]: { text: response, date: dateStr, pillar } }
       })
     }).catch(()=>{});
-    // Save to coach history — deduplicate by prompt+date to prevent race condition duplicates
-    fetch(`${BACKEND}/api/sync?pillar=coach_history`).then(r=>r.json()).then(d=>{
-      const history = Array.isArray(d.data) ? d.data : [];
-      const isDupe = history.some(e=>e.prompt===userMessage&&e.date===dateStr&&e.pillar===pillar);
-      if(!isDupe){
-        history.push({ date: dateStr, pillar, prompt: userMessage, response });
-        fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pillar:'coach_history',data:history})})
-          .then(()=>setTimeout(applyCoachNudges, 800)).catch(()=>{});
-      }
-    }).catch(()=>{});
+    // Save to coach history via queue — prevents race condition when asking multiple questions quickly
+    _coachHistoryQueue.push({ date: dateStr, pillar, prompt: userMessage, response });
+    flushCoachHistory();
   } catch (err) {
     if (el) el.textContent = 'Coach unavailable right now — try again shortly.';
   }
