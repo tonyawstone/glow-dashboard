@@ -15309,33 +15309,28 @@ async function loadCurrentHairPhoto(){
       if(dataUrl){
         photoEl.style.border='none'; photoEl.style.background='transparent';
         photoEl.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onclick="uploadCurrentHair()">`;
-        const btn = document.getElementById('hair-analyze-section');
-        if(btn) btn.style.display='block';      }
-      if(dateEl && date) dateEl.textContent = safeDate(date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-      if(notesEl && notes) notesEl.value = notes;
-      return; // found in localStorage, done
+        if(dateEl && date) dateEl.textContent = safeDate(date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+        if(notesEl && notes) notesEl.value = notes;
+        return; // found in localStorage, done
+      }
     } catch(e){}
   }
 
-  // Fallback — fetch from Blob
+  // Fallback — fetch photo and metadata independently from Blob
   try {
-    const res = await fetch(`${BACKEND}/api/sync?pillar=hair_current`);
-    if(!res.ok) return;
-    const {data} = await res.json();
-    if(!data) return;
-    // hair_current stores notes/date; photo is stored separately
-    const photoRes = await fetch(`${BACKEND}/api/sync?pillar=hair_current_photo`);
-    if(photoRes.ok){
-      const {data:pd} = await photoRes.json();
-      if(pd?.dataUrl){
-        photoEl.style.border='none'; photoEl.style.background='transparent';
-        photoEl.innerHTML = `<img src="${pd.dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onclick="uploadCurrentHair()">`;
-        // Cache to localStorage
-        localStorage.setItem('glowHairCurrentPhoto', JSON.stringify({dataUrl:pd.dataUrl, date:data.date||nowStr(), notes:data.notes||''}));
-      }
+    const [photoRes, metaRes] = await Promise.all([
+      fetch(`${BACKEND}/api/sync?pillar=hair_current_photo`).catch(()=>null),
+      fetch(`${BACKEND}/api/sync?pillar=hair_current`).catch(()=>null)
+    ]);
+    const pd = photoRes?.ok ? (await photoRes.json().catch(()=>({}))).data : null;
+    const md = metaRes?.ok ? (await metaRes.json().catch(()=>({}))).data : null;
+    if(pd?.dataUrl){
+      photoEl.style.border='none'; photoEl.style.background='transparent';
+      photoEl.innerHTML = `<img src="${pd.dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onclick="uploadCurrentHair()">`;
+      localStorage.setItem('glowHairCurrentPhoto', JSON.stringify({dataUrl:pd.dataUrl, date:pd.date||md?.date||nowStr(), notes:md?.notes||''}));
     }
-    if(dateEl && data.date) dateEl.textContent = safeDate(data.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    if(notesEl && data.notes) notesEl.value = data.notes;
+    if(dateEl && (pd?.date||md?.date)) dateEl.textContent = safeDate(pd?.date||md?.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    if(notesEl && md?.notes) notesEl.value = md.notes;
   } catch(e){}
 }
 
