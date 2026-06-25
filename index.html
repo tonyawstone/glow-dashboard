@@ -3943,6 +3943,13 @@ textarea:focus,input:focus{border-color:var(--accent);}
       <input type="file" id="hair-milestone-input" accept="image/*" style="display:none;" onchange="saveHairMilestone(this)">
     </div>
 
+    <!-- Photo timeline -->
+    <div class="card">
+      <div class="card-title">📸 Your hair over time</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Every photo you've uploaded as your current hair, oldest to newest. Tap to view full size.</div>
+      <div id="hair-photo-timeline"><div class="log-empty">No photos yet — upload your first current hair photo on the daily view.</div></div>
+    </div>
+
     <div class="card"><div class="card-title">Weekly hair care summary</div><div id="weekly-hair-summary"><div class="log-empty">Log daily to see weekly summary.</div></div></div>
     <div class="card">
       <div class="card-title">💇 Hair analyses</div>
@@ -5144,7 +5151,7 @@ function setView(v,btn){
   if(curTab==='today' && v==='yearly') buildYearlyTodayView();
   if(curTab==='health'){buildBPChart();if(v==='yearly')setTimeout(buildLabChart,50);if(v==='weekly'){buildWaterWeekChart();buildBodyWaterWeekChart();buildMedsWeeklyCompliance();buildHRRespWeekCharts();buildBPSleepWeekChart();}}
   if(curTab==='skin'&&v!=='daily'){ buildSkinCharts(); if(v==='weekly') loadLatestSkinScan(); if(v==='monthly') setTimeout(()=>switchSkinMetricChart(activeSkinMetric, document.querySelector('#skin-metric-tabs .chart-tab.on')||document.querySelector('#skin-metric-tabs .chart-tab')),100); }
-  if(curTab==='hair'&&v!=='daily'){ buildHairCharts(); if(v==='weekly'){ loadHairAnalysesLog(); loadHairMilestones(); } }
+  if(curTab==='hair'&&v!=='daily'){ buildHairCharts(); if(v==='weekly'){ loadHairAnalysesLog(); loadHairMilestones(); loadHairPhotoTimeline(); } }
   if(curTab==='body'&&v!=='daily'){ buildBodyCompChartsForView(v); if(v==='weekly'){ buildWeeklyExercise(); buildGaitWeekCharts(); } if(v==='monthly') buildZepMonthlyTracker(); if(v==='yearly') buildBodyYearlySummary(); }
   if(curTab==='sleep'&&v==='weekly') { buildMyAirCharts(); buildSleepWeeklyAvg(); buildSleepWeeklyQuality(); buildSleepMyAirCombinedChart(); buildSleepStagesWeeklyChart(); }
   if(curTab==='sleep'&&v==='monthly') { buildMyAirCharts(); buildSleepMonthlyCalendar(); }
@@ -15193,6 +15200,53 @@ async function loadHairMilestones(){
     });
     window._hairMilestones = deduped;
   } catch(e){ console.error('loadHairMilestones error:', e); }
+}
+
+function loadHairPhotoTimeline(){
+  const el = document.getElementById('hair-photo-timeline');
+  if(!el) return;
+  try {
+    const history = JSON.parse(localStorage.getItem('glowHairPhotoHistory')||'[]');
+    const current = JSON.parse(localStorage.getItem('glowHairCurrentPhoto')||'null');
+    const all = [...history.filter(p=>p?.dataUrl)];
+    if(current?.dataUrl) all.push({...current, _isCurrent:true});
+    if(!all.length){
+      el.innerHTML='<div class="log-empty">No photos yet — upload your first current hair photo on the daily view.</div>';
+      return;
+    }
+    all.sort((a,b)=>new Date(a.date)-new Date(b.date));
+    window._hairPhotoTimeline = all;
+    el.innerHTML=`<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;">
+      ${all.map((p,i)=>{
+        const d = p.date ? safeDate(p.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}) : '—';
+        const border = p._isCurrent ? '2px solid var(--accent)' : '1.5px solid var(--border)';
+        return `<div style="flex-shrink:0;text-align:center;width:76px;" onclick="openHairPhotoFull(${i})">
+          <div style="width:76px;height:96px;border-radius:10px;overflow:hidden;border:${border};cursor:pointer;">
+            <img src="${p.dataUrl}" style="width:100%;height:100%;object-fit:cover;">
+          </div>
+          <div style="font-size:10px;color:${p._isCurrent?'var(--accent)':'var(--muted)'};margin-top:4px;line-height:1.3;">${d}</div>
+          ${p._isCurrent?'<div style="font-size:9px;color:var(--accent);font-weight:600;">Current</div>':''}
+        </div>`;
+      }).join('')}
+    </div>`;
+  } catch(e){}
+}
+
+function openHairPhotoFull(idx){
+  const all = window._hairPhotoTimeline||[];
+  const p = all[idx]; if(!p) return;
+  const d = p.date ? safeDate(p.date).toLocaleDateString('en-US',{weekday:'short',month:'long',day:'numeric',year:'numeric'}) : '';
+  const overlay = document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;cursor:pointer;';
+  overlay.onclick=()=>overlay.remove();
+  overlay.innerHTML=`<div style="max-width:340px;width:100%;text-align:center;">
+    <img src="${p.dataUrl}" style="width:100%;max-height:62vh;border-radius:14px;object-fit:contain;">
+    ${d?`<div style="color:#fff;margin-top:12px;font-size:15px;font-weight:500;">${d}</div>`:''}
+    ${p._isCurrent?'<div style="color:var(--accent);font-size:12px;margin-top:4px;font-weight:600;">Current photo</div>':''}
+    ${p.notes?`<div style="color:rgba(255,255,255,0.65);margin-top:8px;font-size:13px;line-height:1.4;">${p.notes}</div>`:''}
+    <div style="color:rgba(255,255,255,0.35);margin-top:16px;font-size:11px;">Tap anywhere to close</div>
+  </div>`;
+  document.body.appendChild(overlay);
 }
 
 async function showMilestoneCompare(idx){
