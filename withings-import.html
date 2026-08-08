@@ -1,0 +1,133 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Restore body water from Withings</title>
+<style>
+  :root{--cream:#F7F3EE;--warm:#EDE6DA;--border:#C8BDB4;--text:#3D2E1E;--muted:#5C4E43;--accent:#A07850;--green:#6B9E78;--rose:#C4735A}
+  body{margin:0;font-family:'DM Sans',system-ui;background:var(--cream);color:var(--text)}
+  header{padding:18px 20px;border-bottom:.5px solid var(--border);background:#fff}
+  h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;font-size:26px;margin:0 0 4px}
+  .sub{font-size:13px;color:var(--muted)}
+  .wrap{padding:18px 20px;max-width:760px}
+  #drop{padding:26px;border:1.5px dashed var(--border);border-radius:16px;text-align:center;background:#fff;cursor:pointer}
+  #drop.hot{background:var(--warm);border-color:var(--accent)}
+  #drop b{color:var(--accent)}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin-top:14px;background:#fff;border-radius:12px;overflow:hidden}
+  th,td{padding:7px 10px;text-align:left;border-bottom:.5px solid var(--border)}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .new{color:var(--green);font-weight:600}
+  .dupe{color:var(--muted)}
+  button.go{margin-top:14px;padding:10px 22px;border-radius:12px;background:var(--accent);border:none;color:#F5EFE6;font-size:14px;cursor:pointer;font-family:inherit}
+  button.go:disabled{opacity:.5;cursor:default}
+  #log{margin-top:12px;font-size:13px;color:var(--muted);white-space:pre-wrap;font-family:ui-monospace,monospace}
+  .warn{color:var(--rose)}
+</style></head>
+<body>
+<header>
+  <h1>Restore body water from Withings</h1>
+  <div class="sub">Health Mate → Profile → Download my data. Drop the measurement CSV below.</div>
+</header>
+<div class="wrap">
+  <div id="drop">Drop the Withings CSV here, or <b>click to choose</b>
+    <input id="file" type="file" accept=".csv,text/csv" hidden>
+  </div>
+  <div id="log"></div>
+  <div id="preview"></div>
+</div>
+<script type="module">
+const BACKEND='https://glow-dashboard-backend.vercel.app'
+const logEl=document.getElementById('log'), prev=document.getElementById('preview')
+const log=(m,cls='')=>{logEl.innerHTML+=(logEl.innerHTML?'\n':'')+(cls?`<span class="${cls}">${m}</span>`:m)}
+let parsed=[], existing=[]
+
+// The Withings export splits into several CSVs; body water lives in one with a date column and a
+// column whose header mentions water (wording varies by locale/export version), so detect rather
+// than hard-code a filename or index.
+function parseCSV(text){
+  const lines=text.replace(/\r/g,'').split('\n').filter(l=>l.trim())
+  if(!lines.length) throw new Error('empty file')
+  const split=l=>{const out=[];let cur='',q=false
+    for(const ch of l){ if(ch==='"'){q=!q} else if(ch===','&&!q){out.push(cur);cur=''} else cur+=ch }
+    out.push(cur); return out.map(v=>v.trim().replace(/^"|"$/g,''))}
+  const hdrRaw=split(lines[0])
+  const hdr=hdrRaw.map(h=>h.toLowerCase())
+  const iDate=hdr.findIndex(h=>/date|time/.test(h))
+  // Withings calls this "Hydration", not "water" — match both.
+  const iWater=hdr.findIndex(h=>/water|hydration/.test(h))
+  const iWeight=hdr.findIndex(h=>/weight/.test(h))
+  if(iDate<0) throw new Error('no date column — headers: '+hdrRaw.join(' | '))
+  if(iWater<0) throw new Error('no hydration/water column in this file. The export contains several CSVs — try the one with a Hydration column. Headers here: '+hdrRaw.join(' | '))
+
+  // Withings reports hydration as a MASS (lb or kg), not a percentage. Convert against the weight
+  // in the same row; a value already in % is passed through. Getting this wrong would import ~73
+  // as "73%" when the real figure is ~43%.
+  const waterIsMass=/\((lb|lbs|kg)\)/.test(hdr[iWater]) || !/%/.test(hdr[iWater])
+  if(waterIsMass && iWeight<0) throw new Error('hydration is a mass but there is no weight column to convert it against')
+
+  const rows=[]
+  for(const line of lines.slice(1)){
+    const c=split(line)
+    const raw=c[iDate], val=parseFloat(c[iWater])
+    if(!raw||isNaN(val)) continue
+    let pct=val
+    if(waterIsMass){
+      const w=parseFloat(c[iWeight])
+      if(!w||isNaN(w)) continue
+      pct=(val/w)*100
+    }
+    if(pct<20||pct>80) continue                       // implausible → skip rather than store junk
+    const d=new Date(raw.replace(' ','T'))
+    if(isNaN(d)) continue
+    rows.push({ date:new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10),
+                pct:Math.round(pct*10)/10, t:d.getTime() })
+  }
+  // One reading per day. Keep the EARLIEST — body composition is measured on the morning weigh-in,
+  // and an evening reading isn't comparable to it.
+  const byDay=new Map()
+  rows.sort((a,b)=>a.t-b.t).forEach(r=>{ if(!byDay.has(r.date)) byDay.set(r.date,{date:r.date,pct:r.pct}) })
+  return [...byDay.values()].sort((a,b)=>a.date.localeCompare(b.date))
+}
+
+async function handle(file){
+  logEl.innerHTML=''; prev.innerHTML=''
+  try{
+    parsed=parseCSV(await file.text())
+  }catch(e){ log('⚠️ '+e.message,'warn'); return }
+  if(!parsed.length){ log('⚠️ no body-water readings found in that file','warn'); return }
+
+  const r=await fetch(`${BACKEND}/api/sync?pillar=body_water&t=`+Date.now())
+  if(!r.ok){ log('⚠️ could not read your current log (HTTP '+r.status+'). Open Glow in this browser and sign in first.','warn'); return }
+  existing=(await r.json()).data||[]
+  const have=new Set(existing.map(e=>e.date))
+  const fresh=parsed.filter(p=>!have.has(p.date))
+
+  log(`Found ${parsed.length} daily readings in the file (${parsed[0].date} → ${parsed[parsed.length-1].date}).`)
+  log(`You currently have ${existing.length} in Glow. ${fresh.length} would be added; ${parsed.length-fresh.length} already exist and will be left alone.`)
+  const rows=parsed.slice(-400).reverse().map(p=>`<tr><td>${p.date}</td><td>${p.pct}%</td><td class="${have.has(p.date)?'dupe':'new'}">${have.has(p.date)?'already logged':'will add'}</td></tr>`).join('')
+  prev.innerHTML=`<table><tr><th>Date</th><th>Body water</th><th></th></tr>${rows}</table>`
+  if(!fresh.length){ log('Nothing new to import.'); return }
+
+  const btn=document.createElement('button'); btn.className='go'; btn.textContent=`Add ${fresh.length} readings to Glow`
+  btn.onclick=async()=>{
+    btn.disabled=true; btn.textContent='Importing…'
+    // Merge locally and write ONCE — never post a container built from a failed read.
+    const merged=[...existing]
+    const seen=new Set(existing.map(e=>e.date))
+    fresh.forEach(f=>{ if(!seen.has(f.date)){ merged.push({ pct:f.pct, date:f.date, ts:Date.now(), src:'withings' }); seen.add(f.date) } })
+    merged.sort((a,b)=>String(a.date).localeCompare(String(b.date)))
+    const res=await fetch(`${BACKEND}/api/sync`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pillar:'body_water',data:merged})})
+    if(!res.ok){ log('⚠️ import failed (HTTP '+res.status+') — nothing was changed','warn'); btn.disabled=false; btn.textContent='Retry'; return }
+    const check=await (await fetch(`${BACKEND}/api/sync?pillar=body_water&t=`+Date.now())).json()
+    log(`✅ Done — your log now holds ${(check.data||[]).length} readings. Open Glow and pull to refresh.`)
+    btn.textContent='Imported'
+  }
+  prev.prepend(btn)
+}
+
+const drop=document.getElementById('drop'), fileIn=document.getElementById('file')
+drop.onclick=()=>fileIn.click()
+fileIn.onchange=e=>{ if(e.target.files[0]) handle(e.target.files[0]) }
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('hot')}
+drop.ondragleave=()=>drop.classList.remove('hot')
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('hot'); if(e.dataTransfer.files[0]) handle(e.dataTransfer.files[0])}
+</script>
+</body></html>
