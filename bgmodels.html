@@ -1,0 +1,147 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Cutout model shootout</title>
+<style>
+  :root{--cream:#F7F3EE;--warm:#EDE6DA;--border:#C8BDB4;--text:#3D2E1E;--muted:#5C4E43;--accent:#A07850;--rose:#C4735A;--green:#6B9E78}
+  body{margin:0;font-family:'DM Sans',system-ui;background:var(--cream);color:var(--text)}
+  header{padding:16px 18px;border-bottom:.5px solid var(--border);background:#fff}
+  h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;font-size:24px;margin:0 0 4px}
+  .sub{font-size:13px;color:var(--muted)}
+  .wrap{padding:16px 18px}
+  #drop{padding:22px;border:1.5px dashed var(--border);border-radius:16px;text-align:center;background:#fff;cursor:pointer;margin-bottom:14px}
+  #drop b{color:var(--accent)}
+  .grid{display:flex;flex-wrap:wrap;gap:12px}
+  figure{margin:0;background:#fff;border:.5px solid var(--border);border-radius:14px;padding:10px}
+  figure img,figure canvas{width:260px;height:auto;display:block;border-radius:8px;
+    background:repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 50%/14px 14px}
+  figcaption{font-size:12px;margin-top:6px;color:var(--text)}
+  .meta{font-size:11px;color:var(--muted)}
+  .fail{color:var(--rose)}
+  .ok{color:var(--green)}
+  #log{font-size:12px;font-family:ui-monospace,monospace;white-space:pre-wrap;color:var(--muted);margin-bottom:12px}
+</style></head>
+<body>
+<header>
+  <h1>Cutout model shootout</h1>
+  <div class="sub">Drop one of your HARD photos — arm on hip, pale things behind you. Every model runs on your device; nothing uploads.</div>
+</header>
+<div class="wrap">
+  <div id="drop">Drop a photo, or <b>click to choose</b><input id="file" type="file" accept="image/*" hidden></div>
+  <div id="log">Ready.</div>
+  <div class="grid" id="grid"></div>
+</div>
+<script type="module">
+const { AutoModel, RawImage, Tensor, env } = await import('https://esm.sh/@huggingface/transformers@3.5.0')
+const logEl = document.getElementById('log'), grid = document.getElementById('grid')
+const log = m => { logEl.textContent += '\n' + m }
+
+// Candidates, hardest-working first. Each fixes a specific reason the earlier attempts died:
+//  - BiRefNet_512x512 needs a QUARTER of the memory of the 1024 build that kept aborting
+//  - fp16 halves it again
+//  - wasm avoids the WebGPU buffer ceiling entirely (slower, but it either works or it doesn't)
+const CANDIDATES = [
+  // Download size is decisive for a phone PWA: the weights are fetched once and cached, but a
+  // half-gigabyte first run is not something to inflict on a phone unless the quality gap is real.
+  { id:'BiRefNet-512 · wasm',      repo:'onnx-community/BiRefNet_512x512-ONNX', size:512,  dtype:'fp16', device:'wasm',   norm:'imagenet', mb:474 },
+  { id:'BiRefNet-lite · wasm',     repo:'onnx-community/BiRefNet_lite-ONNX',    size:1024, dtype:'fp16', device:'wasm',   norm:'imagenet', mb:114 },
+  { id:'BiRefNet-lite · webgpu',   repo:'onnx-community/BiRefNet_lite-ONNX',    size:1024, dtype:'fp16', device:'webgpu', norm:'imagenet', mb:114 },
+  { id:'MODNet (current)',         repo:'Xenova/modnet',                        size:512,  dtype:'fp32', device:'webgpu', norm:'pm1',      mb:26  },
+]
+
+let SRC = null
+
+function letterbox(img, SIZE) {
+  // Pad, never squash: a straight square resize compresses a 3:4 photo ~25% horizontally and
+  // pinches the arm-to-waist gap shut, which is exactly where these models fail.
+  const W = img.naturalWidth, H = img.naturalHeight
+  const s = SIZE / Math.max(W, H)
+  const fw = Math.max(1, Math.round(W * s)), fh = Math.max(1, Math.round(H * s))
+  const ox = Math.floor((SIZE - fw) / 2), oy = Math.floor((SIZE - fh) / 2)
+  const c = document.createElement('canvas'); c.width = SIZE; c.height = SIZE
+  const x = c.getContext('2d')
+  x.fillStyle = '#808080'; x.fillRect(0, 0, SIZE, SIZE)
+  x.imageSmoothingQuality = 'high'
+  x.drawImage(img, 0, 0, W, H, ox, oy, fw, fh)
+  return { canvas: c, fw, fh, ox, oy, W, H }
+}
+
+async function run(cfg, img) {
+  const t0 = performance.now()
+  const model = await AutoModel.from_pretrained(cfg.repo, { device: cfg.device, dtype: cfg.dtype })
+  const tLoad = performance.now() - t0
+
+  const lb = letterbox(img, cfg.size)
+  const rgb = (await RawImage.fromCanvas(lb.canvas)).rgb()
+  const d = rgb.data, ch = rgb.channels
+  const N = cfg.size * cfg.size
+  const chw = new Float32Array(3 * N)
+  const mean = cfg.norm === 'imagenet' ? [0.485,0.456,0.406] : [0.5,0.5,0.5]
+  const std  = cfg.norm === 'imagenet' ? [0.229,0.224,0.225] : [0.5,0.5,0.5]
+  for (let i=0;i<N;i++) for (let c=0;c<3;c++) chw[c*N+i] = ((d[i*ch+c]/255) - mean[c]) / std[c]
+
+  const sess = model.sessions?.model || Object.values(model.sessions||{})[0]
+  const inName = (sess?.inputNames||[])[0] || 'input'
+  const t1 = performance.now()
+  const out = await model({ [inName]: new Tensor('float32', chw, [1,3,cfg.size,cfg.size]) })
+  const tRun = performance.now() - t1
+
+  let t = out[Object.keys(out)[0]]
+  if (cfg.norm === 'imagenet') t = t.sigmoid()     // BiRefNet emits logits; MODNet already 0..1
+  const od = t.data
+
+  // un-letterbox, then scale the mask back to the source
+  const cb = new Uint8ClampedArray(lb.fw * lb.fh)
+  for (let y=0;y<lb.fh;y++) for (let x=0;x<lb.fw;x++)
+    cb[y*lb.fw+x] = Math.max(0, Math.min(255, Math.round(od[(y+lb.oy)*cfg.size + (x+lb.ox)] * 255)))
+  const mask = await new RawImage(cb, lb.fw, lb.fh, 1).resize(lb.W, lb.H)
+
+  // composite onto transparency so leftovers are unmistakable
+  const c = document.createElement('canvas'); c.width = lb.W; c.height = lb.H
+  const cx = c.getContext('2d', { willReadFrequently: true })
+  cx.drawImage(img, 0, 0)
+  const id = cx.getImageData(0,0,lb.W,lb.H)
+  const md = mask.data, ms = mask.channels || 1
+  for (let i=0;i<lb.W*lb.H;i++) id.data[i*4+3] = md[i*ms]
+  cx.putImageData(id, 0, 0)
+  // Guard against a silent failure: some backends return an all-zero mask and look "successful".
+  let opaque = 0
+  for (let i = 3; i < id.data.length; i += 4) if (id.data[i] > 24) opaque++
+  if (opaque < lb.W * lb.H * 0.01) throw new Error('produced an empty mask (silent backend failure)')
+  return { canvas: c, tLoad: Math.round(tLoad), tRun: Math.round(tRun) }
+}
+
+async function handle(file) {
+  grid.innerHTML = ''; logEl.textContent = 'device: ' + (navigator.gpu ? 'webgpu available' : 'wasm only')
+  const url = URL.createObjectURL(file)
+  const img = new Image(); img.src = url; await img.decode()
+  SRC = img
+
+  const f0 = document.createElement('figure')
+  f0.innerHTML = `<img src="${url}"><figcaption>original<div class="meta">${img.naturalWidth}×${img.naturalHeight}</div></figcaption>`
+  grid.append(f0)
+
+  for (const cfg of CANDIDATES) {
+    log(`running ${cfg.id}…`)
+    const fig = document.createElement('figure')
+    fig.innerHTML = `<figcaption>${cfg.id}<div class="meta">downloading ~${cfg.mb} MB…</div></figcaption>`
+    grid.append(fig)
+    try {
+      const r = await run(cfg, img)
+      fig.prepend(r.canvas)
+      fig.querySelector('.meta').innerHTML = `<span class="ok">ok</span> · ${cfg.mb} MB · run ${(r.tRun/1000).toFixed(1)}s`
+      log(`  ✓ ${cfg.id} — load ${r.tLoad}ms, run ${r.tRun}ms`)
+    } catch (e) {
+      const why = String(e && e.message ? e.message : e).slice(0, 120)
+      fig.querySelector('.meta').innerHTML = `<span class="fail">failed</span> — ${why}`
+      log(`  ✗ ${cfg.id} — ${why}`)
+    }
+  }
+  log('done.')
+}
+
+const drop = document.getElementById('drop'), fi = document.getElementById('file')
+drop.onclick = () => fi.click()
+fi.onchange = e => e.target.files[0] && handle(e.target.files[0])
+drop.ondragover = e => e.preventDefault()
+drop.ondrop = e => { e.preventDefault(); if (e.dataTransfer.files[0]) handle(e.dataTransfer.files[0]) }
+</script>
+</body></html>
