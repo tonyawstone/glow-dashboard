@@ -1,0 +1,120 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Glow — pre-flight data check</title>
+<style>
+  :root{--cream:#F7F3EE;--warm:#EDE6DA;--border:#C8BDB4;--text:#3D2E1E;--muted:#5C4E43;--accent:#A07850;--rose:#C4735A;--green:#4A7A55}
+  body{margin:0;font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:var(--cream);color:var(--text);padding:18px;-webkit-text-size-adjust:100%}
+  h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;font-size:26px;margin:0 0 4px}
+  .sub{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px}
+  button{padding:12px 20px;border-radius:20px;border:none;background:var(--accent);color:#F5EFE6;font-size:14px;font-family:inherit;cursor:pointer}
+  .card{background:#fff;border:.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+  .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:5px 0;font-size:13px;border-bottom:.5px solid var(--warm)}
+  .row:last-child{border-bottom:none}
+  .name{color:var(--text)}
+  .val{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .bad{color:var(--rose);font-weight:600}
+  .ok{color:var(--green)}
+  .hdr{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:18px 0 8px}
+  #out{margin-top:16px}
+  .big{font-size:15px;line-height:1.5}
+</style></head>
+<body>
+<h1>Pre-flight data check</h1>
+<div class="sub">
+  Compares what's stored <b>on this device</b> against what's in the cloud, so nothing is lost when
+  Glow moves to a new address. Read-only — it changes nothing.
+  <br><br>Open this on the phone you actually use Glow on, while signed in.
+</div>
+<button id="go">Run the check</button>
+<div id="out"></div>
+
+<script type="module">
+const BACKEND = 'https://glow-dashboard-backend.vercel.app'
+const DB_NAME = 'GlowDB'
+
+// Mirrors lib/blobSync.js PILLAR_TO_STORE. Kept as a copy on purpose: this page must be able to
+// report on a build that is already deployed, without importing from it.
+const PILLAR_TO_STORE = {
+  checkins:'checkins', bps:'bps', sleeps:'sleeps', skins:'skins', hairs:'hairs', minds:'minds',
+  outfits:'outfits', exercises:'exercises', labs:'labs', wardrobeplans:'wardrobeplans',
+  boxsummaries:'boxsummaries', reflections:'reflections', water:'waters', myair:'myair',
+  intentions:'intentions', bodies:'bodies', wellness_checkins:'wellnesses', closet:'closet',
+  zepbound:'zepbound', skinscan:'skinscan', meds_log:'meds_log', scores:'scores',
+  hairscan:'hairscan', considering:'considering', built_outfits:'builtOutfits',
+}
+const entryKey = e => e.ts ? String(e.ts) : ((e.type||'')+(e.date||'')+(e.sys||'')+(e.mood||'')+(e.isoDate||''))
+const outfitKey = e => (e.source === 'dailylook' && e.tryOnId != null)
+  ? 'dl-'+e.dailylookBoxTs+'-'+e.tryOnId
+  : (e.ts ? String(e.ts) : (e.date||'')+(e.src||'')+(e.desc||'').slice(0,20))
+const keyFor = (store, e) => store === 'outfits' ? outfitKey(e) : entryKey(e)
+
+const openDB = () => new Promise((res, rej) => {
+  const r = indexedDB.open(DB_NAME)         // no version — open whatever exists, never upgrade
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error)
+})
+const all = (db, store) => new Promise(res => {
+  try {
+    const rq = db.transaction(store, 'readonly').objectStore(store).getAll()
+    rq.onsuccess = () => res(rq.result || []); rq.onerror = () => res([])
+  } catch { res([]) }
+})
+
+const el = document.getElementById('out')
+const add = h => el.insertAdjacentHTML('beforeend', h)
+
+document.getElementById('go').onclick = async () => {
+  el.innerHTML = '<div class="sub">Checking…</div>'
+  const token = localStorage.getItem('glowToken')
+  if (!token) { el.innerHTML = '<div class="card bad">Not signed in on this device — open Glow, sign in, then come back.</div>'; return }
+  const H = { Authorization: 'Bearer ' + token }
+
+  let db
+  try { db = await openDB() } catch { el.innerHTML = '<div class="card bad">No local Glow database on this device.</div>'; return }
+  const localStores = Array.from(db.objectStoreNames)
+  el.innerHTML = ''
+
+  // ── 1. stores with no pillar at all: local by definition ──
+  const unmapped = localStores.filter(s => !Object.values(PILLAR_TO_STORE).includes(s))
+  let strandedTotal = 0
+  if (unmapped.length) {
+    let rows = ''
+    for (const s of unmapped) { const n = (await all(db, s)).length; strandedTotal += n; rows += `<div class="row"><span class="name">${s}</span><span class="val bad">${n} records, never synced</span></div>` }
+    add(`<div class="hdr">Not connected to the cloud</div><div class="card">${rows}</div>`)
+  }
+
+  // ── 2. per-pillar: records here that the cloud doesn't have ──
+  add('<div class="hdr">On this device vs the cloud</div>')
+  const card = document.createElement('div'); card.className = 'card'; el.append(card)
+  let issues = 0
+  for (const [pillar, store] of Object.entries(PILLAR_TO_STORE)) {
+    if (!localStores.includes(store)) continue
+    const local = await all(db, store)
+    if (!local.length) continue
+    let remote = null
+    try {
+      const r = await fetch(`${BACKEND}/api/sync?pillar=${pillar}&t=${Date.now()}`, { headers: H })
+      if (r.ok) { const d = await r.json(); remote = Array.isArray(d.data) ? d.data : [] }
+    } catch { /* offline */ }
+    if (remote === null) {
+      card.insertAdjacentHTML('beforeend', `<div class="row"><span class="name">${store}</span><span class="val bad">couldn't read cloud — recheck</span></div>`)
+      issues++; continue
+    }
+    const remoteKeys = new Set(remote.map(e => keyFor(store, e)))
+    const missing = local.filter(e => { const k = keyFor(store, e); return k && !remoteKeys.has(k) })
+    strandedTotal += missing.length
+    if (missing.length) issues++
+    card.insertAdjacentHTML('beforeend',
+      `<div class="row"><span class="name">${store}</span><span class="val ${missing.length ? 'bad' : 'ok'}">${
+        missing.length ? `${missing.length} of ${local.length} only here` : `${local.length} all safe`}</span></div>`)
+  }
+
+  // ── 3. verdict ──
+  add(`<div class="card big" style="background:${strandedTotal ? '#FDF1EC' : '#EFF5EE'};border-color:${strandedTotal ? 'var(--rose)' : 'var(--green)'}">
+    ${strandedTotal
+      ? `<b>${strandedTotal} record${strandedTotal === 1 ? '' : 's'} exist only on this device.</b><br>
+         Moving to a new address would lose them. Send this screen to Claude before switching.`
+      : `<b>Everything on this device is in the cloud.</b><br>Safe to move — it will all come back at the new address.`}
+  </div>`)
+}
+</script>
+</body></html>
